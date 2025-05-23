@@ -1,0 +1,118 @@
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
+import Sidebar from "@/components/sidebar";
+import ChatInterface from "@/components/chat-interface";
+import { useAuth } from "@/hooks/useAuth";
+import type { Chat, Folder } from "@shared/schema";
+
+export default function Home() {
+  const { user } = useAuth();
+  const [activeChatId, setActiveChatId] = useState<string | null>(null);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  // Fetch user's chats
+  const { data: chats = [], refetch: refetchChats } = useQuery<Chat[]>({
+    queryKey: ["/api/chats"],
+  });
+
+  // Fetch user's folders
+  const { data: folders = [], refetch: refetchFolders } = useQuery<Folder[]>({
+    queryKey: ["/api/folders"],
+  });
+
+  // Set active chat to most recent if none selected
+  useEffect(() => {
+    if (!activeChatId && chats.length > 0) {
+      const mostRecent = chats.sort((a, b) => 
+        new Date(b.updatedAt!).getTime() - new Date(a.updatedAt!).getTime()
+      )[0];
+      setActiveChatId(mostRecent.id);
+    }
+  }, [chats, activeChatId]);
+
+  const handleNewChat = async () => {
+    try {
+      const response = await fetch("/api/chats", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          title: "New Chat",
+          isActive: true
+        }),
+      });
+
+      if (response.ok) {
+        const newChat = await response.json();
+        setActiveChatId(newChat.id);
+        refetchChats();
+      }
+    } catch (error) {
+      console.error("Failed to create new chat:", error);
+    }
+  };
+
+  const handleChatSelect = (chatId: string) => {
+    setActiveChatId(chatId);
+  };
+
+  const handleFolderCreate = async (name: string, parentId?: string, color?: string) => {
+    try {
+      const response = await fetch("/api/folders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          name,
+          parentId: parentId || null,
+          color: color || "blue"
+        }),
+      });
+
+      if (response.ok) {
+        refetchFolders();
+      }
+    } catch (error) {
+      console.error("Failed to create folder:", error);
+    }
+  };
+
+  return (
+    <div className="h-screen flex flex-col bg-slate-50 dark:bg-slate-900">
+      <ResizablePanelGroup direction="horizontal" className="flex-1">
+        {/* Sidebar Panel */}
+        <ResizablePanel
+          defaultSize={25}
+          minSize={20}
+          maxSize={40}
+          collapsible
+          onCollapse={() => setSidebarCollapsed(true)}
+          onExpand={() => setSidebarCollapsed(false)}
+          className={sidebarCollapsed ? "min-w-0" : ""}
+        >
+          <Sidebar
+            user={user}
+            chats={chats}
+            folders={folders}
+            activeChatId={activeChatId}
+            onNewChat={handleNewChat}
+            onChatSelect={handleChatSelect}
+            onFolderCreate={handleFolderCreate}
+            collapsed={sidebarCollapsed}
+          />
+        </ResizablePanel>
+
+        <ResizableHandle withHandle />
+
+        {/* Chat Panel */}
+        <ResizablePanel defaultSize={75} minSize={60}>
+          <ChatInterface
+            chatId={activeChatId}
+            onChatUpdate={refetchChats}
+          />
+        </ResizablePanel>
+      </ResizablePanelGroup>
+    </div>
+  );
+}
