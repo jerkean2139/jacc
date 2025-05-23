@@ -1,10 +1,28 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MessageSquare, FileText, Calculator, Users } from "lucide-react";
+import { MessageSquare, FileText, Calculator, Users, Settings, User, Crown } from "lucide-react";
 
 export default function Landing() {
   const handleLogin = () => {
     window.location.href = "/api/login";
+  };
+
+  // Development login functions (REMOVE BEFORE PRODUCTION)
+  const handleDevLogin = async (userType: 'admin' | 'client-admin' | 'client-user') => {
+    try {
+      const response = await fetch(`/api/dev/login/${userType}`, {
+        method: 'POST',
+        credentials: 'include'
+      });
+      
+      if (response.ok) {
+        window.location.reload();
+      } else {
+        console.error('Dev login failed');
+      }
+    } catch (error) {
+      console.error('Dev login error:', error);
+    }
   };
 
   return (
@@ -21,9 +39,43 @@ export default function Landing() {
               <p className="text-sm text-slate-600 dark:text-slate-400">AI Sales Assistant</p>
             </div>
           </div>
-          <Button onClick={handleLogin} className="navy-primary text-white hover:opacity-90">
-            Sign In
-          </Button>
+          <div className="flex items-center space-x-2">
+            {/* Development Login Buttons (REMOVE BEFORE PRODUCTION) */}
+            {process.env.NODE_ENV === 'development' && (
+              <>
+                <Button 
+                  onClick={() => handleDevLogin('admin')} 
+                  variant="outline"
+                  size="sm"
+                  className="text-xs"
+                >
+                  <Crown className="w-3 h-3 mr-1" />
+                  Dev Admin
+                </Button>
+                <Button 
+                  onClick={() => handleDevLogin('client-admin')} 
+                  variant="outline"
+                  size="sm"
+                  className="text-xs"
+                >
+                  <Settings className="w-3 h-3 mr-1" />
+                  Client Admin
+                </Button>
+                <Button 
+                  onClick={() => handleDevLogin('client-user')} 
+                  variant="outline"
+                  size="sm"
+                  className="text-xs"
+                >
+                  <User className="w-3 h-3 mr-1" />
+                  Sales Agent
+                </Button>
+              </>
+            )}
+            <Button onClick={handleLogin} className="navy-primary text-white hover:opacity-90">
+              Sign In
+            </Button>
+          </div>
         </div>
       </header>
 

@@ -36,6 +36,92 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
 
+  // Temporary development login routes (REMOVE BEFORE PRODUCTION)
+  if (process.env.NODE_ENV === 'development') {
+    app.post('/api/dev/login/admin', async (req, res) => {
+      try {
+        const adminUser = await storage.upsertUser({
+          id: 'dev-admin-001',
+          email: 'admin@jacc.dev',
+          firstName: 'Admin',
+          lastName: 'User',
+          profileImageUrl: null
+        });
+        
+        // Set session manually
+        (req as any).user = {
+          claims: { sub: 'dev-admin-001' },
+          access_token: 'dev-token',
+          expires_at: Math.floor(Date.now() / 1000) + 3600
+        };
+        
+        res.json({ success: true, user: adminUser });
+      } catch (error) {
+        console.error("Dev admin login error:", error);
+        res.status(500).json({ message: "Failed to create dev admin" });
+      }
+    });
+
+    app.post('/api/dev/login/client-admin', async (req, res) => {
+      try {
+        const clientAdmin = await storage.upsertUser({
+          id: 'dev-client-admin-001',
+          email: 'client.admin@testcompany.com',
+          firstName: 'Client',
+          lastName: 'Admin',
+          profileImageUrl: null
+        });
+        
+        (req as any).user = {
+          claims: { sub: 'dev-client-admin-001' },
+          access_token: 'dev-token',
+          expires_at: Math.floor(Date.now() / 1000) + 3600
+        };
+        
+        res.json({ success: true, user: clientAdmin });
+      } catch (error) {
+        console.error("Dev client admin login error:", error);
+        res.status(500).json({ message: "Failed to create dev client admin" });
+      }
+    });
+
+    app.post('/api/dev/login/client-user', async (req, res) => {
+      try {
+        const clientUser = await storage.upsertUser({
+          id: 'dev-client-user-001',
+          email: 'sales.agent@testcompany.com',
+          firstName: 'Sarah',
+          lastName: 'Johnson',
+          profileImageUrl: null
+        });
+        
+        (req as any).user = {
+          claims: { sub: 'dev-client-user-001' },
+          access_token: 'dev-token',
+          expires_at: Math.floor(Date.now() / 1000) + 3600
+        };
+        
+        res.json({ success: true, user: clientUser });
+      } catch (error) {
+        console.error("Dev client user login error:", error);
+        res.status(500).json({ message: "Failed to create dev client user" });
+      }
+    });
+
+    app.get('/api/dev/current-user', async (req: any, res) => {
+      if (req.user && req.user.claims) {
+        try {
+          const user = await storage.getUser(req.user.claims.sub);
+          res.json(user);
+        } catch (error) {
+          res.status(500).json({ message: "Failed to fetch user" });
+        }
+      } else {
+        res.status(401).json({ message: "No dev session" });
+      }
+    });
+  }
+
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
