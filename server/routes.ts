@@ -3,6 +3,9 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { generateChatResponse, analyzeDocument, generateTitle } from "./openai";
+import { enhancedAIService } from "./enhanced-ai";
+import { googleDriveService } from "./google-drive";
+import { vectorStoreService } from "./vector-store";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -214,7 +217,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         spreadsheetData: null // TODO: Add Google Sheets integration
       };
       
-      const aiResponse = await generateChatResponse(messages, context);
+      // Use enhanced AI service with Google Drive document context
+      const aiResponse = await enhancedAIService.generateResponseWithDocuments(messages, context);
       
       // Save AI response
       const assistantMessage = await storage.createMessage({
@@ -366,6 +370,94 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting favorite:", error);
       res.status(500).json({ message: "Failed to delete favorite" });
+    }
+  });
+
+  // Google Drive Integration routes
+  app.get('/api/drive/status', isAuthenticated, async (req: any, res) => {
+    try {
+      const hasCredentials = !!(process.env.GOOGLE_SERVICE_ACCOUNT_KEY || 
+                                (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET));
+      const hasFolderId = !!process.env.GOOGLE_DRIVE_FOLDER_ID;
+      const hasPinecone = !!process.env.PINECONE_API_KEY;
+      
+      res.json({
+        configured: hasCredentials && hasFolderId && hasPinecone,
+        hasCredentials,
+        hasFolderId,
+        hasPinecone,
+        folderId: process.env.GOOGLE_DRIVE_FOLDER_ID || null
+      });
+    } catch (error) {
+      console.error("Error checking Drive status:", error);
+      res.status(500).json({ message: "Failed to check Drive status" });
+    }
+  });
+
+  app.post('/api/drive/scan', isAuthenticated, async (req: any, res) => {
+    try {
+      if (!process.env.GOOGLE_DRIVE_FOLDER_ID) {
+        return res.status(400).json({ message: "Google Drive folder ID not configured" });
+      }
+
+      // Initialize vector store index if needed
+      await vectorStoreService.ensureIndexExists();
+      
+      // Scan and process documents
+      const documents = await googleDriveService.scanAndProcessFolder(
+        process.env.GOOGLE_DRIVE_FOLDER_ID
+      );
+      
+      let indexedCount = 0;
+      const results = [];
+      
+      for (const doc of documents) {
+        try {
+          await vectorStoreService.indexDocument(doc);
+          indexedCount++;
+          results.push({
+            name: doc.name,
+            status: 'success',
+            chunks: doc.chunks.length,
+            wordCount: doc.metadata.wordCount
+          });
+        } catch (error) {
+          results.push({
+            name: doc.name,
+            status: 'error',
+            error: error.message
+          });
+        }
+      }
+      
+      res.json({
+        success: true,
+        totalDocuments: documents.length,
+        indexedDocuments: indexedCount,
+        results
+      });
+    } catch (error) {
+      console.error("Error scanning Drive folder:", error);
+      res.status(500).json({ 
+        message: "Failed to scan Drive folder", 
+        error: error.message 
+      });
+    }
+  });
+
+  app.get('/api/drive/search', isAuthenticated, async (req: any, res) => {
+    try {
+      const { q: query } = req.query;
+      
+      if (!query || typeof query !== 'string') {
+        return res.status(400).json({ message: "Query parameter 'q' is required" });
+      }
+      
+      const results = await enhancedAIService.searchDocuments(query);
+      res.json(results);
+    } catch (error) {
+      console.error("Error searching documents:", error);
+      res.status(500).json({ message: "Failed to search documents" });
     }
   });
 
