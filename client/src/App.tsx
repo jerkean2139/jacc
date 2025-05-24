@@ -12,6 +12,7 @@ import Home from "@/pages/home";
 import NotFound from "@/pages/not-found";
 import AdminSettings from "@/pages/admin-settings";
 import AdminDashboard from "@/pages/admin-dashboard";
+import ISOAmpCalculator from "@/pages/iso-amp-calculator";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -23,6 +24,7 @@ function Router() {
       ) : (
         <>
           <Route path="/" component={Home} />
+          <Route path="/calculator" component={ISOAmpCalculator} />
           <Route path="/admin" component={AdminSettings} />
           <Route path="/admin/dashboard" component={AdminDashboard} />
         </>
