@@ -4,7 +4,7 @@ import type { ChatMessage, AIResponse } from "./openai";
 
 // the newest Anthropic model is "claude-3-7-sonnet-20250219" which was released February 24, 2025
 const anthropic = new Anthropic({ 
-  apiKey: process.env.ANTHROPIC_API_KEY
+  apiKey: process.env.ANTHROPIC_API_KEY_JACC
 });
 
 export interface EnhancedAIResponse extends AIResponse {
