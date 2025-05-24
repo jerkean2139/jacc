@@ -94,6 +94,25 @@ export const favorites = pgTable("favorites", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const adminSettings = pgTable("admin_settings", {
+  id: varchar("id").primaryKey().notNull().default("default"),
+  systemPrompt: text("system_prompt"),
+  userInstructions: text("user_instructions"),
+  assistantPrompt: text("assistant_prompt"),
+  temperature: real("temperature").default(0.7),
+  maxTokens: integer("max_tokens").default(1500),
+  topP: real("top_p").default(1.0),
+  frequencyPenalty: real("frequency_penalty").default(0.0),
+  presencePenalty: real("presence_penalty").default(0.0),
+  enableVoice: boolean("enable_voice").default(true),
+  enableDocumentSearch: boolean("enable_document_search").default(true),
+  enableRateComparisons: boolean("enable_rate_comparisons").default(true),
+  googleDriveFolderId: varchar("google_drive_folder_id"),
+  model: varchar("model").default("claude-3-7-sonnet-20250219"),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  updatedBy: varchar("updated_by"),
+});
+
 // Define relations
 export const usersRelations = relations(users, ({ many }) => ({
   folders: many(folders),
@@ -171,3 +190,11 @@ export type InsertDocument = z.infer<typeof insertDocumentSchema>;
 export type Document = typeof documents.$inferSelect;
 export type InsertFavorite = z.infer<typeof insertFavoriteSchema>;
 export type Favorite = typeof favorites.$inferSelect;
+
+export const insertAdminSettingsSchema = createInsertSchema(adminSettings).omit({
+  id: true,
+  updatedAt: true,
+});
+
+export type InsertAdminSettings = z.infer<typeof insertAdminSettingsSchema>;
+export type AdminSettings = typeof adminSettings.$inferSelect;
