@@ -36,7 +36,7 @@ export default function Landing() {
             </div>
             <div>
               <h1 className="text-xl font-bold text-slate-900 dark:text-white">JACC</h1>
-              <p className="text-sm text-slate-600 dark:text-slate-400">AI Sales Assistant</p>
+              <p className="text-sm text-slate-600 dark:text-slate-400">Merchant Services Assistant</p>
             </div>
           </div>
           <div className="flex items-center space-x-2">
@@ -85,12 +85,12 @@ export default function Landing() {
           <h2 className="text-4xl md:text-6xl font-bold text-slate-900 dark:text-white mb-6">
             Your AI-Powered
             <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-green-500">
-              Sales Assistant
+              Merchant Services Assistant
             </span>
           </h2>
           <p className="text-xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto mb-8">
-            JACC centralizes documents, answers repetitive questions, compares pricing data, 
-            and includes conversational features to empower independent sales agents.
+            JACC centralizes payment processing documents, answers merchant questions, compares rates, 
+            and includes conversational features to empower Tracer Co Card sales agents.
           </p>
           <Button 
             onClick={handleLogin} 
@@ -110,7 +110,7 @@ export default function Landing() {
             </CardHeader>
             <CardContent>
               <p className="text-slate-600 dark:text-slate-400">
-                ChatGPT-style interface with voice support for natural conversations about insurance products.
+                ChatGPT-style interface with voice support for natural conversations about payment processing solutions.
               </p>
             </CardContent>
           </Card>
@@ -134,7 +134,7 @@ export default function Landing() {
             </CardHeader>
             <CardContent>
               <p className="text-slate-600 dark:text-slate-400">
-                Execute rate comparisons and savings projections using dynamic Google Sheets data.
+                Execute payment processing rate comparisons and savings projections for merchants.
               </p>
             </CardContent>
           </Card>
@@ -146,7 +146,7 @@ export default function Landing() {
             </CardHeader>
             <CardContent>
               <p className="text-slate-600 dark:text-slate-400">
-                Create client proposals, access FAQ database, and get personalized recommendations.
+                Create merchant proposals, access processing FAQ database, and get personalized recommendations.
               </p>
             </CardContent>
           </Card>
@@ -164,7 +164,7 @@ export default function Landing() {
               </div>
               <h4 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Faster Response Times</h4>
               <p className="text-slate-600 dark:text-slate-400">
-                Get instant answers to client questions without waiting for manager approval.
+                Get instant answers to merchant questions without waiting for manager approval.
               </p>
             </div>
             

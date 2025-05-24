@@ -42,32 +42,34 @@ export class EnhancedAIService {
       const documentContext = this.formatDocumentContext(searchResults);
       
       // Enhanced system prompt with document context
-      const systemPrompt = `You are JACC, an AI-powered assistant for independent sales agents working with ISO HUB. You specialize in:
-- Insurance products (Medicare, ACA, Life Insurance, Commercial Insurance)
-- Rate comparisons and savings calculations
-- Document organization and retrieval from Google Drive
-- Client proposal generation
-- Answering sales questions using company knowledge base
+      const systemPrompt = `You are JACC, an AI-powered assistant for Tracer Co Card sales agents. You specialize in:
+- Credit card processing solutions and merchant services
+- Payment processing rates and fee comparisons
+- Point-of-sale (POS) systems and payment terminals
+- Business payment solutions and savings calculations
+- Document organization and client proposal generation
+- Answering merchant services questions using company knowledge base
 
 IMPORTANT INSTRUCTIONS:
 1. Use the provided document context to answer questions accurately
 2. Always cite specific documents when referencing information
 3. Provide direct links to Google Drive documents when available
 4. If you don't find relevant information in the documents, clearly state that
-5. Focus on actionable insights for sales agents
+5. Focus on actionable insights for merchant services sales
 
 Your responses should be:
-- Professional and knowledgeable about insurance
+- Professional and knowledgeable about payment processing
 - Backed by actual company documents when possible
-- Helpful with specific actionable advice
+- Helpful with specific actionable advice for businesses
 - Clear about sources and reasoning
+- Focused on helping businesses save money on payment processing
 
-User context: ${context?.userRole || 'Sales Agent'}
+User context: ${context?.userRole || 'Merchant Services Sales Agent'}
 
 DOCUMENT CONTEXT:
 ${documentContext}
 
-When appropriate, suggest actions like saving information to folders, downloading comparisons, or creating client proposals.`;
+When appropriate, suggest actions like saving payment processing information to folders, downloading rate comparisons, or creating merchant proposals.`;
 
       const response = await anthropic.messages.create({
         model: "claude-3-7-sonnet-20250219",
@@ -97,10 +99,10 @@ When appropriate, suggest actions like saving information to folders, downloadin
         sources: sources.length > 0 ? sources : undefined,
         reasoning,
         suggestions: [
-          "Find similar documents in our knowledge base",
-          "Create a client proposal from this information",
-          "Save this analysis to my folder",
-          "Show me rate comparisons for this scenario"
+          "Find similar merchant documents in our knowledge base",
+          "Create a merchant proposal from this information",
+          "Save this payment analysis to my folder",
+          "Show me processing rate comparisons for this business type"
         ]
       };
     } catch (error) {
@@ -196,7 +198,7 @@ Relevance Score: ${(result.score * 100).toFixed(1)}%
     const relevantDocs = searchResults.filter(r => r.score > 0.7).length;
     const topScore = searchResults[0]?.score || 0;
 
-    return `I found ${searchResults.length} relevant documents in your knowledge base, with ${relevantDocs} being highly relevant (>70% match). The top result "${searchResults[0]?.metadata.documentName}" had a ${(topScore * 100).toFixed(1)}% relevance score. I used these sources to provide accurate, company-specific information rather than general knowledge.`;
+    return `I found ${searchResults.length} relevant documents in your Tracer Co Card knowledge base, with ${relevantDocs} being highly relevant (>70% match). The top result "${searchResults[0]?.metadata.documentName}" had a ${(topScore * 100).toFixed(1)}% relevance score. I used these sources to provide accurate, company-specific merchant services information rather than general knowledge.`;
   }
 
   async searchDocuments(query: string): Promise<VectorSearchResult[]> {
