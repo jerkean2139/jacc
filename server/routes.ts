@@ -52,7 +52,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
         
         // Set session manually
-        (req as any).user = {
+        // Properly set session
+        (req.session as any).user = {
           claims: { sub: 'dev-admin-001' },
           access_token: 'dev-token',
           expires_at: Math.floor(Date.now() / 1000) + 3600
@@ -75,7 +76,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           profileImageUrl: null
         });
         
-        (req as any).user = {
+        // Properly set session
+        (req.session as any).user = {
           claims: { sub: 'dev-client-admin-001' },
           access_token: 'dev-token',
           expires_at: Math.floor(Date.now() / 1000) + 3600
