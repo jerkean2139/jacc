@@ -122,7 +122,7 @@ export default function ISOAmpCalculator() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-20">
       <div className="flex items-center gap-4">
         <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
           <Zap className="w-6 h-6 text-blue-600 dark:text-blue-400" />
