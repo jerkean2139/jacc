@@ -65,7 +65,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           expires_at: Math.floor(Date.now() / 1000) + 3600
         };
         
-        res.json({ success: true, user: adminUser });
+        res.redirect('/');
       } catch (error) {
         console.error("Dev admin login error:", error);
         res.status(500).json({ message: "Failed to create dev admin" });
@@ -89,7 +89,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           expires_at: Math.floor(Date.now() / 1000) + 3600
         };
         
-        res.json({ success: true, user: clientAdmin });
+        res.redirect('/');
       } catch (error) {
         console.error("Dev client admin login error:", error);
         res.status(500).json({ message: "Failed to create dev client admin" });
@@ -113,7 +113,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           expires_at: Math.floor(Date.now() / 1000) + 3600
         };
         
-        res.json({ success: true, user: clientUser });
+        res.redirect('/');
       } catch (error) {
         console.error("Dev client user login error:", error);
         res.status(500).json({ message: "Failed to create dev client user" });

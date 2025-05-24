@@ -8,34 +8,9 @@ export default function Landing() {
   };
 
   // Development login functions (REMOVE BEFORE PRODUCTION)
-  const handleDevLogin = async (userType: 'admin' | 'client-admin' | 'client-user') => {
-    try {
-      console.log(`Attempting ${userType} login...`);
-      const response = await fetch(`/api/dev/login/${userType}`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        }
-      });
-      
-      if (response.ok) {
-        const result = await response.json();
-        console.log('Login successful:', result);
-        // Small delay to ensure session is set, then redirect
-        setTimeout(() => {
-          window.location.href = '/';
-        }, 100);
-      } else {
-        const error = await response.text();
-        console.error('Dev login failed:', error);
-        alert('Login failed. Please try again.');
-      }
-    } catch (error) {
-      console.error('Dev login error:', error);
-      alert('Login error. Please check your connection.');
-    }
+  const handleDevLogin = (userType: 'admin' | 'client-admin' | 'client-user') => {
+    // Direct navigation to login endpoint - this bypasses any routing issues
+    window.location.href = `/api/dev/login/${userType}`;
   };
 
   return (
