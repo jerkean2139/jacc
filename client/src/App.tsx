@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import PWAStatus from "@/components/pwa-status";
+import OfflineIndicator from "@/components/offline-indicator";
 import Landing from "@/pages/landing";
 import Home from "@/pages/home";
 import NotFound from "@/pages/not-found";
@@ -34,6 +35,7 @@ function App() {
       <TooltipProvider>
         <Toaster />
         <PWAStatus />
+        <OfflineIndicator />
         <Router />
       </TooltipProvider>
     </QueryClientProvider>
