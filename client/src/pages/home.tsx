@@ -79,6 +79,9 @@ export default function Home() {
     }
   };
 
+  // Connect the floating action button to new chat creation
+  useNewChatFAB(handleNewChat);
+
   return (
     <div className="h-screen flex flex-col bg-slate-50 dark:bg-slate-900">
       {/* Desktop Layout */}
