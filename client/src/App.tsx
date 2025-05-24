@@ -6,10 +6,12 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import PWAStatus from "@/components/pwa-status";
 import OfflineIndicator from "@/components/offline-indicator";
+import ContextualHelp from "@/components/contextual-help";
 import Landing from "@/pages/landing";
 import Home from "@/pages/home";
 import NotFound from "@/pages/not-found";
 import AdminSettings from "@/pages/admin-settings";
+import AdminDashboard from "@/pages/admin-dashboard";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -22,6 +24,7 @@ function Router() {
         <>
           <Route path="/" component={Home} />
           <Route path="/admin" component={AdminSettings} />
+          <Route path="/admin/dashboard" component={AdminDashboard} />
         </>
       )}
       <Route component={NotFound} />
@@ -36,6 +39,7 @@ function App() {
         <Toaster />
         <PWAStatus />
         <OfflineIndicator />
+        <ContextualHelp />
         <Router />
       </TooltipProvider>
     </QueryClientProvider>
