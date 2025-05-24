@@ -109,7 +109,7 @@ export class ISOAMPService {
   constructor() {
     this.config = {
       apiKey: process.env.ISO_AMP_API_KEY || '',
-      apiUrl: process.env.ISO_AMP_API_URL || 'https://api.isoamp.com/v1',
+      apiUrl: process.env.ISO_AMP_API_URL || 'https://api.getisoamp.com/v1',
       partnerId: process.env.ISO_AMP_PARTNER_ID || ''
     };
   }
