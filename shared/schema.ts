@@ -116,6 +116,44 @@ export const adminSettings = pgTable("admin_settings", {
   updatedBy: varchar("updated_by"),
 });
 
+// Gamification - Achievements System
+export const achievements = pgTable("achievements", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: varchar("name", { length: 100 }).notNull(),
+  description: text("description").notNull(),
+  icon: varchar("icon", { length: 50 }).notNull(), // Lucide icon name
+  category: varchar("category", { length: 50 }).notNull(), // 'chat', 'calculator', 'documents', 'social', 'streaks'
+  rarity: varchar("rarity", { length: 20 }).notNull().default("common"), // 'common', 'rare', 'epic', 'legendary'
+  points: integer("points").notNull().default(10),
+  requirement: jsonb("requirement").notNull(), // JSON object defining unlock criteria
+  isHidden: boolean("is_hidden").notNull().default(false), // Hidden until unlocked
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const userAchievements = pgTable("user_achievements", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  achievementId: uuid("achievement_id").notNull().references(() => achievements.id, { onDelete: "cascade" }),
+  unlockedAt: timestamp("unlocked_at").defaultNow(),
+  progress: jsonb("progress"), // Optional progress tracking
+});
+
+export const userStats = pgTable("user_stats", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  totalMessages: integer("total_messages").notNull().default(0),
+  totalChats: integer("total_chats").notNull().default(0),
+  calculationsPerformed: integer("calculations_performed").notNull().default(0),
+  documentsAnalyzed: integer("documents_analyzed").notNull().default(0),
+  proposalsGenerated: integer("proposals_generated").notNull().default(0),
+  currentStreak: integer("current_streak").notNull().default(0),
+  longestStreak: integer("longest_streak").notNull().default(0),
+  lastActiveDate: timestamp("last_active_date"),
+  totalPoints: integer("total_points").notNull().default(0),
+  level: integer("level").notNull().default(1),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Q&A Knowledge Base Management
 export const qaKnowledgeBase = pgTable("qa_knowledge_base", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -281,6 +319,30 @@ export const insertMerchantApplicationSchema = createInsertSchema(merchantApplic
   createdAt: true,
   updatedAt: true,
 });
+
+// Gamification Schema Exports
+export const insertAchievementSchema = createInsertSchema(achievements).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertUserAchievementSchema = createInsertSchema(userAchievements).omit({
+  id: true,
+  unlockedAt: true,
+});
+
+export const insertUserStatsSchema = createInsertSchema(userStats).omit({
+  id: true,
+  updatedAt: true,
+});
+
+// Gamification Types
+export type Achievement = typeof achievements.$inferSelect;
+export type InsertAchievement = z.infer<typeof insertAchievementSchema>;
+export type UserAchievement = typeof userAchievements.$inferSelect;
+export type InsertUserAchievement = z.infer<typeof insertUserAchievementSchema>;
+export type UserStats = typeof userStats.$inferSelect;
+export type InsertUserStats = z.infer<typeof insertUserStatsSchema>;
 
 export const insertHelpContentSchema = createInsertSchema(helpContent).omit({
   id: true,

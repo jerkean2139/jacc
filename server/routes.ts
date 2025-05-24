@@ -471,6 +471,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Gamification API routes
+  app.get("/api/user/stats", isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const { gamificationService } = await import('./gamification');
+      const stats = await gamificationService.getUserStats(userId);
+      
+      if (!stats) {
+        // Initialize stats for new user
+        const newStats = await gamificationService.initializeUserStats(userId);
+        return res.json(newStats);
+      }
+      
+      res.json(stats);
+    } catch (error) {
+      console.error("Failed to get user stats:", error);
+      res.status(500).json({ error: "Failed to get user stats" });
+    }
+  });
+
+  app.get("/api/user/achievements", isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const { gamificationService } = await import('./gamification');
+      const achievements = await gamificationService.getUserAchievements(userId);
+      res.json(achievements);
+    } catch (error) {
+      console.error("Failed to get user achievements:", error);
+      res.status(500).json({ error: "Failed to get user achievements" });
+    }
+  });
+
+  app.get("/api/achievements/progress", isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const { gamificationService } = await import('./gamification');
+      const progress = await gamificationService.getAchievementProgress(userId);
+      res.json(progress);
+    } catch (error) {
+      console.error("Failed to get achievement progress:", error);
+      res.status(500).json({ error: "Failed to get achievement progress" });
+    }
+  });
+
+  app.post("/api/user/track-action", isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const { action } = req.body;
+      
+      const validActions = ['message_sent', 'calculation_performed', 'document_analyzed', 'proposal_generated', 'daily_login'];
+      if (!validActions.includes(action)) {
+        return res.status(400).json({ error: "Invalid action type" });
+      }
+      
+      const { gamificationService } = await import('./gamification');
+      const newAchievements = await gamificationService.trackAction(userId, action);
+      res.json({ newAchievements });
+    } catch (error) {
+      console.error("Failed to track action:", error);
+      res.status(500).json({ error: "Failed to track action" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
