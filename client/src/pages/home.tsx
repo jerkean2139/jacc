@@ -4,6 +4,7 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/componen
 import Sidebar from "@/components/sidebar";
 import ChatInterface from "@/components/chat-interface";
 import { useAuth } from "@/hooks/useAuth";
+import { useNewChatFAB } from "@/components/bottom-nav";
 import type { Chat, Folder } from "@shared/schema";
 
 export default function Home() {
@@ -80,39 +81,50 @@ export default function Home() {
 
   return (
     <div className="h-screen flex flex-col bg-slate-50 dark:bg-slate-900">
-      <ResizablePanelGroup direction="horizontal" className="flex-1">
-        {/* Sidebar Panel */}
-        <ResizablePanel
-          defaultSize={25}
-          minSize={20}
-          maxSize={40}
-          collapsible
-          onCollapse={() => setSidebarCollapsed(true)}
-          onExpand={() => setSidebarCollapsed(false)}
-          className={sidebarCollapsed ? "min-w-0" : ""}
-        >
-          <Sidebar
-            user={user}
-            chats={chats}
-            folders={folders}
-            activeChatId={activeChatId}
-            onNewChat={handleNewChat}
-            onChatSelect={handleChatSelect}
-            onFolderCreate={handleFolderCreate}
-            collapsed={sidebarCollapsed}
-          />
-        </ResizablePanel>
+      {/* Desktop Layout */}
+      <div className="hidden md:flex flex-1">
+        <ResizablePanelGroup direction="horizontal" className="flex-1">
+          {/* Sidebar Panel */}
+          <ResizablePanel
+            defaultSize={25}
+            minSize={20}
+            maxSize={40}
+            collapsible
+            onCollapse={() => setSidebarCollapsed(true)}
+            onExpand={() => setSidebarCollapsed(false)}
+            className={sidebarCollapsed ? "min-w-0" : ""}
+          >
+            <Sidebar
+              user={user}
+              chats={chats}
+              folders={folders}
+              activeChatId={activeChatId}
+              onNewChat={handleNewChat}
+              onChatSelect={handleChatSelect}
+              onFolderCreate={handleFolderCreate}
+              collapsed={sidebarCollapsed}
+            />
+          </ResizablePanel>
 
-        <ResizableHandle withHandle />
+          <ResizableHandle withHandle />
 
-        {/* Chat Panel */}
-        <ResizablePanel defaultSize={75} minSize={60}>
-          <ChatInterface
-            chatId={activeChatId}
-            onChatUpdate={refetchChats}
-          />
-        </ResizablePanel>
-      </ResizablePanelGroup>
+          {/* Chat Panel */}
+          <ResizablePanel defaultSize={75} minSize={60}>
+            <ChatInterface
+              chatId={activeChatId}
+              onChatUpdate={refetchChats}
+            />
+          </ResizablePanel>
+        </ResizablePanelGroup>
+      </div>
+
+      {/* Mobile Layout */}
+      <div className="flex-1 md:hidden pb-16">
+        <ChatInterface
+          chatId={activeChatId}
+          onChatUpdate={refetchChats}
+        />
+      </div>
     </div>
   );
 }

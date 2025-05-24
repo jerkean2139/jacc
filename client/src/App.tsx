@@ -9,6 +9,7 @@ import OfflineIndicator from "@/components/offline-indicator";
 import ContextualHelp from "@/components/contextual-help";
 import InteractiveTutorial from "@/components/interactive-tutorial";
 import PWAInstallPrompt from "@/components/pwa-install-prompt";
+import BottomNav from "@/components/bottom-nav";
 import Landing from "@/pages/landing";
 import Home from "@/pages/home";
 import NotFound from "@/pages/not-found";
@@ -51,6 +52,7 @@ function App() {
         <InteractiveTutorial />
         <PWAInstallPrompt />
         <Router />
+        <BottomNav />
       </TooltipProvider>
     </QueryClientProvider>
   );
