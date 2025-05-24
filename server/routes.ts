@@ -9,7 +9,7 @@ import { supabaseVectorService } from "./supabase-vector";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-import { insertMessageSchema, insertChatSchema, insertFolderSchema, insertDocumentSchema } from "@shared/schema";
+import { insertMessageSchema, insertChatSchema, insertFolderSchema, insertDocumentSchema, insertAdminSettingsSchema } from "@shared/schema";
 
 // Configure multer for file uploads
 const uploadDir = path.join(process.cwd(), "uploads");

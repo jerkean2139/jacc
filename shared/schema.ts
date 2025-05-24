@@ -8,7 +8,8 @@ import {
   serial,
   integer,
   boolean,
-  uuid
+  uuid,
+  real
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -99,11 +100,11 @@ export const adminSettings = pgTable("admin_settings", {
   systemPrompt: text("system_prompt"),
   userInstructions: text("user_instructions"),
   assistantPrompt: text("assistant_prompt"),
-  temperature: real("temperature").default(0.7),
+  temperature: text("temperature").default("0.7"),
   maxTokens: integer("max_tokens").default(1500),
-  topP: real("top_p").default(1.0),
-  frequencyPenalty: real("frequency_penalty").default(0.0),
-  presencePenalty: real("presence_penalty").default(0.0),
+  topP: text("top_p").default("1.0"),
+  frequencyPenalty: text("frequency_penalty").default("0.0"),
+  presencePenalty: text("presence_penalty").default("0.0"),
   enableVoice: boolean("enable_voice").default(true),
   enableDocumentSearch: boolean("enable_document_search").default(true),
   enableRateComparisons: boolean("enable_rate_comparisons").default(true),
