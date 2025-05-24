@@ -1,16 +1,42 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MessageSquare, FileText, Calculator, Users, Settings, User, Crown } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { MessageSquare, FileText, Calculator, Users, Settings, User, Crown, Eye, EyeOff } from "lucide-react";
 
 export default function Landing() {
-  const handleLogin = () => {
-    window.location.href = "/api/login";
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    
+    try {
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      
+      if (response.ok) {
+        window.location.href = '/';
+      } else {
+        alert('Invalid email or password');
+      }
+    } catch (error) {
+      alert('Login failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  // Development login functions (REMOVE BEFORE PRODUCTION)
-  const handleDevLogin = (userType: 'admin' | 'client-admin' | 'client-user') => {
-    // Direct navigation to login endpoint - this bypasses any routing issues
-    window.location.href = `/api/dev/login/${userType}`;
+  const fillCredentials = (email: string, password: string) => {
+    setEmail(email);
+    setPassword(password);
   };
 
   return (
@@ -87,6 +113,95 @@ export default function Landing() {
           >
             Get Started
           </Button>
+        </div>
+
+        {/* Login Form */}
+        <div className="max-w-md mx-auto mb-16">
+          <Card>
+            <CardHeader>
+              <CardTitle>Sign In to JACC</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="Enter your email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password</Label>
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Enter your password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                </div>
+
+                <Button 
+                  type="submit" 
+                  className="w-full"
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Signing in..." : "Sign In"}
+                </Button>
+              </form>
+
+              {/* Demo Accounts */}
+              <div className="mt-6 pt-6 border-t">
+                <p className="text-sm text-center text-slate-600 mb-4">Demo Accounts (Click to auto-fill):</p>
+                <div className="space-y-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start"
+                    onClick={() => fillCredentials("sarah@tracerco.com", "sales123")}
+                  >
+                    <User className="h-4 w-4 mr-2" />
+                    Sales Agent - sarah@tracerco.com
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start"
+                    onClick={() => fillCredentials("admin@testcompany.com", "admin123")}
+                  >
+                    <Users className="h-4 w-4 mr-2" />
+                    Client Admin - admin@testcompany.com
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start"
+                    onClick={() => fillCredentials("dev@jacc.com", "dev123")}
+                  >
+                    <Crown className="h-4 w-4 mr-2" />
+                    Dev Admin - dev@jacc.com
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Features Grid */}
