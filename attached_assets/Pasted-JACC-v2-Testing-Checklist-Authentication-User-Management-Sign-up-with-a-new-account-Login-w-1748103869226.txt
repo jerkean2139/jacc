@@ -1,0 +1,82 @@
+JACC v2 Testing Checklist
+
+Authentication & User Management
+ Sign up with a new account
+ Login with existing credentials
+ Log out functionality
+ Password reset flow (if implemented)
+ User profile editing
+ Role-based access (admin vs regular user features)
+
+Navigation & UI
+ Sidebar navigation on desktop
+ Bottom navigation on mobile
+ Responsive design on different screen sizes
+ Dark/light mode toggle (if implemented)
+ Menu collapse/expand functionality
+
+Chat Experience
+ Start a new conversation
+ Send and receive text messages
+ Switch between different AI agents
+ Load previous conversations
+ Delete conversations
+ Share conversation content
+
+Voice Nuggets
+ Record a voice message
+ Proper audio recording indicators
+ Transcription accuracy
+ AI response generation
+ Voice nugget storage in history
+ Playback of saved recordings
+
+Tokens & Payments
+ View current token balance
+ Free monthly token allocation
+ Purchase token packages (use Stripe test cards)
+ Purchase nugget packages
+ Payment success/failure handling
+ Transaction history display
+
+
+
+Gifting & Referrals
+ Send a nugget gift to another user
+ Redeem a received gift
+ Generate a referral code
+ Redeem a referral bonus
+ View sent/received gifts history
+
+PWA Features
+ App installation to home screen
+ Offline functionality
+ App launch from home screen icon
+ Standalone mode (no browser chrome)
+ Smooth experience with spotty connectivity
+
+Admin Features (if applicable)
+ User management dashboard
+ Content moderation tools
+ Analytics and reporting
+ System configuration settings
+
+Performance & Technical
+ App loading speed
+ Response time for AI interactions
+ Error handling and user feedback
+ Memory usage over extended sessions
+ Battery consumption
+
+Edge Cases
+ Very long conversations
+ Large file uploads (if applicable)
+ Rapid consecutive actions
+ Session timeout handling
+ Browser back button behavior
+
+Cross-Device
+ Start conversation on mobile, continue on desktop
+ Consistent UI/UX across devices
+ Push notification delivery (if implemented)
+This comprehensive checklist should help you thoroughly test all aspects of the application in the live environment. Is there any specific area you'd like me to elaborate on further.
