@@ -92,7 +92,8 @@ export class GoogleDriveService {
         });
       }
     } else {
-      throw new Error('Google Drive credentials not found. Please provide GOOGLE_SERVICE_ACCOUNT_KEY or OAuth credentials.');
+      console.log('No Google Drive credentials found. Google Drive features will be disabled.');
+      return;
     }
 
     this.drive = google.drive({ version: 'v3', auth: this.auth });
