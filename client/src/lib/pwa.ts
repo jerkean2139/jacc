@@ -304,12 +304,14 @@ window.addEventListener('beforeinstallprompt', (e) => {
 });
 
 // React hook for PWA functionality
-export function usePWA() {
-  const [isOnline, setIsOnline] = React.useState(navigator.onLine);
-  const [installAvailable, setInstallAvailable] = React.useState(false);
-  const [updateAvailable, setUpdateAvailable] = React.useState(false);
+import { useState, useEffect } from 'react';
 
-  React.useEffect(() => {
+export function usePWA() {
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [installAvailable, setInstallAvailable] = useState(false);
+  const [updateAvailable, setUpdateAvailable] = useState(false);
+
+  useEffect(() => {
     const handleOnlineStatus = (event: any) => {
       setIsOnline(event.detail.online);
     };
