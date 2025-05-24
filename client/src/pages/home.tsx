@@ -31,7 +31,7 @@ export default function Home() {
       console.log("Setting active chat ID to:", chatId);
       setActiveChatId(chatId);
     }
-  }, [chats, activeChatId]);
+  }, [chats]); // Remove activeChatId from dependencies to prevent infinite loop
 
   const handleNewChat = async () => {
     try {
