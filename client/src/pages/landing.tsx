@@ -23,7 +23,8 @@ export default function Landing() {
       });
       
       if (response.ok) {
-        window.location.href = '/';
+        // Force page reload to refresh authentication state
+        window.location.reload();
       } else {
         alert('Invalid email or password');
       }
