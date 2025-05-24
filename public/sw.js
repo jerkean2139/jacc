@@ -1,20 +1,21 @@
-const CACHE_NAME = 'jacc-v1';
-const STATIC_CACHE = 'jacc-static-v1';
-const DYNAMIC_CACHE = 'jacc-dynamic-v1';
+const CACHE_NAME = 'jacc-v2';
+const STATIC_CACHE = 'jacc-static-v2';
+const DYNAMIC_CACHE = 'jacc-dynamic-v2';
 
 // Files to cache for offline functionality
 const STATIC_FILES = [
   '/',
   '/manifest.json',
-  '/static/css/index.css',
-  '/static/js/main.js',
-  // Add other critical static assets
+  '/icon-192.png',
+  '/icon-512.png',
+  '/calculator',
+  '/guide',
+  '/admin'
 ];
 
 // API endpoints to cache for offline access
 const CACHEABLE_APIS = [
-  '/api/dev/current-user',
-  '/api/auth/user',
+  '/api/user',
   '/api/chats',
   '/api/folders',
   '/api/admin/settings'
