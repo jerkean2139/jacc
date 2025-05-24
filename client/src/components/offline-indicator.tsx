@@ -43,8 +43,8 @@ export default function OfflineIndicator() {
 
   return (
     <>
-      {/* Connection Status Badge */}
-      <div className="fixed top-4 left-4 z-40">
+      {/* Connection Status Badge - Hidden on Mobile */}
+      <div className="hidden md:block fixed top-4 left-4 z-40">
         <Badge 
           variant={isOnline ? "default" : "destructive"}
           className="flex items-center space-x-1 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm shadow-lg"

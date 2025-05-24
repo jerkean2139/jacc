@@ -66,8 +66,8 @@ export default function PWAStatus() {
   };
 
   return (
-    <div className="fixed top-4 right-4 z-50 space-y-2">
-      {/* Online/Offline Status */}
+    <div className="fixed top-4 right-4 z-50 space-y-2 hidden md:block">
+      {/* Online/Offline Status - Hidden on Mobile */}
       <div className="flex items-center space-x-2">
         <Badge 
           variant={isOnline ? "default" : "destructive"}

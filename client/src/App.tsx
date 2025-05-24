@@ -48,7 +48,9 @@ function App() {
         <Toaster />
         <PWAStatus />
         <OfflineIndicator />
-        <ContextualHelp />
+        <div className="hidden md:block">
+          <ContextualHelp />
+        </div>
         <InteractiveTutorial />
         <PWAInstallPrompt />
         <Router />

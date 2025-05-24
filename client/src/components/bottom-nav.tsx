@@ -6,7 +6,8 @@ import {
   BookOpen, 
   Settings,
   Plus,
-  Home
+  Home,
+  HelpCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -32,6 +33,11 @@ const navItems: NavItem[] = [
     href: "/guide",
     icon: BookOpen,
     label: "Guide"
+  },
+  {
+    href: "/help",
+    icon: HelpCircle,
+    label: "Help"
   },
   {
     href: "/admin",
