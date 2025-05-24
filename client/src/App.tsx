@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import PWAStatus from "@/components/pwa-status";
 import OfflineIndicator from "@/components/offline-indicator";
 import ContextualHelp from "@/components/contextual-help";
+import InteractiveTutorial from "@/components/interactive-tutorial";
 import Landing from "@/pages/landing";
 import Home from "@/pages/home";
 import NotFound from "@/pages/not-found";
@@ -44,6 +45,7 @@ function App() {
         <PWAStatus />
         <OfflineIndicator />
         <ContextualHelp />
+        <InteractiveTutorial />
         <Router />
       </TooltipProvider>
     </QueryClientProvider>

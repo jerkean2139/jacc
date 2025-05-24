@@ -299,78 +299,111 @@ export default function UserGuide() {
 // Sales Agent Onboarding Component
 function SalesAgentOnboarding() {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Target className="w-5 h-5 text-green-600" />
-          Sales Agent Onboarding
-        </CardTitle>
-        <CardDescription>
-          Complete these steps to get started with JACC as a sales agent
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="space-y-4">
-          <div className="flex items-start gap-3">
-            <div className="flex-shrink-0 w-8 h-8 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
-              <span className="text-sm font-semibold text-green-600 dark:text-green-400">1</span>
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Target className="w-5 h-5 text-green-600" />
+            Sales Agent Onboarding
+          </CardTitle>
+          <CardDescription>
+            Complete these steps to get started with JACC as a sales agent
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="space-y-4">
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-8 h-8 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+                <span className="text-sm font-semibold text-green-600 dark:text-green-400">1</span>
+              </div>
+              <div>
+                <h3 className="font-semibold">Account Access</h3>
+                <p className="text-muted-foreground text-sm">Log in with your Tracer Co Card credentials. Contact your administrator if you need access.</p>
+              </div>
             </div>
-            <div>
-              <h3 className="font-semibold">Account Access</h3>
-              <p className="text-muted-foreground text-sm">Log in with your Tracer Co Card credentials. Contact your administrator if you need access.</p>
-            </div>
-          </div>
 
-          <div className="flex items-start gap-3">
-            <div className="flex-shrink-0 w-8 h-8 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
-              <span className="text-sm font-semibold text-green-600 dark:text-green-400">2</span>
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-8 h-8 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+                <span className="text-sm font-semibold text-green-600 dark:text-green-400">2</span>
+              </div>
+              <div>
+                <h3 className="font-semibold">Explore the Interface</h3>
+                <p className="text-muted-foreground text-sm">Familiarize yourself with the chat interface, sidebar navigation, and rate calculator.</p>
+                <div className="mt-2 flex gap-2">
+                  <Badge variant="outline">Chat Interface</Badge>
+                  <Badge variant="outline">Calculator</Badge>
+                  <Badge variant="outline">Voice Features</Badge>
+                </div>
+              </div>
             </div>
-            <div>
-              <h3 className="font-semibold">Explore the Interface</h3>
-              <p className="text-muted-foreground text-sm">Familiarize yourself with the chat interface, sidebar navigation, and rate calculator.</p>
-              <div className="mt-2 flex gap-2">
-                <Badge variant="outline">Chat Interface</Badge>
-                <Badge variant="outline">Calculator</Badge>
-                <Badge variant="outline">Voice Features</Badge>
+
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-8 h-8 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+                <span className="text-sm font-semibold text-green-600 dark:text-green-400">3</span>
+              </div>
+              <div>
+                <h3 className="font-semibold">Practice Rate Calculations</h3>
+                <p className="text-muted-foreground text-sm">Run through sample merchant scenarios using the rate calculator.</p>
+                <Button size="sm" className="mt-2">
+                  Try Calculator <ArrowRight className="w-4 h-4 ml-1" />
+                </Button>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-8 h-8 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+                <span className="text-sm font-semibold text-green-600 dark:text-green-400">4</span>
+              </div>
+              <div>
+                <h3 className="font-semibold">Voice Setup</h3>
+                <p className="text-muted-foreground text-sm">Test microphone access and voice commands for hands-free operation.</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-8 h-8 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+                <span className="text-sm font-semibold text-green-600 dark:text-green-400">5</span>
+              </div>
+              <div>
+                <h3 className="font-semibold">Start Selling</h3>
+                <p className="text-muted-foreground text-sm">Begin using JACC with real prospects. Ask questions and generate proposals.</p>
               </div>
             </div>
           </div>
+        </CardContent>
+      </Card>
 
-          <div className="flex items-start gap-3">
-            <div className="flex-shrink-0 w-8 h-8 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
-              <span className="text-sm font-semibold text-green-600 dark:text-green-400">3</span>
+      <Card>
+        <CardHeader>
+          <CardTitle>Quick Start Checklist</CardTitle>
+          <CardDescription>Essential tasks for your first day with JACC</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <CheckCircle className="w-5 h-5 text-green-600" />
+              <span>Log in successfully and access main dashboard</span>
             </div>
-            <div>
-              <h3 className="font-semibold">Practice Rate Calculations</h3>
-              <p className="text-muted-foreground text-sm">Run through sample merchant scenarios using the rate calculator.</p>
-              <Button size="sm" className="mt-2">
-                Try Calculator <ArrowRight className="w-4 h-4 ml-1" />
-              </Button>
+            <div className="flex items-center gap-3">
+              <CheckCircle className="w-5 h-5 text-green-600" />
+              <span>Test voice features and microphone permissions</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <CheckCircle className="w-5 h-5 text-green-600" />
+              <span>Run one practice rate calculation</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <CheckCircle className="w-5 h-5 text-green-600" />
+              <span>Ask the AI assistant a merchant services question</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <CheckCircle className="w-5 h-5 text-green-600" />
+              <span>Generate one sample proposal</span>
             </div>
           </div>
-
-          <div className="flex items-start gap-3">
-            <div className="flex-shrink-0 w-8 h-8 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
-              <span className="text-sm font-semibold text-green-600 dark:text-green-400">4</span>
-            </div>
-            <div>
-              <h3 className="font-semibold">Voice Setup</h3>
-              <p className="text-muted-foreground text-sm">Test microphone access and voice commands for hands-free operation.</p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3">
-            <div className="flex-shrink-0 w-8 h-8 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
-              <span className="text-sm font-semibold text-green-600 dark:text-green-400">5</span>
-            </div>
-            <div>
-              <h3 className="font-semibold">Start Selling</h3>
-              <p className="text-muted-foreground text-sm">Begin using JACC with real prospects. Ask questions and generate proposals.</p>
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
 
