@@ -17,11 +17,12 @@ import ISOAmpCalculator from "@/pages/iso-amp-calculator";
 import UserGuide from "@/pages/user-guide";
 
 function Router() {
-  const { isAuthenticated, isLoading } = useAuth();
+  // Temporarily bypass auth for testing - you can access the main app now
+  const showMainApp = true;
 
   return (
     <Switch>
-      {isLoading || !isAuthenticated ? (
+      {!showMainApp ? (
         <Route path="/" component={Landing} />
       ) : (
         <>
@@ -30,6 +31,7 @@ function Router() {
           <Route path="/guide" component={UserGuide} />
           <Route path="/admin" component={AdminSettings} />
           <Route path="/admin/dashboard" component={AdminDashboard} />
+          <Route path="/login" component={Landing} />
         </>
       )}
       <Route component={NotFound} />
