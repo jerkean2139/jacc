@@ -53,11 +53,14 @@ export default function ChatInterface({ chatId, onChatUpdate }: ChatInterfacePro
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
 
-  // Fetch messages for the active chat with debugging
+  // Fetch messages for the active chat with cache busting
   const { data: messages = [], isLoading } = useQuery<MessageWithActions[]>({
     queryKey: ["/api/chats", chatId, "messages"],
     enabled: !!chatId,
-    refetchInterval: 3000, // Refresh every 3 seconds for debugging
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
+    staleTime: 0, // Always fetch fresh data
+    cacheTime: 0, // Don't cache at all
   });
 
   // Debug logging
