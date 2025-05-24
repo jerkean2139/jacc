@@ -29,7 +29,7 @@ export class SupabaseVectorService {
       process.env.SUPABASE_ANON_KEY
     );
     
-    // the newest Anthropic model is "claude-3-5-sonnet-20241022" which was released October 22, 2024
+    // the newest Anthropic model is "claude-3-7-sonnet-20250219" which was released February 24, 2025
     this.anthropic = new Anthropic({
       apiKey: process.env.ANTHROPIC_API_KEY,
     });

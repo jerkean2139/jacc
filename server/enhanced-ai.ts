@@ -2,7 +2,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { supabaseVectorService, type VectorSearchResult } from "./supabase-vector";
 import type { ChatMessage, AIResponse } from "./openai";
 
-// the newest Anthropic model is "claude-3-5-sonnet-20241022" which was released October 22, 2024
+// the newest Anthropic model is "claude-3-7-sonnet-20250219" which was released February 24, 2025
 const anthropic = new Anthropic({ 
   apiKey: process.env.ANTHROPIC_API_KEY
 });
@@ -70,7 +70,7 @@ ${documentContext}
 When appropriate, suggest actions like saving information to folders, downloading comparisons, or creating client proposals.`;
 
       const response = await anthropic.messages.create({
-        model: "claude-3-5-sonnet-20241022",
+        model: "claude-3-7-sonnet-20250219",
         system: systemPrompt,
         messages: messages.map(msg => ({
           role: msg.role === 'user' ? 'user' as const : 'assistant' as const,
