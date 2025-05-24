@@ -5,7 +5,7 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { generateChatResponse, analyzeDocument, generateTitle } from "./openai";
 import { enhancedAIService } from "./enhanced-ai";
 import { googleDriveService } from "./google-drive";
-import { vectorStoreService } from "./vector-store";
+import { supabaseVectorService } from "./supabase-vector";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
