@@ -114,6 +114,72 @@ export const adminSettings = pgTable("admin_settings", {
   updatedBy: varchar("updated_by"),
 });
 
+// Q&A Knowledge Base Management
+export const qaKnowledgeBase = pgTable("qa_knowledge_base", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  question: text("question").notNull(),
+  answer: text("answer").notNull(),
+  category: varchar("category").notNull(),
+  tags: text("tags").array(),
+  isActive: boolean("is_active").default(true),
+  priority: integer("priority").default(0),
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Document Tags
+export const documentTags = pgTable("document_tags", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: varchar("name").notNull(),
+  color: varchar("color").notNull(),
+  description: text("description"),
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Document Tag Relationships
+export const documentTagRelations = pgTable("document_tag_relations", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  documentId: uuid("document_id").notNull().references(() => documents.id),
+  tagId: uuid("tag_id").notNull().references(() => documentTags.id),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// ISO AMP Integration Data
+export const merchantApplications = pgTable("merchant_applications", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  businessName: varchar("business_name").notNull(),
+  contactName: varchar("contact_name").notNull(),
+  email: varchar("email").notNull(),
+  phone: varchar("phone").notNull(),
+  businessType: varchar("business_type").notNull(),
+  monthlyVolume: text("monthly_volume").notNull(),
+  averageTicket: text("average_ticket").notNull(),
+  status: varchar("status").notNull(),
+  applicationData: jsonb("application_data"),
+  proposalData: jsonb("proposal_data"),
+  assignedAgent: varchar("assigned_agent").references(() => users.id),
+  priority: varchar("priority").default("medium"),
+  notes: text("notes").array(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Help Content for Contextual Bubbles
+export const helpContent = pgTable("help_content", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  pageRoute: varchar("page_route").notNull(),
+  elementSelector: varchar("element_selector").notNull(),
+  title: varchar("title").notNull(),
+  content: text("content").notNull(),
+  position: varchar("position").default("bottom"),
+  isActive: boolean("is_active").default(true),
+  order: integer("order").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Define relations
 export const usersRelations = relations(users, ({ many }) => ({
   folders: many(folders),
@@ -197,5 +263,36 @@ export const insertAdminSettingsSchema = createInsertSchema(adminSettings).omit(
   updatedAt: true,
 });
 
+export const insertQAKnowledgeBaseSchema = createInsertSchema(qaKnowledgeBase).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertDocumentTagSchema = createInsertSchema(documentTags).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertMerchantApplicationSchema = createInsertSchema(merchantApplications).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertHelpContentSchema = createInsertSchema(helpContent).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export type InsertAdminSettings = z.infer<typeof insertAdminSettingsSchema>;
 export type AdminSettings = typeof adminSettings.$inferSelect;
+export type InsertQAKnowledgeBase = z.infer<typeof insertQAKnowledgeBaseSchema>;
+export type QAKnowledgeBase = typeof qaKnowledgeBase.$inferSelect;
+export type InsertDocumentTag = z.infer<typeof insertDocumentTagSchema>;
+export type DocumentTag = typeof documentTags.$inferSelect;
+export type InsertMerchantApplication = z.infer<typeof insertMerchantApplicationSchema>;
+export type MerchantApplication = typeof merchantApplications.$inferSelect;
+export type InsertHelpContent = z.infer<typeof insertHelpContentSchema>;
+export type HelpContent = typeof helpContent.$inferSelect;

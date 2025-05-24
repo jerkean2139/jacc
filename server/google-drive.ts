@@ -22,6 +22,9 @@ export interface ProcessedDocument {
   name: string;
   content: string;
   chunks: DocumentChunk[];
+  tags: string[];
+  category: string;
+  isFavorite: boolean;
   metadata: {
     mimeType: string;
     size: string;
@@ -30,6 +33,10 @@ export interface ProcessedDocument {
     thumbnailLink?: string;
     wordCount: number;
     chunkCount: number;
+    description?: string;
+    author?: string;
+    lastModifiedBy?: string;
+    version: number;
   };
 }
 
