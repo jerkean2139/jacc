@@ -23,6 +23,7 @@ import {
   Save,
   Share,
   ThumbsUp,
+  FileText,
   ThumbsDown
 } from "lucide-react";
 import MessageBubble from "./message-bubble";
@@ -351,34 +352,25 @@ export default function ChatInterface({ chatId, onChatUpdate }: ChatInterfacePro
           </Button>
         </div>
 
-        {/* Quick Actions */}
+        {/* Quick Actions - Simplified to avoid redundancy with bottom nav */}
         <div className="flex flex-wrap gap-2 mt-3 max-w-4xl mx-auto">
           <Button
             variant="secondary"
             size="sm"
-            onClick={() => handleQuickAction("Show me rate comparisons for Medicare plans")}
-            className="text-slate-700 dark:text-slate-300"
-          >
-            <Calculator className="w-3 h-3 mr-2" />
-            Rate Calculator
-          </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => handleQuickAction("Help me find documents in my folders")}
+            onClick={() => handleQuickAction("Help me analyze this document and provide insights")}
             className="text-slate-700 dark:text-slate-300"
           >
             <FileSearch className="w-3 h-3 mr-2" />
-            Find Document
+            Analyze Document
           </Button>
           <Button
             variant="secondary"
             size="sm"
-            onClick={() => handleQuickAction("Search frequently asked questions")}
+            onClick={() => handleQuickAction("Generate a client proposal based on this information")}
             className="text-slate-700 dark:text-slate-300"
           >
-            <HelpCircle className="w-3 h-3 mr-2" />
-            FAQ Search
+            <FileText className="w-3 h-3 mr-2" />
+            Create Proposal
           </Button>
         </div>
       </div>
