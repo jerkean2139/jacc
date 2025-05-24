@@ -65,9 +65,9 @@ export default function MessageBubble({ message, actions }: MessageBubbleProps) 
   };
 
   // Check if message contains structured data (like rate comparisons)
-  const hasStructuredData = message.content.includes('Medicare Advantage') || 
-                            message.content.includes('rate comparison') ||
-                            message.content.includes('comparison table');
+  const hasStructuredData = message.content?.includes('Medicare Advantage') || 
+                            message.content?.includes('rate comparison') ||
+                            message.content?.includes('comparison table');
 
   return (
     <div className={cn(
