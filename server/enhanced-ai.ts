@@ -1,10 +1,10 @@
-import OpenAI from "openai";
-import { vectorStoreService, type VectorSearchResult } from "./vector-store";
+import Anthropic from '@anthropic-ai/sdk';
+import { supabaseVectorService, type VectorSearchResult } from "./supabase-vector";
 import type { ChatMessage, AIResponse } from "./openai";
 
-// the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-const openai = new OpenAI({ 
-  apiKey: process.env.OPENAI_API_KEY
+// the newest Anthropic model is "claude-3-5-sonnet-20241022" which was released October 22, 2024
+const anthropic = new Anthropic({ 
+  apiKey: process.env.ANTHROPIC_API_KEY
 });
 
 export interface EnhancedAIResponse extends AIResponse {
@@ -36,7 +36,7 @@ export class EnhancedAIService {
       }
 
       // Search relevant documents
-      const searchResults = await vectorStoreService.searchDocuments(lastMessage.content, 5);
+      const searchResults = await supabaseVectorService.searchDocuments(lastMessage.content, 5);
       
       // Create context from search results
       const documentContext = this.formatDocumentContext(searchResults);
@@ -69,17 +69,18 @@ ${documentContext}
 
 When appropriate, suggest actions like saving information to folders, downloading comparisons, or creating client proposals.`;
 
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o",
-        messages: [
-          { role: "system", content: systemPrompt },
-          ...messages
-        ],
+      const response = await anthropic.messages.create({
+        model: "claude-3-5-sonnet-20241022",
+        system: systemPrompt,
+        messages: messages.map(msg => ({
+          role: msg.role === 'user' ? 'user' as const : 'assistant' as const,
+          content: msg.content
+        })),
         temperature: 0.7,
         max_tokens: 1500,
       });
 
-      const content = response.choices[0].message.content || "";
+      const content = response.content[0].type === 'text' ? response.content[0].text : "";
       
       // Parse response for potential actions
       const actions = this.extractActions(content);
@@ -199,7 +200,7 @@ Relevance Score: ${(result.score * 100).toFixed(1)}%
   }
 
   async searchDocuments(query: string): Promise<VectorSearchResult[]> {
-    return await vectorStoreService.searchDocuments(query, 10);
+    return await supabaseVectorService.searchDocuments(query, 10);
   }
 }
 

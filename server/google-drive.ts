@@ -4,7 +4,7 @@ import path from 'path';
 import pdfParse from 'pdf-parse';
 import mammoth from 'mammoth';
 import * as cheerio from 'cheerio';
-import { encode } from 'tiktoken';
+import { get_encoding } from 'tiktoken';
 
 export interface DriveFile {
   id: string;
@@ -154,7 +154,7 @@ export class GoogleDriveService {
   }
 
   chunkDocument(content: string, maxTokens: number = 1000): DocumentChunk[] {
-    const encoder = encode;
+    const encoder = get_encoding('cl100k_base');
     const chunks: DocumentChunk[] = [];
     const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 0);
     
@@ -164,7 +164,7 @@ export class GoogleDriveService {
     let startChar = 0;
 
     for (const sentence of sentences) {
-      const sentenceTokens = encoder(sentence.trim()).length;
+      const sentenceTokens = encoder.encode(sentence.trim()).length;
       
       if (currentTokens + sentenceTokens > maxTokens && currentChunk.length > 0) {
         // Save current chunk
@@ -206,6 +206,7 @@ export class GoogleDriveService {
       });
     }
 
+    encoder.free();
     return chunks;
   }
 
@@ -242,7 +243,7 @@ export class GoogleDriveService {
     }
   }
 
-  async scanAndProcessFolder(folderId: string): Promise<ProcessedDocument[]> {
+  async scanAndProcessFolder(folderId: string = '1iIS1kMU_rnArNAF8Ka5F7y3rWj0-e8_X'): Promise<ProcessedDocument[]> {
     try {
       console.log(`Scanning Google Drive folder: ${folderId}`);
       const files = await this.listFolderContents(folderId);

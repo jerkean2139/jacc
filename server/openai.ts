@@ -14,7 +14,7 @@ export interface AIResponse {
   message: string;
   suggestions?: string[];
   actions?: Array<{
-    type: 'save_to_folder' | 'download' | 'create_proposal';
+    type: 'save_to_folder' | 'download' | 'create_proposal' | 'find_documents';
     label: string;
     data?: any;
   }>;
