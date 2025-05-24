@@ -53,42 +53,8 @@ export default function Landing() {
               <p className="text-sm text-slate-600 dark:text-slate-400">Merchant Services Assistant</p>
             </div>
           </div>
-          <div className="flex items-center space-x-2">
-            {/* Development Login Buttons (REMOVE BEFORE PRODUCTION) */}
-            {true && (
-              <>
-                <Button 
-                  onClick={() => handleDevLogin('admin')} 
-                  variant="outline"
-                  size="sm"
-                  className="text-xs"
-                >
-                  <Crown className="w-3 h-3 mr-1" />
-                  Dev Admin
-                </Button>
-                <Button 
-                  onClick={() => handleDevLogin('client-admin')} 
-                  variant="outline"
-                  size="sm"
-                  className="text-xs"
-                >
-                  <Settings className="w-3 h-3 mr-1" />
-                  Client Admin
-                </Button>
-                <Button 
-                  onClick={() => handleDevLogin('client-user')} 
-                  variant="outline"
-                  size="sm"
-                  className="text-xs"
-                >
-                  <User className="w-3 h-3 mr-1" />
-                  Sales Agent
-                </Button>
-              </>
-            )}
-            <Button onClick={handleLogin} className="navy-primary text-white hover:opacity-90">
-              Sign In
-            </Button>
+          <div className="flex items-center">
+            <span className="text-sm text-slate-600 dark:text-slate-400">Welcome to JACC</span>
           </div>
         </div>
       </header>
