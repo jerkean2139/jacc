@@ -534,6 +534,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Initialize gamification system
+  const initializeGamification = async () => {
+    try {
+      const { gamificationService } = await import('./gamification');
+      await gamificationService.initializeAchievements();
+      console.log('✅ Gamification system initialized');
+    } catch (error) {
+      console.log('Gamification initialization skipped:', error.message);
+    }
+  };
+  
+  initializeGamification();
+
   const httpServer = createServer(app);
   return httpServer;
 }
