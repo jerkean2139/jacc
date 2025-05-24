@@ -94,7 +94,7 @@ export default function ChatInterface({ chatId, onChatUpdate }: ChatInterfacePro
           body: JSON.stringify({ action: "message_sent" })
         });
       } catch (error) {
-        console.log("Gamification tracking not available");
+        console.log("Achievement tracking unavailable");
       }
     },
   });

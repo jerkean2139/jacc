@@ -42,20 +42,30 @@ function Router() {
   );
 }
 
+function AppContent() {
+  const { user } = useAuth();
+  
+  return (
+    <GamificationProvider userId={user?.id}>
+      <Toaster />
+      <PWAStatus />
+      <OfflineIndicator />
+      <div className="hidden md:block">
+        <ContextualHelp />
+      </div>
+      <InteractiveTutorial />
+      <PWAInstallPrompt />
+      <Router />
+      <BottomNav />
+    </GamificationProvider>
+  );
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Toaster />
-        <PWAStatus />
-        <OfflineIndicator />
-        <div className="hidden md:block">
-          <ContextualHelp />
-        </div>
-        <InteractiveTutorial />
-        <PWAInstallPrompt />
-        <Router />
-        <BottomNav />
+        <AppContent />
       </TooltipProvider>
     </QueryClientProvider>
   );
