@@ -115,11 +115,19 @@ export class DatabaseStorage implements IStorage {
 
   // Message operations
   async getChatMessages(chatId: string): Promise<Message[]> {
-    return await db
+    const result = await db
       .select()
       .from(messages)
       .where(eq(messages.chatId, chatId))
       .orderBy(messages.createdAt);
+    
+    console.log(`Database: Found ${result.length} messages for chat ${chatId}`);
+    if (result.length > 0) {
+      console.log(`First message: ${result[0].content.substring(0, 50)}...`);
+      console.log(`Last message: ${result[result.length - 1].content.substring(0, 50)}...`);
+    }
+    
+    return result;
   }
 
   async createMessage(messageData: InsertMessage): Promise<Message> {
