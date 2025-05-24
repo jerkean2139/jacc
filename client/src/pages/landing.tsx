@@ -16,7 +16,8 @@ export default function Landing() {
       });
       
       if (response.ok) {
-        window.location.reload();
+        // Force a complete page refresh to ensure session is recognized
+        window.location.href = '/';
       } else {
         console.error('Dev login failed');
       }
