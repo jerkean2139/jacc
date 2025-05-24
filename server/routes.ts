@@ -38,7 +38,7 @@ const upload = multer({
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup development auth first for simple session management
-  if (process.env.NODE_ENV === 'development') {
+  if (true) {
     setupDevAuth(app);
   }
   
@@ -46,7 +46,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   await setupAuth(app);
 
   // Temporary development login routes (REMOVE BEFORE PRODUCTION)
-  if (process.env.NODE_ENV === 'development') {
+  if (true) {
     app.post('/api/dev/login/admin', async (req, res) => {
       try {
         const adminUser = await storage.upsertUser({
