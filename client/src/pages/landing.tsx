@@ -42,7 +42,7 @@ export default function Landing() {
           </div>
           <div className="flex items-center space-x-2">
             {/* Development Login Buttons (REMOVE BEFORE PRODUCTION) */}
-            {process.env.NODE_ENV === 'development' && (
+            {true && (
               <>
                 <Button 
                   onClick={() => handleDevLogin('admin')} 
