@@ -80,10 +80,22 @@ export default function ChatInterface({ chatId, onChatUpdate }: ChatInterfacePro
 
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ["/api/chats", chatId, "messages"] });
       queryClient.invalidateQueries({ queryKey: ["/api/chats"] });
       onChatUpdate();
+      
+      // Track message sent action for gamification
+      try {
+        await fetch("/api/user/track-action", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ action: "message_sent" })
+        });
+      } catch (error) {
+        console.log("Gamification tracking not available");
+      }
     },
   });
 
