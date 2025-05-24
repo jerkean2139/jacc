@@ -92,13 +92,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         const clientUser = await storage.upsertUser({
           id: 'dev-client-user-001',
-          email: 'sales.agent@testcompany.com',
+          email: 'sales.agent@tracercocard.com',
           firstName: 'Sarah',
           lastName: 'Johnson',
           profileImageUrl: null
         });
         
-        (req as any).user = {
+        // Properly set session
+        (req.session as any).user = {
           claims: { sub: 'dev-client-user-001' },
           access_token: 'dev-token',
           expires_at: Math.floor(Date.now() / 1000) + 3600
@@ -112,9 +113,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
 
     app.get('/api/dev/current-user', async (req: any, res) => {
-      if (req.user && req.user.claims) {
+      const sessionUser = (req.session as any)?.user;
+      if (sessionUser && sessionUser.claims) {
         try {
-          const user = await storage.getUser(req.user.claims.sub);
+          const user = await storage.getUser(sessionUser.claims.sub);
           res.json(user);
         } catch (error) {
           res.status(500).json({ message: "Failed to fetch user" });
