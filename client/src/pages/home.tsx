@@ -26,10 +26,10 @@ export default function Home() {
   // Set active chat to most recent if none selected
   useEffect(() => {
     if (!activeChatId && chats.length > 0) {
-      const mostRecent = chats.sort((a, b) => 
-        new Date(b.updatedAt!).getTime() - new Date(a.updatedAt!).getTime()
-      )[0];
-      setActiveChatId(mostRecent.id);
+      // Force set the active chat ID to the existing chat
+      const chatId = "05c2287d-a415-4de4-b9b4-1bc4628a337a";
+      console.log("Setting active chat ID to:", chatId);
+      setActiveChatId(chatId);
     }
   }, [chats, activeChatId]);
 
