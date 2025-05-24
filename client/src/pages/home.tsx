@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import Sidebar from "@/components/sidebar";
 import ChatInterface from "@/components/chat-interface";
+import UserStatsDashboard from "@/components/user-stats-dashboard";
 import { useAuth } from "@/hooks/useAuth";
 import { useNewChatFAB } from "@/components/bottom-nav";
 import type { Chat, Folder } from "@shared/schema";
