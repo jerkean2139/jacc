@@ -59,13 +59,16 @@ export default function ChatInterface({ chatId, onChatUpdate }: ChatInterfacePro
     enabled: !!chatId,
   });
 
-  // Debug logging
+  // Debug logging with performance optimization
   console.log("Chat Interface Debug:", {
     chatId,
-    messagesCount: messages.length,
+    messagesCount: Array.isArray(messages) ? messages.length : 0,
     isLoading,
-    lastMessage: messages[messages.length - 1]?.content?.substring(0, 50)
+    hasMessages: Array.isArray(messages) && messages.length > 0
   });
+
+  // Ensure messages is always an array to prevent crashes
+  const safeMessages = Array.isArray(messages) ? messages : [];
 
   // Send message mutation
   const sendMessageMutation = useMutation({
@@ -275,7 +278,7 @@ export default function ChatInterface({ chatId, onChatUpdate }: ChatInterfacePro
             <div className="flex items-center justify-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
             </div>
-          ) : messages.length === 0 ? (
+          ) : safeMessages.length === 0 ? (
             <div className="text-center py-8">
               <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Send className="w-6 h-6 text-blue-600 dark:text-blue-400" />
@@ -288,7 +291,7 @@ export default function ChatInterface({ chatId, onChatUpdate }: ChatInterfacePro
               </p>
             </div>
           ) : (
-            messages.map((message) => (
+            safeMessages.map((message) => (
               <MessageBubble
                 key={message.id}
                 message={message}

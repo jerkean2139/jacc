@@ -187,6 +187,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const messages = await storage.getChatMessages(chatId);
+      console.log(`API: Sending ${messages.length} messages to frontend for chat ${chatId}`);
       res.json(messages);
     } catch (error) {
       console.error("Error fetching messages:", error);
