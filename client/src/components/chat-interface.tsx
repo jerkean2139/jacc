@@ -53,11 +53,16 @@ export default function ChatInterface({ chatId, onChatUpdate }: ChatInterfacePro
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
 
-  // Fetch messages for the active chat - simplified
-  const { data: messages = [], isLoading } = useQuery<MessageWithActions[]>({
+  // Fetch messages for the active chat - with error handling
+  const { data: messages = [], isLoading, error } = useQuery<MessageWithActions[]>({
     queryKey: ["/api/chats", chatId, "messages"],
     enabled: !!chatId,
   });
+
+  // Log any errors with message loading
+  if (error) {
+    console.error("Error loading messages:", error);
+  }
 
   // Debug logging with performance optimization
   console.log("Chat Interface Debug:", {
