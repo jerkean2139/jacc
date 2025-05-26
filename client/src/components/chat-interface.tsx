@@ -55,14 +55,26 @@ export default function ChatInterface({ chatId, onChatUpdate }: ChatInterfacePro
 
   // Fetch messages for the active chat - with error handling
   const { data: messages = [], isLoading, error } = useQuery<MessageWithActions[]>({
-    queryKey: ["/api/chats", chatId, "messages"],
+    queryKey: [`/api/chats/${chatId}/messages`],
     enabled: !!chatId,
+    refetchOnMount: true,
+    staleTime: 0, // Always refetch
   });
 
   // Log any errors with message loading
   if (error) {
     console.error("Error loading messages:", error);
   }
+
+  // Debug the actual API call
+  console.log("Messages Query Status:", {
+    chatId,
+    queryKey: [`/api/chats/${chatId}/messages`],
+    enabled: !!chatId,
+    isLoading,
+    hasError: !!error,
+    messageCount: messages?.length || 0
+  });
 
   // Debug logging with performance optimization
   console.log("Chat Interface Debug:", {
