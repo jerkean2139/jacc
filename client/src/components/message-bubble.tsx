@@ -30,6 +30,11 @@ export default function MessageBubble({ message, actions }: MessageBubbleProps) 
   const isUser = message.role === 'user';
   const isAssistant = message.role === 'assistant';
 
+  // Don't render empty messages
+  if (!message.content || message.content.trim() === '') {
+    return null;
+  }
+
   const handleAction = (actionType: string, data?: any) => {
     console.log('Action triggered:', actionType, data);
     // Implement action handling based on type

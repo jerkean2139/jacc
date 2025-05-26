@@ -43,61 +43,45 @@ export default function OfflineIndicator() {
 
   return (
     <>
-      {/* Connection Status Badge - Hidden on Mobile */}
-      <div className="hidden md:block fixed top-4 left-4 z-40">
+      {/* Connection Status Badge - Compact Bottom Right */}
+      <div className="fixed bottom-24 right-4 z-40">
         <Badge 
           variant={isOnline ? "default" : "destructive"}
-          className="flex items-center space-x-1 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm shadow-lg"
+          className="flex items-center space-x-1 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm shadow-lg text-xs px-2 py-1"
         >
           {isOnline ? (
-            <>
-              <Wifi className="w-3 h-3" />
-              <span>Online</span>
-            </>
+            <Wifi className="w-3 h-3" />
           ) : (
-            <>
-              <WifiOff className="w-3 h-3" />
-              <span>Offline</span>
-            </>
+            <WifiOff className="w-3 h-3" />
           )}
         </Badge>
       </div>
 
-      {/* Offline Mode Alert */}
+      {/* Offline Mode Alert - Compact */}
       {showOfflineMessage && (
-        <div className="fixed top-16 left-4 right-4 z-50 md:left-auto md:right-4 md:w-96">
+        <div className="fixed bottom-36 right-4 z-50 w-72">
           <Alert className="bg-amber-50 dark:bg-amber-950 border-amber-200 dark:border-amber-800 shadow-lg">
             <CloudOff className="h-4 w-4" />
             <AlertDescription>
-              <div className="space-y-1">
-                <p className="font-medium text-amber-800 dark:text-amber-200">
-                  You're now offline
-                </p>
-                <p className="text-sm text-amber-700 dark:text-amber-300">
-                  Don't worry! JACC works offline. Your messages will be saved and synced when you're back online.
-                </p>
-              </div>
+              <p className="text-sm text-amber-800 dark:text-amber-200">
+                Offline mode - messages will sync when reconnected
+              </p>
             </AlertDescription>
           </Alert>
         </div>
       )}
 
-      {/* Data Sync Indicator */}
+      {/* Data Sync Indicator - Compact */}
       {pendingSync && (
-        <div className="fixed top-16 left-4 right-4 z-50 md:left-auto md:right-4 md:w-96">
+        <div className="fixed bottom-36 right-4 z-50 w-72">
           <Alert className="bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800 shadow-lg">
             <CheckCircle className="h-4 w-4" />
             <AlertDescription>
               <div className="flex items-center space-x-2">
-                <div className="flex-1">
-                  <p className="font-medium text-green-800 dark:text-green-200">
-                    Syncing your data...
-                  </p>
-                  <p className="text-sm text-green-700 dark:text-green-300">
-                    Your offline messages are being uploaded.
-                  </p>
-                </div>
-                <div className="animate-spin rounded-full h-4 w-4 border-2 border-green-600 border-t-transparent"></div>
+                <p className="text-sm text-green-800 dark:text-green-200">
+                  Syncing data...
+                </p>
+                <div className="animate-spin rounded-full h-3 w-3 border-2 border-green-600 border-t-transparent"></div>
               </div>
             </AlertDescription>
           </Alert>
