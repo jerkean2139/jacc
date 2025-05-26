@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import jaccLogoPath from "@assets/IMG_0782.jpeg";
 import {
   Download,
   Save,
@@ -81,6 +82,7 @@ export default function MessageBubble({ message, actions }: MessageBubbleProps) 
     )}>
       {!isUser && (
         <Avatar className="w-8 h-8 flex-shrink-0">
+          <AvatarImage src={jaccLogoPath} alt="JACC" />
           <AvatarFallback className="navy-primary text-white">
             <Bot className="w-4 h-4" />
           </AvatarFallback>
