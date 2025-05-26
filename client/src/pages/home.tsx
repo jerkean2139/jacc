@@ -85,12 +85,14 @@ export default function Home() {
   // Connect the floating action button to new chat creation
   useNewChatFAB(handleNewChat);
 
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+
   return (
     <div className="h-screen flex flex-col bg-slate-50 dark:bg-slate-900">
       {/* Mobile Layout */}
-      <div className="flex-1 md:hidden pb-16 flex flex-col">
+      <div className="md:hidden flex-1 flex flex-col pb-16">
         {/* Mobile Header */}
-        <div className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 p-4 flex items-center justify-between">
+        <div className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 p-4 flex items-center justify-between shrink-0">
           <div className="flex items-center space-x-3">
             <Sheet>
               <SheetTrigger asChild>
@@ -122,10 +124,12 @@ export default function Home() {
           </button>
         </div>
         
-        <ChatInterface
-          chatId={activeChatId}
-          onChatUpdate={refetchChats}
-        />
+        <div className="flex-1 overflow-hidden">
+          <ChatInterface
+            chatId={activeChatId}
+            onChatUpdate={refetchChats}
+          />
+        </div>
       </div>
 
       {/* Desktop Layout */}
