@@ -91,7 +91,7 @@ export default function MessageBubble({ message, actions }: MessageBubbleProps) 
         <div className={cn(
           "rounded-2xl p-4 max-w-full",
           isUser 
-            ? "bg-blue-600 text-white rounded-tr-md" 
+            ? "bg-navy-600 text-white rounded-tr-md" 
             : "bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-tl-md"
         )}>
           {/* Message Content */}
