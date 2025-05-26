@@ -90,9 +90,42 @@ export default function HomeStable() {
   useNewChatFAB(handleNewChat);
 
   return (
-    <div className="h-screen flex flex-col bg-slate-50 dark:bg-slate-900">
-      {/* Always show mobile layout for screens under 768px */}
-      <div className="lg:hidden flex-1 flex flex-col pb-16">
+    <div className="h-screen bg-slate-50 dark:bg-slate-900">
+      {/* Mobile Header - Always visible on mobile */}
+      <div className="lg:hidden bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 p-4 flex items-center justify-between">
+        <div className="flex items-center space-x-3">
+          <Sheet>
+            <SheetTrigger asChild>
+              <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg">
+                <Menu className="w-5 h-5 text-slate-600 dark:text-slate-300" />
+              </button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-80 p-0">
+              <Sidebar
+                user={user}
+                chats={chats}
+                folders={folders}
+                activeChatId={activeChatId}
+                onNewChat={handleNewChat}
+                onChatSelect={handleChatSelect}
+                onFolderCreate={handleFolderCreate}
+                collapsed={false}
+              />
+            </SheetContent>
+          </Sheet>
+          <img src="/icons/icon-192x192.png" alt="JACC" className="w-8 h-8" />
+          <h1 className="text-lg font-semibold text-slate-900 dark:text-white">JACC</h1>
+        </div>
+        <button
+          onClick={handleNewChat}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+        >
+          New Chat
+        </button>
+      </div>
+
+      {/* Mobile Chat Area */}
+      <div className="lg:hidden flex-1 pb-16">
           {/* Mobile Header */}
           <div className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 p-4 flex items-center justify-between shrink-0">
             <div className="flex items-center space-x-3">
