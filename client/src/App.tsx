@@ -12,7 +12,7 @@ import InteractiveTutorial from "@/components/interactive-tutorial";
 import PWAInstallPrompt from "@/components/pwa-install-prompt";
 import BottomNav from "@/components/bottom-nav";
 import Landing from "@/pages/landing";
-import Home from "@/pages/home";
+import HomeStable from "@/pages/home-stable";
 import NotFound from "@/pages/not-found";
 import AdminSettings from "@/pages/admin-settings";
 import AdminDashboard from "@/pages/admin-dashboard";
@@ -29,7 +29,7 @@ function Router() {
         <Route path="/" component={Landing} />
       ) : (
         <>
-          <Route path="/" component={Home} />
+          <Route path="/" component={HomeStable} />
           <Route path="/calculator" component={ISOAmpCalculator} />
           <Route path="/guide" component={UserGuide} />
           <Route path="/admin" component={AdminSettings} />
