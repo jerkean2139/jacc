@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import jaccLogoPath from "@assets/IMG_0816.png";
+import jaccLogoPath from "@assets/FS6idYAvlqMOrtmKZEBd5.jpg";
 import {
   Download,
   Save,
