@@ -89,20 +89,10 @@ export default function HomeStable() {
   // Connect the floating action button to new chat creation
   useNewChatFAB(handleNewChat);
 
-  // Don't render until we're on the client
-  if (!isClient) {
-    return <div className="h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
-      <div className="text-slate-600 dark:text-slate-400">Loading...</div>
-    </div>;
-  }
-
-  const isMobile = window.innerWidth < 768;
-
   return (
     <div className="h-screen flex flex-col bg-slate-50 dark:bg-slate-900">
-      {isMobile ? (
-        // Mobile Layout
-        <div className="flex-1 flex flex-col pb-16">
+      {/* Always show mobile layout for screens under 768px */}
+      <div className="lg:hidden flex-1 flex flex-col pb-16">
           {/* Mobile Header */}
           <div className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 p-4 flex items-center justify-between shrink-0">
             <div className="flex items-center space-x-3">
@@ -180,7 +170,43 @@ export default function HomeStable() {
             </ResizablePanel>
           </ResizablePanelGroup>
         </div>
-      )}
+
+      {/* Desktop Layout - Show on large screens only */}
+      <div className="hidden lg:flex flex-1">
+        <ResizablePanelGroup direction="horizontal" className="flex-1">
+          {/* Sidebar Panel */}
+          <ResizablePanel
+            defaultSize={25}
+            minSize={20}
+            maxSize={40}
+            collapsible
+            onCollapse={() => setSidebarCollapsed(true)}
+            onExpand={() => setSidebarCollapsed(false)}
+            className={sidebarCollapsed ? "min-w-0" : ""}
+          >
+            <Sidebar
+              user={user}
+              chats={chats}
+              folders={folders}
+              activeChatId={activeChatId}
+              onNewChat={handleNewChat}
+              onChatSelect={handleChatSelect}
+              onFolderCreate={handleFolderCreate}
+              collapsed={sidebarCollapsed}
+            />
+          </ResizablePanel>
+
+          <ResizableHandle withHandle />
+
+          {/* Chat Panel */}
+          <ResizablePanel defaultSize={75} minSize={60}>
+            <ChatInterface
+              chatId={activeChatId}
+              onChatUpdate={refetchChats}
+            />
+          </ResizablePanel>
+        </ResizablePanelGroup>
+      </div>
     </div>
   );
 }
