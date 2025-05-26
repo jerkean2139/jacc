@@ -43,8 +43,8 @@ export default function OfflineIndicator() {
 
   return (
     <>
-      {/* Connection Status Badge - Compact Bottom Right */}
-      <div className="fixed bottom-24 right-4 z-40">
+      {/* Connection Status Badge - Top Right Corner */}
+      <div className="fixed top-4 right-4 z-40">
         <Badge 
           variant={isOnline ? "default" : "destructive"}
           className="flex items-center space-x-1 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm shadow-lg text-xs px-2 py-1"
