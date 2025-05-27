@@ -62,7 +62,7 @@ export class GoogleDriveService {
 
   private async initializeAuth() {
     // Use OAuth2 credentials for better compatibility
-    const CLIENT_ID = '317136716497-jcmdudupqcn4b0mgshlohmi23c4ps1u7.apps.googleusercontent.com';
+    const CLIENT_ID = '317136716497-jcmdudupqcn4b0mgshlohml23c4ps1u7.apps.googleusercontent.com';
     const CLIENT_SECRET = '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';
     const REFRESH_TOKEN = process.env.GOOGLE_REFRESH_TOKEN;
     
