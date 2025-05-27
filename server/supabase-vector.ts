@@ -162,7 +162,19 @@ export class SupabaseVectorService {
       
     } catch (error) {
       console.error('Google Drive search error:', error);
-      return [];
+      // Return a helpful message when Google Drive isn't available
+      return [{
+        id: 'no-documents-available',
+        score: 0.5,
+        documentId: 'system-message',
+        content: 'I apologize, but I cannot access your Google Drive documents at the moment due to authentication issues. I can still help you with general questions about merchant services, insurance, and business topics. Please let me know what specific information you need!',
+        metadata: {
+          documentName: 'System Message',
+          webViewLink: '',
+          chunkIndex: 0,
+          mimeType: 'text/plain'
+        }
+      }];
     }
   }
 
