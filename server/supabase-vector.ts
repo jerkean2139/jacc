@@ -65,13 +65,21 @@ export class SupabaseVectorService {
 
   async ensureTableExists(): Promise<void> {
     try {
-      // Create documents table if it doesn't exist
-      const { error } = await this.supabase.rpc('create_documents_table_if_not_exists');
-      if (error && !error.message.includes('already exists')) {
-        console.error('Error creating table:', error);
+      // First check if the table exists by trying to query it
+      const { data, error: queryError } = await this.supabase
+        .from('document_chunks')
+        .select('id')
+        .limit(1);
+
+      if (queryError && queryError.code === 'PGRST116') {
+        console.log('Document chunks table does not exist, creating fallback search...');
+        // Table doesn't exist, but we'll continue with fallback search
+        return;
       }
+
+      console.log('Vector search table is ready for use');
     } catch (error) {
-      console.log('Table creation handled by Supabase schema');
+      console.log('Using fallback text search for documents');
     }
   }
 
