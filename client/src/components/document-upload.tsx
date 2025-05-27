@@ -82,25 +82,75 @@ export default function DocumentUpload({ folderId, onUploadComplete }: DocumentU
     },
   });
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || []);
-    
-    // Filter allowed file types
-    const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'image/jpeg', 'image/png', 'image/jpg'];
-    
-    const validFiles = files.filter(file => 
-      allowedTypes.includes(file.type) && file.size <= 100 * 1024 * 1024 // 100MB limit
-    );
+  const [isDragOver, setIsDragOver] = useState(false);
 
-    if (validFiles.length !== files.length) {
+  const validateAndAddFiles = (files: File[]) => {
+    // Enhanced file type validation including ZIP files
+    const allowedTypes = [
+      'application/pdf', 
+      'application/msword', 
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 
+      'application/vnd.ms-excel', 
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      'image/jpeg', 
+      'image/png', 
+      'image/jpg',
+      'application/zip',
+      'application/x-zip-compressed'
+    ];
+    
+    const validFiles = files.filter(file => {
+      const isValidType = allowedTypes.includes(file.type) || 
+                         file.name.toLowerCase().endsWith('.zip') ||
+                         file.name.toLowerCase().endsWith('.docx') ||
+                         file.name.toLowerCase().endsWith('.xlsx') ||
+                         file.name.toLowerCase().endsWith('.pptx');
+      const isValidSize = file.size <= 100 * 1024 * 1024; // 100MB limit
+      return isValidType && isValidSize;
+    });
+
+    const skippedFiles = files.length - validFiles.length;
+    if (skippedFiles > 0) {
       toast({
-        title: "Some files skipped",
-        description: "Only PDF, Word, Excel, and image files under 100MB are allowed.",
+        title: `${skippedFiles} file(s) skipped`,
+        description: "Only PDF, Word, Excel, PowerPoint, Images, and ZIP files under 100MB are allowed.",
         variant: "destructive",
       });
     }
 
-    setSelectedFiles(prev => [...prev, ...validFiles]);
+    if (validFiles.length > 0) {
+      setSelectedFiles(prev => [...prev, ...validFiles]);
+      toast({
+        title: `${validFiles.length} file(s) ready`,
+        description: "Files added successfully. Click 'Upload Documents' to process them.",
+      });
+    }
+  };
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    validateAndAddFiles(files);
+    // Reset the input value so the same file can be selected again
+    event.target.value = '';
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    
+    const files = Array.from(e.dataTransfer.files);
+    validateAndAddFiles(files);
   };
 
   const removeFile = (index: number) => {
@@ -139,20 +189,48 @@ export default function DocumentUpload({ folderId, onUploadComplete }: DocumentU
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="file-upload">Select Files</Label>
-            <Input
-              id="file-upload"
+          {/* Enhanced Drag & Drop Upload Area */}
+          <div 
+            className={`border-2 border-dashed rounded-lg p-8 text-center transition-all duration-200 cursor-pointer relative ${
+              isDragOver 
+                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 scale-105' 
+                : 'border-gray-300 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500'
+            }`}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <Upload className={`mx-auto h-12 w-12 mb-4 transition-colors ${
+              isDragOver ? 'text-blue-500' : 'text-gray-400 dark:text-gray-500'
+            }`} />
+            <div className="space-y-2">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
+                {isDragOver ? 'Drop your files here!' : 'Upload Documents'}
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                {isDragOver 
+                  ? 'Release to add your documents' 
+                  : 'Drag and drop files here, or click to browse'
+                }
+              </p>
+            </div>
+            <input
               type="file"
               ref={fileInputRef}
               onChange={handleFileSelect}
               multiple
-              accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.zip"
-              className="cursor-pointer"
+              accept=".pdf,.doc,.docx,.xls,.xlsx,.pptx,.jpg,.jpeg,.png,.zip"
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
             />
-            <p className="text-sm text-muted-foreground mt-1">
-              Supported: PDF, Word, Excel, Images, ZIP files (max 100MB each)
-            </p>
+            <div className="mt-4 space-y-1">
+              <p className="text-sm text-muted-foreground">
+                Supported: PDF, Word, Excel, PowerPoint, Images, ZIP files
+              </p>
+              <p className="text-xs text-green-600 dark:text-green-400 font-medium">
+                ✓ 100MB max per file ✓ Automatic ZIP extraction ✓ Folder organization
+              </p>
+            </div>
           </div>
 
           {/* Selected Files */}
