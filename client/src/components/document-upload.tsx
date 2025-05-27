@@ -89,13 +89,13 @@ export default function DocumentUpload({ folderId, onUploadComplete }: DocumentU
     const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'image/jpeg', 'image/png', 'image/jpg'];
     
     const validFiles = files.filter(file => 
-      allowedTypes.includes(file.type) && file.size <= 10 * 1024 * 1024 // 10MB limit
+      allowedTypes.includes(file.type) && file.size <= 100 * 1024 * 1024 // 100MB limit
     );
 
     if (validFiles.length !== files.length) {
       toast({
         title: "Some files skipped",
-        description: "Only PDF, Word, Excel, and image files under 10MB are allowed.",
+        description: "Only PDF, Word, Excel, and image files under 100MB are allowed.",
         variant: "destructive",
       });
     }

@@ -29,7 +29,7 @@ interface UploadFile extends File {
 export default function FileUpload({
   onFileUpload,
   maxFiles = 5,
-  maxFileSize = 10,
+  maxFileSize = 100,
   acceptedTypes = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'jpg', 'jpeg', 'png']
 }: FileUploadProps) {
   const [files, setFiles] = useState<UploadFile[]>([]);
