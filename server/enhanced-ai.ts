@@ -53,9 +53,11 @@ export class EnhancedAIService {
 IMPORTANT INSTRUCTIONS:
 1. Use the provided document context to answer questions accurately
 2. Always cite specific documents when referencing information
-3. Provide direct links to Google Drive documents when available
-4. If you don't find relevant information in the documents, clearly state that
-5. Focus on actionable insights for merchant services sales
+3. **ALWAYS provide direct clickable links to Google Drive documents when available**
+4. When answering with document information, format like: "Based on [Document Name](link), here's what I found..."
+5. If you don't find relevant information in the documents, clearly state that
+6. Focus on actionable insights for merchant services sales
+7. For any document-based answer, include the phrase "📄 **Source:** [Document Name](direct_link)" at the end
 
 Your responses should be:
 - Professional and knowledgeable about payment processing
@@ -118,9 +120,11 @@ When appropriate, suggest actions like saving payment processing information to 
 
     return searchResults.map((result, index) => {
       return `Document ${index + 1}: "${result.metadata.documentName}"
+Direct Link: ${result.metadata.webViewLink}
 Content: ${result.content}
-Source: ${result.metadata.webViewLink}
 Relevance Score: ${(result.score * 100).toFixed(1)}%
+
+IMPORTANT: When referencing this document in your response, always include the clickable link: [${result.metadata.documentName}](${result.metadata.webViewLink})
 ---`;
     }).join('\n');
   }
