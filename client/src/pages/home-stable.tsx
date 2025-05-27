@@ -12,13 +12,27 @@ import type { Chat, Folder } from "@shared/schema";
 export default function HomeStable() {
   const { user } = useAuth();
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    // Initialize from localStorage or default to false
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('jacc-sidebar-collapsed');
+      return saved ? JSON.parse(saved) : false;
+    }
+    return false;
+  });
   const [isClient, setIsClient] = useState(false);
 
   // Ensure we're on the client side
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  // Persist sidebar state to localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('jacc-sidebar-collapsed', JSON.stringify(sidebarCollapsed));
+    }
+  }, [sidebarCollapsed]);
 
   // Fetch user's chats
   const { data: chats = [], refetch: refetchChats } = useQuery<Chat[]>({
@@ -165,43 +179,6 @@ export default function HomeStable() {
               onChatUpdate={refetchChats}
             />
           </div>
-        </div>
-      ) : (
-        // Desktop Layout
-        <div className="flex-1">
-          <ResizablePanelGroup direction="horizontal" className="flex-1">
-            {/* Sidebar Panel */}
-            <ResizablePanel
-              defaultSize={25}
-              minSize={20}
-              maxSize={40}
-              collapsible
-              onCollapse={() => setSidebarCollapsed(true)}
-              onExpand={() => setSidebarCollapsed(false)}
-              className={sidebarCollapsed ? "min-w-0" : ""}
-            >
-              <Sidebar
-                user={user}
-                chats={chats}
-                folders={folders}
-                activeChatId={activeChatId}
-                onNewChat={handleNewChat}
-                onChatSelect={handleChatSelect}
-                onFolderCreate={handleFolderCreate}
-                collapsed={sidebarCollapsed}
-              />
-            </ResizablePanel>
-
-            <ResizableHandle withHandle />
-
-            {/* Chat Panel */}
-            <ResizablePanel defaultSize={75} minSize={60}>
-              <ChatInterface
-                chatId={activeChatId}
-                onChatUpdate={refetchChats}
-              />
-            </ResizablePanel>
-          </ResizablePanelGroup>
         </div>
 
       {/* Desktop Layout - Show on large screens only */}
