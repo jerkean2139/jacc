@@ -12,27 +12,12 @@ import type { Chat, Folder } from "@shared/schema";
 export default function HomeStable() {
   const { user } = useAuth();
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
-    // Initialize from localStorage or default to false
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('jacc-sidebar-collapsed');
-      return saved ? JSON.parse(saved) : false;
-    }
-    return false;
-  });
   const [isClient, setIsClient] = useState(false);
 
   // Ensure we're on the client side
   useEffect(() => {
     setIsClient(true);
   }, []);
-
-  // Persist sidebar state to localStorage
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('jacc-sidebar-collapsed', JSON.stringify(sidebarCollapsed));
-    }
-  }, [sidebarCollapsed]);
 
   // Fetch user's chats
   const { data: chats = [], refetch: refetchChats } = useQuery<Chat[]>({
