@@ -74,14 +74,14 @@ ${documentContext}
 When appropriate, suggest actions like saving payment processing information to folders, downloading rate comparisons, or creating merchant proposals.`;
 
       const response = await anthropic.messages.create({
-        model: "claude-3-7-sonnet-20250219",
+        model: "claude-3-haiku-20240307",
         system: systemPrompt,
         messages: messages.map(msg => ({
           role: msg.role === 'user' ? 'user' as const : 'assistant' as const,
           content: msg.content
         })),
         temperature: 0.7,
-        max_tokens: 1500,
+        max_tokens: 1000,
       });
 
       const content = response.content[0].type === 'text' ? response.content[0].text : "";
