@@ -120,98 +120,59 @@ export class SupabaseVectorService {
   }
 
   async searchDocuments(query: string, topK: number = 5): Promise<VectorSearchResult[]> {
-    try {
-      const queryEmbedding = await this.createEmbedding(query);
-      
-      const { data, error } = await this.supabase.rpc('search_documents', {
-        query_embedding: queryEmbedding,
-        match_threshold: 0.7,
-        match_count: topK
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      return data?.map((item: any) => ({
-        id: item.id,
-        score: item.similarity,
-        documentId: item.document_id,
-        content: item.content,
-        metadata: {
-          documentName: item.document_name,
-          webViewLink: item.web_view_link,
-          chunkIndex: item.chunk_index,
-          mimeType: item.mime_type,
-        }
-      })) || [];
-    } catch (error) {
-      console.error('Error searching documents:', error);
-      // Fallback to text-based search if vector search fails
-      return this.fallbackTextSearch(query, topK);
-    }
+    console.log('Starting document search for:', query);
+    
+    // Skip vector search for now and go straight to Google Drive search
+    return this.fallbackTextSearch(query, topK);
   }
 
   private async fallbackTextSearch(query: string, topK: number): Promise<VectorSearchResult[]> {
     try {
-      const { data, error } = await this.supabase
-        .from('document_chunks')
-        .select('*')
-        .textSearch('content', query)
-        .limit(topK);
-
-      if (error) {
-        throw error;
-      }
-
-      return data?.map((item: any) => ({
-        id: item.id,
-        score: 0.8, // Default similarity score for text search
-        documentId: item.document_id,
-        content: item.content,
-        metadata: {
-          documentName: item.document_name,
-          webViewLink: item.web_view_link,
-          chunkIndex: item.chunk_index,
-          mimeType: item.mime_type,
-        }
-      })) || [];
-    } catch (error) {
-      console.error('Error in fallback text search:', error);
-      // Final fallback: search through Google Drive documents directly
-      try {
-        const { googleDriveService } = await import('./google-drive');
-        console.log('Using Google Drive direct search...');
-        
-        const documents = await googleDriveService.scanAndProcessFolder();
-        const results: VectorSearchResult[] = [];
-        const queryLower = query.toLowerCase();
-        
-        for (const doc of documents) {
-          for (const chunk of doc.chunks) {
-            if (chunk.content.toLowerCase().includes(queryLower)) {
-              results.push({
-                id: chunk.id,
-                score: 0.7,
-                documentId: doc.id,
-                content: chunk.content,
-                metadata: {
-                  documentName: doc.name,
-                  webViewLink: doc.metadata.webViewLink,
-                  chunkIndex: chunk.chunkIndex,
-                  mimeType: doc.metadata.mimeType
-                }
-              });
+      console.log('Searching Google Drive documents for:', query);
+      const { googleDriveService } = await import('./google-drive');
+      
+      // Get documents from Google Drive
+      const documents = await googleDriveService.scanAndProcessFolder();
+      const results: VectorSearchResult[] = [];
+      const queryLower = query.toLowerCase();
+      
+      for (const doc of documents) {
+        // Search in document content
+        const docContentLower = doc.content.toLowerCase();
+        if (docContentLower.includes(queryLower)) {
+          // Create a summary chunk if the document matches
+          const snippet = this.extractSnippet(doc.content, queryLower);
+          results.push({
+            id: `${doc.id}-summary`,
+            score: 0.8,
+            documentId: doc.id,
+            content: snippet,
+            metadata: {
+              documentName: doc.name,
+              webViewLink: doc.metadata.webViewLink,
+              chunkIndex: 0,
+              mimeType: doc.metadata.mimeType
             }
-          }
+          });
         }
-        
-        return results.slice(0, topK);
-      } catch (driveError) {
-        console.error('Google Drive search error:', driveError);
-        return [];
       }
+      
+      console.log(`Found ${results.length} matching documents`);
+      return results.slice(0, topK);
+      
+    } catch (error) {
+      console.error('Google Drive search error:', error);
+      return [];
     }
+  }
+
+  private extractSnippet(content: string, query: string, snippetLength: number = 200): string {
+    const index = content.toLowerCase().indexOf(query.toLowerCase());
+    if (index === -1) return content.substring(0, snippetLength) + '...';
+    
+    const start = Math.max(0, index - 50);
+    const end = Math.min(content.length, index + query.length + 150);
+    return content.substring(start, end) + '...';
   }
 
   async deleteDocumentVectors(documentId: string): Promise<void> {
