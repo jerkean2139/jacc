@@ -109,7 +109,7 @@ export default function PWAInstallPrompt() {
         </CardHeader>
         <CardContent className="pt-0">
           <p className="text-sm text-gray-600 mb-4">
-            Add JACC to your home screen for quick access and a better experience.
+            Add Tracer to your home screen for quick access and a better experience.
           </p>
           
           <div className="flex gap-4 mb-4 text-xs text-gray-500">

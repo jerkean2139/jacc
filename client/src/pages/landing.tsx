@@ -50,12 +50,12 @@ export default function Landing() {
               <MessageSquare className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-slate-900 dark:text-white">JACC</h1>
+              <h1 className="text-xl font-bold text-slate-900 dark:text-white">Tracer</h1>
               <p className="text-sm text-slate-600 dark:text-slate-400">Merchant Services Assistant</p>
             </div>
           </div>
           <div className="flex items-center">
-            <span className="text-sm text-slate-600 dark:text-slate-400">Welcome to JACC</span>
+            <span className="text-sm text-slate-600 dark:text-slate-400">Welcome to Tracer</span>
           </div>
         </div>
       </header>

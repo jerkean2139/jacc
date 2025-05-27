@@ -316,7 +316,7 @@ export default function InteractiveTutorial() {
               Congratulations!
             </h3>
             <p className="text-muted-foreground text-lg">
-              You've completed the JACC tutorial and are ready to transform your merchant services sales with AI power.
+              You've completed the Tracer tutorial and are ready to transform your merchant services sales with AI power.
             </p>
           </div>
           

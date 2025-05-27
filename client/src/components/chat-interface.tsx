@@ -222,7 +222,7 @@ export default function ChatInterface({ chatId, onChatUpdate }: ChatInterfacePro
               <Send className="w-8 h-8 text-blue-600 dark:text-blue-400" />
             </div>
             <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">
-              Welcome to JACC
+              Welcome to Tracer
             </h2>
             <p className="text-slate-600 dark:text-slate-400 mb-6">
               Start a new conversation to get help with insurance questions, rate comparisons, 
