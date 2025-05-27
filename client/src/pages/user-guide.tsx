@@ -54,7 +54,7 @@ export default function UserGuide() {
           <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
             <BookOpen className="w-6 h-6 text-blue-600 dark:text-blue-400" />
           </div>
-          <h1 className="text-3xl font-bold">JACC User Guide</h1>
+          <h1 className="text-3xl font-bold">Tracer User Guide</h1>
         </div>
         <p className="text-lg text-muted-foreground">
           Complete onboarding and training guide for Tracer Co Card's AI-powered merchant services assistant
@@ -131,9 +131,9 @@ export default function UserGuide() {
               </Alert>
 
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold">What is JACC?</h3>
+                <h3 className="text-lg font-semibold">What is Tracer?</h3>
                 <p className="text-muted-foreground">
-                  JACC (Just Another Chat Companion) is Tracer Co Card's comprehensive platform that combines:
+                  Tracer is Tracer Co Card's comprehensive AI-powered platform that combines:
                 </p>
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -307,7 +307,7 @@ function SalesAgentOnboarding() {
             Sales Agent Onboarding
           </CardTitle>
           <CardDescription>
-            Complete these steps to get started with JACC as a sales agent
+            Complete these steps to get started with Tracer as a sales agent
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">

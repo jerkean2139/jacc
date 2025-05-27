@@ -90,7 +90,7 @@ export default function PWAInstallPrompt() {
               </div>
               <div>
                 <CardTitle className="text-sm font-semibold text-gray-900">
-                  Install JACC
+                  Install Tracer
                 </CardTitle>
                 <Badge variant="secondary" className="text-xs mt-1">
                   PWA Available

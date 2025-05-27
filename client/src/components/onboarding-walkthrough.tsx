@@ -56,7 +56,7 @@ export default function OnboardingWalkthrough() {
   const steps: OnboardingStep[] = [
     {
       id: 'welcome',
-      title: 'Welcome to JACC! 🎉',
+      title: 'Welcome to Tracer! 🎉',
       description: 'Your AI-powered merchant services assistant',
       content: (
         <div className="space-y-4">
@@ -64,7 +64,7 @@ export default function OnboardingWalkthrough() {
             <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
               <Zap className="w-8 h-8 text-white" />
             </div>
-            <h3 className="text-xl font-bold mb-2">Welcome to JACC!</h3>
+            <h3 className="text-xl font-bold mb-2">Welcome to Tracer!</h3>
             <p className="text-muted-foreground">
               You're about to discover the most powerful merchant services platform at Tracer Co Card.
             </p>
@@ -299,7 +299,7 @@ export default function OnboardingWalkthrough() {
             </div>
             <h3 className="text-xl font-bold mb-2">Congratulations!</h3>
             <p className="text-muted-foreground">
-              You've completed the JACC onboarding. You're now ready to leverage AI for merchant services success.
+              You've completed the Tracer onboarding. You're now ready to leverage AI for merchant services success.
             </p>
           </div>
           
