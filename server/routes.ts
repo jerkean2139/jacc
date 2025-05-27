@@ -11,6 +11,7 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { insertMessageSchema, insertChatSchema, insertFolderSchema, insertDocumentSchema, insertAdminSettingsSchema } from "@shared/schema";
+import { setupOAuthHelper } from "./oauth-helper";
 
 // Configure multer for file uploads
 const uploadDir = path.join(process.cwd(), "uploads");
@@ -44,6 +45,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Auth middleware
   await setupAuth(app);
+  
+  // Setup OAuth helper for Google Drive credentials
+  setupOAuthHelper(app);
 
   // Temporary development login routes (REMOVE BEFORE PRODUCTION)
   if (true) {
