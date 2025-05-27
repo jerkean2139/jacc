@@ -178,7 +178,39 @@ export class SupabaseVectorService {
       })) || [];
     } catch (error) {
       console.error('Error in fallback text search:', error);
-      return [];
+      // Final fallback: search through Google Drive documents directly
+      try {
+        const { googleDriveService } = await import('./google-drive');
+        console.log('Using Google Drive direct search...');
+        
+        const documents = await googleDriveService.scanAndProcessFolder();
+        const results: VectorSearchResult[] = [];
+        const queryLower = query.toLowerCase();
+        
+        for (const doc of documents) {
+          for (const chunk of doc.chunks) {
+            if (chunk.content.toLowerCase().includes(queryLower)) {
+              results.push({
+                id: chunk.id,
+                score: 0.7,
+                documentId: doc.id,
+                content: chunk.content,
+                metadata: {
+                  documentName: doc.name,
+                  webViewLink: doc.metadata.webViewLink,
+                  chunkIndex: chunk.chunkIndex,
+                  mimeType: doc.metadata.mimeType
+                }
+              });
+            }
+          }
+        }
+        
+        return results.slice(0, topK);
+      } catch (driveError) {
+        console.error('Google Drive search error:', driveError);
+        return [];
+      }
     }
   }
 
