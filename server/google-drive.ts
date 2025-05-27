@@ -61,19 +61,33 @@ export class GoogleDriveService {
   }
 
   private async initializeAuth() {
-    // Check for service account credentials first
-    if (process.env.GOOGLE_SERVICE_ACCOUNT_KEY) {
+    // Use OAuth2 credentials for better compatibility
+    const CLIENT_ID = '317136716497-jcmdudupqcn4b0mgshlohmi23c4ps1u7.apps.googleusercontent.com';
+    const CLIENT_SECRET = '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';
+    const REFRESH_TOKEN = process.env.GOOGLE_REFRESH_TOKEN;
+    
+    if (CLIENT_ID && CLIENT_SECRET && REFRESH_TOKEN) {
       try {
-        // Handle potential newline issues in the private key
+        this.auth = new google.auth.OAuth2(
+          CLIENT_ID,
+          CLIENT_SECRET,
+          'http://localhost:5000/auth/callback'
+        );
+        
+        this.auth.setCredentials({
+          refresh_token: REFRESH_TOKEN
+        });
+        
+        console.log('Google Drive OAuth2 authentication initialized successfully');
+      } catch (error) {
+        console.error('Failed to initialize Google OAuth2:', error);
+        console.log('Skipping Google Drive initialization due to credential issues');
+        return;
+      }
+    } else if (process.env.GOOGLE_SERVICE_ACCOUNT_KEY) {
+      try {
+        // Fallback to service account if OAuth2 not available
         let keyString = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
-        
-        // If the key string starts with a newline, it needs proper JSON formatting
-        if (keyString.startsWith('\n')) {
-          // This appears to be just the private key content, we need to construct the full JSON
-          console.error('Google Service Account Key appears to be incomplete. Please provide the full JSON credentials file.');
-          throw new Error('Invalid Google Service Account Key format');
-        }
-        
         const credentials = JSON.parse(keyString);
         
         // Fix private key formatting for Node.js compatibility
@@ -81,19 +95,14 @@ export class GoogleDriveService {
           credentials.private_key = credentials.private_key.replace(/\\n/g, '\n');
         }
         
-        // Try using fromJSON method which handles key formatting better
         this.auth = new google.auth.GoogleAuth({
           credentials,
           scopes: ['https://www.googleapis.com/auth/drive.readonly']
         });
         
-        // Test the authentication to ensure it works
-        await this.auth.getClient();
-        
         console.log('Google Drive service account authentication initialized successfully');
       } catch (error) {
         console.error('Failed to parse Google Service Account Key:', error);
-        // For now, skip Google Drive initialization so the app can start
         console.log('Skipping Google Drive initialization due to credential issues');
         return;
       }
