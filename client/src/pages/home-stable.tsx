@@ -166,30 +166,28 @@ export default function HomeStable() {
           </div>
         </div>
 
-      {/* Desktop Layout - Show on large screens only */}
-      <div className="hidden lg:flex flex-1">
-        <div className="flex w-full h-full">
-          {/* Sidebar - Always visible unless explicitly collapsed */}
-          <div className="w-80 min-w-[320px] border-r border-border">
-            <Sidebar
-              user={user}
-              chats={chats}
-              folders={folders}
-              activeChatId={activeChatId}
-              onNewChat={handleNewChat}
-              onChatSelect={handleChatSelect}
-              onFolderCreate={handleFolderCreate}
-              collapsed={false}
-            />
-          </div>
+      {/* Desktop Layout - CSS Grid for stability */}
+      <div className="hidden lg:grid grid-cols-[320px_1fr] h-full w-full">
+        {/* Sidebar - Fixed width grid column */}
+        <div className="border-r border-border overflow-hidden">
+          <Sidebar
+            user={user}
+            chats={chats}
+            folders={folders}
+            activeChatId={activeChatId}
+            onNewChat={handleNewChat}
+            onChatSelect={handleChatSelect}
+            onFolderCreate={handleFolderCreate}
+            collapsed={false}
+          />
+        </div>
 
-          {/* Chat Panel */}
-          <div className="flex-1 min-w-0">
-            <ChatInterface
-              chatId={activeChatId}
-              onChatUpdate={refetchChats}
-            />
-          </div>
+        {/* Chat Panel - Flexible grid column */}
+        <div className="overflow-hidden">
+          <ChatInterface
+            chatId={activeChatId}
+            onChatUpdate={refetchChats}
+          />
         </div>
       </div>
     </div>
