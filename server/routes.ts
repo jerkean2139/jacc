@@ -23,7 +23,7 @@ if (!fs.existsSync(uploadDir)) {
 const upload = multer({
   dest: uploadDir,
   limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB limit
+    fileSize: 100 * 1024 * 1024, // 100MB limit
   },
   fileFilter: (req, file, cb) => {
     const allowedTypes = /pdf|doc|docx|xls|xlsx|jpg|jpeg|png|zip/;

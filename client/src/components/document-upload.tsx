@@ -151,7 +151,7 @@ export default function DocumentUpload({ folderId, onUploadComplete }: DocumentU
               className="cursor-pointer"
             />
             <p className="text-sm text-muted-foreground mt-1">
-              Supported: PDF, Word, Excel, Images, ZIP files (max 10MB each)
+              Supported: PDF, Word, Excel, Images, ZIP files (max 100MB each)
             </p>
           </div>
 
