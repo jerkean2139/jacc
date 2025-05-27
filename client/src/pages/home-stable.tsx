@@ -183,17 +183,9 @@ export default function HomeStable() {
 
       {/* Desktop Layout - Show on large screens only */}
       <div className="hidden lg:flex flex-1">
-        <ResizablePanelGroup direction="horizontal" className="flex-1">
-          {/* Sidebar Panel */}
-          <ResizablePanel
-            defaultSize={25}
-            minSize={20}
-            maxSize={40}
-            collapsible
-            onCollapse={() => setSidebarCollapsed(true)}
-            onExpand={() => setSidebarCollapsed(false)}
-            className={sidebarCollapsed ? "min-w-0" : ""}
-          >
+        <div className="flex w-full h-full">
+          {/* Sidebar - Always visible unless explicitly collapsed */}
+          <div className="w-80 min-w-[320px] border-r border-border">
             <Sidebar
               user={user}
               chats={chats}
@@ -202,20 +194,18 @@ export default function HomeStable() {
               onNewChat={handleNewChat}
               onChatSelect={handleChatSelect}
               onFolderCreate={handleFolderCreate}
-              collapsed={sidebarCollapsed}
+              collapsed={false}
             />
-          </ResizablePanel>
-
-          <ResizableHandle withHandle />
+          </div>
 
           {/* Chat Panel */}
-          <ResizablePanel defaultSize={75} minSize={60}>
+          <div className="flex-1 min-w-0">
             <ChatInterface
               chatId={activeChatId}
               onChatUpdate={refetchChats}
             />
-          </ResizablePanel>
-        </ResizablePanelGroup>
+          </div>
+        </div>
       </div>
     </div>
   );
