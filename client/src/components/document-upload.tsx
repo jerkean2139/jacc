@@ -147,11 +147,11 @@ export default function DocumentUpload({ folderId, onUploadComplete }: DocumentU
               ref={fileInputRef}
               onChange={handleFileSelect}
               multiple
-              accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"
+              accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.zip"
               className="cursor-pointer"
             />
             <p className="text-sm text-muted-foreground mt-1">
-              Supported: PDF, Word, Excel, Images (max 10MB each)
+              Supported: PDF, Word, Excel, Images, ZIP files (max 10MB each)
             </p>
           </div>
 

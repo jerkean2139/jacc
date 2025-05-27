@@ -12,6 +12,7 @@ import path from "path";
 import fs from "fs";
 import { insertMessageSchema, insertChatSchema, insertFolderSchema, insertDocumentSchema, insertAdminSettingsSchema } from "@shared/schema";
 import { setupOAuthHelper } from "./oauth-helper";
+import { zipProcessor } from "./zip-processor";
 
 // Configure multer for file uploads
 const uploadDir = path.join(process.cwd(), "uploads");
@@ -25,14 +26,14 @@ const upload = multer({
     fileSize: 10 * 1024 * 1024, // 10MB limit
   },
   fileFilter: (req, file, cb) => {
-    const allowedTypes = /pdf|doc|docx|xls|xlsx|jpg|jpeg|png/;
+    const allowedTypes = /pdf|doc|docx|xls|xlsx|jpg|jpeg|png|zip/;
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = allowedTypes.test(file.mimetype);
+    const mimetype = allowedTypes.test(file.mimetype) || file.mimetype === 'application/zip';
     
     if (mimetype && extname) {
       return cb(null, true);
     } else {
-      cb(new Error("Only PDF, DOC, XLS, and image files are allowed"));
+      cb(new Error("Only PDF, DOC, XLS, images, and ZIP files are allowed"));
     }
   }
 });
@@ -304,47 +305,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/documents/upload', isAuthenticated, upload.single('file'), async (req: any, res) => {
+  app.post('/api/documents/upload', isAuthenticated, upload.array('files'), async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const file = req.file;
+      const files = req.files;
       
-      if (!file) {
-        return res.status(400).json({ message: "No file uploaded" });
+      if (!files || files.length === 0) {
+        return res.status(400).json({ message: "No files uploaded" });
       }
 
-      // Create document record
-      const documentData = insertDocumentSchema.parse({
-        name: file.filename,
-        originalName: file.originalname,
-        mimeType: file.mimetype,
-        size: file.size,
-        path: file.path,
-        userId,
-        folderId: req.body.folderId || null
-      });
-      
-      const document = await storage.createDocument(documentData);
+      const results = [];
+      const errors = [];
 
-      // Analyze document if it's an image
-      let analysis = null;
-      if (file.mimetype.startsWith('image/')) {
+      for (const file of files) {
         try {
-          const fileBuffer = fs.readFileSync(file.path);
-          const base64Content = fileBuffer.toString('base64');
-          analysis = await analyzeDocument(base64Content, file.mimetype, file.originalname);
+          // Check if it's a ZIP file
+          if (file.mimetype === 'application/zip' || path.extname(file.originalname).toLowerCase() === '.zip') {
+            // Process ZIP file with automatic extraction
+            const zipResult = await zipProcessor.processZipFile(file.path, userId, req.body.folderId || null);
+            
+            results.push({
+              type: 'zip',
+              originalName: file.originalname,
+              extractedFiles: zipResult.extractedFiles.length,
+              foldersCreated: zipResult.foldersCreated.length,
+              documentsCreated: zipResult.documentsCreated.length,
+              errors: zipResult.errors
+            });
+
+            // Clean up the original ZIP file
+            if (fs.existsSync(file.path)) {
+              fs.unlinkSync(file.path);
+            }
+          } else {
+            // Process regular file
+            const documentData = insertDocumentSchema.parse({
+              name: file.filename,
+              originalName: file.originalname,
+              mimeType: file.mimetype,
+              size: file.size,
+              path: file.path,
+              userId,
+              folderId: req.body.folderId || null
+            });
+            
+            const document = await storage.createDocument(documentData);
+
+            // Analyze document if it's an image
+            let analysis = null;
+            if (file.mimetype.startsWith('image/')) {
+              try {
+                const fileBuffer = fs.readFileSync(file.path);
+                const base64Content = fileBuffer.toString('base64');
+                analysis = await analyzeDocument(base64Content, file.mimetype, file.originalname);
+              } catch (error) {
+                console.error("Document analysis failed:", error);
+              }
+            }
+
+            results.push({
+              type: 'document',
+              document,
+              analysis
+            });
+          }
         } catch (error) {
-          console.error("Document analysis failed:", error);
+          errors.push({
+            file: file.originalname,
+            error: error instanceof Error ? error.message : 'Unknown error'
+          });
         }
       }
-      
+
       res.json({
-        document,
-        analysis
+        success: true,
+        results,
+        errors,
+        totalProcessed: results.length
       });
     } catch (error) {
-      console.error("Error uploading document:", error);
-      res.status(500).json({ message: "Failed to upload document" });
+      console.error("Error uploading documents:", error);
+      res.status(500).json({ message: "Failed to upload documents" });
     }
   });
 
