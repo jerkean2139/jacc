@@ -19,6 +19,7 @@ import AdminSettings from "@/pages/admin-settings";
 import AdminDashboard from "@/pages/admin-dashboard";
 import ISOAmpCalculator from "@/pages/iso-amp-calculator";
 import UserGuide from "@/pages/user-guide";
+import DocumentsPage from "@/pages/documents-page";
 
 function Router() {
   // Temporarily bypass auth for testing - you can access the main app now
@@ -33,6 +34,7 @@ function Router() {
           <Route path="/" component={HomeStable} />
           <Route path="/calculator" component={ISOAmpCalculator} />
           <Route path="/guide" component={UserGuide} />
+          <Route path="/documents" component={DocumentsPage} />
           <Route path="/admin" component={AdminSettings} />
           <Route path="/admin/dashboard" component={AdminDashboard} />
           <Route path="/login" component={Landing} />
