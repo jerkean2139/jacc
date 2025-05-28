@@ -443,6 +443,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete document endpoint
+  app.delete('/api/documents/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { id } = req.params;
+      
+      // Get the document first to verify ownership and get file path
+      const document = await storage.getDocument(id);
+      if (!document || document.userId !== userId) {
+        return res.status(404).json({ message: "Document not found" });
+      }
+      
+      // Delete the document from database
+      await storage.deleteDocument(id);
+      
+      // Optionally delete the physical file
+      if (document.path) {
+        try {
+          const fs = require('fs').promises;
+          const path = require('path');
+          const filePath = path.join(process.cwd(), 'uploads', document.path);
+          await fs.unlink(filePath);
+        } catch (fileError) {
+          console.log("File deletion failed (file may not exist):", fileError);
+        }
+      }
+      
+      res.json({ success: true, message: "Document deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting document:", error);
+      res.status(500).json({ message: "Failed to delete document" });
+    }
+  });
+
   app.delete('/api/favorites/:id', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;

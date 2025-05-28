@@ -44,6 +44,8 @@ export interface IStorage {
   // Document operations
   getUserDocuments(userId: string): Promise<Document[]>;
   createDocument(document: InsertDocument): Promise<Document>;
+  getDocument(id: string): Promise<Document | undefined>;
+  deleteDocument(id: string): Promise<void>;
   
   // Favorite operations
   getUserFavorites(userId: string): Promise<Favorite[]>;
@@ -170,6 +172,20 @@ export class DatabaseStorage implements IStorage {
       .values(documentData)
       .returning();
     return document;
+  }
+
+  async getDocument(id: string): Promise<Document | undefined> {
+    const [document] = await db
+      .select()
+      .from(documents)
+      .where(eq(documents.id, id));
+    return document || undefined;
+  }
+
+  async deleteDocument(id: string): Promise<void> {
+    await db
+      .delete(documents)
+      .where(eq(documents.id, id));
   }
 
   // Favorite operations

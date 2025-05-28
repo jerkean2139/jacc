@@ -1,15 +1,18 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
 import DocumentUpload from "@/components/document-upload";
-import { Search, FileText, Upload, Folder } from "lucide-react";
+import { Search, FileText, Upload, Folder, Trash2 } from "lucide-react";
 import type { Document, Folder as FolderType } from "@shared/schema";
 
 export default function DocumentsPage() {
   const [searchQuery, setSearchQuery] = useState("");
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Fetch documents and folders
   const { data: documents = [] } = useQuery<Document[]>({
@@ -18,6 +21,32 @@ export default function DocumentsPage() {
 
   const { data: folders = [] } = useQuery<FolderType[]>({
     queryKey: ["/api/folders"],
+  });
+
+  // Delete document mutation
+  const deleteMutation = useMutation({
+    mutationFn: async (documentId: string) => {
+      const response = await fetch(`/api/documents/${documentId}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        throw new Error('Failed to delete document');
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/documents"] });
+      toast({
+        title: "Document deleted",
+        description: "The document has been successfully removed.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Delete failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
   });
 
   const filteredDocuments = documents.filter(doc =>
@@ -93,13 +122,24 @@ export default function DocumentsPage() {
                           </div>
                         </div>
                       </div>
-                      {doc.url && (
-                        <Button variant="outline" size="sm" asChild>
-                          <a href={doc.url} target="_blank" rel="noopener noreferrer">
-                            View
-                          </a>
+                      <div className="flex items-center gap-2">
+                        {doc.path && (
+                          <Button variant="outline" size="sm" asChild>
+                            <a href={`/uploads/${doc.path}`} target="_blank" rel="noopener noreferrer">
+                              View
+                            </a>
+                          </Button>
+                        )}
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => deleteMutation.mutate(doc.id)}
+                          disabled={deleteMutation.isPending}
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          <Trash2 className="h-4 w-4" />
                         </Button>
-                      )}
+                      </div>
                     </div>
                   ))}
                 </div>
