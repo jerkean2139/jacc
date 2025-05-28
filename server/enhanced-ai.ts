@@ -42,19 +42,40 @@ export class EnhancedAIService {
       let searchResults = [];
       let webSearchResults = null;
       
-      // Try document search first
+      // STEP 1: Primary document search with original query
       try {
         searchResults = await pineconeVectorService.searchDocuments(lastMessage.content, 5);
-        console.log(`Found ${searchResults.length} document matches`);
+        console.log(`Step 1: Found ${searchResults.length} document matches for: "${lastMessage.content}"`);
       } catch (error) {
-        console.log("Document search failed, proceeding without document context");
+        console.log("Step 1: Document search failed, proceeding to step 2");
         searchResults = [];
       }
       
-      // Only use web search if no relevant documents found
+      // STEP 2: Double-check with alternative search strategies if no results
+      if (searchResults.length === 0) {
+        console.log("Step 2: No documents found, trying comprehensive alternative searches...");
+        
+        const alternativeQueries = this.generateAlternativeQueries(lastMessage.content);
+        
+        for (const altQuery of alternativeQueries) {
+          try {
+            const altResults = await pineconeVectorService.searchDocuments(altQuery, 10);
+            console.log(`Step 2: Alternative query "${altQuery}" found ${altResults.length} results`);
+            if (altResults.length > 0) {
+              searchResults = altResults;
+              console.log("Step 2: Found relevant documents with alternative search!");
+              break;
+            }
+          } catch (error) {
+            console.log(`Step 2: Alternative query "${altQuery}" failed`);
+          }
+        }
+      }
+      
+      // Only use web search if absolutely no relevant documents found after comprehensive search
       let webSearchReason = null;
       if (searchResults.length === 0) {
-        webSearchReason = "No internal documents found matching the query";
+        webSearchReason = "Comprehensive search completed: No internal documents found with original query or alternative search terms";
         try {
           webSearchResults = await perplexitySearchService.searchWeb(lastMessage.content);
           console.log("Web search completed successfully - no internal documents found");
@@ -248,6 +269,40 @@ IMPORTANT: When referencing this document in your response, always include the c
 
   async searchDocuments(query: string): Promise<VectorSearchResult[]> {
     return await pineconeVectorService.searchDocuments(query, 10);
+  }
+
+  generateAlternativeQueries(originalQuery: string): string[] {
+    const alternatives: string[] = [];
+    const lowercaseQuery = originalQuery.toLowerCase();
+    
+    // Extract key terms and create variations
+    const keyTerms = lowercaseQuery.split(' ').filter(word => word.length > 2);
+    
+    // Vendor-specific alternatives
+    if (lowercaseQuery.includes('tsys')) {
+      alternatives.push('customer support', 'technical support', 'help desk', 'TSYS support', 'processor support');
+    }
+    
+    if (lowercaseQuery.includes('merchant') || lowercaseQuery.includes('application')) {
+      alternatives.push('merchant application', 'application form', 'signup form', 'enrollment', 'TRX merchant');
+    }
+    
+    if (lowercaseQuery.includes('high risk') || lowercaseQuery.includes('risk')) {
+      alternatives.push('permissible high risk', 'risk list', 'business categories', 'prohibited business');
+    }
+    
+    if (lowercaseQuery.includes('ach') || lowercaseQuery.includes('bank')) {
+      alternatives.push('ACH form', 'bank transfer', 'electronic transfer', 'TSYS ACH', 'global ACH');
+    }
+    
+    // Add broader payment processing terms
+    alternatives.push('payment processing', 'credit card processing', 'merchant services');
+    
+    // Add each individual key term
+    keyTerms.forEach(term => alternatives.push(term));
+    
+    // Remove duplicates and return unique alternatives
+    return [...new Set(alternatives)].slice(0, 5); // Limit to 5 alternatives
   }
 
   async logWebSearchUsage(query: string, response: string, reason: string, context: any): Promise<void> {
