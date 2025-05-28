@@ -76,10 +76,10 @@ export default function DocumentUpload({ folderId, onUploadComplete }: DocumentU
     const duplicates: string[] = [];
     files.forEach(file => {
       const existingDoc = documents.find(doc => 
-        doc.originalName === file.name || 
-        doc.name === file.name
+        doc.originalName?.toLowerCase() === file.name.toLowerCase() || 
+        doc.name.toLowerCase() === file.name.replace(/\.[^/.]+$/, "").toLowerCase()
       );
-      if (existingDoc) {
+      if (existingDoc && !duplicates.includes(file.name)) {
         duplicates.push(file.name);
       }
     });
@@ -95,18 +95,11 @@ export default function DocumentUpload({ folderId, onUploadComplete }: DocumentU
     }));
   };
 
+
+
   // Upload mutation
   const uploadMutation = useMutation({
-    mutationFn: async (files: File[]) => {
-      const formData = new FormData();
-      files.forEach((file) => {
-        formData.append("files", file);
-      });
-      
-      if (folderId) {
-        formData.append("folderId", folderId);
-      }
-
+    mutationFn: async (formData: FormData) => {
       const response = await fetch("/api/documents/upload", {
         method: "POST",
         credentials: "include",
@@ -215,7 +208,21 @@ export default function DocumentUpload({ folderId, onUploadComplete }: DocumentU
 
   const handleUpload = () => {
     if (selectedFiles.length === 0) return;
-    uploadMutation.mutate(selectedFiles);
+    
+    // Create FormData with custom names
+    const formData = new FormData();
+    selectedFiles.forEach((file, index) => {
+      const fileKey = `${index}-${file.name}`;
+      const customName = fileNames[fileKey];
+      
+      // Add the file with the custom name as metadata
+      formData.append('files', file);
+      if (customName && customName !== file.name.replace(/\.[^/.]+$/, "")) {
+        formData.append(`customName_${index}`, customName);
+      }
+    });
+    
+    uploadMutation.mutate(formData);
   };
 
   const getFileIcon = (fileType: string) => {

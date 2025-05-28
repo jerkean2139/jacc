@@ -344,8 +344,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const results = [];
       const errors = [];
 
-      for (const file of files) {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
         try {
+          // Get custom name from request body if provided
+          const customName = req.body[`customName_${i}`];
+          const displayName = customName || file.originalname.replace(/\.[^/.]+$/, "");
+          
           // Check if it's a ZIP file
           if (file.mimetype === 'application/zip' || path.extname(file.originalname).toLowerCase() === '.zip') {
             // Process ZIP file with automatic extraction
@@ -365,9 +370,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
               fs.unlinkSync(file.path);
             }
           } else {
-            // Process regular file
+            // Process regular file with custom name
             const documentData = insertDocumentSchema.parse({
-              name: file.filename,
+              name: displayName,
               originalName: file.originalname,
               mimeType: file.mimetype,
               size: file.size,
