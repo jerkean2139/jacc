@@ -542,9 +542,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Google Drive folder ID not configured" });
       }
 
-      // Initialize vector store index if needed
-      await vectorStoreService.ensureIndexExists();
-      
       // Scan and process documents
       const documents = await googleDriveService.scanAndProcessFolder(
         process.env.GOOGLE_DRIVE_FOLDER_ID
@@ -555,7 +552,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       for (const doc of documents) {
         try {
-          await vectorStoreService.indexDocument(doc);
+          await pineconeVectorService.indexDocument(doc);
           indexedCount++;
           results.push({
             name: doc.name,
