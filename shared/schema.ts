@@ -219,6 +219,20 @@ export const helpContent = pgTable("help_content", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Web Search Log for Admin Notifications
+export const webSearchLogs = pgTable("web_search_logs", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: varchar("user_id").references(() => users.id),
+  userQuery: text("user_query").notNull(),
+  webResponse: text("web_response").notNull(),
+  reason: varchar("reason").notNull(),
+  shouldAddToDocuments: boolean("should_add_to_documents").default(false),
+  adminReviewed: boolean("admin_reviewed").default(false),
+  reviewedBy: varchar("reviewed_by").references(() => users.id),
+  reviewNotes: text("review_notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Define relations
 export const usersRelations = relations(users, ({ many }) => ({
   folders: many(folders),

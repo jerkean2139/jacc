@@ -1,6 +1,8 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { pineconeVectorService, type VectorSearchResult } from "./pinecone-vector";
 import { perplexitySearchService } from "./perplexity-search";
+import { db } from "./db";
+import { webSearchLogs } from "@shared/schema";
 import type { ChatMessage, AIResponse } from "./openai";
 
 // the newest Anthropic model is "claude-3-7-sonnet-20250219" which was released February 24, 2025
@@ -49,12 +51,21 @@ export class EnhancedAIService {
         searchResults = [];
       }
       
-      // Always try web search since document search is temporarily disabled
-      try {
-        webSearchResults = await perplexitySearchService.searchWeb(lastMessage.content);
-        console.log("Web search completed successfully");
-      } catch (error) {
-        console.log("Web search failed, proceeding without web results");
+      // Only use web search if no relevant documents found
+      let webSearchReason = null;
+      if (searchResults.length === 0) {
+        webSearchReason = "No internal documents found matching the query";
+        try {
+          webSearchResults = await perplexitySearchService.searchWeb(lastMessage.content);
+          console.log("Web search completed successfully - no internal documents found");
+          
+          // Log the web search usage
+          await this.logWebSearchUsage(lastMessage.content, webSearchResults.content, webSearchReason, context);
+        } catch (error) {
+          console.log("Web search failed, proceeding without web results");
+        }
+      } else {
+        console.log("Using internal documents, web search not needed");
       }
       
       // Create context from search results
@@ -68,21 +79,28 @@ export class EnhancedAIService {
 - Point-of-sale (POS) systems and payment terminals
 - Business payment solutions and savings calculations
 - Document organization and client proposal generation
-- Current market information and up-to-date resources
 
-IMPORTANT INSTRUCTIONS:
-1. Use the provided document context to answer questions accurately
-2. Use web search results for current information and links
-3. **ALWAYS provide direct clickable links to Google Drive documents when available**
-4. When answering with document information, format like: "Based on [Document Name](link), here's what I found..."
-5. When using web information, mention it's current/recent data
-6. Focus on actionable insights for merchant services sales
-7. For any document-based answer, include the phrase "📄 **Source:** [Document Name](direct_link)" at the end
+CRITICAL SEARCH PRIORITY:
+1. **ALWAYS search internal documents FIRST** before using any web information
+2. **PROVIDE DIRECT LINKS** to internal documents when they contain relevant information
+3. Only use web search results if NO internal documents match the query
+4. When internal documents are found, format responses as: "Based on [Document Name](internal_link), here's what I found..."
+
+DOCUMENT RESPONSE FORMAT:
+- **ALWAYS include**: "📄 **Source:** [Document Name](direct_internal_link)" at the end
+- **PRIORITIZE**: Company-specific information from uploaded documents
+- **INCLUDE**: Direct clickable links to Google Drive or internal document storage
+- **HIGHLIGHT**: Specific sections, page numbers, or relevant details from documents
+
+WEB SEARCH USAGE:
+- Only use when NO internal documents contain relevant information
+- Clearly state: "Since this information wasn't found in our internal documents, I searched current web sources..."
+- Mention web sources are external and may need verification
 
 Your responses should be:
 - Professional and knowledgeable about payment processing
-- Backed by actual company documents when possible
-- Enhanced with current web information when relevant
+- Backed by actual company documents whenever possible
+- Clear about whether information comes from internal docs or external sources
 - Helpful with specific actionable advice for businesses
 - Clear about sources and reasoning
 - Focused on helping businesses save money on payment processing
@@ -228,6 +246,23 @@ IMPORTANT: When referencing this document in your response, always include the c
 
   async searchDocuments(query: string): Promise<VectorSearchResult[]> {
     return await pineconeVectorService.searchDocuments(query, 10);
+  }
+
+  async logWebSearchUsage(query: string, response: string, reason: string, context: any): Promise<void> {
+    try {
+      await db.insert(webSearchLogs).values({
+        userId: context?.userData?.id || null,
+        userQuery: query,
+        webResponse: response,
+        reason: reason,
+        shouldAddToDocuments: true, // Default to suggesting addition
+        adminReviewed: false
+      });
+      
+      console.log(`🔍 WEB SEARCH LOGGED: "${query}" - Reason: ${reason}`);
+    } catch (error) {
+      console.error('Failed to log web search usage:', error);
+    }
   }
 }
 
