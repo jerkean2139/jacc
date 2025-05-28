@@ -169,7 +169,11 @@ export default function DocumentUpload({ folderId, onUploadComplete }: DocumentU
     }
 
     if (validFiles.length > 0) {
-      setSelectedFiles(prev => [...prev, ...validFiles]);
+      setSelectedFiles(prev => {
+        const newFiles = [...prev, ...validFiles];
+        checkForDuplicates(newFiles);
+        return newFiles;
+      });
       toast({
         title: `${validFiles.length} file(s) ready`,
         description: "Files added successfully. Click 'Upload Documents' to process them.",
@@ -203,7 +207,18 @@ export default function DocumentUpload({ folderId, onUploadComplete }: DocumentU
   };
 
   const removeFile = (index: number) => {
-    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+    setSelectedFiles(prev => {
+      const newFiles = prev.filter((_, i) => i !== index);
+      checkForDuplicates(newFiles);
+      return newFiles;
+    });
+    // Clear the custom name for this file
+    const fileKey = `${index}-${selectedFiles[index]?.name}`;
+    setFileNames(prev => {
+      const updated = { ...prev };
+      delete updated[fileKey];
+      return updated;
+    });
   };
 
   const handleUpload = () => {
