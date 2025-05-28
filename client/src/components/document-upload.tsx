@@ -18,6 +18,7 @@ import {
   Download,
   ExternalLink,
   Edit2,
+  Trash2,
   Save,
   AlertTriangle
 } from "lucide-react";
@@ -475,12 +476,11 @@ export default function DocumentUpload({ folderId, onUploadComplete }: DocumentU
                         </Button>
                       )}
                       <Button 
-                        variant="ghost" 
+                        variant="destructive" 
                         size="sm" 
                         onClick={() => handleDeleteDocument(doc.id)}
-                        className="text-red-600 hover:text-red-700"
                       >
-                        <X className="h-3 w-3" />
+                        <Trash2 className="h-3 w-3" />
                       </Button>
                     </div>
                   </div>
