@@ -238,40 +238,12 @@ export default function Sidebar({
                   )}
                 </div>
                 
-                {/* Trash icon delete button */}
-                <button
-                  onClick={async (e) => {
-                    e.stopPropagation();
-                    
-                    if (confirm("Are you sure you want to delete this chat?")) {
-                      try {
-                        const response = await fetch(`/api/chats/${chat.id}`, {
-                          method: "DELETE",
-                          credentials: "include",
-                        });
-                        
-                        if (response.ok) {
-                          window.location.reload();
-                        } else {
-                          alert("Failed to delete chat");
-                        }
-                      } catch (error) {
-                        alert("Error deleting chat");
-                      }
-                    }
-                  }}
-                  className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
-                  title="Delete Chat"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-                
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="w-6 h-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="w-6 h-6 text-slate-400 hover:text-slate-600"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <MoreVertical className="w-3 h-3" />
@@ -279,7 +251,25 @@ export default function Sidebar({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem 
-                      onClick={() => onChatDelete?.(chat.id)}
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        if (confirm("Are you sure you want to delete this chat?")) {
+                          try {
+                            const response = await fetch(`/api/chats/${chat.id}`, {
+                              method: "DELETE",
+                              credentials: "include",
+                            });
+                            
+                            if (response.ok) {
+                              window.location.reload();
+                            } else {
+                              alert("Failed to delete chat");
+                            }
+                          } catch (error) {
+                            alert("Error deleting chat");
+                          }
+                        }
+                      }}
                       className="text-red-600 hover:text-red-700"
                     >
                       <Trash2 className="w-4 h-4 mr-2" />
