@@ -46,8 +46,37 @@ export class PineconeVectorService {
     return embedding;
   }
 
+  async ensureIndexExists(): Promise<void> {
+    try {
+      // Check if index exists, if not create it
+      try {
+        await this.pinecone.describeIndex(this.indexName);
+        console.log(`Index ${this.indexName} already exists`);
+      } catch (error) {
+        console.log(`Creating index ${this.indexName}...`);
+        await this.pinecone.createIndex({
+          name: this.indexName,
+          dimension: 384,
+          metric: 'cosine',
+          spec: {
+            serverless: {
+              cloud: 'aws',
+              region: 'us-east-1'
+            }
+          }
+        });
+        console.log(`Index ${this.indexName} created successfully`);
+        // Wait a moment for index to be ready
+        await new Promise(resolve => setTimeout(resolve, 5000));
+      }
+    } catch (error) {
+      console.error('Error ensuring index exists:', error);
+    }
+  }
+
   async indexDocument(document: any): Promise<void> {
     try {
+      await this.ensureIndexExists();
       const index = this.pinecone.Index(this.indexName);
       
       const vectors = [];

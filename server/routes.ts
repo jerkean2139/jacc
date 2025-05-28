@@ -403,6 +403,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
             
             const document = await storage.createDocument(documentData);
 
+            // Index document for search
+            try {
+              // Create chunks for vector search
+              const chunks = [];
+              if (content) {
+                const words = content.split(/\s+/);
+                const chunkSize = 200; // words per chunk
+                
+                for (let i = 0; i < words.length; i += chunkSize) {
+                  const chunkWords = words.slice(i, i + chunkSize);
+                  const chunkContent = chunkWords.join(' ');
+                  
+                  chunks.push({
+                    id: `${document.id}_chunk_${Math.floor(i / chunkSize)}`,
+                    documentId: document.id,
+                    content: chunkContent,
+                    tokens: chunkWords.length,
+                    chunkIndex: Math.floor(i / chunkSize),
+                    metadata: {
+                      startChar: 0,
+                      endChar: chunkContent.length
+                    }
+                  });
+                }
+              }
+
+              await pineconeVectorService.indexDocument({
+                id: document.id,
+                name: document.name,
+                content: content || '',
+                chunks: chunks,
+                metadata: {
+                  mimeType: file.mimetype,
+                  size: file.size.toString(),
+                  modifiedTime: new Date().toISOString(),
+                  webViewLink: `/api/documents/${document.id}`,
+                  wordCount: content ? content.split(/\s+/).length : 0,
+                  chunkCount: chunks.length
+                }
+              });
+              console.log(`Document indexed for search: ${document.name}`);
+            } catch (indexError) {
+              console.error('Failed to index document:', indexError);
+            }
+
             // Analyze document if it's an image
             let analysis = null;
             if (file.mimetype.startsWith('image/')) {
