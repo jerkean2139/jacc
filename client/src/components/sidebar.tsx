@@ -202,12 +202,7 @@ export default function Sidebar({
           <h4 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3">
             Recent Chats
           </h4>
-          {/* Test button to verify rendering */}
-          <div className="mb-2">
-            <button className="w-full p-2 bg-red-500 text-white text-sm rounded">
-              TEST DELETE BUTTON - Can you see this?
-            </button>
-          </div>
+
           
           <div className="space-y-1">
             {recentChats.map((chat) => (
@@ -243,11 +238,10 @@ export default function Sidebar({
                   )}
                 </div>
                 
-                {/* Direct delete button with inline delete function */}
+                {/* Trash icon delete button */}
                 <button
                   onClick={async (e) => {
                     e.stopPropagation();
-                    console.log("Delete button clicked for chat:", chat.id);
                     
                     if (confirm("Are you sure you want to delete this chat?")) {
                       try {
@@ -257,21 +251,19 @@ export default function Sidebar({
                         });
                         
                         if (response.ok) {
-                          // Force page reload to refresh chat list
                           window.location.reload();
                         } else {
-                          console.error("Failed to delete chat");
+                          alert("Failed to delete chat");
                         }
                       } catch (error) {
-                        console.error("Error deleting chat:", error);
+                        alert("Error deleting chat");
                       }
                     }
                   }}
-                  className="ml-2 px-2 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600 transition-colors flex items-center gap-1"
+                  className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
                   title="Delete Chat"
                 >
-                  <Trash2 className="w-3 h-3" />
-                  Delete
+                  <Trash2 className="w-4 h-4" />
                 </button>
                 
                 <DropdownMenu>
