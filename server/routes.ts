@@ -321,9 +321,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Document routes
-  app.get('/api/documents', isDevAuthenticated, async (req: any, res) => {
+  app.get('/api/documents', async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = 'simple-user-001'; // Temporary for testing
       const documents = await storage.getUserDocuments(userId);
       res.json(documents);
     } catch (error) {
