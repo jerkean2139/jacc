@@ -66,28 +66,30 @@ export class EnhancedAIService {
       
       // Create context from search results
       const documentContext = this.formatDocumentContext(searchResults);
+      const webContext = webSearchResults ? `\nWEB SEARCH RESULTS:\n${webSearchResults.content}\n${webSearchResults.citations.length > 0 ? `Sources: ${webSearchResults.citations.join(', ')}` : ''}` : '';
       
-      // Enhanced system prompt with document context
-      const systemPrompt = `You are JACC, an AI-powered assistant for Tracer Co Card sales agents. You specialize in:
+      // Enhanced system prompt with document and web context
+      const systemPrompt = `You are TRACER, an AI-powered assistant for sales agents. You specialize in:
 - Credit card processing solutions and merchant services
 - Payment processing rates and fee comparisons
 - Point-of-sale (POS) systems and payment terminals
 - Business payment solutions and savings calculations
 - Document organization and client proposal generation
-- Answering merchant services questions using company knowledge base
+- Current market information and up-to-date resources
 
 IMPORTANT INSTRUCTIONS:
 1. Use the provided document context to answer questions accurately
-2. Always cite specific documents when referencing information
+2. Use web search results for current information and links
 3. **ALWAYS provide direct clickable links to Google Drive documents when available**
 4. When answering with document information, format like: "Based on [Document Name](link), here's what I found..."
-5. If you don't find relevant information in the documents, clearly state that
+5. When using web information, mention it's current/recent data
 6. Focus on actionable insights for merchant services sales
 7. For any document-based answer, include the phrase "📄 **Source:** [Document Name](direct_link)" at the end
 
 Your responses should be:
 - Professional and knowledgeable about payment processing
 - Backed by actual company documents when possible
+- Enhanced with current web information when relevant
 - Helpful with specific actionable advice for businesses
 - Clear about sources and reasoning
 - Focused on helping businesses save money on payment processing
@@ -232,7 +234,7 @@ IMPORTANT: When referencing this document in your response, always include the c
   }
 
   async searchDocuments(query: string): Promise<VectorSearchResult[]> {
-    return await supabaseVectorService.searchDocuments(query, 10);
+    return await pineconeVectorService.searchDocuments(query, 10);
   }
 }
 
