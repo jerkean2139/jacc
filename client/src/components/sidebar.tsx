@@ -202,6 +202,13 @@ export default function Sidebar({
           <h4 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3">
             Recent Chats
           </h4>
+          {/* Test button to verify rendering */}
+          <div className="mb-2">
+            <button className="w-full p-2 bg-red-500 text-white text-sm rounded">
+              TEST DELETE BUTTON - Can you see this?
+            </button>
+          </div>
+          
           <div className="space-y-1">
             {recentChats.map((chat) => (
               <div
