@@ -50,6 +50,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup OAuth helper for Google Drive credentials
   setupOAuthHelper(app);
 
+  // Simplified authentication for document uploads
+  app.post('/api/auth/simple-login', async (req, res) => {
+    try {
+      const user = await storage.upsertUser({
+        id: 'simple-user-001',
+        email: 'user@tracer.com',
+        firstName: 'Tracer',
+        lastName: 'User',
+        profileImageUrl: null
+      });
+      
+      // Set session for dev authentication
+      (req.session as any).user = {
+        id: 'simple-user-001',
+        email: 'user@tracer.com',
+        firstName: 'Tracer',
+        lastName: 'User'
+      };
+      
+      res.json({ success: true, user });
+    } catch (error) {
+      console.error("Simple login error:", error);
+      res.status(500).json({ message: "Failed to login" });
+    }
+  });
+
   // Temporary development login routes (REMOVE BEFORE PRODUCTION)
   if (true) {
     app.post('/api/dev/login/admin', async (req, res) => {

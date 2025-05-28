@@ -33,6 +33,33 @@ export default function DocumentUpload({ folderId, onUploadComplete }: DocumentU
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Simple authentication function
+  const handleAuthenticate = async () => {
+    try {
+      const response = await fetch('/api/auth/simple-login', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      if (response.ok) {
+        setIsAuthenticated(true);
+        queryClient.invalidateQueries({ queryKey: ["/api/documents"] });
+        toast({
+          title: "Authentication Successful",
+          description: "You can now upload documents using drag & drop!",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Authentication Failed",
+        description: "Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   // Fetch existing documents
   const { data: documents = [] } = useQuery<Document[]>({
