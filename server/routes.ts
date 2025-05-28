@@ -62,12 +62,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           profileImageUrl: null
         });
         
-        // Set session manually
-        // Properly set session
+        // Set session for dev authentication
         (req.session as any).user = {
-          claims: { sub: 'dev-admin-001' },
-          access_token: 'dev-token',
-          expires_at: Math.floor(Date.now() / 1000) + 3600
+          id: 'dev-admin-001',
+          email: 'admin@jacc.dev',
+          firstName: 'Admin',
+          lastName: 'User'
         };
         
         res.redirect('/');
@@ -87,11 +87,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           profileImageUrl: null
         });
         
-        // Properly set session
+        // Set session for dev authentication
         (req.session as any).user = {
-          claims: { sub: 'dev-client-admin-001' },
-          access_token: 'dev-token',
-          expires_at: Math.floor(Date.now() / 1000) + 3600
+          id: 'dev-client-admin-001',
+          email: 'client.admin@testcompany.com',
+          firstName: 'Client',
+          lastName: 'Admin'
         };
         
         res.redirect('/');
