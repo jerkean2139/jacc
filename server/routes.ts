@@ -260,22 +260,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
         spreadsheetData: null // TODO: Add Google Sheets integration
       };
       
-      // Use enhanced AI service with Google Drive document context with timeout
+      // Use enhanced AI service with faster timeout and better fallback
       let aiResponse;
       try {
         const responsePromise = enhancedAIService.generateResponseWithDocuments(messages, context);
         const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('AI response timeout')), 30000)
+          setTimeout(() => reject(new Error('AI response timeout')), 10000)
         );
         
         aiResponse = await Promise.race([responsePromise, timeoutPromise]);
       } catch (error) {
-        console.error("AI response failed, using fallback:", error);
-        aiResponse = {
-          message: "I'm processing your request. Please give me a moment to search through your documents and provide a comprehensive response.",
-          suggestions: ["Try asking about merchant services", "Ask about payment processing rates", "Request document information"],
-          actions: []
-        };
+        console.error("AI response failed, using direct AI:", error);
+        // Use direct AI without document search as fallback
+        try {
+          const directResponse = await generateChatResponse(messages);
+          aiResponse = {
+            message: directResponse.message,
+            suggestions: directResponse.suggestions || ["Ask about merchant services", "Request payment processing rates", "Inquire about documentation"],
+            actions: directResponse.actions || []
+          };
+        } catch (fallbackError) {
+          console.error("Direct AI also failed:", fallbackError);
+          aiResponse = {
+            message: "I'm ready to help with your merchant services questions. Please ask me about payment processing, rates, equipment, or any business questions you have.",
+            suggestions: ["What payment processing options are available?", "Show me current rates", "Help with merchant applications"],
+            actions: []
+          };
+        }
       }
       
       // Save AI response
