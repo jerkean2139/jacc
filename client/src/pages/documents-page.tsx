@@ -28,6 +28,7 @@ export default function DocumentsPage() {
     mutationFn: async (documentId: string) => {
       const response = await fetch(`/api/documents/${documentId}`, {
         method: 'DELETE',
+        credentials: 'include',
       });
       if (!response.ok) {
         throw new Error('Failed to delete document');

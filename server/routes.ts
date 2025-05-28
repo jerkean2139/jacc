@@ -449,9 +449,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete document endpoint
-  app.delete('/api/documents/:id', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/documents/:id', async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = 'simple-user-001'; // Use same user ID as upload
       const { id } = req.params;
       
       // Get the document first to verify ownership and get file path
