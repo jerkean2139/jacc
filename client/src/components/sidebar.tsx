@@ -201,14 +201,16 @@ export default function Sidebar({
               <div
                 key={chat.id}
                 className={cn(
-                  "group flex items-center justify-between p-2 rounded-lg cursor-pointer transition-colors",
+                  "group flex items-center justify-between p-2 rounded-lg transition-colors",
                   activeChatId === chat.id 
                     ? "bg-slate-100 dark:bg-slate-800" 
                     : "hover:bg-slate-50 dark:hover:bg-slate-800/50"
                 )}
-                onClick={() => onChatSelect(chat.id)}
               >
-                <div className="flex items-center space-x-3 flex-1 min-w-0">
+                <div 
+                  className="flex items-center space-x-3 flex-1 min-w-0 cursor-pointer"
+                  onClick={() => onChatSelect(chat.id)}
+                >
                   <MessageSquare className={cn(
                     "w-4 h-4 flex-shrink-0",
                     activeChatId === chat.id 
@@ -223,25 +225,22 @@ export default function Sidebar({
                   )}>
                     {chat.title}
                   </span>
-                </div>
-                <div className="flex items-center space-x-2">
                   {activeChatId === chat.id && (
                     <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0" />
                   )}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onChatDelete?.(chat.id);
-                    }}
-                    className="h-6 px-2 text-xs text-red-600 border-red-300 hover:bg-red-50 hover:border-red-400"
-                    title="Delete Chat"
-                  >
-                    <Trash2 className="w-3 h-3 mr-1" />
-                    Delete
-                  </Button>
                 </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onChatDelete?.(chat.id);
+                  }}
+                  className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
+                  title="Delete Chat"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
