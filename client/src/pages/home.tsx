@@ -127,6 +127,7 @@ export default function Home() {
                   onNewChat={handleNewChat}
                   onChatSelect={handleChatSelect}
                   onFolderCreate={handleFolderCreate}
+                  onChatDelete={handleChatDelete}
                   collapsed={false}
                 />
               </SheetContent>
@@ -171,6 +172,7 @@ export default function Home() {
               onNewChat={handleNewChat}
               onChatSelect={handleChatSelect}
               onFolderCreate={handleFolderCreate}
+              onChatDelete={handleChatDelete}
               collapsed={sidebarCollapsed}
             />
           </ResizablePanel>
