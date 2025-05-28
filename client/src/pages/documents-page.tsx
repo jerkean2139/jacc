@@ -21,9 +21,8 @@ export default function DocumentsPage() {
   });
 
   const filteredDocuments = documents.filter(doc =>
-    doc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    doc.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    doc.category?.toLowerCase().includes(searchQuery.toLowerCase())
+    doc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    doc.originalName?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -80,13 +79,11 @@ export default function DocumentsPage() {
                       <div className="flex items-center gap-3 flex-1">
                         <FileText className="h-5 w-5 text-blue-500" />
                         <div className="flex-1">
-                          <h3 className="font-medium">{doc.title}</h3>
-                          {doc.description && (
-                            <p className="text-sm text-muted-foreground">{doc.description}</p>
-                          )}
+                          <h3 className="font-medium">{doc.name}</h3>
+                          <p className="text-sm text-muted-foreground">{doc.originalName}</p>
                           <div className="flex items-center gap-2 mt-1">
                             <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded">
-                              {doc.category || 'Document'}
+                              {doc.mimeType.split('/')[1].toUpperCase() || 'Document'}
                             </span>
                             {doc.isFavorite && (
                               <span className="text-xs px-2 py-1 bg-yellow-100 text-yellow-800 rounded">
