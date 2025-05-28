@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { supabaseVectorService, type VectorSearchResult } from "./supabase-vector";
+import { pineconeVectorService, type VectorSearchResult } from "./pinecone-vector";
+import { perplexitySearchService } from "./perplexity-search";
 import type { ChatMessage, AIResponse } from "./openai";
 
 // the newest Anthropic model is "claude-3-7-sonnet-20250219" which was released February 24, 2025
@@ -35,17 +36,32 @@ export class EnhancedAIService {
         throw new Error('Last message must be from user');
       }
 
-      // Search relevant documents with timeout
+      // Search both documents and web for comprehensive results
       let searchResults = [];
+      let webSearchResults = null;
+      
+      // Try document search first
       try {
-        const searchPromise = supabaseVectorService.searchDocuments(lastMessage.content, 5);
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Search timeout')), 5000)
-        );
-        searchResults = await Promise.race([searchPromise, timeoutPromise]);
+        searchResults = await pineconeVectorService.searchDocuments(lastMessage.content, 5);
+        console.log(`Found ${searchResults.length} document matches`);
       } catch (error) {
-        console.log("Document search timed out, proceeding without document context");
+        console.log("Document search failed, proceeding without document context");
         searchResults = [];
+      }
+      
+      // If no good document results or user is asking for current info, search web
+      if (searchResults.length < 2 || 
+          lastMessage.content.toLowerCase().includes('latest') ||
+          lastMessage.content.toLowerCase().includes('current') ||
+          lastMessage.content.toLowerCase().includes('recent') ||
+          lastMessage.content.toLowerCase().includes('link') ||
+          lastMessage.content.toLowerCase().includes('website')) {
+        try {
+          webSearchResults = await perplexitySearchService.searchWeb(lastMessage.content);
+          console.log("Web search completed successfully");
+        } catch (error) {
+          console.log("Web search failed, proceeding with document-only results");
+        }
       }
       
       // Create context from search results
