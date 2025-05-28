@@ -224,9 +224,22 @@ export default function Sidebar({
                     {chat.title}
                   </span>
                 </div>
-                {activeChatId === chat.id && (
-                  <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0" />
-                )}
+                <div className="flex items-center space-x-1">
+                  {activeChatId === chat.id && (
+                    <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0" />
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onChatDelete?.(chat.id);
+                    }}
+                    className="w-6 h-6 p-0 bg-red-500 hover:bg-red-600 text-white opacity-0 group-hover:opacity-100 transition-opacity rounded-full"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </Button>
+                </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
