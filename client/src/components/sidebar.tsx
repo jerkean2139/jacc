@@ -229,18 +229,22 @@ export default function Sidebar({
                     <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0" />
                   )}
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onChatDelete?.(chat.id);
-                  }}
-                  className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
-                  title="Delete Chat"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
+                {onChatDelete && (
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      console.log("Delete button clicked for chat:", chat.id);
+                      onChatDelete(chat.id);
+                    }}
+                    className="h-7 px-2 text-xs bg-red-500 text-white hover:bg-red-600"
+                    title="Delete Chat"
+                  >
+                    <Trash2 className="w-3 h-3 mr-1" />
+                    Delete
+                  </Button>
+                )}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
