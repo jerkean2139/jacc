@@ -240,6 +240,32 @@ export default function DocumentUpload({ folderId, onUploadComplete }: DocumentU
     uploadMutation.mutate(formData);
   };
 
+  // Delete document function
+  const handleDeleteDocument = async (documentId: string) => {
+    try {
+      const response = await fetch(`/api/documents/${documentId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      
+      if (response.ok) {
+        queryClient.invalidateQueries({ queryKey: ["/api/documents"] });
+        toast({
+          title: "Document deleted",
+          description: "The document has been successfully removed.",
+        });
+      } else {
+        throw new Error('Failed to delete document');
+      }
+    } catch (error) {
+      toast({
+        title: "Delete failed",
+        description: "Failed to delete the document. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const getFileIcon = (fileType: string) => {
     if (fileType.includes('pdf')) return <FileText className="h-4 w-4 text-red-500" />;
     if (fileType.includes('word')) return <FileText className="h-4 w-4 text-blue-500" />;
@@ -424,12 +450,10 @@ export default function DocumentUpload({ folderId, onUploadComplete }: DocumentU
                     <div className="flex items-center gap-3 flex-1 min-w-0">
                       {getFileIcon(doc.mimeType || '')}
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{doc.title}</p>
-                        {doc.description && (
-                          <p className="text-xs text-muted-foreground truncate">
-                            {doc.description}
-                          </p>
-                        )}
+                        <p className="text-sm font-medium truncate">{doc.name}</p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {doc.originalName}
+                        </p>
                       </div>
                       <div className="flex items-center gap-2">
                         {doc.isFavorite && (
@@ -438,18 +462,26 @@ export default function DocumentUpload({ folderId, onUploadComplete }: DocumentU
                           </Badge>
                         )}
                         <Badge variant="outline" className="text-xs">
-                          {doc.category || 'Document'}
+                          {doc.mimeType?.split('/')[1]?.toUpperCase() || 'Document'}
                         </Badge>
                       </div>
                     </div>
                     <div className="flex items-center gap-1">
-                      {doc.url && (
+                      {doc.path && (
                         <Button variant="ghost" size="sm" asChild>
-                          <a href={doc.url} target="_blank" rel="noopener noreferrer">
+                          <a href={`/uploads/${doc.path}`} target="_blank" rel="noopener noreferrer">
                             <ExternalLink className="h-3 w-3" />
                           </a>
                         </Button>
                       )}
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => handleDeleteDocument(doc.id)}
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
                     </div>
                   </div>
                 ))}
