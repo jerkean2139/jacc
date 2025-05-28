@@ -268,7 +268,46 @@ IMPORTANT: When referencing this document in your response, always include the c
   }
 
   async searchDocuments(query: string): Promise<VectorSearchResult[]> {
-    return await pineconeVectorService.searchDocuments(query, 10);
+    try {
+      // First search uploaded documents directly by name
+      const { storage } = await import('./storage');
+      const documents = await storage.getUserDocuments('simple-user-001');
+      
+      // Search for documents that match the query
+      const matchingDocs = documents.filter(doc => {
+        const searchText = `${doc.name} ${doc.originalName}`.toLowerCase();
+        const queryLower = query.toLowerCase();
+        return searchText.includes(queryLower) || 
+               (searchText.includes('tsys') && queryLower.includes('tsys')) ||
+               (searchText.includes('merchant') && queryLower.includes('merchant')) ||
+               (searchText.includes('clearent') && queryLower.includes('clearent')) ||
+               (searchText.includes('voyager') && queryLower.includes('voyager')) ||
+               (searchText.includes('trx') && queryLower.includes('trx'));
+      });
+      
+      if (matchingDocs.length > 0) {
+        console.log(`✅ Found ${matchingDocs.length} uploaded documents for query: "${query}"`);
+        return matchingDocs.map(doc => ({
+          id: doc.id,
+          score: 0.9,
+          documentId: doc.id,
+          content: `I found your uploaded document "${doc.name}" which contains information relevant to your query about "${query}".`,
+          metadata: {
+            documentName: doc.name,
+            webViewLink: `/api/documents/${doc.id}/download`,
+            chunkIndex: 0,
+            mimeType: doc.mimeType
+          }
+        }));
+      }
+      
+      console.log(`No uploaded documents found for query: "${query}"`);
+      // Fallback to vector search if available
+      return await pineconeVectorService.searchDocuments(query, 10);
+    } catch (error) {
+      console.error('Error searching documents:', error);
+      return await pineconeVectorService.searchDocuments(query, 10);
+    }
   }
 
   generateAlternativeQueries(originalQuery: string): string[] {
