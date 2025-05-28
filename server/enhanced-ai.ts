@@ -49,19 +49,12 @@ export class EnhancedAIService {
         searchResults = [];
       }
       
-      // If no good document results or user is asking for current info, search web
-      if (searchResults.length < 2 || 
-          lastMessage.content.toLowerCase().includes('latest') ||
-          lastMessage.content.toLowerCase().includes('current') ||
-          lastMessage.content.toLowerCase().includes('recent') ||
-          lastMessage.content.toLowerCase().includes('link') ||
-          lastMessage.content.toLowerCase().includes('website')) {
-        try {
-          webSearchResults = await perplexitySearchService.searchWeb(lastMessage.content);
-          console.log("Web search completed successfully");
-        } catch (error) {
-          console.log("Web search failed, proceeding with document-only results");
-        }
+      // Always try web search since document search is temporarily disabled
+      try {
+        webSearchResults = await perplexitySearchService.searchWeb(lastMessage.content);
+        console.log("Web search completed successfully");
+      } catch (error) {
+        console.log("Web search failed, proceeding without web results");
       }
       
       // Create context from search results

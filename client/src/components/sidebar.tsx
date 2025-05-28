@@ -103,18 +103,30 @@ export default function Sidebar({
         
         <div className="flex-1 space-y-2">
           {recentChats.slice(0, 5).map((chat) => (
-            <Button
-              key={chat.id}
-              variant={activeChatId === chat.id ? "default" : "ghost"}
-              size="icon"
-              onClick={() => onChatSelect(chat.id)}
-              className={cn(
-                "w-10 h-10",
-                activeChatId === chat.id && "navy-primary text-white"
-              )}
-            >
-              <MessageSquare className="w-4 h-4" />
-            </Button>
+            <div key={chat.id} className="relative group">
+              <Button
+                variant={activeChatId === chat.id ? "default" : "ghost"}
+                size="icon"
+                onClick={() => onChatSelect(chat.id)}
+                className={cn(
+                  "w-10 h-10",
+                  activeChatId === chat.id && "navy-primary text-white"
+                )}
+              >
+                <MessageSquare className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onChatDelete(chat.id);
+                }}
+                className="absolute -top-1 -right-1 w-5 h-5 p-0 bg-red-500 hover:bg-red-600 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <Trash2 className="w-3 h-3" />
+              </Button>
+            </div>
           ))}
         </div>
 

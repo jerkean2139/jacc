@@ -109,6 +109,8 @@ export default function ChatInterface({ chatId, onChatUpdate }: ChatInterfacePro
       return response.json();
     },
     onSuccess: async () => {
+      // Input will be cleared by form reset
+      
       // Force immediate refresh of messages with correct query key format
       await queryClient.invalidateQueries({ queryKey: [`/api/chats/${chatId}/messages`] });
       await queryClient.refetchQueries({ queryKey: [`/api/chats/${chatId}/messages`] });

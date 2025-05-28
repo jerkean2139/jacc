@@ -106,27 +106,10 @@ export class PineconeVectorService {
 
   async searchDocuments(query: string, topK: number = 5): Promise<VectorSearchResult[]> {
     try {
-      const index = this.pinecone.Index(this.indexName);
-      const queryEmbedding = await this.createEmbedding(query);
-      
-      const searchResults = await index.query({
-        vector: queryEmbedding,
-        topK,
-        includeMetadata: true
-      });
-      
-      return searchResults.matches?.map(match => ({
-        id: match.id!,
-        score: match.score!,
-        documentId: match.metadata!.documentId as string,
-        content: match.metadata!.content as string,
-        metadata: {
-          documentName: match.metadata!.documentName as string,
-          webViewLink: match.metadata!.webViewLink as string,
-          chunkIndex: match.metadata!.chunkIndex as number,
-          mimeType: match.metadata!.mimeType as string,
-        }
-      })) || [];
+      // For now, return empty results since Pinecone index doesn't exist
+      // This allows the system to fall back to web search
+      console.log('Document search temporarily disabled - using web search instead');
+      return [];
     } catch (error) {
       console.error('Error searching documents:', error);
       return [];
