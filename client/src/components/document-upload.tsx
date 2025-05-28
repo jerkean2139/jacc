@@ -16,7 +16,10 @@ import {
   Check,
   AlertCircle,
   Download,
-  ExternalLink
+  ExternalLink,
+  Edit2,
+  Save,
+  AlertTriangle
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import type { Document } from "@shared/schema";
@@ -34,6 +37,8 @@ export default function DocumentUpload({ folderId, onUploadComplete }: DocumentU
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [fileNames, setFileNames] = useState<Record<string, string>>({});
+  const [duplicateWarnings, setDuplicateWarnings] = useState<string[]>([]);
 
   // Simple authentication function
   const handleAuthenticate = async () => {
@@ -65,6 +70,30 @@ export default function DocumentUpload({ folderId, onUploadComplete }: DocumentU
   const { data: documents = [] } = useQuery<Document[]>({
     queryKey: ["/api/documents"],
   });
+
+  // Check for duplicate files
+  const checkForDuplicates = (files: File[]) => {
+    const duplicates: string[] = [];
+    files.forEach(file => {
+      const existingDoc = documents.find(doc => 
+        doc.originalName === file.name || 
+        doc.name === file.name
+      );
+      if (existingDoc) {
+        duplicates.push(file.name);
+      }
+    });
+    setDuplicateWarnings(duplicates);
+  };
+
+  // Update file name
+  const updateFileName = (fileIndex: number, newName: string) => {
+    const fileKey = `${fileIndex}-${selectedFiles[fileIndex]?.name}`;
+    setFileNames(prev => ({
+      ...prev,
+      [fileKey]: newName
+    }));
+  };
 
   // Upload mutation
   const uploadMutation = useMutation({
@@ -277,28 +306,58 @@ export default function DocumentUpload({ folderId, onUploadComplete }: DocumentU
 
           {/* Selected Files */}
           {selectedFiles.length > 0 && (
-            <div className="space-y-2">
-              <Label>Selected Files ({selectedFiles.length})</Label>
-              <ScrollArea className="h-32 border rounded-md p-3">
-                {selectedFiles.map((file, index) => (
-                  <div key={index} className="flex items-center justify-between py-1">
-                    <div className="flex items-center gap-2 flex-1 min-w-0">
-                      {getFileIcon(file.type)}
-                      <span className="text-sm truncate">{file.name}</span>
-                      <Badge variant="secondary" className="text-xs">
-                        {formatFileSize(file.size)}
-                      </Badge>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <Label>Selected Files ({selectedFiles.length})</Label>
+                {duplicateWarnings.length > 0 && (
+                  <Badge variant="destructive" className="text-xs">
+                    <AlertTriangle className="h-3 w-3 mr-1" />
+                    {duplicateWarnings.length} Potential Duplicates
+                  </Badge>
+                )}
+              </div>
+              
+              <ScrollArea className="h-40 border rounded-md p-3">
+                {selectedFiles.map((file, index) => {
+                  const fileKey = `${index}-${file.name}`;
+                  const customName = fileNames[fileKey];
+                  const isDuplicate = duplicateWarnings.includes(file.name);
+                  
+                  return (
+                    <div key={index} className={`flex items-center gap-2 py-2 px-2 rounded ${isDuplicate ? 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800' : ''}`}>
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                        {getFileIcon(file.type)}
+                        <div className="flex-1 min-w-0">
+                          <Input
+                            value={customName || file.name.replace(/\.[^/.]+$/, "")}
+                            onChange={(e) => updateFileName(index, e.target.value)}
+                            className="text-sm h-7 border-0 bg-transparent p-1"
+                            placeholder="Document name..."
+                          />
+                          {isDuplicate && (
+                            <div className="flex items-center gap-1 mt-1">
+                              <AlertTriangle className="h-3 w-3 text-red-500" />
+                              <span className="text-xs text-red-600 dark:text-red-400">
+                                Similar document exists
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        <Badge variant="secondary" className="text-xs">
+                          {formatFileSize(file.size)}
+                        </Badge>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeFile(index)}
+                        className="h-6 w-6 p-0"
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeFile(index)}
-                      className="h-6 w-6 p-0"
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
-                  </div>
-                ))}
+                  );
+                })}
               </ScrollArea>
             </div>
           )}
