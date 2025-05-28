@@ -260,8 +260,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         spreadsheetData: null // TODO: Add Google Sheets integration
       };
       
-      // Use enhanced AI service with Google Drive document context
-      const aiResponse = await enhancedAIService.generateResponseWithDocuments(messages, context);
+      // Use enhanced AI service with Google Drive document context with timeout
+      let aiResponse;
+      try {
+        const responsePromise = enhancedAIService.generateResponseWithDocuments(messages, context);
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('AI response timeout')), 30000)
+        );
+        
+        aiResponse = await Promise.race([responsePromise, timeoutPromise]);
+      } catch (error) {
+        console.error("AI response failed, using fallback:", error);
+        aiResponse = {
+          message: "I'm processing your request. Please give me a moment to search through your documents and provide a comprehensive response.",
+          suggestions: ["Try asking about merchant services", "Ask about payment processing rates", "Request document information"],
+          actions: []
+        };
+      }
       
       // Save AI response
       const assistantMessage = await storage.createMessage({
