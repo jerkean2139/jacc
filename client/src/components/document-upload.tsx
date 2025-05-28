@@ -216,13 +216,28 @@ export default function DocumentUpload({ folderId, onUploadComplete }: DocumentU
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Authentication Button */}
+          {!isAuthenticated && (
+            <div className="mb-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-medium text-yellow-800 dark:text-yellow-200">Authentication Required</h3>
+                  <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">Click to enable document uploads</p>
+                </div>
+                <Button onClick={handleAuthenticate} variant="outline" size="sm">
+                  Enable Uploads
+                </Button>
+              </div>
+            </div>
+          )}
+
           {/* Enhanced Drag & Drop Upload Area */}
           <div 
             className={`border-2 border-dashed rounded-lg p-8 text-center transition-all duration-200 cursor-pointer relative ${
               isDragOver 
                 ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 scale-105' 
                 : 'border-gray-300 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500'
-            }`}
+            } ${!isAuthenticated ? 'opacity-50 pointer-events-none' : ''}`}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
