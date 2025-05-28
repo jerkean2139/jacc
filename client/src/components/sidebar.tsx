@@ -235,7 +235,8 @@ export default function Sidebar({
                       e.stopPropagation();
                       onChatDelete?.(chat.id);
                     }}
-                    className="w-6 h-6 p-0 bg-red-500 hover:bg-red-600 text-white opacity-0 group-hover:opacity-100 transition-opacity rounded-full"
+                    className="w-5 h-5 p-0 text-red-500 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                    title="Delete Chat"
                   >
                     <Trash2 className="w-3 h-3" />
                   </Button>
