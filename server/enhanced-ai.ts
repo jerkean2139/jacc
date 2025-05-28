@@ -35,8 +35,18 @@ export class EnhancedAIService {
         throw new Error('Last message must be from user');
       }
 
-      // Search relevant documents
-      const searchResults = await supabaseVectorService.searchDocuments(lastMessage.content, 5);
+      // Search relevant documents with timeout
+      let searchResults = [];
+      try {
+        const searchPromise = supabaseVectorService.searchDocuments(lastMessage.content, 5);
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Search timeout')), 5000)
+        );
+        searchResults = await Promise.race([searchPromise, timeoutPromise]);
+      } catch (error) {
+        console.log("Document search timed out, proceeding without document context");
+        searchResults = [];
+      }
       
       // Create context from search results
       const documentContext = this.formatDocumentContext(searchResults);
