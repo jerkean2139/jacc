@@ -120,9 +120,9 @@ export default function Sidebar({
                 size="icon"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onChatDelete(chat.id);
+                  onChatDelete?.(chat.id);
                 }}
-                className="absolute -top-1 -right-1 w-5 h-5 p-0 bg-red-500 hover:bg-red-600 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute -top-1 -right-1 w-6 h-6 p-0 bg-red-500 hover:bg-red-600 text-white opacity-0 group-hover:opacity-100 transition-all duration-200 rounded-full shadow-lg z-10"
               >
                 <Trash2 className="w-3 h-3" />
               </Button>
