@@ -35,6 +35,7 @@ interface SidebarProps {
   onNewChat: () => void;
   onChatSelect: (chatId: string) => void;
   onFolderCreate: (name: string, parentId?: string, color?: string) => void;
+  onChatDelete?: (chatId: string) => void;
   collapsed?: boolean;
 }
 
@@ -46,6 +47,7 @@ export default function Sidebar({
   onNewChat,
   onChatSelect,
   onFolderCreate,
+  onChatDelete,
   collapsed = false
 }: SidebarProps) {
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
@@ -225,7 +227,10 @@ export default function Sidebar({
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={() => onChatDelete?.(chat.id)}
+                      className="text-red-600 hover:text-red-700"
+                    >
                       <Trash2 className="w-4 h-4 mr-2" />
                       Delete Chat
                     </DropdownMenuItem>

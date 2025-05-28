@@ -61,6 +61,26 @@ export default function Home() {
     setActiveChatId(chatId);
   };
 
+  const handleChatDelete = async (chatId: string) => {
+    try {
+      const response = await fetch(`/api/chats/${chatId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        // If we deleted the active chat, select another one
+        if (activeChatId === chatId) {
+          const remainingChats = chats.filter(chat => chat.id !== chatId);
+          setActiveChatId(remainingChats.length > 0 ? remainingChats[0].id : null);
+        }
+        refetchChats();
+      }
+    } catch (error) {
+      console.error("Failed to delete chat:", error);
+    }
+  };
+
   const handleFolderCreate = async (name: string, parentId?: string, color?: string) => {
     try {
       const response = await fetch("/api/folders", {
