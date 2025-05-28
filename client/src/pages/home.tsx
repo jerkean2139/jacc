@@ -62,6 +62,7 @@ export default function Home() {
   };
 
   const handleChatDelete = async (chatId: string) => {
+    console.log("handleChatDelete called with:", chatId);
     try {
       const response = await fetch(`/api/chats/${chatId}`, {
         method: "DELETE",
@@ -80,6 +81,9 @@ export default function Home() {
       console.error("Failed to delete chat:", error);
     }
   };
+
+  // Debug the function
+  console.log("Home component - handleChatDelete defined:", typeof handleChatDelete);
 
   const handleFolderCreate = async (name: string, parentId?: string, color?: string) => {
     try {

@@ -50,6 +50,12 @@ export default function Sidebar({
   onChatDelete,
   collapsed = false
 }: SidebarProps) {
+  // Debug logging
+  console.log("Sidebar Debug:", {
+    chatsCount: chats.length,
+    hasOnChatDelete: !!onChatDelete,
+    onChatDeleteType: typeof onChatDelete
+  });
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
   const [creatingFolder, setCreatingFolder] = useState(false);
   const [newFolderName, setNewFolderName] = useState("");
@@ -201,10 +207,10 @@ export default function Sidebar({
               <div
                 key={chat.id}
                 className={cn(
-                  "group flex items-center justify-between p-2 rounded-lg transition-colors",
+                  "group flex items-center p-2 rounded-lg transition-colors border",
                   activeChatId === chat.id 
-                    ? "bg-slate-100 dark:bg-slate-800" 
-                    : "hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                    ? "bg-slate-100 dark:bg-slate-800 border-blue-200" 
+                    : "hover:bg-slate-50 dark:hover:bg-slate-800/50 border-transparent"
                 )}
               >
                 <div 
@@ -229,22 +235,22 @@ export default function Sidebar({
                     <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0" />
                   )}
                 </div>
-                {onChatDelete && (
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      console.log("Delete button clicked for chat:", chat.id);
+                
+                {/* Simple red delete button - always visible */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    console.log("Delete button clicked for chat:", chat.id);
+                    if (onChatDelete) {
                       onChatDelete(chat.id);
-                    }}
-                    className="h-7 px-2 text-xs bg-red-500 text-white hover:bg-red-600"
-                    title="Delete Chat"
-                  >
-                    <Trash2 className="w-3 h-3 mr-1" />
-                    Delete
-                  </Button>
-                )}
+                    }
+                  }}
+                  className="ml-2 p-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+                  title="Delete Chat"
+                >
+                  <Trash2 className="w-3 h-3" />
+                </button>
+                
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
