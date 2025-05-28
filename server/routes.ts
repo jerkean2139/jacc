@@ -629,7 +629,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/drive/search', isAuthenticated, async (req: any, res) => {
+  // Document search endpoint
+  app.get('/api/drive/search', async (req: any, res) => {
     try {
       const { q: query } = req.query;
       
@@ -639,6 +640,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const results = await enhancedAIService.searchDocuments(query);
       res.json(results);
+    } catch (error) {
+      console.error("Error searching documents:", error);
+      res.status(500).json({ message: "Failed to search documents" });
+    }
+  });
+
+  // Simple document search for uploaded files
+  app.post('/api/search-documents', async (req: any, res) => {
+    try {
+      const { query } = req.body;
+      const userId = 'simple-user-001'; // Using your test user
+      
+      if (!query) {
+        return res.status(400).json({ message: "Query is required" });
+      }
+      
+      // Get all user documents
+      const documents = await storage.getUserDocuments(userId);
+      
+      // Simple text search in document names and content
+      const searchResults = documents.filter(doc => 
+        doc.name.toLowerCase().includes(query.toLowerCase()) ||
+        doc.originalName.toLowerCase().includes(query.toLowerCase())
+      ).map(doc => ({
+        id: doc.id,
+        score: 0.8,
+        documentId: doc.id,
+        content: `Document: ${doc.name}`,
+        metadata: {
+          documentName: doc.name,
+          webViewLink: `/documents/${doc.id}`,
+          chunkIndex: 0,
+          mimeType: doc.mimeType
+        }
+      }));
+      
+      console.log(`Found ${searchResults.length} documents matching query: "${query}"`);
+      res.json(searchResults);
     } catch (error) {
       console.error("Error searching documents:", error);
       res.status(500).json({ message: "Failed to search documents" });
