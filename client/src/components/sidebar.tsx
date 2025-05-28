@@ -236,19 +236,35 @@ export default function Sidebar({
                   )}
                 </div>
                 
-                {/* Simple red delete button - always visible */}
+                {/* Direct delete button with inline delete function */}
                 <button
-                  onClick={(e) => {
+                  onClick={async (e) => {
                     e.stopPropagation();
                     console.log("Delete button clicked for chat:", chat.id);
-                    if (onChatDelete) {
-                      onChatDelete(chat.id);
+                    
+                    if (confirm("Are you sure you want to delete this chat?")) {
+                      try {
+                        const response = await fetch(`/api/chats/${chat.id}`, {
+                          method: "DELETE",
+                          credentials: "include",
+                        });
+                        
+                        if (response.ok) {
+                          // Force page reload to refresh chat list
+                          window.location.reload();
+                        } else {
+                          console.error("Failed to delete chat");
+                        }
+                      } catch (error) {
+                        console.error("Error deleting chat:", error);
+                      }
                     }
                   }}
-                  className="ml-2 p-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+                  className="ml-2 px-2 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600 transition-colors flex items-center gap-1"
                   title="Delete Chat"
                 >
                   <Trash2 className="w-3 h-3" />
+                  Delete
                 </button>
                 
                 <DropdownMenu>
