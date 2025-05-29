@@ -106,12 +106,48 @@ export class PineconeVectorService {
     }
   }
 
-  async searchDocuments(query: string, topK: number = 5): Promise<VectorSearchResult[]> {
+  async searchDocuments(query: string, topK: number = 5, namespaces: string[] = ['default']): Promise<VectorSearchResult[]> {
     try {
-      // For now, return empty results since Pinecone index doesn't exist
-      // This allows the system to fall back to web search
-      console.log('Document search temporarily disabled - using web search instead');
-      return [];
+      await this.ensureIndexExists();
+      const index = this.pinecone.Index(this.indexName);
+      
+      const queryEmbedding = await this.createEmbedding(query);
+      const results: VectorSearchResult[] = [];
+      
+      // Search across specified namespaces
+      for (const namespace of namespaces) {
+        try {
+          const searchResponse = await index.namespace(namespace).query({
+            vector: queryEmbedding,
+            topK: Math.ceil(topK / namespaces.length),
+            includeMetadata: true,
+            includeValues: false
+          });
+          
+          // Transform results to our format
+          for (const match of searchResponse.matches || []) {
+            if (match.metadata) {
+              results.push({
+                id: match.id,
+                score: match.score || 0,
+                documentId: match.metadata.documentId as string,
+                content: match.metadata.content as string,
+                metadata: {
+                  documentName: match.metadata.documentName as string,
+                  webViewLink: match.metadata.webViewLink as string,
+                  chunkIndex: match.metadata.chunkIndex as number,
+                  mimeType: match.metadata.mimeType as string,
+                }
+              });
+            }
+          }
+        } catch (namespaceError) {
+          console.log(`Namespace ${namespace} not found or empty, skipping...`);
+        }
+      }
+      
+      // Sort by score and return top results
+      return results.sort((a, b) => b.score - a.score).slice(0, topK);
     } catch (error) {
       console.error('Error searching documents:', error);
       return [];

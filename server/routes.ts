@@ -246,7 +246,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Save user message
       const userMessage = await storage.createMessage(messageData);
       
-      // Generate AI response
+      // Generate AI response using enhanced prompt chaining
       const chatHistory = await storage.getChatMessages(chatId);
       const messages = chatHistory.map(m => ({
         role: m.role as 'user' | 'assistant',

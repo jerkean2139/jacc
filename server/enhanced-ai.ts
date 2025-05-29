@@ -1,8 +1,11 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { pineconeVectorService, type VectorSearchResult } from "./pinecone-vector";
 import { perplexitySearchService } from "./perplexity-search";
+import { promptChainService } from "./prompt-chain";
+import { smartRoutingService } from "./smart-routing";
 import { db } from "./db";
-import { webSearchLogs } from "@shared/schema";
+import { webSearchLogs, adminSettings } from "@shared/schema";
+import { eq } from "drizzle-orm";
 import type { ChatMessage, AIResponse } from "./openai";
 
 // the newest Anthropic model is "claude-3-7-sonnet-20250219" which was released February 24, 2025
@@ -24,6 +27,64 @@ export interface DocumentSource {
 }
 
 export class EnhancedAIService {
+  
+  async getAdminSettings() {
+    const [settings] = await db
+      .select()
+      .from(adminSettings)
+      .where(eq(adminSettings.id, 'default'))
+      .limit(1);
+    
+    return settings || {
+      enablePromptChaining: true,
+      enableSmartRouting: true,
+      folderRoutingThreshold: 0.7
+    };
+  }
+
+  async generateChainedResponse(
+    message: string,
+    conversationHistory: ChatMessage[],
+    userId: string
+  ): Promise<EnhancedAIResponse> {
+    try {
+      console.log(`🔗 Starting prompt chain for user ${userId}`);
+      
+      // Initialize default folders if they don't exist
+      await smartRoutingService.initializeDefaultFolders(userId);
+      
+      // Execute the prompt chain
+      const chainResult = await promptChainService.executeChain(
+        message,
+        userId,
+        conversationHistory
+      );
+      
+      console.log(`✅ Prompt chain completed with ${chainResult.steps.length} steps, confidence: ${(chainResult.confidence * 100).toFixed(1)}%`);
+      
+      return {
+        message: chainResult.finalResponse,
+        sources: chainResult.sources,
+        reasoning: chainResult.reasoning,
+        suggestions: this.extractSuggestions(chainResult.finalResponse),
+        actions: this.extractActions(chainResult.finalResponse)
+      };
+      
+    } catch (error) {
+      console.error('Prompt chain failed, falling back to standard response:', error);
+      return await this.generateStandardResponse(message, conversationHistory);
+    }
+  }
+
+  async generateStandardResponse(
+    message: string,
+    conversationHistory: ChatMessage[]
+  ): Promise<EnhancedAIResponse> {
+    // Fallback to existing logic
+    const messages = [...conversationHistory, { role: 'user' as const, content: message }];
+    return await this.generateResponseWithDocuments(messages);
+  }
+
   async generateResponseWithDocuments(
     messages: ChatMessage[],
     context?: {
