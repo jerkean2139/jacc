@@ -33,6 +33,7 @@ function Router() {
         <>
           <Route path="/" component={HomeStable} />
           <Route path="/calculator" component={ISOAmpCalculator} />
+          <Route path="/iso-amp-calculator" component={ISOAmpCalculator} />
           <Route path="/guide" component={UserGuide} />
           <Route path="/documents" component={DocumentsPage} />
           <Route path="/admin" component={AdminSettings} />

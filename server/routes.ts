@@ -928,6 +928,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ISO AMP API Routes
+  app.post('/api/iso-amp/test-connection', async (req, res) => {
+    try {
+      const { isoAMPService } = await import('./iso-amp-api');
+      const isConnected = await isoAMPService.testConnection();
+      res.json({ connected: isConnected, timestamp: new Date().toISOString() });
+    } catch (error) {
+      res.status(500).json({ connected: false, error: error.message });
+    }
+  });
+
+  app.post('/api/iso-amp/rate-comparison', async (req, res) => {
+    try {
+      const { isoAMPService } = await import('./iso-amp-api');
+      const comparisons = await isoAMPService.getRateComparisons(req.body);
+      res.json({ comparisons, timestamp: new Date().toISOString() });
+    } catch (error) {
+      console.error('Rate comparison error:', error);
+      res.status(500).json({ error: 'Failed to get rate comparisons' });
+    }
+  });
+
+  app.post('/api/iso-amp/advanced-savings', async (req, res) => {
+    try {
+      const { isoAMPService } = await import('./iso-amp-api');
+      const savings = await isoAMPService.calculateAdvancedSavings(req.body);
+      res.json({ savings, timestamp: new Date().toISOString() });
+    } catch (error) {
+      console.error('Advanced savings error:', error);
+      res.status(500).json({ error: 'Failed to calculate savings' });
+    }
+  });
+
+  app.post('/api/iso-amp/equipment-costs', async (req, res) => {
+    try {
+      const { isoAMPService } = await import('./iso-amp-api');
+      const equipment = await isoAMPService.calculateEquipmentCosts(req.body);
+      res.json({ equipment, timestamp: new Date().toISOString() });
+    } catch (error) {
+      console.error('Equipment costs error:', error);
+      res.status(500).json({ error: 'Failed to calculate equipment costs' });
+    }
+  });
+
+  app.post('/api/iso-amp/generate-proposal', async (req, res) => {
+    try {
+      const { isoAMPService } = await import('./iso-amp-api');
+      const proposal = await isoAMPService.generateProposal(req.body);
+      res.json({ proposal, timestamp: new Date().toISOString() });
+    } catch (error) {
+      console.error('Proposal generation error:', error);
+      res.status(500).json({ error: 'Failed to generate proposal' });
+    }
+  });
+
   // Initialize gamification system
   const initializeGamification = async () => {
     try {
