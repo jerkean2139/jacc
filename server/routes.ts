@@ -533,9 +533,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
             // Index document for search
             try {
+              // Extract content first
+              let content = '';
+              try {
+                if (file.mimetype === 'text/plain') {
+                  content = fs.readFileSync(file.path, 'utf8');
+                } else {
+                  // Use content extractor for other file types
+                  const { extractDocumentContent } = await import('./content-extractor');
+                  content = await extractDocumentContent(file.path, file.mimetype);
+                }
+              } catch (extractError) {
+                console.error(`Content extraction failed for ${file.originalname}:`, extractError);
+                content = ''; // Fallback to empty content
+              }
+
               // Create chunks for vector search
               const chunks = [];
-              if (content) {
+              if (content && content.trim()) {
                 const words = content.split(/\s+/);
                 const chunkSize = 200; // words per chunk
                 
