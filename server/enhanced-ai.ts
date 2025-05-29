@@ -108,9 +108,10 @@ MANDATORY DOCUMENT-FIRST PROTOCOL:
 4. **DOCUMENT VERIFICATION CHECKPOINT** - Before stating "no documents found," verify you've searched filenames, content keywords, vendor names
 
 DOCUMENT RESPONSE REQUIREMENTS:
-- **MANDATORY FORMAT**: "Based on our internal document '[Document Name]', here's the information:"
+- **SINGLE DOCUMENT**: "Based on our internal document '[Document Name]', here's the information:"
+- **MULTIPLE DOCUMENTS**: "I found [X] relevant documents: [list with links]. Can you tell me more specifically what you're looking for so I can guide you to the most relevant document?"
 - **ALWAYS INCLUDE**: Direct download link using format: /api/documents/[document-id]/download
-- **CITE SPECIFIC SOURCES**: Reference exact document names found in your search
+- **CITE SPECIFIC SOURCES**: Reference exact original filenames (not internal storage names)
 - **NO GENERIC RESPONSES**: If documents exist, use them - never give generic merchant services advice
 
 WEB SEARCH - LAST RESORT ONLY:
@@ -182,6 +183,15 @@ When appropriate, suggest actions like saving payment processing information to 
   private formatDocumentContext(searchResults: VectorSearchResult[]): string {
     if (searchResults.length === 0) {
       return "No relevant documents found in the knowledge base.";
+    }
+
+    if (searchResults.length > 3) {
+      return `MULTIPLE DOCUMENTS FOUND (${searchResults.length} total):
+${searchResults.map((result, index) => 
+  `${index + 1}. "${result.metadata.documentName}" - [Download](${result.metadata.webViewLink})`
+).join('\n')}
+
+INSTRUCTION: Since multiple documents were found, ask the user to be more specific about what they're looking for so you can guide them to the most relevant document(s).`;
     }
 
     return searchResults.map((result, index) => {
@@ -295,9 +305,9 @@ IMPORTANT: When referencing this document in your response, always include the c
           id: doc.id,
           score: 0.9,
           documentId: doc.id,
-          content: `I found your uploaded document "${doc.name}" which contains information relevant to your query about "${query}".`,
+          content: `Found document: ${doc.originalName || doc.name} - This document contains information relevant to your query.`,
           metadata: {
-            documentName: doc.name,
+            documentName: doc.originalName || doc.name, // Use original filename instead of internal name
             webViewLink: `/api/documents/${doc.id}/download`,
             chunkIndex: 0,
             mimeType: doc.mimeType
