@@ -12,7 +12,9 @@ import { duplicateDetectionService } from "./duplicate-detector";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-import { insertMessageSchema, insertChatSchema, insertFolderSchema, insertDocumentSchema, insertAdminSettingsSchema } from "@shared/schema";
+import { insertMessageSchema, insertChatSchema, insertFolderSchema, insertDocumentSchema, insertAdminSettingsSchema, faqKnowledgeBase } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 import { setupOAuthHelper } from "./oauth-helper";
 import { zipProcessor } from "./zip-processor";
 
