@@ -101,24 +101,28 @@ export class EnhancedAIService {
 - Business payment solutions and savings calculations
 - Document organization and client proposal generation
 
-CRITICAL SEARCH PRIORITY:
-1. **ALWAYS search internal documents FIRST** before using any web information
-2. **PROVIDE DIRECT LINKS** to internal documents when they contain relevant information
-3. Only use web search results if NO internal documents match the query
-4. When internal documents are found, format responses as: "Based on [Document Name](internal_link), here's what I found..."
+MANDATORY DOCUMENT-FIRST PROTOCOL:
+1. **INTERNAL DOCUMENTS ARE YOUR PRIMARY KNOWLEDGE SOURCE** - Search uploaded company documents BEFORE any external information
+2. **NEVER CLAIM LACK OF ACCESS** if documents exist in the system - you have direct access to all uploaded files
+3. **EXHAUSTIVE DOCUMENT SEARCH REQUIRED** - Check all variations: TSYS, merchant applications, forms, training materials
+4. **DOCUMENT VERIFICATION CHECKPOINT** - Before stating "no documents found," verify you've searched filenames, content keywords, vendor names
 
-DOCUMENT RESPONSE FORMAT:
-- **ALWAYS include**: "📄 **Source:** [Document Name](direct_internal_link)" at the end
-- **PRIORITIZE**: Company-specific information from uploaded documents
-- **INCLUDE**: Direct clickable links to Google Drive or internal document storage
-- **HIGHLIGHT**: Specific sections, page numbers, or relevant details from documents
+DOCUMENT RESPONSE REQUIREMENTS:
+- **MANDATORY FORMAT**: "Based on our internal document '[Document Name]', here's the information:"
+- **ALWAYS INCLUDE**: Direct download link using format: /api/documents/[document-id]/download
+- **CITE SPECIFIC SOURCES**: Reference exact document names found in your search
+- **NO GENERIC RESPONSES**: If documents exist, use them - never give generic merchant services advice
 
-WEB SEARCH USAGE:
-- Only use when NO internal documents contain relevant information
-- When web search results are provided, USE THEM to answer the user's question
-- Clearly state: "Since this information wasn't found in our internal documents, I searched current web sources and found..."
-- Provide the actual information and links from web search results
-- Include citations from web sources
+WEB SEARCH - LAST RESORT ONLY:
+- **ONLY AFTER** comprehensive document search confirms NO relevant internal files
+- **EXPLICIT DISCLAIMER**: "After searching all internal documents and finding no relevant information, I consulted external sources:"
+- **CLEAR DISTINCTION**: Always differentiate between internal company knowledge and external information
+
+CRITICAL ERROR PREVENTION:
+- NEVER respond with "I don't have access to your systems" if documents are in the database
+- NEVER use web search if ANY document contains related information
+- NEVER give generic advice if company-specific documents exist
+- ALWAYS prioritize uploaded TSYS, merchant, application, and training documents
 
 Your responses should be:
 - Professional and knowledgeable about payment processing
@@ -317,13 +321,37 @@ IMPORTANT: When referencing this document in your response, always include the c
     // Extract key terms and create variations
     const keyTerms = lowercaseQuery.split(' ').filter(word => word.length > 2);
     
-    // Vendor-specific alternatives
-    if (lowercaseQuery.includes('tsys')) {
-      alternatives.push('customer support', 'technical support', 'help desk', 'TSYS support', 'processor support');
+    // TSYS-specific comprehensive search
+    if (lowercaseQuery.includes('tsys') || lowercaseQuery.includes('support') || lowercaseQuery.includes('help')) {
+      alternatives.push(
+        'TSYS customer support info',
+        'TSYS support',
+        'customer support',
+        'technical support', 
+        'help desk',
+        'TSYS Global',
+        'TSYS_Global',
+        'processor support',
+        'TSYS documentation'
+      );
     }
     
+    // Merchant application searches
     if (lowercaseQuery.includes('merchant') || lowercaseQuery.includes('application')) {
-      alternatives.push('merchant application', 'application form', 'signup form', 'enrollment', 'TRX merchant');
+      alternatives.push(
+        'merchant application',
+        'TRX_Merchant_Application', 
+        'application form',
+        'signup form',
+        'enrollment',
+        'TRX merchant',
+        'merchant app'
+      );
+    }
+    
+    // Clearent searches
+    if (lowercaseQuery.includes('clearent') || lowercaseQuery.includes('clearant')) {
+      alternatives.push('clearent', 'clearant', 'application', 'link', 'clearent application');
     }
     
     if (lowercaseQuery.includes('high risk') || lowercaseQuery.includes('risk')) {
