@@ -8,6 +8,7 @@ import { enhancedAIService } from "./enhanced-ai";
 import { googleDriveService } from "./google-drive";
 import { pineconeVectorService } from "./pinecone-vector";
 import { smartRoutingService } from "./smart-routing";
+import { duplicateDetectionService } from "./duplicate-detector";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -376,6 +377,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const customName = req.body[`customName_${i}`];
           const displayName = customName || file.originalname.replace(/\.[^/.]+$/, "");
           
+          // Check for duplicates before processing
+          const duplicateCheck = await duplicateDetectionService.checkForDuplicates(
+            file.path,
+            file.originalname,
+            userId
+          );
+          
+          if (duplicateCheck.isDuplicate) {
+            console.log(`⚠️ Duplicate detected: ${file.originalname}`);
+            errors.push({
+              file: file.originalname,
+              error: `Duplicate file detected - already exists as "${duplicateCheck.existingDocument.originalName}"`
+            });
+            
+            // Clean up the duplicate file
+            if (fs.existsSync(file.path)) {
+              fs.unlinkSync(file.path);
+            }
+            continue;
+          }
+          
+          if (duplicateCheck.similarDocuments.length > 0) {
+            console.log(`📋 Similar files found for: ${file.originalname}`);
+            console.log(duplicateDetectionService.generateDuplicateReport(duplicateCheck, file.originalname));
+          }
+          
           // Check if it's a ZIP file
           if (file.mimetype === 'application/zip' || path.extname(file.originalname).toLowerCase() === '.zip') {
             // Process ZIP file with automatic extraction
@@ -395,7 +422,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               fs.unlinkSync(file.path);
             }
           } else {
-            // Process regular file with custom name
+            // Process regular file with custom name and include hash values
             const documentData = insertDocumentSchema.parse({
               name: displayName,
               originalName: file.originalname,
@@ -403,7 +430,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
               size: file.size,
               path: file.path,
               userId,
-              folderId: req.body.folderId || null
+              folderId: req.body.folderId || null,
+              contentHash: duplicateCheck.contentHash,
+              nameHash: duplicateCheck.nameHash
             });
             
             const document = await storage.createDocument(documentData);
@@ -488,6 +517,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error uploading documents:", error);
       res.status(500).json({ message: "Failed to upload documents" });
+    }
+  });
+
+  // Duplicate detection routes
+  app.post('/api/documents/check-duplicates', async (req: any, res) => {
+    try {
+      const userId = 'simple-user-001'; // Temporary for testing
+      const { filenames } = req.body;
+      
+      if (!filenames || !Array.isArray(filenames)) {
+        return res.status(400).json({ message: "Filenames array required" });
+      }
+
+      const results = [];
+      for (const filename of filenames) {
+        // For pre-upload checks, we only check name similarity since we don't have file content yet
+        const documents = await storage.getUserDocuments(userId);
+        const similarDocuments = documents.filter(doc => {
+          const similarity = duplicateDetectionService.calculateNameSimilarity 
+            ? duplicateDetectionService.calculateNameSimilarity(filename, doc.originalName)
+            : 0;
+          return similarity > 0.8;
+        });
+
+        results.push({
+          filename,
+          potentialDuplicates: similarDocuments.length,
+          similarDocuments: similarDocuments.map(doc => ({
+            name: doc.originalName,
+            uploadDate: doc.createdAt
+          }))
+        });
+      }
+
+      res.json({ results });
+    } catch (error) {
+      console.error("Error checking duplicates:", error);
+      res.status(500).json({ message: "Failed to check duplicates" });
     }
   });
 

@@ -86,6 +86,8 @@ export const documents = pgTable("documents", {
   userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   folderId: uuid("folder_id").references(() => folders.id, { onDelete: "set null" }),
   isFavorite: boolean("is_favorite").default(false),
+  contentHash: varchar("content_hash", { length: 64 }), // SHA256 hash for duplicate detection
+  nameHash: varchar("name_hash", { length: 32 }), // MD5 hash of normalized filename
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
