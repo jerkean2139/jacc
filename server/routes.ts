@@ -231,6 +231,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // FAQ import endpoint
+  app.post('/api/admin/import-faq', async (req: any, res) => {
+    try {
+      const faqData = [
+        { question: "What POS option would be good for an archery business?", answer: "Quantic, Clover, HubWallet", category: "pos", tags: ["pos", "quantic", "clover", "hubwallet"] },
+        { question: "Can we integrate with Epro?", answer: "No, they use Fluid Pay Direct", category: "integration", tags: ["integration", "epro"] },
+        { question: "What are the fees with Quantic?", answer: "The rep will quote the processing rates, Quantic will quote the hardware based on the merchants needs", category: "pricing", tags: ["pricing", "quantic"] },
+        { question: "Can we integrate with Epicor?", answer: "Yes, Via MiCamp", category: "integration", tags: ["integration", "epicor", "micamp"] },
+        { question: "Who has the best price on a PAX terminal?", answer: "Clearent, or MiCamp", category: "hardware", tags: ["hardware", "pax", "clearent", "micamp"] },
+        { question: "Can we integrate with Roommaster/InnQuest?", answer: "Yes, Via MiCamp", category: "integration", tags: ["integration", "roommaster", "micamp"] },
+        { question: "Can we integrate with Quickbooks?", answer: "Yes, Via TRX and Clearent through Hyfin", category: "integration", tags: ["integration", "quickbooks", "trx", "clearent"] },
+        { question: "Who offers restaurant POS?", answer: "Shift4, MiCamp, HubWallet", category: "pos", tags: ["pos", "restaurant", "shift4", "micamp", "hubwallet"] },
+        { question: "Who offers ACH?", answer: "TRX, ACI, Clearent", category: "gateway", tags: ["gateway", "ach", "trx", "aci", "clearent"] },
+        { question: "What gateways can we offer?", answer: "Authorize.net, Fluid Pay, Accept Blue, TRX, Clearent, MiCamp", category: "gateway", tags: ["gateway", "authorize-net", "trx", "clearent", "micamp"] },
+        { question: "Who do we use for High Risk?", answer: "TRX, Payment Advisors", category: "industry", tags: ["high-risk", "trx"] },
+        { question: "Who has a mobile solution?", answer: "TRX, Clearent, MiCamp", category: "hardware", tags: ["mobile", "trx", "clearent", "micamp"] },
+        { question: "What is the Customer support number for Clearent?", answer: "866.435.0666 Option 1", category: "support", tags: ["support", "clearent"], priority: 3 },
+        { question: "What is the Customer support number for TRX?", answer: "888-933-8797 Option 2", category: "support", tags: ["support", "trx"], priority: 3 },
+        { question: "What is the Customer support number for TSYS?", answer: "877-608-6599", category: "support", tags: ["support", "tsys"], priority: 3 },
+        { question: "What is the Customer support email for Clearent?", answer: "customersupport@clearent.com", category: "support", tags: ["support", "clearent"], priority: 3 },
+        { question: "What is the Customer support email for TRX?", answer: "customersupport@trxservices.com", category: "support", tags: ["support", "trx"], priority: 3 },
+        { question: "Who is the contact for Quantic?", answer: "Nick Vitucci, nvitucci@getquantic.com", category: "support", tags: ["support", "quantic"], priority: 3 }
+      ];
+
+      await db.delete(faqKnowledgeBase);
+      
+      for (const faq of faqData) {
+        await db.insert(faqKnowledgeBase).values({
+          question: faq.question,
+          answer: faq.answer,
+          category: faq.category,
+          tags: faq.tags,
+          priority: faq.priority || 1,
+          isActive: true
+        });
+      }
+
+      res.json({ success: true, imported: faqData.length });
+    } catch (error) {
+      console.error("Error importing FAQ data:", error);
+      res.status(500).json({ message: "Failed to import FAQ data" });
+    }
+  });
+
   app.post('/api/chats/:chatId/messages', async (req: any, res) => {
     try {
       const userId = 'dev-user-123'; // Use test user for chat testing
