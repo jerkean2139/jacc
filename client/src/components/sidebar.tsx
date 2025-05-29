@@ -216,7 +216,7 @@ export default function Sidebar({
                 )}
               >
                 <div 
-                  className="flex items-center space-x-3 flex-1 min-w-0 cursor-pointer"
+                  className="flex items-center space-x-3 flex-1 min-w-0 cursor-pointer group"
                   onClick={() => onChatSelect(chat.id)}
                 >
                   <MessageSquare className={cn(
@@ -225,6 +225,34 @@ export default function Sidebar({
                       ? "text-green-500" 
                       : "text-slate-400 dark:text-slate-500"
                   )} />
+                  
+                  {/* Trash can icon for delete */}
+                  <button
+                    onClick={async (e) => {
+                      e.stopPropagation();
+                      if (confirm("Are you sure you want to delete this chat history from the internal memory?")) {
+                        try {
+                          const response = await fetch(`/api/chats/${chat.id}`, {
+                            method: "DELETE",
+                            credentials: "include",
+                          });
+                          
+                          if (response.ok) {
+                            window.location.reload();
+                          } else {
+                            alert("Failed to delete chat");
+                          }
+                        } catch (error) {
+                          alert("Error deleting chat");
+                        }
+                      }
+                    }}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-red-100 rounded"
+                    title="Delete this chat"
+                  >
+                    <Trash2 className="w-3 h-3 text-red-500 hover:text-red-700" />
+                  </button>
+                  
                   <span className={cn(
                     "text-sm truncate",
                     activeChatId === chat.id 
