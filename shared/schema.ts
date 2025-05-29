@@ -241,6 +241,19 @@ export const webSearchLogs = pgTable("web_search_logs", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// FAQ Knowledge Base for structured Q&A content
+export const faqKnowledgeBase = pgTable("faq_knowledge_base", {
+  id: serial("id").primaryKey(),
+  question: text("question").notNull(),
+  answer: text("answer").notNull(),
+  category: varchar("category").notNull(), // pos, integration, support, contact, etc.
+  tags: text("tags").array().default([]),
+  priority: integer("priority").default(1),
+  isActive: boolean("is_active").default(true),
+  lastUpdated: timestamp("last_updated").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Define relations
 export const usersRelations = relations(users, ({ many }) => ({
   folders: many(folders),
@@ -357,6 +370,12 @@ export const insertUserStatsSchema = createInsertSchema(userStats).omit({
   updatedAt: true,
 });
 
+export const insertFaqSchema = createInsertSchema(faqKnowledgeBase).omit({
+  id: true,
+  createdAt: true,
+  lastUpdated: true,
+});
+
 // Gamification Types
 export type Achievement = typeof achievements.$inferSelect;
 export type InsertAchievement = z.infer<typeof insertAchievementSchema>;
@@ -364,6 +383,8 @@ export type UserAchievement = typeof userAchievements.$inferSelect;
 export type InsertUserAchievement = z.infer<typeof insertUserAchievementSchema>;
 export type UserStats = typeof userStats.$inferSelect;
 export type InsertUserStats = z.infer<typeof insertUserStatsSchema>;
+export type FaqEntry = typeof faqKnowledgeBase.$inferSelect;
+export type InsertFaq = z.infer<typeof insertFaqSchema>;
 
 export const insertHelpContentSchema = createInsertSchema(helpContent).omit({
   id: true,
