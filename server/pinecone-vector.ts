@@ -74,7 +74,7 @@ export class PineconeVectorService {
     }
   }
 
-  async indexDocument(document: any): Promise<void> {
+  async indexDocument(document: any, namespace: string = 'default'): Promise<void> {
     try {
       await this.ensureIndexExists();
       const index = this.pinecone.Index(this.indexName);
@@ -92,13 +92,15 @@ export class PineconeVectorService {
             webViewLink: document.metadata.webViewLink,
             chunkIndex: chunk.chunkIndex,
             mimeType: document.metadata.mimeType,
-            content: chunk.content
+            content: chunk.content,
+            namespace: namespace,
+            folderType: document.folderType || 'custom',
           }
         });
       }
       
-      await index.upsert(vectors);
-      console.log(`Indexed ${vectors.length} chunks for document: ${document.name}`);
+      await index.namespace(namespace).upsert(vectors);
+      console.log(`Indexed ${vectors.length} chunks for document: ${document.name} in namespace: ${namespace}`);
     } catch (error) {
       console.error('Error indexing document:', error);
     }

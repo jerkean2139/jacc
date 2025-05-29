@@ -40,13 +40,16 @@ export const users = pgTable("users", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Folders for organizing documents and chats
+// Folders for organizing documents and chats with vector namespaces
 export const folders = pgTable("folders", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: varchar("name", { length: 255 }).notNull(),
   userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   parentId: uuid("parent_id").references(() => folders.id, { onDelete: "cascade" }),
   color: varchar("color", { length: 50 }).default("blue"),
+  vectorNamespace: varchar("vector_namespace", { length: 255 }).notNull(), // Pinecone namespace
+  folderType: varchar("folder_type", { length: 50 }).default("custom"), // processor, gateway, hardware, sales, custom
+  priority: integer("priority").default(50), // For AI routing priority
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -111,6 +114,9 @@ export const adminSettings = pgTable("admin_settings", {
   enableRateComparisons: boolean("enable_rate_comparisons").default(true),
   googleDriveFolderId: varchar("google_drive_folder_id"),
   model: varchar("model").default("claude-3-7-sonnet-20250219"),
+  enablePromptChaining: boolean("enable_prompt_chaining").default(true),
+  enableSmartRouting: boolean("enable_smart_routing").default(true),
+  folderRoutingThreshold: real("folder_routing_threshold").default(0.7),
   updatedAt: timestamp("updated_at").defaultNow(),
   updatedBy: varchar("updated_by"),
 });
