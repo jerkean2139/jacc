@@ -247,7 +247,7 @@ export default function Sidebar({
                         }
                       }
                     }}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-red-100 rounded"
+                    className="opacity-30 hover:opacity-100 transition-opacity p-1 hover:bg-red-100 dark:hover:bg-red-900/20 rounded"
                     title="Delete this chat"
                   >
                     <Trash2 className="w-3 h-3 text-red-500 hover:text-red-700" />
