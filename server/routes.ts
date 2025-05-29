@@ -7,6 +7,7 @@ import { generateChatResponse, analyzeDocument, generateTitle } from "./openai";
 import { enhancedAIService } from "./enhanced-ai";
 import { googleDriveService } from "./google-drive";
 import { pineconeVectorService } from "./pinecone-vector";
+import { smartRoutingService } from "./smart-routing";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -260,10 +261,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         spreadsheetData: null // TODO: Add Google Sheets integration
       };
       
-      // Try enhanced AI with document search first, then fallback to direct AI
+      // Use new prompt chaining system with smart routing
       let aiResponse;
       try {
-        aiResponse = await enhancedAIService.generateResponseWithDocuments(messages, context);
+        aiResponse = await enhancedAIService.generateChainedResponse(
+          messageData.content,
+          messages.slice(0, -1), // Exclude the just-added user message
+          userId
+        );
       } catch (error) {
         console.error("Enhanced AI failed, using direct AI:", error);
         try {

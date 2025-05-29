@@ -443,6 +443,30 @@ IMPORTANT: When referencing this document in your response, always include the c
     return [...new Set(alternatives)].slice(0, 5); // Limit to 5 alternatives
   }
 
+  private extractSuggestions(response: string): string[] {
+    // Extract relevant suggestions from the AI response
+    const suggestions = [
+      "Tell me about TSYS processing rates",
+      "Show me Clearent application process", 
+      "Compare processor fees",
+      "Find hardware options",
+      "Help with merchant applications"
+    ];
+    
+    // Add contextual suggestions based on response content
+    if (response.toLowerCase().includes('rate')) {
+      suggestions.unshift("Compare competitive rates");
+    }
+    if (response.toLowerCase().includes('application')) {
+      suggestions.unshift("Get application links");
+    }
+    if (response.toLowerCase().includes('terminal')) {
+      suggestions.unshift("Browse terminal options");
+    }
+    
+    return suggestions.slice(0, 5);
+  }
+
   async logWebSearchUsage(query: string, response: string, reason: string, context: any): Promise<void> {
     try {
       await db.insert(webSearchLogs).values({
