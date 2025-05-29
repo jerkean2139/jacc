@@ -42,9 +42,9 @@ export class EnhancedAIService {
       let searchResults = [];
       let webSearchResults = null;
       
-      // STEP 1: Primary document search with original query
+      // STEP 1: Primary document search with original query (using direct document search)
       try {
-        searchResults = await pineconeVectorService.searchDocuments(lastMessage.content, 5);
+        searchResults = await this.searchDocuments(lastMessage.content);
         console.log(`Step 1: Found ${searchResults.length} document matches for: "${lastMessage.content}"`);
       } catch (error) {
         console.log("Step 1: Document search failed, proceeding to step 2");
@@ -59,7 +59,7 @@ export class EnhancedAIService {
         
         for (const altQuery of alternativeQueries) {
           try {
-            const altResults = await pineconeVectorService.searchDocuments(altQuery, 10);
+            const altResults = await this.searchDocuments(altQuery);
             console.log(`Step 2: Alternative query "${altQuery}" found ${altResults.length} results`);
             if (altResults.length > 0) {
               searchResults = altResults;
