@@ -32,14 +32,21 @@ const upload = multer({
     fieldSize: 200 * 1024 * 1024, // 200MB total request size
   },
   fileFilter: (req, file, cb) => {
-    const allowedTypes = /pdf|doc|docx|xls|xlsx|jpg|jpeg|png|zip/;
+    const allowedTypes = /pdf|doc|docx|xls|xlsx|jpg|jpeg|png|zip|txt/;
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = allowedTypes.test(file.mimetype) || file.mimetype === 'application/zip';
+    const mimetype = allowedTypes.test(file.mimetype) || 
+                    file.mimetype === 'application/zip' || 
+                    file.mimetype === 'text/plain' ||
+                    file.mimetype === 'application/pdf' ||
+                    file.mimetype.startsWith('application/vnd.openxmlformats') ||
+                    file.mimetype.startsWith('application/msword') ||
+                    file.mimetype.startsWith('application/vnd.ms-excel') ||
+                    file.mimetype.startsWith('image/');
     
     if (mimetype && extname) {
       return cb(null, true);
     } else {
-      cb(new Error("Only PDF, DOC, XLS, images, and ZIP files are allowed"));
+      cb(new Error("Only PDF, DOC, DOCX, XLS, XLSX, TXT, images, and ZIP files are allowed"));
     }
   }
 });
