@@ -230,7 +230,7 @@ export default function Sidebar({
                   <button
                     onClick={async (e) => {
                       e.stopPropagation();
-                      if (confirm("Are you sure you want to delete this chat history from the internal memory?")) {
+                      if (confirm("JACC wants to make sure you want to delete this chat history from the internal memory?")) {
                         try {
                           const response = await fetch(`/api/chats/${chat.id}`, {
                             method: "DELETE",
