@@ -85,7 +85,7 @@ export class DuplicateDetectionService {
     return crypto.createHash('md5').update(normalized).digest('hex');
   }
   
-  private calculateNameSimilarity(name1: string, name2: string): number {
+  public calculateNameSimilarity(name1: string, name2: string): number {
     const norm1 = this.normalizeFilename(name1);
     const norm2 = this.normalizeFilename(name2);
     

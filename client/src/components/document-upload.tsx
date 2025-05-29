@@ -72,19 +72,46 @@ export default function DocumentUpload({ folderId, onUploadComplete }: DocumentU
     queryKey: ["/api/documents"],
   });
 
-  // Check for duplicate files
-  const checkForDuplicates = (files: File[]) => {
-    const duplicates: string[] = [];
-    files.forEach(file => {
-      const existingDoc = documents.find(doc => 
-        doc.originalName?.toLowerCase() === file.name.toLowerCase() || 
-        doc.name.toLowerCase() === file.name.replace(/\.[^/.]+$/, "").toLowerCase()
-      );
-      if (existingDoc && !duplicates.includes(file.name)) {
-        duplicates.push(file.name);
+  // Check for duplicate files using the API
+  const checkForDuplicates = async (files: File[]) => {
+    try {
+      const filenames = files.map(file => file.name);
+      const response = await fetch('/api/documents/check-duplicates', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ filenames })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const duplicates: string[] = [];
+        
+        data.results.forEach((result: any) => {
+          if (result.potentialDuplicates > 0) {
+            duplicates.push(result.filename);
+          }
+        });
+        
+        setDuplicateWarnings(duplicates);
       }
-    });
-    setDuplicateWarnings(duplicates);
+    } catch (error) {
+      console.error('Error checking for duplicates:', error);
+      // Fallback to local check
+      const duplicates: string[] = [];
+      files.forEach(file => {
+        const existingDoc = documents.find(doc => 
+          doc.originalName?.toLowerCase() === file.name.toLowerCase() || 
+          doc.name.toLowerCase() === file.name.replace(/\.[^/.]+$/, "").toLowerCase()
+        );
+        if (existingDoc && !duplicates.includes(file.name)) {
+          duplicates.push(file.name);
+        }
+      });
+      setDuplicateWarnings(duplicates);
+    }
   };
 
   // Update file name
