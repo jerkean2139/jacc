@@ -22,8 +22,10 @@ import {
   LogOut,
   MoreVertical,
   Trash2,
-  FolderPlus
+  FolderPlus,
+  Download
 } from "lucide-react";
+import { DocumentDownload } from "@/components/document-download";
 import type { User, Chat, Folder as FolderType } from "@shared/schema";
 import { cn } from "@/lib/utils";
 
@@ -185,7 +187,7 @@ export default function Sidebar({
       </div>
 
       {/* New Chat Button */}
-      <div className="p-4">
+      <div className="p-4 space-y-2">
         <Button
           onClick={onNewChat}
           className="w-full navy-primary text-white hover:opacity-90 font-medium"
@@ -193,6 +195,12 @@ export default function Sidebar({
           <Plus className="w-4 h-4 mr-2" />
           New Chat
         </Button>
+        
+        {/* FAQ Download */}
+        <DocumentDownload 
+          documentType="faq" 
+          className="w-full" 
+        />
       </div>
 
       {/* Scrollable Content */}

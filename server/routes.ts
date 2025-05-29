@@ -275,6 +275,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Document download endpoints
+  app.get('/api/documents/faq/download/:format', async (req: any, res) => {
+    try {
+      const { format } = req.params;
+      const faqs = await db.select().from(faqKnowledgeBase).where(eq(faqKnowledgeBase.isActive, true));
+      
+      if (format === 'txt') {
+        let content = 'Tracer FAQ Knowledge Base\n';
+        content += '='.repeat(50) + '\n\n';
+        
+        const categories = [...new Set(faqs.map(f => f.category))];
+        categories.forEach(category => {
+          content += `${category.toUpperCase()}\n`;
+          content += '-'.repeat(category.length) + '\n\n';
+          
+          const categoryFaqs = faqs.filter(f => f.category === category);
+          categoryFaqs.forEach((faq, index) => {
+            content += `Q${index + 1}: ${faq.question}\n`;
+            content += `A${index + 1}: ${faq.answer}\n\n`;
+          });
+          content += '\n';
+        });
+        
+        res.setHeader('Content-Type', 'text/plain');
+        res.setHeader('Content-Disposition', 'attachment; filename="tracer-faq.txt"');
+        res.send(content);
+      } else if (format === 'json') {
+        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Content-Disposition', 'attachment; filename="tracer-faq.json"');
+        res.json(faqs);
+      } else {
+        res.status(400).json({ error: 'Unsupported format' });
+      }
+    } catch (error) {
+      console.error('Error generating FAQ download:', error);
+      res.status(500).json({ error: 'Failed to generate download' });
+    }
+  });
+
   app.post('/api/chats/:chatId/messages', async (req: any, res) => {
     try {
       const userId = 'dev-user-123'; // Use test user for chat testing
