@@ -138,7 +138,7 @@ export default function ISOAmpCalculator() {
         </div>
       </div>
 
-      <Tabs defaultValue="setup" className="space-y-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 gap-1">
           <TabsTrigger value="setup" className="text-xs md:text-sm">Setup</TabsTrigger>
           <TabsTrigger value="rates" className="text-xs md:text-sm">Rates</TabsTrigger>
@@ -179,11 +179,12 @@ export default function ISOAmpCalculator() {
                   <Input
                     id="averageTicket"
                     type="number"
-                    value={businessData.averageTicket}
+                    value={businessData.averageTicket === 0 ? '' : businessData.averageTicket}
+                    placeholder="Enter average ticket"
                     onChange={(e) => setBusinessData(prev => ({
                       ...prev,
-                      averageTicket: parseFloat(e.target.value) || 0,
-                      transactionCount: Math.round(prev.monthlyVolume / (parseFloat(e.target.value) || 1))
+                      averageTicket: e.target.value === '' ? 0 : parseFloat(e.target.value) || 0,
+                      transactionCount: Math.round(prev.monthlyVolume / (e.target.value === '' ? 1 : parseFloat(e.target.value) || 1))
                     }))}
                   />
                 </div>
@@ -252,10 +253,11 @@ export default function ISOAmpCalculator() {
                       id="qualifiedRate"
                       type="number"
                       step="0.01"
-                      value={businessData.currentRates?.qualifiedRate || 0}
+                      value={businessData.currentRates?.qualifiedRate === 0 ? '' : businessData.currentRates?.qualifiedRate || ''}
+                      placeholder="e.g. 2.89"
                       onChange={(e) => setBusinessData(prev => ({
                         ...prev,
-                        currentRates: { ...prev.currentRates!, qualifiedRate: parseFloat(e.target.value) || 0 }
+                        currentRates: { ...prev.currentRates!, qualifiedRate: e.target.value === '' ? 0 : parseFloat(e.target.value) || 0 }
                       }))}
                     />
                   </div>
@@ -265,10 +267,11 @@ export default function ISOAmpCalculator() {
                       id="midQualifiedRate"
                       type="number"
                       step="0.01"
-                      value={businessData.currentRates?.midQualifiedRate || 0}
+                      value={businessData.currentRates?.midQualifiedRate === 0 ? '' : businessData.currentRates?.midQualifiedRate || ''}
+                      placeholder="e.g. 3.19"
                       onChange={(e) => setBusinessData(prev => ({
                         ...prev,
-                        currentRates: { ...prev.currentRates!, midQualifiedRate: parseFloat(e.target.value) || 0 }
+                        currentRates: { ...prev.currentRates!, midQualifiedRate: e.target.value === '' ? 0 : parseFloat(e.target.value) || 0 }
                       }))}
                     />
                   </div>
@@ -278,10 +281,11 @@ export default function ISOAmpCalculator() {
                       id="nonQualifiedRate"
                       type="number"
                       step="0.01"
-                      value={businessData.currentRates?.nonQualifiedRate || 0}
+                      value={businessData.currentRates?.nonQualifiedRate === 0 ? '' : businessData.currentRates?.nonQualifiedRate || ''}
+                      placeholder="e.g. 3.49"
                       onChange={(e) => setBusinessData(prev => ({
                         ...prev,
-                        currentRates: { ...prev.currentRates!, nonQualifiedRate: parseFloat(e.target.value) || 0 }
+                        currentRates: { ...prev.currentRates!, nonQualifiedRate: e.target.value === '' ? 0 : parseFloat(e.target.value) || 0 }
                       }))}
                     />
                   </div>
@@ -293,10 +297,11 @@ export default function ISOAmpCalculator() {
                     <Input
                       id="monthlyFee"
                       type="number"
-                      value={businessData.currentRates?.monthlyFee || 0}
+                      value={businessData.currentRates?.monthlyFee === 0 ? '' : businessData.currentRates?.monthlyFee || ''}
+                      placeholder="e.g. 25"
                       onChange={(e) => setBusinessData(prev => ({
                         ...prev,
-                        currentRates: { ...prev.currentRates!, monthlyFee: parseFloat(e.target.value) || 0 }
+                        currentRates: { ...prev.currentRates!, monthlyFee: e.target.value === '' ? 0 : parseFloat(e.target.value) || 0 }
                       }))}
                     />
                   </div>
@@ -305,16 +310,25 @@ export default function ISOAmpCalculator() {
                     <Input
                       id="equipmentLease"
                       type="number"
-                      value={businessData.currentRates?.equipmentLease || 0}
+                      value={businessData.currentRates?.equipmentLease === 0 ? '' : businessData.currentRates?.equipmentLease || ''}
+                      placeholder="e.g. 39"
                       onChange={(e) => setBusinessData(prev => ({
                         ...prev,
-                        currentRates: { ...prev.currentRates!, equipmentLease: parseFloat(e.target.value) || 0 }
+                        currentRates: { ...prev.currentRates!, equipmentLease: e.target.value === '' ? 0 : parseFloat(e.target.value) || 0 }
                       }))}
                     />
                   </div>
                 </div>
               </div>
             </CardContent>
+            <div className="p-6 pt-0">
+              <div className="flex justify-end">
+                <Button onClick={() => setActiveTab('rates')} className="gap-2">
+                  Next: Rate Analysis
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
           </Card>
         </TabsContent>
 
@@ -340,7 +354,7 @@ export default function ISOAmpCalculator() {
                 <Target className="w-4 h-4 ml-2" />
               </Button>
 
-              {results?.type === 'comparison' && (
+              {results?.type === 'comparison' && results.data && Array.isArray(results.data) && (
                 <div className="space-y-4">
                   {results.data.map((comparison: any, index: number) => (
                     <Card key={index} className={comparison.provider === 'Tracer Co Card' ? 'border-green-500 bg-green-50 dark:bg-green-950' : ''}>
