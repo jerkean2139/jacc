@@ -468,44 +468,59 @@ IMPORTANT: When referencing this document in your response, always include the c
 
   async searchDocuments(query: string): Promise<VectorSearchResult[]> {
     try {
-      // PRIORITY 1: Search ZenBot Knowledge Base first
-      const knowledgeBaseAnswer = await this.searchZenBotKnowledgeBase(query);
-      if (knowledgeBaseAnswer.length > 0) {
-        console.log(`✅ Found answer in ZenBot Knowledge Base for: "${query}"`);
-        return knowledgeBaseAnswer;
+      // PRIORITY 1: Search ZenBot Knowledge Base for internal guidance (not user-facing)
+      const knowledgeBaseGuidance = await this.searchZenBotKnowledgeBase(query);
+      let searchTerms = [query]; // Start with original query
+      
+      if (knowledgeBaseGuidance.length > 0) {
+        console.log(`✅ Found guidance in ZenBot Knowledge Base for: "${query}"`);
+        // Extract search terms from the knowledge base answers to guide document search
+        searchTerms = this.extractSearchTermsFromGuidance(knowledgeBaseGuidance, query);
+        console.log(`🔍 Using enhanced search terms: ${searchTerms.join(', ')}`);
       }
 
-      // PRIORITY 2: Search uploaded documents by name
+      // PRIORITY 2: Search uploaded documents using guidance from knowledge base
       const { storage } = await import('./storage');
       const documents = await storage.getUserDocuments('simple-user-001');
       
-      // Search for documents that match the query
-      const matchingDocs = documents.filter(doc => {
-        const searchText = `${doc.name} ${doc.originalName}`.toLowerCase();
-        const queryLower = query.toLowerCase();
+      let matchingDocs: any[] = [];
+      
+      // Search using each search term from knowledge base guidance
+      for (const searchTerm of searchTerms) {
+        const termMatches = documents.filter(doc => {
+          const searchText = `${doc.name} ${doc.originalName}`.toLowerCase();
+          const termLower = searchTerm.toLowerCase();
+          
+          // Enhanced keyword matching using guided terms
+          const keywordMatches = [
+            // Direct term match
+            searchText.includes(termLower),
+            // Processor names from knowledge base
+            (searchText.includes('tsys') && termLower.includes('tsys')),
+            (searchText.includes('clearent') && termLower.includes('clearent')),
+            (searchText.includes('voyager') && termLower.includes('voyager')),
+            (searchText.includes('trx') && termLower.includes('trx')),
+            (searchText.includes('shift') && (termLower.includes('shift') || termLower.includes('shift4'))),
+            (searchText.includes('skytab') && (termLower.includes('skytab') || termLower.includes('sky tab'))),
+            (searchText.includes('clover') && termLower.includes('clover')),
+            (searchText.includes('micamp') && termLower.includes('micamp')),
+            (searchText.includes('hubwallet') && termLower.includes('hubwallet')),
+            (searchText.includes('quantic') && termLower.includes('quantic')),
+            // Service types from knowledge base
+            (searchText.includes('restaurant') && termLower.includes('restaurant')),
+            (searchText.includes('pos') && (termLower.includes('pos') || termLower.includes('point of sale'))),
+            (searchText.includes('processing') && termLower.includes('processing')),
+            (searchText.includes('rates') && (termLower.includes('rates') || termLower.includes('pricing')))
+          ];
+          
+          return keywordMatches.some(match => match);
+        });
         
-        // Enhanced keyword matching for better document discovery
-        const keywordMatches = [
-          // Direct query match
-          searchText.includes(queryLower),
-          // Processor names
-          (searchText.includes('tsys') && queryLower.includes('tsys')),
-          (searchText.includes('clearent') && queryLower.includes('clearent')),
-          (searchText.includes('voyager') && queryLower.includes('voyager')),
-          (searchText.includes('trx') && queryLower.includes('trx')),
-          (searchText.includes('shift') && (queryLower.includes('shift') || queryLower.includes('shift4'))),
-          (searchText.includes('skytab') && (queryLower.includes('skytab') || queryLower.includes('sky tab'))),
-          (searchText.includes('clover') && queryLower.includes('clover')),
-          (searchText.includes('cenpos') && queryLower.includes('cenpos')),
-          // General terms
-          (searchText.includes('merchant') && queryLower.includes('merchant')),
-          (searchText.includes('pricing') && (queryLower.includes('pricing') || queryLower.includes('price') || queryLower.includes('cost'))),
-          (searchText.includes('equipment') && (queryLower.includes('equipment') || queryLower.includes('terminal') || queryLower.includes('hardware'))),
-          (searchText.includes('pos') && (queryLower.includes('pos') || queryLower.includes('point of sale')))
-        ];
-        
-        return keywordMatches.some(match => match);
-      });
+        matchingDocs.push(...termMatches);
+      }
+      
+      // Remove duplicates
+      matchingDocs = Array.from(new Map(matchingDocs.map(doc => [doc.id, doc])).values());
       
       if (matchingDocs.length > 0) {
         console.log(`✅ Found ${matchingDocs.length} uploaded documents for query: "${query}"`);
@@ -614,6 +629,34 @@ IMPORTANT: When referencing this document in your response, always include the c
     }
     
     return suggestions.slice(0, 5);
+  }
+
+  private extractSearchTermsFromGuidance(knowledgeBaseResults: VectorSearchResult[], originalQuery: string): string[] {
+    const searchTerms = [originalQuery]; // Always include original query
+    
+    // Extract key terms from knowledge base answers
+    knowledgeBaseResults.forEach(result => {
+      const content = result.content.toLowerCase();
+      
+      // Extract company/provider names mentioned in knowledge base
+      const providers = ['shift4', 'skytab', 'micamp', 'clover', 'hubwallet', 'quantic', 'clearent', 'trx', 'tsys', 'authorize.net', 'fluid pay', 'accept blue'];
+      providers.forEach(provider => {
+        if (content.includes(provider)) {
+          searchTerms.push(provider);
+        }
+      });
+      
+      // Extract product/service types
+      const services = ['restaurant pos', 'pos system', 'point of sale', 'payment processing', 'terminal', 'gateway', 'ach', 'gift cards', 'mobile solution'];
+      services.forEach(service => {
+        if (content.includes(service)) {
+          searchTerms.push(service);
+        }
+      });
+    });
+    
+    // Remove duplicates and return
+    return [...new Set(searchTerms)];
   }
 
   async logWebSearchUsage(query: string, response: string, reason: string, context: any): Promise<void> {
