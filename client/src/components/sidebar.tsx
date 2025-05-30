@@ -24,7 +24,8 @@ import {
   Trash2,
   FolderPlus,
   Download,
-  Calculator
+  Calculator,
+  FileSearch
 } from "lucide-react";
 import { DocumentDownload } from "@/components/document-download";
 import type { User, Chat, Folder as FolderType } from "@shared/schema";
@@ -404,11 +405,11 @@ export default function Sidebar({
               <span className="text-sm text-slate-700 dark:text-slate-300">Rate Calculator</span>
             </a>
             <a 
-              href="/iso-amp-calculator" 
+              href="/documents" 
               className="flex items-center space-x-3 p-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg cursor-pointer transition-colors"
             >
-              <Calculator className="w-4 h-4 text-blue-500" />
-              <span className="text-sm text-slate-700 dark:text-slate-300">Business Analysis</span>
+              <FileSearch className="w-4 h-4 text-blue-500" />
+              <span className="text-sm text-slate-700 dark:text-slate-300">Document Analysis</span>
             </a>
           </div>
         </div>
