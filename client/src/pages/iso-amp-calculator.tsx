@@ -408,6 +408,18 @@ export default function ISOAmpCalculator() {
                 </div>
               )}
             </CardContent>
+            <div className="p-6 pt-0">
+              <div className="flex justify-between">
+                <Button variant="outline" onClick={() => setActiveTab('setup')} className="gap-2">
+                  <ChevronLeft className="w-4 h-4" />
+                  Back: Setup
+                </Button>
+                <Button onClick={() => setActiveTab('savings')} className="gap-2">
+                  Next: Savings Analysis
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
           </Card>
         </TabsContent>
 
@@ -513,6 +525,18 @@ export default function ISOAmpCalculator() {
                 </div>
               )}
             </CardContent>
+            <div className="p-6 pt-0">
+              <div className="flex justify-between">
+                <Button variant="outline" onClick={() => setActiveTab('rates')} className="gap-2">
+                  <ChevronLeft className="w-4 h-4" />
+                  Back: Rate Analysis
+                </Button>
+                <Button onClick={() => setActiveTab('equipment')} className="gap-2">
+                  Next: Equipment
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
           </Card>
         </TabsContent>
 
@@ -596,6 +620,14 @@ export default function ISOAmpCalculator() {
                 </div>
               )}
             </CardContent>
+            <div className="p-6 pt-0">
+              <div className="flex justify-start">
+                <Button variant="outline" onClick={() => setActiveTab('savings')} className="gap-2">
+                  <ChevronLeft className="w-4 h-4" />
+                  Back: Savings Analysis
+                </Button>
+              </div>
+            </div>
           </Card>
         </TabsContent>
       </Tabs>
