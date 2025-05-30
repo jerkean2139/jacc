@@ -109,6 +109,32 @@ export default function HomeStable() {
     createFolderMutation.mutate(name);
   };
 
+  // Mutation for deleting folder
+  const deleteFolderMutation = useMutation({
+    mutationFn: async (folderId: string) => {
+      const response = await apiRequest("DELETE", `/api/folders/${folderId}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/folders"] });
+      toast({
+        title: "Success",
+        description: "Folder deleted successfully",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to delete folder",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const handleFolderDelete = (folderId: string) => {
+    deleteFolderMutation.mutate(folderId);
+  };
+
   // Connect the floating action button to new chat creation
   useNewChatFAB(handleNewChat);
 
@@ -132,6 +158,7 @@ export default function HomeStable() {
                 onNewChat={handleNewChat}
                 onChatSelect={handleChatSelect}
                 onFolderCreate={handleFolderCreate}
+                onFolderDelete={handleFolderDelete}
                 collapsed={false}
               />
             </SheetContent>
@@ -172,6 +199,7 @@ export default function HomeStable() {
             onNewChat={handleNewChat}
             onChatSelect={handleChatSelect}
             onFolderCreate={handleFolderCreate}
+            onFolderDelete={handleFolderDelete}
             collapsed={false}
           />
         </div>

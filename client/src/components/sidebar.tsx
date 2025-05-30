@@ -39,6 +39,7 @@ interface SidebarProps {
   onNewChat: () => void;
   onChatSelect: (chatId: string) => void;
   onFolderCreate: (name: string, parentId?: string, color?: string) => void;
+  onFolderDelete?: (folderId: string) => void;
   onChatDelete?: (chatId: string) => void;
   collapsed?: boolean;
 }
@@ -51,6 +52,7 @@ export default function Sidebar({
   onNewChat,
   onChatSelect,
   onFolderCreate,
+  onFolderDelete,
   onChatDelete,
   collapsed = false
 }: SidebarProps) {
@@ -357,28 +359,43 @@ export default function Sidebar({
                 open={expandedFolders.has(folder.id)}
                 onOpenChange={() => toggleFolder(folder.id)}
               >
-                <CollapsibleTrigger asChild>
-                  <div className="flex items-center justify-between p-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg cursor-pointer group transition-colors">
-                    <div className="flex items-center space-x-2">
-                      {expandedFolders.has(folder.id) ? (
-                        <ChevronDown className="w-3 h-3 text-slate-400 dark:text-slate-500" />
-                      ) : (
-                        <ChevronRight className="w-3 h-3 text-slate-400 dark:text-slate-500" />
-                      )}
-                      <Folder className={cn(
-                        "w-4 h-4",
-                        folder.color === "green" ? "text-green-500" :
-                        folder.color === "blue" ? "text-blue-500" :
-                        folder.color === "yellow" ? "text-yellow-500" :
-                        "text-slate-500"
-                      )} />
-                      <span className="text-sm text-slate-700 dark:text-slate-300">{folder.name}</span>
+                <div className="relative group">
+                  <CollapsibleTrigger asChild>
+                    <div className="flex items-center justify-between p-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg cursor-pointer transition-colors">
+                      <div className="flex items-center space-x-2">
+                        {expandedFolders.has(folder.id) ? (
+                          <ChevronDown className="w-3 h-3 text-slate-400 dark:text-slate-500" />
+                        ) : (
+                          <ChevronRight className="w-3 h-3 text-slate-400 dark:text-slate-500" />
+                        )}
+                        <Folder className={cn(
+                          "w-4 h-4",
+                          folder.color === "green" ? "text-green-500" :
+                          folder.color === "blue" ? "text-blue-500" :
+                          folder.color === "yellow" ? "text-yellow-500" :
+                          "text-slate-500"
+                        )} />
+                        <span className="text-sm text-slate-700 dark:text-slate-300">{folder.name}</span>
+                      </div>
+                      <Badge variant="secondary" className="text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+                        0 files
+                      </Badge>
                     </div>
-                    <Badge variant="secondary" className="text-xs opacity-0 group-hover:opacity-100 transition-opacity">
-                      0 files
-                    </Badge>
-                  </div>
-                </CollapsibleTrigger>
+                  </CollapsibleTrigger>
+                  {onFolderDelete && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onFolderDelete(folder.id);
+                      }}
+                      className="absolute top-1 right-1 w-6 h-6 p-0 bg-red-500 hover:bg-red-600 text-white opacity-30 group-hover:opacity-100 transition-all duration-200 rounded-full shadow-lg z-10"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
+                  )}
+                </div>
                 <CollapsibleContent className="ml-6 space-y-1">
                   {/* Subfolder content would go here */}
                 </CollapsibleContent>
