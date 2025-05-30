@@ -452,6 +452,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Document search endpoint
+  app.get('/api/documents/search', async (req: any, res) => {
+    try {
+      const { query } = req.query;
+      
+      if (!query || typeof query !== 'string') {
+        return res.status(400).json({ message: "Query parameter is required" });
+      }
+      
+      const results = await enhancedAIService.searchDocuments(query);
+      res.json(results);
+    } catch (error) {
+      console.error("Error searching documents:", error);
+      res.status(500).json({ message: "Failed to search documents" });
+    }
+  });
+
   app.post('/api/documents/upload', upload.array('files'), async (req: any, res) => {
     try {
       const userId = 'simple-user-001'; // Temporary for testing
