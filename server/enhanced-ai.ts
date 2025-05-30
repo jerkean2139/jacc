@@ -341,9 +341,126 @@ IMPORTANT: When referencing this document in your response, always include the c
     return `I found ${searchResults.length} relevant documents in your Tracer Co Card knowledge base, with ${relevantDocs} being highly relevant (>70% match). The top result "${searchResults[0]?.metadata.documentName}" had a ${(topScore * 100).toFixed(1)}% relevance score. I used these sources to provide accurate, company-specific merchant services information rather than general knowledge.`;
   }
 
+  async searchZenBotKnowledgeBase(query: string): Promise<VectorSearchResult[]> {
+    try {
+      const fs = require('fs');
+      const path = require('path');
+      const knowledgeBasePath = path.join(process.cwd(), 'uploads', 'zenbot-knowledge-base.csv');
+      
+      if (!fs.existsSync(knowledgeBasePath)) {
+        console.log('ZenBot knowledge base not found at:', knowledgeBasePath);
+        return [];
+      }
+
+      const csvContent = fs.readFileSync(knowledgeBasePath, 'utf8');
+      const lines = csvContent.split('\n').slice(1); // Skip header
+      
+      const queryLower = query.toLowerCase();
+      const matchingEntries = [];
+
+      for (const line of lines) {
+        if (!line.trim()) continue;
+        
+        const [question, answer] = line.split(',').map(col => col.trim());
+        if (!question || !answer) continue;
+
+        const questionLower = question.toLowerCase();
+        
+        // Check for keyword matches in the question
+        const keywordMatches = [
+          questionLower.includes(queryLower),
+          this.checkKeywordRelevance(queryLower, questionLower),
+          this.checkProcessorMatches(queryLower, questionLower),
+          this.checkPOSMatches(queryLower, questionLower),
+          this.checkIntegrationMatches(queryLower, questionLower)
+        ];
+
+        if (keywordMatches.some(match => match)) {
+          matchingEntries.push({
+            question: question.replace(/"/g, ''),
+            answer: answer.replace(/"/g, ''),
+            relevance: this.calculateRelevance(queryLower, questionLower)
+          });
+        }
+      }
+
+      if (matchingEntries.length === 0) {
+        return [];
+      }
+
+      // Sort by relevance and return top matches
+      matchingEntries.sort((a, b) => b.relevance - a.relevance);
+      
+      return matchingEntries.slice(0, 3).map((entry, index) => ({
+        id: `zenbot-${index}`,
+        score: entry.relevance,
+        documentId: '2dc361a6-0507-469e-86b2-c0caeed94259',
+        content: `Q: ${entry.question}\nA: ${entry.answer}`,
+        metadata: {
+          documentName: 'ZenBot Knowledge Base - Q&A Reference',
+          webViewLink: '/api/documents/2dc361a6-0507-469e-86b2-c0caeed94259/view',
+          downloadLink: '/api/documents/2dc361a6-0507-469e-86b2-c0caeed94259/download',
+          previewLink: '/api/documents/2dc361a6-0507-469e-86b2-c0caeed94259/preview',
+          chunkIndex: index,
+          mimeType: 'text/csv'
+        }
+      }));
+    } catch (error) {
+      console.error('Error searching ZenBot knowledge base:', error);
+      return [];
+    }
+  }
+
+  private checkKeywordRelevance(query: string, question: string): boolean {
+    const queryWords = query.split(' ').filter(word => word.length > 2);
+    return queryWords.some(word => question.includes(word));
+  }
+
+  private checkProcessorMatches(query: string, question: string): boolean {
+    const processors = ['tsys', 'clearent', 'trx', 'shift4', 'micamp', 'voyager', 'merchant lynx'];
+    return processors.some(processor => 
+      query.includes(processor) && question.includes(processor)
+    );
+  }
+
+  private checkPOSMatches(query: string, question: string): boolean {
+    const posTerms = ['pos', 'point of sale', 'quantic', 'clover', 'skytab', 'hubwallet', 'aloha'];
+    return posTerms.some(term => 
+      query.includes(term) && question.includes(term)
+    );
+  }
+
+  private checkIntegrationMatches(query: string, question: string): boolean {
+    const integrationTerms = ['integrate', 'quickbooks', 'epicor', 'aloha', 'roommaster'];
+    return integrationTerms.some(term => 
+      query.includes(term) && question.includes(term)
+    );
+  }
+
+  private calculateRelevance(query: string, question: string): number {
+    const queryWords = query.split(' ').filter(word => word.length > 2);
+    const questionWords = question.split(' ');
+    
+    let matches = 0;
+    for (const queryWord of queryWords) {
+      if (questionWords.some(qWord => qWord.includes(queryWord))) {
+        matches++;
+      }
+    }
+    
+    return matches / queryWords.length;
+  }
+
   async searchDocuments(query: string): Promise<VectorSearchResult[]> {
     try {
-      // First search uploaded documents directly by name
+      // PRIORITY 1: Search ZenBot Knowledge Base first
+      const knowledgeBaseAnswer = await this.searchZenBotKnowledgeBase(query);
+      if (knowledgeBaseAnswer.length > 0) {
+        console.log(`✅ Found answer in ZenBot Knowledge Base for: "${query}"`);
+        return knowledgeBaseAnswer;
+      }
+
+      // PRIORITY 2: Search uploaded documents by name
       const { storage } = await import('./storage');
       const documents = await storage.getUserDocuments('simple-user-001');
       
