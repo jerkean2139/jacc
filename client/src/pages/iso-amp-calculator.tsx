@@ -20,7 +20,9 @@ import {
   AlertTriangle,
   Zap,
   Target,
-  Award
+  Award,
+  ChevronRight,
+  ChevronLeft
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
@@ -44,6 +46,7 @@ interface BusinessData {
 }
 
 export default function ISOAmpCalculator() {
+  const [activeTab, setActiveTab] = useState('setup');
   const [businessData, setBusinessData] = useState<BusinessData>({
     monthlyVolume: 50000,
     averageTicket: 85,
@@ -162,11 +165,12 @@ export default function ISOAmpCalculator() {
                   <Input
                     id="monthlyVolume"
                     type="number"
-                    value={businessData.monthlyVolume}
+                    value={businessData.monthlyVolume === 0 ? '' : businessData.monthlyVolume}
+                    placeholder="Enter monthly volume"
                     onChange={(e) => setBusinessData(prev => ({
                       ...prev,
-                      monthlyVolume: parseFloat(e.target.value) || 0,
-                      transactionCount: Math.round((parseFloat(e.target.value) || 0) / prev.averageTicket)
+                      monthlyVolume: e.target.value === '' ? 0 : parseFloat(e.target.value) || 0,
+                      transactionCount: Math.round((e.target.value === '' ? 0 : parseFloat(e.target.value) || 0) / prev.averageTicket)
                     }))}
                   />
                 </div>
