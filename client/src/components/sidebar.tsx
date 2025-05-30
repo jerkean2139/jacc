@@ -27,7 +27,7 @@ import {
   Calculator,
   FileSearch
 } from "lucide-react";
-import { DocumentDownload } from "@/components/document-download";
+
 import type { User, Chat, Folder as FolderType } from "@shared/schema";
 import { cn } from "@/lib/utils";
 
@@ -198,11 +198,7 @@ export default function Sidebar({
           New Chat
         </Button>
         
-        {/* FAQ Download */}
-        <DocumentDownload 
-          documentType="faq" 
-          className="w-full" 
-        />
+
       </div>
 
       {/* Scrollable Content */}
