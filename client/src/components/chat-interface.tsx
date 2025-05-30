@@ -210,7 +210,7 @@ export default function ChatInterface({ chatId, onChatUpdate }: ChatInterfacePro
         <div className="flex-1 flex flex-col items-center justify-center p-6 max-w-4xl mx-auto">
           <div className="text-center mb-8">
             <img 
-              src="/attached_assets/FS6idYAvlqMOrtmKZEBd5.jpg" 
+              src="/jacc-logo.jpg" 
               alt="JACC" 
               className="w-16 h-16 rounded-full mx-auto mb-4 object-cover"
             />

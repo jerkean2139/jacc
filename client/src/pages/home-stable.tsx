@@ -103,7 +103,7 @@ export default function HomeStable() {
             </SheetContent>
           </Sheet>
           <img 
-            src="/attached_assets/FS6idYAvlqMOrtmKZEBd5.jpg" 
+            src="/jacc-logo.jpg" 
             alt="JACC" 
             className="w-8 h-8 rounded-full object-cover" 
           />
