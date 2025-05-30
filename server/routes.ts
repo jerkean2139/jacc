@@ -440,6 +440,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.delete('/api/folders/:id', async (req: any, res) => {
+    try {
+      const userId = 'dev-user-123'; // Use test user for folder testing
+      const { id } = req.params;
+      
+      // Verify folder belongs to user before deleting
+      const folder = await storage.getFolder(id);
+      if (!folder || folder.userId !== userId) {
+        return res.status(404).json({ message: "Folder not found" });
+      }
+      
+      await storage.deleteFolder(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting folder:", error);
+      res.status(500).json({ message: "Failed to delete folder" });
+    }
+  });
+
   // Document routes
   app.get('/api/documents', async (req: any, res) => {
     try {
