@@ -164,6 +164,17 @@ export class SmartRoutingService {
   }
 
   async initializeDefaultFolders(userId: string): Promise<void> {
+    // Check if folders already exist for this user
+    const existingFolders = await db
+      .select()
+      .from(folders)
+      .where(eq(folders.userId, userId));
+
+    if (existingFolders.length > 0) {
+      console.log(`✅ Chat organization folders already exist for user ${userId} (${existingFolders.length} folders)`);
+      return;
+    }
+
     const defaultFolders = [
       // Processors
       { name: 'TSYS', namespace: 'processors/tsys', type: 'processor', priority: 90 },
@@ -188,22 +199,28 @@ export class SmartRoutingService {
       { name: 'Contracts', namespace: 'sales/contracts', type: 'sales', priority: 55 },
     ];
 
+    // Create folders one by one with proper error handling
+    let createdCount = 0;
     for (const folder of defaultFolders) {
       try {
-        await db.insert(folders).values({
+        const [newFolder] = await db.insert(folders).values({
           name: folder.name,
           userId: userId,
           vectorNamespace: folder.namespace,
           folderType: folder.type,
           priority: folder.priority,
           color: this.getFolderColor(folder.type),
-        }).onConflictDoNothing();
+        }).returning();
+        
+        if (newFolder) {
+          createdCount++;
+        }
       } catch (error) {
-        console.log(`Folder ${folder.name} might already exist, skipping...`);
+        console.log(`Skipping existing folder: ${folder.name}`);
       }
     }
 
-    console.log(`✅ Initialized default folder structure for user ${userId}`);
+    console.log(`✅ Created ${createdCount} chat organization folders for user ${userId}`);
   }
 
   private getFolderColor(type: string): string {

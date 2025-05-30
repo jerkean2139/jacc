@@ -318,17 +318,18 @@ export default function Sidebar({
           </div>
         </div>
 
-        {/* Folders Section */}
+        {/* Chat Organization Folders */}
         <div className="mb-6">
           <div className="flex items-center justify-between mb-3">
             <h4 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
-              Folders
+              Chat Categories
             </h4>
             <Button
               variant="ghost"
               size="icon"
               className="w-5 h-5"
               onClick={() => setCreatingFolder(true)}
+              title="Create new chat category"
             >
               <FolderPlus className="w-3 h-3" />
             </Button>
