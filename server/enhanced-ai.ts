@@ -80,7 +80,16 @@ export class EnhancedAIService {
     message: string,
     conversationHistory: ChatMessage[]
   ): Promise<EnhancedAIResponse> {
-    // Fallback to existing logic
+    // Use ZenBot knowledge base guided document search
+    const searchResults = await this.searchDocuments(message);
+    
+    if (searchResults.length > 0) {
+      console.log(`📋 Found ${searchResults.length} documents using ZenBot guidance for: "${message}"`);
+      const messages = [...conversationHistory, { role: 'user' as const, content: message }];
+      return await this.generateResponseWithDocuments(messages, { searchResults });
+    }
+    
+    // Fallback to basic response if no documents found
     const messages = [...conversationHistory, { role: 'user' as const, content: message }];
     return await this.generateResponseWithDocuments(messages);
   }
