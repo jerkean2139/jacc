@@ -231,45 +231,45 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
           <div className="grid md:grid-cols-2 gap-4 w-full max-w-2xl mb-8">
             <Button
               variant="outline"
-              className="p-4 h-auto text-left justify-start hover:bg-slate-50 dark:hover:bg-slate-800"
+              className="p-4 h-auto text-left justify-start hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-300 hover:border-blue-200 dark:hover:border-blue-700 transition-colors"
               onClick={() => handleQuickAction("Calculate processing rates for a restaurant")}
             >
               <div>
                 <div className="font-medium mb-1">Calculate Rates</div>
-                <div className="text-sm text-slate-500">Get processing rates for different business types</div>
+                <div className="text-sm text-slate-500 group-hover:text-blue-600 dark:group-hover:text-blue-400">Get processing rates for different business types</div>
               </div>
             </Button>
             
             <Button
               variant="outline"
-              className="p-4 h-auto text-left justify-start hover:bg-slate-50 dark:hover:bg-slate-800"
+              className="p-4 h-auto text-left justify-start hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-300 hover:border-blue-200 dark:hover:border-blue-700 transition-colors"
               onClick={() => handleQuickAction("Compare interchange plus vs tiered pricing")}
             >
               <div>
                 <div className="font-medium mb-1">Rate Comparison</div>
-                <div className="text-sm text-slate-500">Compare different pricing models</div>
+                <div className="text-sm text-slate-500 group-hover:text-blue-600 dark:group-hover:text-blue-400">Compare different pricing models</div>
               </div>
             </Button>
             
             <Button
               variant="outline"
-              className="p-4 h-auto text-left justify-start hover:bg-slate-50 dark:hover:bg-slate-800"
+              className="p-4 h-auto text-left justify-start hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-300 hover:border-blue-200 dark:hover:border-blue-700 transition-colors"
               onClick={() => handleQuickAction("What equipment does a small retail store need?")}
             >
               <div>
                 <div className="font-medium mb-1">Equipment Advice</div>
-                <div className="text-sm text-slate-500">Get recommendations for payment terminals</div>
+                <div className="text-sm text-slate-500 group-hover:text-blue-600 dark:group-hover:text-blue-400">Get recommendations for payment terminals</div>
               </div>
             </Button>
             
             <Button
               variant="outline"
-              className="p-4 h-auto text-left justify-start hover:bg-slate-50 dark:hover:bg-slate-800"
+              className="p-4 h-auto text-left justify-start hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-300 hover:border-blue-200 dark:hover:border-blue-700 transition-colors"
               onClick={() => handleQuickAction("Help me prepare a proposal for a new client")}
             >
               <div>
                 <div className="font-medium mb-1">Create Proposal</div>
-                <div className="text-sm text-slate-500">Generate client proposals and documents</div>
+                <div className="text-sm text-slate-500 group-hover:text-blue-600 dark:group-hover:text-blue-400">Generate client proposals and documents</div>
               </div>
             </Button>
           </div>
