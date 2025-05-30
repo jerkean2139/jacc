@@ -102,9 +102,11 @@ export default function HomeStable() {
               />
             </SheetContent>
           </Sheet>
-          <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
-            J
-          </div>
+          <img 
+            src="/attached_assets/FS6idYAvlqMOrtmKZEBd5.jpg" 
+            alt="JACC" 
+            className="w-8 h-8 rounded-full object-cover" 
+          />
           <h1 className="text-lg font-semibold text-slate-900 dark:text-white">JACC</h1>
         </div>
         <button
