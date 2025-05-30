@@ -601,6 +601,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete chat endpoint
+  app.delete('/api/chats/:chatId', async (req: any, res) => {
+    try {
+      const userId = 'dev-user-123'; // Use test user for chat testing
+      const { chatId } = req.params;
+      
+      // Verify chat belongs to user
+      const chat = await storage.getChat(chatId);
+      if (!chat || chat.userId !== userId) {
+        return res.status(404).json({ message: "Chat not found" });
+      }
+      
+      // Delete the chat (this should cascade delete messages)
+      await storage.deleteChat(chatId);
+      console.log(`Chat ${chatId} deleted successfully`);
+      
+      res.json({ message: "Chat deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting chat:", error);
+      res.status(500).json({ message: "Failed to delete chat" });
+    }
+  });
+
   // FAQ import endpoint
   app.post('/api/admin/import-faq', async (req: any, res) => {
     try {
