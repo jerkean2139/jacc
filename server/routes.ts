@@ -923,6 +923,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Document viewer route for PDF display in browser
+  app.get('/api/documents/:id/view', async (req: any, res) => {
+    try {
+      const userId = 'simple-user-001'; // Temporary for testing
+      const { id } = req.params;
+      
+      const document = await storage.getDocument(id);
+      if (!document || document.userId !== userId) {
+        return res.status(404).json({ message: "Document not found" });
+      }
+      
+      const fs = require('fs');
+      const path = require('path');
+      const filePath = path.join(process.cwd(), 'uploads', document.path);
+      
+      if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ message: "File not found on disk" });
+      }
+      
+      // Set headers for inline viewing
+      res.setHeader('Content-Type', document.mimeType || 'application/pdf');
+      res.setHeader('Content-Disposition', `inline; filename="${document.originalName}"`);
+      res.setHeader('Cache-Control', 'public, max-age=31536000');
+      
+      const fileStream = fs.createReadStream(filePath);
+      fileStream.pipe(res);
+    } catch (error) {
+      console.error("Error viewing document:", error);
+      res.status(500).json({ message: "Failed to view document" });
+    }
+  });
+
+  // Document preview route for hover preview data
+  app.get('/api/documents/:id/preview', async (req: any, res) => {
+    try {
+      const userId = 'simple-user-001'; // Temporary for testing
+      const { id } = req.params;
+      
+      const document = await storage.getDocument(id);
+      if (!document || document.userId !== userId) {
+        return res.status(404).json({ message: "Document not found" });
+      }
+      
+      res.json({
+        id: document.id,
+        name: document.originalName || document.name,
+        mimeType: document.mimeType,
+        createdAt: document.createdAt,
+        description: document.description || `${document.originalName} - Click to view full document`,
+        viewUrl: `/api/documents/${id}/view`,
+        downloadUrl: `/api/documents/${id}/download`
+      });
+    } catch (error) {
+      console.error("Error getting document preview:", error);
+      res.status(500).json({ message: "Failed to get document preview" });
+    }
+  });
+
   app.post('/api/documents/upload', upload.array('files'), async (req: any, res) => {
     try {
       const userId = 'simple-user-001'; // Temporary for testing

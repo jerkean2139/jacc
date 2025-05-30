@@ -249,15 +249,14 @@ When appropriate, suggest actions like saving payment processing information to 
     if (searchResults.length > 3) {
       return `MULTIPLE DOCUMENTS FOUND (${searchResults.length} total):
 ${searchResults.map((result, index) => 
-  `${index + 1}. "${result.metadata.documentName}" - [Download](${result.metadata.webViewLink})`
+  `${index + 1}. [${result.metadata.documentName}](${result.metadata.webViewLink}) ${result.metadata.mimeType?.includes('pdf') ? '📄' : '📊'}`
 ).join('\n')}
 
 INSTRUCTION: Since multiple documents were found, ask the user to be more specific about what they're looking for so you can guide them to the most relevant document(s).`;
     }
 
     return searchResults.map((result, index) => {
-      return `Document ${index + 1}: "${result.metadata.documentName}"
-Direct Link: ${result.metadata.webViewLink}
+      return `Document ${index + 1}: [${result.metadata.documentName}](${result.metadata.webViewLink}) ${result.metadata.mimeType?.includes('pdf') ? '📄' : '📊'}
 Content: ${result.content}
 Relevance Score: ${(result.score * 100).toFixed(1)}%
 
@@ -384,8 +383,10 @@ IMPORTANT: When referencing this document in your response, always include the c
           documentId: doc.id,
           content: `Found document: ${doc.originalName || doc.name} - This document contains information relevant to your query.`,
           metadata: {
-            documentName: doc.originalName || doc.name, // Use original filename instead of internal name
-            webViewLink: `/api/documents/${doc.id}/download`,
+            documentName: doc.originalName || doc.name,
+            webViewLink: `/api/documents/${doc.id}/view`,
+            downloadLink: `/api/documents/${doc.id}/download`,
+            previewLink: `/api/documents/${doc.id}/preview`,
             chunkIndex: 0,
             mimeType: doc.mimeType
           }
