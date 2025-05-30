@@ -362,6 +362,23 @@ export const insertApiKeySchema = createInsertSchema(apiKeys).omit({
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
+
+// User prompt customization table
+export const userPrompts = pgTable("user_prompts", {
+  id: varchar("id").primaryKey().notNull(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  name: varchar("name").notNull(), // e.g., "Email Writing", "Marketing Ideas"
+  writingStyle: text("writing_style"), // User's personal writing style description
+  systemRules: text("system_rules"), // Rules for how AI should respond
+  promptTemplate: text("prompt_template"), // The actual prompt template
+  isDefault: boolean("is_default").default(false),
+  category: varchar("category").default("general"), // "writing", "marketing", "communication", etc.
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export type UserPrompt = typeof userPrompts.$inferSelect;
+export type InsertUserPrompt = typeof userPrompts.$inferInsert;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type ApiKey = typeof apiKeys.$inferSelect;
 export type InsertApiKey = z.infer<typeof insertApiKeySchema>;

@@ -1525,6 +1525,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   initializeGamification();
 
+  // User prompt customization routes
+  app.get('/api/user/prompts', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const prompts = await storage.getUserPrompts(userId);
+      res.json(prompts);
+    } catch (error) {
+      console.error("Error fetching user prompts:", error);
+      res.status(500).json({ message: "Failed to fetch prompts" });
+    }
+  });
+
+  app.post('/api/user/prompts', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const promptData = {
+        id: crypto.randomUUID(),
+        userId,
+        ...req.body
+      };
+      const prompt = await storage.createUserPrompt(promptData);
+      res.json(prompt);
+    } catch (error) {
+      console.error("Error creating user prompt:", error);
+      res.status(500).json({ message: "Failed to create prompt" });
+    }
+  });
+
+  app.put('/api/user/prompts/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const promptId = req.params.id;
+      const prompt = await storage.updateUserPrompt(promptId, req.body);
+      res.json(prompt);
+    } catch (error) {
+      console.error("Error updating user prompt:", error);
+      res.status(500).json({ message: "Failed to update prompt" });
+    }
+  });
+
+  app.delete('/api/user/prompts/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const promptId = req.params.id;
+      await storage.deleteUserPrompt(promptId);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting user prompt:", error);
+      res.status(500).json({ message: "Failed to delete prompt" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

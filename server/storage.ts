@@ -313,6 +313,48 @@ export class DatabaseStorage implements IStorage {
         .orderBy(desc(userChatLogs.timestamp));
     }
   }
+
+  // Prompt customization operations
+  async getUserPrompts(userId: string): Promise<UserPrompt[]> {
+    const prompts = await db.select().from(userPrompts).where(eq(userPrompts.userId, userId));
+    return prompts;
+  }
+
+  async createUserPrompt(promptData: InsertUserPrompt): Promise<UserPrompt> {
+    const [prompt] = await db
+      .insert(userPrompts)
+      .values(promptData)
+      .returning();
+    return prompt;
+  }
+
+  async updateUserPrompt(promptId: string, updates: Partial<UserPrompt>): Promise<UserPrompt> {
+    const [prompt] = await db
+      .update(userPrompts)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(userPrompts.id, promptId))
+      .returning();
+    return prompt;
+  }
+
+  async deleteUserPrompt(promptId: string): Promise<void> {
+    await db.delete(userPrompts).where(eq(userPrompts.id, promptId));
+  }
+
+  async getUserDefaultPrompt(userId: string, category?: string): Promise<UserPrompt | undefined> {
+    const query = db.select().from(userPrompts)
+      .where(and(
+        eq(userPrompts.userId, userId),
+        eq(userPrompts.isDefault, true)
+      ));
+    
+    if (category) {
+      query.where(eq(userPrompts.category, category));
+    }
+    
+    const [prompt] = await query;
+    return prompt;
+  }
 }
 
 export const storage = new DatabaseStorage();
