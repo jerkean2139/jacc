@@ -11,7 +11,7 @@ import ContextualHelp from "@/components/contextual-help";
 import InteractiveTutorial from "@/components/interactive-tutorial";
 import PWAInstallPrompt from "@/components/pwa-install-prompt";
 import BottomNav from "@/components/bottom-nav";
-import ResponsiveDebugPanel from "@/components/responsive-debug-panel";
+
 import Landing from "@/pages/landing";
 import HomeStable from "@/pages/home-stable";
 import NotFound from "@/pages/not-found";
@@ -62,7 +62,6 @@ function AppContent() {
       <PWAInstallPrompt />
       <Router />
       <BottomNav />
-      <ResponsiveDebugPanel />
     </GamificationProvider>
   );
 }
