@@ -5,13 +5,17 @@ import {
   messages, 
   documents, 
   favorites,
+  apiKeys,
   type User, 
   type UpsertUser,
+  type InsertUser,
   type Folder,
   type Chat,
   type Message,
   type Document,
   type Favorite,
+  type ApiKey,
+  type InsertApiKey,
   type InsertFolder,
   type InsertChat,
   type InsertMessage,
@@ -25,7 +29,17 @@ import { eq, desc } from "drizzle-orm";
 export interface IStorage {
   // User operations
   getUser(id: string): Promise<User | undefined>;
+  getUserByUsername(username: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  createUser(user: InsertUser): Promise<User>;
   upsertUser(user: UpsertUser): Promise<User>;
+  
+  // API Key operations
+  createApiKey(apiKey: InsertApiKey): Promise<ApiKey>;
+  getApiKeyByHash(keyHash: string): Promise<ApiKey | undefined>;
+  getUserApiKeys(userId: string): Promise<ApiKey[]>;
+  updateApiKeyUsage(id: string): Promise<void>;
+  deleteApiKey(id: string): Promise<void>;
   
   // Chat operations
   getUserChats(userId: string): Promise<Chat[]>;
@@ -58,16 +72,25 @@ export interface IStorage {
 export class DatabaseStorage implements IStorage {
   // User operations
   async getUser(id: string): Promise<User | undefined> {
-    const [user] = await db.select({
-      id: users.id,
-      email: users.email,
-      firstName: users.firstName,
-      lastName: users.lastName,
-      profileImageUrl: users.profileImageUrl,
-      role: users.role,
-      createdAt: users.createdAt,
-      updatedAt: users.updatedAt
-    }).from(users).where(eq(users.id, id));
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user;
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user;
+  }
+
+  async createUser(userData: InsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(userData)
+      .returning();
     return user;
   }
 
@@ -84,6 +107,34 @@ export class DatabaseStorage implements IStorage {
       })
       .returning();
     return user;
+  }
+
+  // API Key operations
+  async createApiKey(apiKeyData: InsertApiKey): Promise<ApiKey> {
+    const [apiKey] = await db
+      .insert(apiKeys)
+      .values(apiKeyData)
+      .returning();
+    return apiKey;
+  }
+
+  async getApiKeyByHash(keyHash: string): Promise<ApiKey | undefined> {
+    const [apiKey] = await db.select().from(apiKeys).where(eq(apiKeys.keyHash, keyHash));
+    return apiKey;
+  }
+
+  async getUserApiKeys(userId: string): Promise<ApiKey[]> {
+    return await db.select().from(apiKeys).where(eq(apiKeys.userId, userId));
+  }
+
+  async updateApiKeyUsage(id: string): Promise<void> {
+    await db.update(apiKeys)
+      .set({ lastUsed: new Date() })
+      .where(eq(apiKeys.id, id));
+  }
+
+  async deleteApiKey(id: string): Promise<void> {
+    await db.delete(apiKeys).where(eq(apiKeys.id, id));
   }
 
   // Chat operations
