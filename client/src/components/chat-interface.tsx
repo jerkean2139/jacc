@@ -241,54 +241,6 @@ export default function ChatInterface({ chatId, onChatUpdate }: ChatInterfacePro
 
   return (
     <div className="h-full flex flex-col bg-white dark:bg-slate-900">
-      {/* Chat Header - Desktop Only */}
-      <div className="hidden md:block border-b border-slate-200 dark:border-slate-700 p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div>
-              <h1 className="text-xl font-semibold text-slate-900 dark:text-white">JACC Assistant</h1>
-              <p className="text-sm text-slate-500 dark:text-slate-400">AI-powered sales support</p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleVoiceInput}
-              className={cn(
-                "transition-colors",
-                isListening && "text-red-500"
-              )}
-              title="Voice Chat"
-            >
-              <Mic className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setShowFileUpload(!showFileUpload)}
-              title="Upload File"
-            >
-              <Paperclip className="w-4 h-4" />
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <MoreVertical className="w-4 h-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem>
-                  Clear Chat
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  Export Chat
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-      </div>
 
       {/* Chat Messages */}
       <ScrollArea className="flex-1 p-4">

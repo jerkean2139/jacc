@@ -112,7 +112,7 @@ export default function HomeStable() {
               />
             </SheetContent>
           </Sheet>
-          <img src="/icons/icon-192x192.png" alt="JACC" className="w-8 h-8" />
+          <img src="/attached_assets/FS6idYAvlqMOrtmKZEBd5.jpg" alt="JACC" className="w-8 h-8 rounded-full object-cover" />
           <h1 className="text-lg font-semibold text-slate-900 dark:text-white">JACC</h1>
         </div>
         <button
