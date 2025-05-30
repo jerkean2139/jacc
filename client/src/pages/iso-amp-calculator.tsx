@@ -48,7 +48,7 @@ interface BusinessData {
 }
 
 export default function ISOAmpCalculator() {
-  const [activeTab, setActiveTab] = useState('setup');
+  const [activeTab, setActiveTab] = useState('analysis');
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [analysisResults, setAnalysisResults] = useState<any>(null);
   const [businessData, setBusinessData] = useState<BusinessData>({
@@ -647,7 +647,7 @@ export default function ISOAmpCalculator() {
                   {/* Scenarios */}
                   <div className="space-y-4">
                     <h4 className="font-semibold">Savings Scenarios</h4>
-                    {results.data.scenarios.map((scenario: any, index: number) => (
+                    {results.data.scenarios?.map((scenario: any, index: number) => (
                       <Card key={index}>
                         <CardHeader>
                           <div className="flex justify-between items-start">
