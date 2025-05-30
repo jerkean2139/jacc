@@ -6,6 +6,7 @@ import {
   documents, 
   favorites,
   apiKeys,
+  userChatLogs,
   type User, 
   type UpsertUser,
   type InsertUser,
@@ -20,7 +21,9 @@ import {
   type InsertChat,
   type InsertMessage,
   type InsertDocument,
-  type InsertFavorite
+  type InsertFavorite,
+  type InsertUserChatLog,
+  type UserChatLog
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc } from "drizzle-orm";

@@ -269,6 +269,19 @@ export const faqKnowledgeBase = pgTable("faq_knowledge_base", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Admin logging table for tracking all first user chat requests
+export const userChatLogs = pgTable("user_chat_logs", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  sessionId: varchar("session_id"),
+  firstMessage: text("first_message").notNull(),
+  chatId: uuid("chat_id").notNull().references(() => chats.id, { onDelete: "cascade" }),
+  userRole: varchar("user_role"),
+  ipAddress: varchar("ip_address"),
+  userAgent: text("user_agent"),
+  timestamp: timestamp("timestamp").defaultNow(),
+});
+
 // Define relations
 export const usersRelations = relations(users, ({ many }) => ({
   folders: many(folders),
@@ -433,3 +446,11 @@ export type InsertMerchantApplication = z.infer<typeof insertMerchantApplication
 export type MerchantApplication = typeof merchantApplications.$inferSelect;
 export type InsertHelpContent = z.infer<typeof insertHelpContentSchema>;
 export type HelpContent = typeof helpContent.$inferSelect;
+
+export const insertUserChatLogSchema = createInsertSchema(userChatLogs).omit({
+  id: true,
+  timestamp: true,
+});
+
+export type InsertUserChatLog = z.infer<typeof insertUserChatLogSchema>;
+export type UserChatLog = typeof userChatLogs.$inferSelect;

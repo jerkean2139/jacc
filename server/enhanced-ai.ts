@@ -352,12 +352,28 @@ IMPORTANT: When referencing this document in your response, always include the c
       const matchingDocs = documents.filter(doc => {
         const searchText = `${doc.name} ${doc.originalName}`.toLowerCase();
         const queryLower = query.toLowerCase();
-        return searchText.includes(queryLower) || 
-               (searchText.includes('tsys') && queryLower.includes('tsys')) ||
-               (searchText.includes('merchant') && queryLower.includes('merchant')) ||
-               (searchText.includes('clearent') && queryLower.includes('clearent')) ||
-               (searchText.includes('voyager') && queryLower.includes('voyager')) ||
-               (searchText.includes('trx') && queryLower.includes('trx'));
+        
+        // Enhanced keyword matching for better document discovery
+        const keywordMatches = [
+          // Direct query match
+          searchText.includes(queryLower),
+          // Processor names
+          (searchText.includes('tsys') && queryLower.includes('tsys')),
+          (searchText.includes('clearent') && queryLower.includes('clearent')),
+          (searchText.includes('voyager') && queryLower.includes('voyager')),
+          (searchText.includes('trx') && queryLower.includes('trx')),
+          (searchText.includes('shift') && (queryLower.includes('shift') || queryLower.includes('shift4'))),
+          (searchText.includes('skytab') && (queryLower.includes('skytab') || queryLower.includes('sky tab'))),
+          (searchText.includes('clover') && queryLower.includes('clover')),
+          (searchText.includes('cenpos') && queryLower.includes('cenpos')),
+          // General terms
+          (searchText.includes('merchant') && queryLower.includes('merchant')),
+          (searchText.includes('pricing') && (queryLower.includes('pricing') || queryLower.includes('price') || queryLower.includes('cost'))),
+          (searchText.includes('equipment') && (queryLower.includes('equipment') || queryLower.includes('terminal') || queryLower.includes('hardware'))),
+          (searchText.includes('pos') && (queryLower.includes('pos') || queryLower.includes('point of sale')))
+        ];
+        
+        return keywordMatches.some(match => match);
       });
       
       if (matchingDocs.length > 0) {
