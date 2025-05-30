@@ -469,6 +469,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Individual document download endpoint
+  app.get('/api/documents/:id/download', async (req: any, res) => {
+    try {
+      const userId = 'simple-user-001';
+      const { id } = req.params;
+      
+      const document = await storage.getDocument(id);
+      if (!document || document.userId !== userId) {
+        return res.status(404).json({ message: "Document not found" });
+      }
+      
+      const fs = require('fs');
+      const path = require('path');
+      const filePath = path.join(process.cwd(), 'uploads', document.path);
+      
+      if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ message: "File not found on disk" });
+      }
+      
+      res.setHeader('Content-Type', document.mimeType || 'application/octet-stream');
+      res.setHeader('Content-Disposition', `attachment; filename="${document.originalName}"`);
+      
+      const fileStream = fs.createReadStream(filePath);
+      fileStream.pipe(res);
+    } catch (error) {
+      console.error("Error downloading document:", error);
+      res.status(500).json({ message: "Failed to download document" });
+    }
+  });
+
   app.post('/api/documents/upload', upload.array('files'), async (req: any, res) => {
     try {
       const userId = 'simple-user-001'; // Temporary for testing
