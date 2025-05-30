@@ -1519,12 +1519,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'No file uploaded' });
       }
 
-      const { documentProcessor } = await import('./document-processor');
       const filePath = req.file.path;
       const mimeType = req.file.mimetype;
 
       // Extract text content from the uploaded statement
-      const content = await documentProcessor.extractTextContent(filePath, mimeType);
+      const { DocumentProcessor } = await import('./document-processor');
+      const processor = new DocumentProcessor();
+      const content = await processor.extractTextContent(filePath, mimeType);
       
       // Analyze content for financial data
       const extractedData = await analyzeStatementContent(content);
@@ -1551,6 +1552,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: 'Failed to analyze statement' });
     }
   });
+
+// Statement analysis helper function
+async function analyzeStatementContent(content: string) {
+  try {
+    // Use regex patterns to extract financial data from statement text
+    const patterns = {
+      monthlyVolume: /(?:total\s+volume|monthly\s+volume|gross\s+sales?)[\s:]+\$?([\d,]+\.?\d*)/i,
+      transactionCount: /(?:transaction\s+count|total\s+transactions?)[\s:]+(\d+)/i,
+      averageTicket: /(?:average\s+(?:ticket|sale)|avg\s+ticket)[\s:]+\$?([\d,]+\.?\d*)/i,
+      processingFee: /(?:processing\s+fee|discount\s+rate)[\s:]+(\d+\.?\d*)%?/i,
+      monthlyFee: /(?:monthly\s+fee|statement\s+fee)[\s:]+\$?([\d,]+\.?\d*)/i,
+    };
+
+    const extracted: any = {};
+
+    // Extract monthly volume
+    const volumeMatch = content.match(patterns.monthlyVolume);
+    if (volumeMatch) {
+      extracted.monthlyVolume = parseFloat(volumeMatch[1].replace(/,/g, ''));
+    }
+
+    // Extract transaction count
+    const countMatch = content.match(patterns.transactionCount);
+    if (countMatch) {
+      extracted.transactionCount = parseInt(countMatch[1]);
+    }
+
+    // Extract average ticket
+    const ticketMatch = content.match(patterns.averageTicket);
+    if (ticketMatch) {
+      extracted.averageTicket = parseFloat(ticketMatch[1].replace(/,/g, ''));
+    } else if (extracted.monthlyVolume && extracted.transactionCount) {
+      // Calculate average ticket if not found directly
+      extracted.averageTicket = Math.round((extracted.monthlyVolume / extracted.transactionCount) * 100) / 100;
+    }
+
+    // Extract processing rates
+    const feeMatch = content.match(patterns.processingFee);
+    if (feeMatch) {
+      extracted.currentRates = {
+        qualifiedRate: parseFloat(feeMatch[1]),
+      };
+    }
+
+    // Extract monthly fees
+    const monthlyFeeMatch = content.match(patterns.monthlyFee);
+    if (monthlyFeeMatch) {
+      if (!extracted.currentRates) extracted.currentRates = {};
+      extracted.currentRates.monthlyFee = parseFloat(monthlyFeeMatch[1].replace(/,/g, ''));
+    }
+
+    return extracted;
+  } catch (error) {
+    console.error('Error analyzing statement content:', error);
+    return {};
+  }
+}
 
   // Initialize gamification system
   const initializeGamification = async () => {

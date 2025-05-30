@@ -49,7 +49,7 @@ export class DocumentProcessor {
     }
   }
 
-  private async extractTextContent(filePath: string, mimeType: string): Promise<string> {
+  async extractTextContent(filePath: string, mimeType: string): Promise<string> {
     try {
       if (!fs.existsSync(filePath)) {
         console.error(`File not found: ${filePath}`);
