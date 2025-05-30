@@ -29,14 +29,8 @@ export default function HomeStable() {
     queryKey: ["/api/folders"],
   });
 
-  // Set active chat to most recent if none selected
-  useEffect(() => {
-    if (!activeChatId && chats.length > 0) {
-      const chatId = "05c2287d-a415-4de4-b9b4-1bc4628a337a";
-      console.log("Setting active chat ID to:", chatId);
-      setActiveChatId(chatId);
-    }
-  }, [chats]);
+  // Don't auto-select any chat - start with new chat interface
+  // Users can manually select a chat from the sidebar
 
   const handleNewChat = async () => {
     try {

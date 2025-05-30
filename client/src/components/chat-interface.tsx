@@ -204,35 +204,97 @@ export default function ChatInterface({ chatId, onChatUpdate }: ChatInterfacePro
 
   if (!chatId) {
     return (
-      <div className="h-full flex flex-col">
-        {/* Header - Desktop Only */}
-        <div className="hidden md:block border-b border-slate-200 dark:border-slate-700 p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
+      <div className="h-full flex flex-col bg-white dark:bg-slate-900">
+
+        {/* Welcome Screen */}
+        <div className="flex-1 flex flex-col items-center justify-center p-6 max-w-4xl mx-auto">
+          <div className="text-center mb-8">
+            <img 
+              src="/attached_assets/FS6idYAvlqMOrtmKZEBd5.jpg" 
+              alt="JACC" 
+              className="w-16 h-16 rounded-full mx-auto mb-4 object-cover"
+            />
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
+              How can I help you today?
+            </h1>
+            <p className="text-slate-600 dark:text-slate-400">
+              Ask me about merchant services, rates, documents, or client questions
+            </p>
+          </div>
+
+          {/* Suggested Prompts */}
+          <div className="grid md:grid-cols-2 gap-4 w-full max-w-2xl mb-8">
+            <Button
+              variant="outline"
+              className="p-4 h-auto text-left justify-start hover:bg-slate-50 dark:hover:bg-slate-800"
+              onClick={() => handleQuickAction("Calculate processing rates for a restaurant")}
+            >
               <div>
-                <h1 className="text-xl font-semibold text-slate-900 dark:text-white">JACC Assistant</h1>
-                <p className="text-sm text-slate-500 dark:text-slate-400">AI-powered sales support</p>
+                <div className="font-medium mb-1">Calculate Rates</div>
+                <div className="text-sm text-slate-500">Get processing rates for different business types</div>
               </div>
-            </div>
+            </Button>
+            
+            <Button
+              variant="outline"
+              className="p-4 h-auto text-left justify-start hover:bg-slate-50 dark:hover:bg-slate-800"
+              onClick={() => handleQuickAction("Compare interchange plus vs tiered pricing")}
+            >
+              <div>
+                <div className="font-medium mb-1">Rate Comparison</div>
+                <div className="text-sm text-slate-500">Compare different pricing models</div>
+              </div>
+            </Button>
+            
+            <Button
+              variant="outline"
+              className="p-4 h-auto text-left justify-start hover:bg-slate-50 dark:hover:bg-slate-800"
+              onClick={() => handleQuickAction("What equipment does a small retail store need?")}
+            >
+              <div>
+                <div className="font-medium mb-1">Equipment Advice</div>
+                <div className="text-sm text-slate-500">Get recommendations for payment terminals</div>
+              </div>
+            </Button>
+            
+            <Button
+              variant="outline"
+              className="p-4 h-auto text-left justify-start hover:bg-slate-50 dark:hover:bg-slate-800"
+              onClick={() => handleQuickAction("Help me prepare a proposal for a new client")}
+            >
+              <div>
+                <div className="font-medium mb-1">Create Proposal</div>
+                <div className="text-sm text-slate-500">Generate client proposals and documents</div>
+              </div>
+            </Button>
           </div>
         </div>
 
-        {/* Welcome Screen */}
-        <div className="flex-1 flex items-center justify-center p-8">
-          <div className="text-center max-w-md">
-            <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Send className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+        {/* Input Box for New Chat */}
+        <div className="border-t border-slate-200 dark:border-slate-700 p-4">
+          <div className="flex items-end space-x-3 max-w-4xl mx-auto">
+            <div className="flex-1 relative">
+              <Textarea
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyPress}
+                placeholder="Ask JACC anything about merchant services..."
+                className="auto-resize border-slate-300 dark:border-slate-600 rounded-xl pr-12 min-h-[50px] max-h-[120px] resize-none focus:ring-blue-500 focus:border-blue-500"
+                disabled={sendMessageMutation.isPending}
+              />
+              
+              <div className="absolute right-2 bottom-2">
+                <Button
+                  type="submit"
+                  size="icon"
+                  onClick={handleSendMessage}
+                  disabled={!input.trim() || sendMessageMutation.isPending}
+                  className="w-8 h-8 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
+                >
+                  <Send className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">
-              Welcome to Tracer
-            </h2>
-            <p className="text-slate-600 dark:text-slate-400 mb-6">
-              Start a new conversation to get help with insurance questions, rate comparisons, 
-              document analysis, and more.
-            </p>
-            <Button onClick={() => {}} className="navy-primary text-white hover:opacity-90">
-              Start New Chat
-            </Button>
           </div>
         </div>
       </div>
