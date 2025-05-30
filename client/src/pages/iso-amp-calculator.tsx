@@ -774,7 +774,7 @@ export default function ISOAmpCalculator() {
                   {/* Equipment Recommendations */}
                   <div className="space-y-4">
                     <h4 className="font-semibold">Recommended Equipment</h4>
-                    {equipmentResults.recommendations.map((item: any, index: number) => (
+                    {equipmentResults.recommendations?.map((item: any, index: number) => (
                       <Card key={index}>
                         <CardHeader>
                           <div className="flex justify-between items-start">

@@ -1556,53 +1556,97 @@ export async function registerRoutes(app: Express): Promise<Server> {
 // Statement analysis helper function
 async function analyzeStatementContent(content: string) {
   try {
-    // Use regex patterns to extract financial data from statement text
+    console.log('Analyzing content length:', content.length);
+    console.log('Content sample (first 500 chars):', content.substring(0, 500));
+
+    // Improved patterns for various statement formats
     const patterns = {
-      monthlyVolume: /(?:total\s+volume|monthly\s+volume|gross\s+sales?)[\s:]+\$?([\d,]+\.?\d*)/i,
-      transactionCount: /(?:transaction\s+count|total\s+transactions?)[\s:]+(\d+)/i,
-      averageTicket: /(?:average\s+(?:ticket|sale)|avg\s+ticket)[\s:]+\$?([\d,]+\.?\d*)/i,
-      processingFee: /(?:processing\s+fee|discount\s+rate)[\s:]+(\d+\.?\d*)%?/i,
-      monthlyFee: /(?:monthly\s+fee|statement\s+fee)[\s:]+\$?([\d,]+\.?\d*)/i,
+      // More flexible volume patterns
+      monthlyVolume: [
+        /(?:total\s+volume|monthly\s+volume|gross\s+sales?|total\s+sales?)[\s:$]*(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/i,
+        /volume[\s:$]*(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/i,
+        /\$(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)\s*(?:total|volume|sales)/i
+      ],
+      // Transaction count patterns
+      transactionCount: [
+        /(?:transaction\s+count|total\s+transactions?|number\s+of\s+transactions?)[\s:]*(\d{1,6})/i,
+        /(\d{1,6})\s*(?:transactions?|trans)/i,
+        /count[\s:]*(\d{1,6})/i
+      ],
+      // Average ticket patterns
+      averageTicket: [
+        /(?:average\s+(?:ticket|sale)|avg\s+ticket|average\s+amount)[\s:$]*(\d{1,4}(?:\.\d{2})?)/i,
+        /ticket[\s:$]*(\d{1,4}(?:\.\d{2})?)/i
+      ],
+      // Processing fee patterns
+      processingFee: [
+        /(?:processing\s+fee|discount\s+rate|rate)[\s:]*(\d+\.?\d*)%?/i,
+        /(\d+\.\d{2})%\s*(?:rate|fee)/i
+      ],
+      // Monthly fee patterns
+      monthlyFee: [
+        /(?:monthly\s+fee|statement\s+fee|service\s+fee)[\s:$]*(\d{1,3}(?:\.\d{2})?)/i
+      ]
     };
 
     const extracted: any = {};
 
-    // Extract monthly volume
-    const volumeMatch = content.match(patterns.monthlyVolume);
-    if (volumeMatch) {
-      extracted.monthlyVolume = parseFloat(volumeMatch[1].replace(/,/g, ''));
+    // Try each pattern until we find a match
+    for (const [key, patternArray] of Object.entries(patterns)) {
+      for (const pattern of patternArray) {
+        const match = content.match(pattern);
+        if (match) {
+          const value = match[1].replace(/,/g, '');
+          
+          if (key === 'monthlyVolume') {
+            extracted.monthlyVolume = parseFloat(value);
+            console.log('Found monthly volume:', extracted.monthlyVolume);
+          } else if (key === 'transactionCount') {
+            extracted.transactionCount = parseInt(value);
+            console.log('Found transaction count:', extracted.transactionCount);
+          } else if (key === 'averageTicket') {
+            extracted.averageTicket = parseFloat(value);
+            console.log('Found average ticket:', extracted.averageTicket);
+          } else if (key === 'processingFee') {
+            if (!extracted.currentRates) extracted.currentRates = {};
+            extracted.currentRates.qualifiedRate = parseFloat(value);
+            console.log('Found processing fee:', extracted.currentRates.qualifiedRate);
+          } else if (key === 'monthlyFee') {
+            if (!extracted.currentRates) extracted.currentRates = {};
+            extracted.currentRates.monthlyFee = parseFloat(value);
+            console.log('Found monthly fee:', extracted.currentRates.monthlyFee);
+          }
+          break; // Found a match, try next field
+        }
+      }
     }
 
-    // Extract transaction count
-    const countMatch = content.match(patterns.transactionCount);
-    if (countMatch) {
-      extracted.transactionCount = parseInt(countMatch[1]);
-    }
-
-    // Extract average ticket
-    const ticketMatch = content.match(patterns.averageTicket);
-    if (ticketMatch) {
-      extracted.averageTicket = parseFloat(ticketMatch[1].replace(/,/g, ''));
-    } else if (extracted.monthlyVolume && extracted.transactionCount) {
-      // Calculate average ticket if not found directly
+    // Calculate average ticket if we have volume and count but no direct ticket
+    if (extracted.monthlyVolume && extracted.transactionCount && !extracted.averageTicket) {
       extracted.averageTicket = Math.round((extracted.monthlyVolume / extracted.transactionCount) * 100) / 100;
+      console.log('Calculated average ticket:', extracted.averageTicket);
     }
 
-    // Extract processing rates
-    const feeMatch = content.match(patterns.processingFee);
-    if (feeMatch) {
-      extracted.currentRates = {
-        qualifiedRate: parseFloat(feeMatch[1]),
-      };
+    // If we didn't find much, try to extract any numbers for debugging
+    if (Object.keys(extracted).length === 0) {
+      console.log('No structured data found. Looking for any dollar amounts and numbers...');
+      const dollarAmounts = content.match(/\$[\d,]+(?:\.\d{2})?/g);
+      const largeNumbers = content.match(/\b\d{1,3}(?:,\d{3})+\b/g);
+      console.log('Dollar amounts found:', dollarAmounts?.slice(0, 5));
+      console.log('Large numbers found:', largeNumbers?.slice(0, 5));
+
+      // As a fallback, try to extract the largest dollar amount as volume
+      if (dollarAmounts && dollarAmounts.length > 0) {
+        const amounts = dollarAmounts.map(amt => parseFloat(amt.replace(/[$,]/g, '')));
+        const maxAmount = Math.max(...amounts);
+        if (maxAmount > 1000) { // Reasonable minimum for monthly volume
+          extracted.monthlyVolume = maxAmount;
+          console.log('Using largest dollar amount as volume:', maxAmount);
+        }
+      }
     }
 
-    // Extract monthly fees
-    const monthlyFeeMatch = content.match(patterns.monthlyFee);
-    if (monthlyFeeMatch) {
-      if (!extracted.currentRates) extracted.currentRates = {};
-      extracted.currentRates.monthlyFee = parseFloat(monthlyFeeMatch[1].replace(/,/g, ''));
-    }
-
+    console.log('Final extracted data:', extracted);
     return extracted;
   } catch (error) {
     console.error('Error analyzing statement content:', error);
