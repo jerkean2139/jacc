@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import type { Message } from "@shared/schema";
 import { cn } from "@/lib/utils";
+import { MessageContent } from "./message-content";
 
 interface MessageBubbleProps {
   message: Message;
@@ -136,7 +137,7 @@ export default function MessageBubble({ message, actions }: MessageBubbleProps) 
                 </Card>
               </div>
             ) : (
-              <p className="whitespace-pre-wrap">{message.content}</p>
+              <MessageContent content={message.content} />
             )}
           </div>
 
