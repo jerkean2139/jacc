@@ -405,10 +405,26 @@ export default function Sidebar({
           </div>
         </div>
 
-        {/* ISO AMP Section */}
+        {/* Knowledge Base Section */}
         <div className="mb-6">
           <h4 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3">
-            ISO AMP
+            Knowledge Base
+          </h4>
+          <div className="space-y-1">
+            <a 
+              href="/documents" 
+              className="flex items-center space-x-3 p-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg cursor-pointer transition-colors"
+            >
+              <FileSearch className="w-4 h-4 text-green-500" />
+              <span className="text-sm text-slate-700 dark:text-slate-300">Document Library</span>
+            </a>
+          </div>
+        </div>
+
+        {/* ISO AMP Tools Section */}
+        <div className="mb-6">
+          <h4 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3">
+            ISO AMP Tools
           </h4>
           <div className="space-y-1">
             <a 
@@ -417,13 +433,6 @@ export default function Sidebar({
             >
               <Calculator className="w-4 h-4 text-blue-500" />
               <span className="text-sm text-slate-700 dark:text-slate-300">Rate Calculator</span>
-            </a>
-            <a 
-              href="/documents" 
-              className="flex items-center space-x-3 p-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg cursor-pointer transition-colors"
-            >
-              <FileSearch className="w-4 h-4 text-blue-500" />
-              <span className="text-sm text-slate-700 dark:text-slate-300">Document Analysis</span>
             </a>
           </div>
         </div>

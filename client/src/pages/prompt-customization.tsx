@@ -8,8 +8,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Edit3, Trash2, MessageSquare, Mail, TrendingUp, Users } from "lucide-react";
+import { Plus, Edit3, Trash2, MessageSquare, Mail, TrendingUp, Users, Home, ChevronRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Link } from "wouter";
 
 interface UserPrompt {
   id: string;
@@ -175,6 +176,16 @@ export default function PromptCustomization() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
+      {/* Breadcrumb Navigation */}
+      <nav className="flex items-center text-sm text-muted-foreground mb-4">
+        <Link href="/" className="flex items-center hover:text-foreground transition-colors">
+          <Home className="w-4 h-4 mr-1" />
+          Home
+        </Link>
+        <ChevronRight className="w-4 h-4 mx-2" />
+        <span className="text-foreground">AI Prompt Customization</span>
+      </nav>
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">AI Prompt Customization</h1>
