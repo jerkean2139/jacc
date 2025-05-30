@@ -1,82 +1,78 @@
-import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
+import { useState, useRef, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Link, useLocation } from "wouter";
+import { Menu, Plus, MessageSquare, Folder, Download, Settings, HelpCircle, Calculator, BookOpen, Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
 import Sidebar from "@/components/sidebar";
 import ChatInterface from "@/components/chat-interface";
 import { useAuth } from "@/hooks/useAuth";
 import { useNewChatFAB } from "@/components/bottom-nav";
-import type { Chat, Folder } from "@shared/schema";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 export default function HomeStable() {
   const { user } = useAuth();
-  const [activeChatId, setActiveChatId] = useState<string | null>(null);
-  const [isClient, setIsClient] = useState(false);
+  const [location, navigate] = useLocation();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  // Ensure we're on the client side
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
+  // Extract chatId from URL
+  const activeChatId = location.includes('/chat/') ? location.split('/chat/')[1] : null;
 
-  // Fetch user's chats
-  const { data: chats = [], refetch: refetchChats } = useQuery<Chat[]>({
+  // Fetch chats and folders
+  const { data: chats = [], refetch: refetchChats } = useQuery({
     queryKey: ["/api/chats"],
   });
 
-  // Fetch user's folders
-  const { data: folders = [], refetch: refetchFolders } = useQuery<Folder[]>({
+  const { data: folders = [] } = useQuery({
     queryKey: ["/api/folders"],
   });
 
-  // Don't auto-select any chat - start with new chat interface
-  // Users can manually select a chat from the sidebar
-
-  const handleNewChat = async () => {
-    try {
-      const response = await fetch("/api/chats", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          title: "New Chat",
-          isActive: true
-        }),
+  // Mutation for creating new chat
+  const createChatMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", "/api/chats", {
+        title: "New Chat",
       });
-
-      if (response.ok) {
-        const newChat = await response.json();
-        setActiveChatId(newChat.id);
-        refetchChats();
-      }
-    } catch (error) {
-      console.error("Failed to create new chat:", error);
+      return response.json();
+    },
+    onSuccess: (newChat) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/chats"] });
+      navigate(`/chat/${newChat.id}`);
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to create new chat",
+        variant: "destructive",
+      });
     }
+  });
+
+  // Mutation for creating new folder
+  const createFolderMutation = useMutation({
+    mutationFn: async (name: string) => {
+      const response = await apiRequest("POST", "/api/folders", { name });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/folders"] });
+    },
+  });
+
+  const handleNewChat = () => {
+    createChatMutation.mutate();
   };
 
   const handleChatSelect = (chatId: string) => {
-    setActiveChatId(chatId);
+    navigate(`/chat/${chatId}`);
   };
 
-  const handleFolderCreate = async (name: string, parentId?: string, color?: string) => {
-    try {
-      const response = await fetch("/api/folders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          name,
-          parentId: parentId || null,
-          color: color || "blue"
-        }),
-      });
-
-      if (response.ok) {
-        refetchFolders();
-      }
-    } catch (error) {
-      console.error("Failed to create folder:", error);
-    }
+  const handleFolderCreate = (name: string) => {
+    createFolderMutation.mutate(name);
   };
 
   // Connect the floating action button to new chat creation
@@ -106,7 +102,9 @@ export default function HomeStable() {
               />
             </SheetContent>
           </Sheet>
-          <img src="/attached_assets/FS6idYAvlqMOrtmKZEBd5.jpg" alt="JACC" className="w-8 h-8 rounded-full object-cover" />
+          <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+            J
+          </div>
           <h1 className="text-lg font-semibold text-slate-900 dark:text-white">JACC</h1>
         </div>
         <button
@@ -118,47 +116,12 @@ export default function HomeStable() {
       </div>
 
       {/* Mobile Chat Area */}
-      <div className="lg:hidden flex-1 pb-16">
-          {/* Mobile Header */}
-          <div className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 p-4 flex items-center justify-between shrink-0">
-            <div className="flex items-center space-x-3">
-              <Sheet>
-                <SheetTrigger asChild>
-                  <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg">
-                    <Menu className="w-5 h-5 text-slate-600 dark:text-slate-300" />
-                  </button>
-                </SheetTrigger>
-                <SheetContent side="left" className="w-80 p-0">
-                  <Sidebar
-                    user={user}
-                    chats={chats}
-                    folders={folders}
-                    activeChatId={activeChatId}
-                    onNewChat={handleNewChat}
-                    onChatSelect={handleChatSelect}
-                    onFolderCreate={handleFolderCreate}
-                    collapsed={false}
-                  />
-                </SheetContent>
-              </Sheet>
-              <img src="/icons/icon-192x192.png" alt="JACC" className="w-8 h-8" />
-              <h1 className="text-lg font-semibold text-slate-900 dark:text-white">JACC</h1>
-            </div>
-            <button
-              onClick={handleNewChat}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-            >
-              New Chat
-            </button>
-          </div>
-          
-          <div className="flex-1 overflow-hidden">
-            <ChatInterface
-              chatId={activeChatId}
-              onChatUpdate={refetchChats}
-            />
-          </div>
-        </div>
+      <div className="lg:hidden flex-1 h-[calc(100vh-80px)]">
+        <ChatInterface 
+          chatId={activeChatId} 
+          onChatUpdate={refetchChats}
+        />
+      </div>
 
       {/* Desktop Layout - CSS Grid for stability */}
       <div className="hidden lg:grid grid-cols-[320px_1fr] h-full w-full">

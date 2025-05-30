@@ -209,11 +209,9 @@ export default function ChatInterface({ chatId, onChatUpdate }: ChatInterfacePro
         {/* Welcome Screen */}
         <div className="flex-1 flex flex-col items-center justify-center p-6 max-w-4xl mx-auto">
           <div className="text-center mb-8">
-            <img 
-              src="/attached_assets/FS6idYAvlqMOrtmKZEBd5.jpg" 
-              alt="JACC" 
-              className="w-16 h-16 rounded-full mx-auto mb-4 object-cover"
-            />
+            <div className="w-16 h-16 bg-blue-600 text-white rounded-full mx-auto mb-4 flex items-center justify-center text-2xl font-bold">
+              J
+            </div>
             <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
               How can I help you today?
             </h1>
