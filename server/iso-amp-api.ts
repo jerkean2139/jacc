@@ -109,22 +109,36 @@ export class ISOAMPService {
   constructor() {
     this.config = {
       apiKey: process.env.ISO_AMP_API_KEY || '',
-      apiUrl: process.env.ISO_AMP_API_URL || 'https://api.getisoamp.com/v1',
+      apiUrl: process.env.ISO_AMP_API_URL || '',
       partnerId: process.env.ISO_AMP_PARTNER_ID || ''
     };
   }
 
   private async makeAPIRequest(endpoint: string, method: 'GET' | 'POST' | 'PUT' = 'GET', data?: any) {
+    if (!this.config.apiUrl) {
+      throw new Error('ISO AMP API URL not configured. Please set ISO_AMP_API_URL environment variable with your ISO AMP domain.');
+    }
+
+    if (!this.config.apiKey) {
+      throw new Error('ISO AMP API key not configured. Please set ISO_AMP_API_KEY environment variable.');
+    }
+
     const url = `${this.config.apiUrl}${endpoint}`;
     
     try {
+      const headers: Record<string, string> = {
+        'Authorization': `Bearer ${this.config.apiKey}`,
+        'Content-Type': 'application/json',
+      };
+
+      // Only include partner ID header if it's provided
+      if (this.config.partnerId) {
+        headers['X-Partner-ID'] = this.config.partnerId;
+      }
+
       const response = await fetch(url, {
         method,
-        headers: {
-          'Authorization': `Bearer ${this.config.apiKey}`,
-          'Content-Type': 'application/json',
-          'X-Partner-ID': this.config.partnerId,
-        },
+        headers,
         body: data ? JSON.stringify(data) : undefined,
       });
 
