@@ -212,9 +212,9 @@ export default function ChatInterface({ chatId, onChatUpdate }: ChatInterfacePro
             <img 
               src="/jacc-logo.jpg" 
               alt="JACC" 
-              className="w-16 h-16 rounded-full mx-auto mb-4 object-cover"
+              className="w-24 h-24 rounded-full mx-auto mb-6 object-cover shadow-lg"
             />
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
+            <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-3">
               How can I help you today?
             </h1>
             <p className="text-slate-600 dark:text-slate-400">

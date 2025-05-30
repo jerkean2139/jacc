@@ -32,6 +32,7 @@ function Router() {
       ) : (
         <>
           <Route path="/" component={HomeStable} />
+          <Route path="/chat/:chatId" component={HomeStable} />
           <Route path="/calculator" component={ISOAmpCalculator} />
           <Route path="/iso-amp-calculator" component={ISOAmpCalculator} />
           <Route path="/guide" component={UserGuide} />
