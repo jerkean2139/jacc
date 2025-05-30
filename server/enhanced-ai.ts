@@ -343,8 +343,8 @@ IMPORTANT: When referencing this document in your response, always include the c
 
   async searchZenBotKnowledgeBase(query: string): Promise<VectorSearchResult[]> {
     try {
-      const fs = require('fs');
-      const path = require('path');
+      const fs = await import('fs');
+      const path = await import('path');
       const knowledgeBasePath = path.join(process.cwd(), 'uploads', 'zenbot-knowledge-base.csv');
       
       if (!fs.existsSync(knowledgeBasePath)) {
@@ -361,7 +361,13 @@ IMPORTANT: When referencing this document in your response, always include the c
       for (const line of lines) {
         if (!line.trim()) continue;
         
-        const [question, answer] = line.split(',').map(col => col.trim());
+        // Handle CSV parsing properly - split on commas but handle quoted text
+        const columns = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
+        if (!columns || columns.length < 2) continue;
+        
+        const question = columns[0].replace(/"/g, '').trim();
+        const answer = columns[1].replace(/"/g, '').trim();
+        
         if (!question || !answer) continue;
 
         const questionLower = question.toLowerCase();
@@ -425,9 +431,18 @@ IMPORTANT: When referencing this document in your response, always include the c
 
   private checkPOSMatches(query: string, question: string): boolean {
     const posTerms = ['pos', 'point of sale', 'quantic', 'clover', 'skytab', 'hubwallet', 'aloha'];
-    return posTerms.some(term => 
+    const restaurantTerms = ['restaurant', 'food', 'dining', 'cafe', 'bar'];
+    
+    // Direct POS term matches
+    const directMatch = posTerms.some(term => 
       query.includes(term) && question.includes(term)
     );
+    
+    // Restaurant + POS combination matches
+    const restaurantPOSMatch = restaurantTerms.some(restTerm => query.includes(restTerm)) && 
+                              question.includes('restaurant') && question.includes('pos');
+    
+    return directMatch || restaurantPOSMatch;
   }
 
   private checkIntegrationMatches(query: string, question: string): boolean {

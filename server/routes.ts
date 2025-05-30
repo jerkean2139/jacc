@@ -934,8 +934,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Document not found" });
       }
       
-      const fs = require('fs');
-      const path = require('path');
+      const fs = await import('fs');
+      const path = await import('path');
       const filePath = path.join(process.cwd(), 'uploads', document.path);
       
       if (!fs.existsSync(filePath)) {
