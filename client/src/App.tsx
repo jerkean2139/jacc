@@ -18,6 +18,7 @@ import NotFound from "@/pages/not-found";
 import AdminSettings from "@/pages/admin-settings";
 import AdminDashboard from "@/pages/admin-dashboard";
 import ISOAmpCalculator from "@/pages/iso-amp-calculator";
+import PromptCustomization from "@/pages/prompt-customization";
 import UserGuide from "@/pages/user-guide";
 import DocumentsPage from "@/pages/documents-page";
 
@@ -37,6 +38,7 @@ function Router() {
           <Route path="/iso-amp-calculator" component={ISOAmpCalculator} />
           <Route path="/guide" component={UserGuide} />
           <Route path="/documents" component={DocumentsPage} />
+          <Route path="/prompts" component={PromptCustomization} />
           <Route path="/admin" component={AdminSettings} />
           <Route path="/admin/dashboard" component={AdminDashboard} />
           <Route path="/login" component={Landing} />

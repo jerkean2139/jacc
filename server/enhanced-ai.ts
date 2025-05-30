@@ -72,31 +72,41 @@ export class EnhancedAIService {
       
     } catch (error) {
       console.error('Prompt chain failed, falling back to standard response:', error);
-      return await this.generateStandardResponse(message, conversationHistory);
+      return await this.generateStandardResponse(message, conversationHistory, userId);
     }
   }
 
   async generateStandardResponse(
     message: string,
-    conversationHistory: ChatMessage[]
+    conversationHistory: ChatMessage[],
+    userId?: string
   ): Promise<EnhancedAIResponse> {
-    // Use ZenBot knowledge base guided document search
+    // Step 1: Get user's custom prompt if available
+    let customPrompt = null;
+    if (userId) {
+      const { storage } = await import('./storage');
+      customPrompt = await storage.getUserDefaultPrompt(userId);
+    }
+
+    // Step 2: Use ZenBot knowledge base guided document search (PRIORITIZED)
     const searchResults = await this.searchDocuments(message);
     
     if (searchResults.length > 0) {
       console.log(`📋 Found ${searchResults.length} documents using ZenBot guidance for: "${message}"`);
       const messages = [...conversationHistory, { role: 'user' as const, content: message }];
-      return await this.generateResponseWithDocuments(messages, { searchResults });
+      return await this.generateResponseWithDocuments(messages, { searchResults, customPrompt });
     }
     
-    // Fallback to basic response if no documents found
+    // Step 3: If no internal documents found, still use custom prompt for general response
     const messages = [...conversationHistory, { role: 'user' as const, content: message }];
-    return await this.generateResponseWithDocuments(messages);
+    return await this.generateResponseWithDocuments(messages, { customPrompt });
   }
 
   async generateResponseWithDocuments(
     messages: ChatMessage[],
     context?: {
+      searchResults?: VectorSearchResult[];
+      customPrompt?: any;
       userRole?: string;
       documents?: Array<{ name: string; content?: string }>;
       spreadsheetData?: any;
