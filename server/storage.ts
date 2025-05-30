@@ -71,6 +71,10 @@ export interface IStorage {
   getUserFavorites(userId: string): Promise<Favorite[]>;
   createFavorite(favorite: InsertFavorite): Promise<Favorite>;
   deleteFavorite(id: string, userId: string): Promise<void>;
+  
+  // Admin logging operations
+  logUserChatRequest(chatLog: InsertUserChatLog): Promise<UserChatLog>;
+  getUserChatLogs(userId?: string): Promise<UserChatLog[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -284,6 +288,30 @@ export class DatabaseStorage implements IStorage {
     await db
       .delete(favorites)
       .where(eq(favorites.id, id));
+  }
+
+  // Admin logging operations
+  async logUserChatRequest(chatLogData: InsertUserChatLog): Promise<UserChatLog> {
+    const [chatLog] = await db
+      .insert(userChatLogs)
+      .values(chatLogData)
+      .returning();
+    return chatLog;
+  }
+
+  async getUserChatLogs(userId?: string): Promise<UserChatLog[]> {
+    if (userId) {
+      return await db
+        .select()
+        .from(userChatLogs)
+        .where(eq(userChatLogs.userId, userId))
+        .orderBy(desc(userChatLogs.timestamp));
+    } else {
+      return await db
+        .select()
+        .from(userChatLogs)
+        .orderBy(desc(userChatLogs.timestamp));
+    }
   }
 }
 

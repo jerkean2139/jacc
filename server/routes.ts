@@ -726,8 +726,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Save user message
       const userMessage = await storage.createMessage(messageData);
       
-      // Generate AI response using enhanced prompt chaining
+      // Log first user chat request for admin monitoring
       const chatHistory = await storage.getChatMessages(chatId);
+      const isFirstMessage = chatHistory.filter(m => m.role === 'user').length === 1;
+      
+      if (isFirstMessage) {
+        try {
+          const user = await storage.getUser(userId);
+          await storage.logUserChatRequest({
+            userId,
+            sessionId: req.sessionID || null,
+            firstMessage: messageData.content,
+            chatId,
+            userRole: user?.role || 'unknown',
+            ipAddress: req.ip || req.connection.remoteAddress || null,
+            userAgent: req.get('User-Agent') || null
+          });
+          console.log(`📊 ADMIN LOG: First message logged for user ${userId} in chat ${chatId}`);
+        } catch (logError) {
+          console.error('Failed to log first user chat request:', logError);
+        }
+      }
+      
+      // Generate AI response using enhanced prompt chaining
       const messages = chatHistory.map(m => ({
         role: m.role as 'user' | 'assistant',
         content: m.content
