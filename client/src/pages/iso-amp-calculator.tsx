@@ -22,7 +22,9 @@ import {
   Target,
   Award,
   ChevronRight,
-  ChevronLeft
+  ChevronLeft,
+  Upload,
+  FileBarChart
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
@@ -47,6 +49,8 @@ interface BusinessData {
 
 export default function ISOAmpCalculator() {
   const [activeTab, setActiveTab] = useState('setup');
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [analysisResults, setAnalysisResults] = useState<any>(null);
   const [businessData, setBusinessData] = useState<BusinessData>({
     monthlyVolume: 50000,
     averageTicket: 85,
@@ -68,6 +72,60 @@ export default function ISOAmpCalculator() {
   const [results, setResults] = useState<any>(null);
   const [equipmentResults, setEquipmentResults] = useState<any>(null);
   const { toast } = useToast();
+
+  // File upload handling
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setUploadedFile(file);
+    }
+  };
+
+  // Bank statement analysis mutation
+  const statementAnalysisMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('statement', file);
+      
+      const response = await fetch('/api/iso-amp/analyze-statement', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to analyze statement');
+      }
+      
+      return response.json();
+    },
+    onSuccess: (data) => {
+      setAnalysisResults(data);
+      // Auto-populate business data from analysis
+      if (data.extractedData) {
+        setBusinessData(prev => ({
+          ...prev,
+          ...data.extractedData
+        }));
+      }
+      toast({
+        title: "Statement Analyzed",
+        description: "Business data has been extracted and populated.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Analysis Failed",
+        description: "Could not analyze the uploaded statement. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleAnalyzeStatement = () => {
+    if (uploadedFile) {
+      statementAnalysisMutation.mutate(uploadedFile);
+    }
+  };
 
   // Rate comparison mutation
   const rateComparisonMutation = useMutation({
@@ -139,12 +197,137 @@ export default function ISOAmpCalculator() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 gap-1">
+        <TabsList className="grid w-full grid-cols-3 md:grid-cols-5 gap-1">
+          <TabsTrigger value="analysis" className="text-xs md:text-sm">Statement</TabsTrigger>
           <TabsTrigger value="setup" className="text-xs md:text-sm">Setup</TabsTrigger>
           <TabsTrigger value="rates" className="text-xs md:text-sm">Rates</TabsTrigger>
           <TabsTrigger value="savings" className="text-xs md:text-sm">Savings</TabsTrigger>
           <TabsTrigger value="equipment" className="text-xs md:text-sm">Equipment</TabsTrigger>
         </TabsList>
+
+        {/* Bank Statement Analysis Tab */}
+        <TabsContent value="analysis" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileBarChart className="w-5 h-5" />
+                Bank Statement Analysis
+              </CardTitle>
+              <CardDescription>
+                Upload processing statements or bank statements for automated data extraction
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* File Upload Section */}
+              <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6">
+                <div className="text-center">
+                  <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                  <div className="mt-4">
+                    <label htmlFor="statement-upload" className="cursor-pointer">
+                      <span className="mt-2 block text-sm font-medium text-gray-900 dark:text-gray-100">
+                        Upload Processing Statement or Bank Statement
+                      </span>
+                      <span className="mt-1 block text-xs text-gray-500 dark:text-gray-400">
+                        PDF, CSV, or Excel files up to 10MB
+                      </span>
+                    </label>
+                    <input
+                      id="statement-upload"
+                      type="file"
+                      className="hidden"
+                      accept=".pdf,.csv,.xlsx,.xls"
+                      onChange={handleFileUpload}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Uploaded File Display */}
+              {uploadedFile && (
+                <div className="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <FileText className="w-5 h-5 text-blue-600" />
+                    <div>
+                      <p className="text-sm font-medium">{uploadedFile.name}</p>
+                      <p className="text-xs text-gray-500">
+                        {Math.round(uploadedFile.size / 1024)} KB
+                      </p>
+                    </div>
+                  </div>
+                  <Button 
+                    onClick={handleAnalyzeStatement}
+                    disabled={statementAnalysisMutation.isPending}
+                    className="gap-2"
+                  >
+                    {statementAnalysisMutation.isPending ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        Analyzing...
+                      </>
+                    ) : (
+                      <>
+                        <FileBarChart className="w-4 h-4" />
+                        Analyze Statement
+                      </>
+                    )}
+                  </Button>
+                </div>
+              )}
+
+              {/* Analysis Results */}
+              {analysisResults && (
+                <div className="space-y-4">
+                  <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                    <div className="flex items-center gap-2 mb-3">
+                      <CheckCircle className="w-5 h-5 text-green-600" />
+                      <h3 className="font-medium text-green-800 dark:text-green-200">
+                        Analysis Complete
+                      </h3>
+                    </div>
+                    
+                    {analysisResults.extractedData && (
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                        <div className="p-3 bg-white dark:bg-gray-800 rounded border">
+                          <p className="text-xs text-gray-500 dark:text-gray-400">Monthly Volume</p>
+                          <p className="text-lg font-semibold">
+                            ${analysisResults.extractedData.monthlyVolume?.toLocaleString() || 'N/A'}
+                          </p>
+                        </div>
+                        <div className="p-3 bg-white dark:bg-gray-800 rounded border">
+                          <p className="text-xs text-gray-500 dark:text-gray-400">Average Ticket</p>
+                          <p className="text-lg font-semibold">
+                            ${analysisResults.extractedData.averageTicket || 'N/A'}
+                          </p>
+                        </div>
+                        <div className="p-3 bg-white dark:bg-gray-800 rounded border">
+                          <p className="text-xs text-gray-500 dark:text-gray-400">Transaction Count</p>
+                          <p className="text-lg font-semibold">
+                            {analysisResults.extractedData.transactionCount?.toLocaleString() || 'N/A'}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    <Alert className="mt-4">
+                      <AlertTriangle className="h-4 w-4" />
+                      <AlertDescription>
+                        Extracted data has been automatically populated in the Setup tab. 
+                        Review and adjust as needed before proceeding.
+                      </AlertDescription>
+                    </Alert>
+                  </div>
+
+                  <div className="flex justify-end">
+                    <Button onClick={() => setActiveTab('setup')} className="gap-2">
+                      Continue to Setup
+                      <ChevronRight className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         {/* Business Setup Tab */}
         <TabsContent value="setup" className="space-y-6">

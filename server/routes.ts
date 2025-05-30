@@ -1512,6 +1512,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Bank statement analysis endpoint
+  app.post('/api/iso-amp/analyze-statement', upload.single('statement'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: 'No file uploaded' });
+      }
+
+      const { documentProcessor } = await import('./document-processor');
+      const filePath = req.file.path;
+      const mimeType = req.file.mimetype;
+
+      // Extract text content from the uploaded statement
+      const content = await documentProcessor.extractTextContent(filePath, mimeType);
+      
+      // Analyze content for financial data
+      const extractedData = await analyzeStatementContent(content);
+
+      res.json({
+        success: true,
+        extractedData,
+        fileName: req.file.originalname,
+        fileSize: req.file.size,
+        timestamp: new Date().toISOString()
+      });
+
+      // Clean up uploaded file
+      setTimeout(() => {
+        try {
+          require('fs').unlinkSync(filePath);
+        } catch (error) {
+          console.log('Could not delete temp file:', error.message);
+        }
+      }, 1000);
+
+    } catch (error) {
+      console.error('Statement analysis error:', error);
+      res.status(500).json({ error: 'Failed to analyze statement' });
+    }
+  });
+
   // Initialize gamification system
   const initializeGamification = async () => {
     try {
