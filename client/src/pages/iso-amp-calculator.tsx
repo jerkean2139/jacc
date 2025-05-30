@@ -122,25 +122,25 @@ export default function ISOAmpCalculator() {
   };
 
   return (
-    <div className="space-y-6 pb-20">
-      <div className="flex items-center gap-4">
-        <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
-          <Zap className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+    <div className="space-y-6 pb-20 px-4 md:px-0">
+      <div className="flex items-start gap-3 md:items-center md:gap-4">
+        <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg flex-shrink-0">
+          <Zap className="w-5 h-5 md:w-6 md:h-6 text-blue-600 dark:text-blue-400" />
         </div>
-        <div>
-          <h2 className="text-2xl font-bold">ISOAmp Integration Calculator</h2>
-          <p className="text-muted-foreground">
+        <div className="min-w-0 flex-1">
+          <h2 className="text-lg md:text-2xl font-bold leading-tight">ISOAmp Integration Calculator</h2>
+          <p className="text-sm md:text-base text-muted-foreground mt-1">
             Advanced merchant services calculations with real-time rate analysis
           </p>
         </div>
       </div>
 
       <Tabs defaultValue="setup" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="setup">Business Setup</TabsTrigger>
-          <TabsTrigger value="rates">Rate Analysis</TabsTrigger>
-          <TabsTrigger value="savings">Savings Calculator</TabsTrigger>
-          <TabsTrigger value="equipment">Equipment</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 gap-1">
+          <TabsTrigger value="setup" className="text-xs md:text-sm">Setup</TabsTrigger>
+          <TabsTrigger value="rates" className="text-xs md:text-sm">Rates</TabsTrigger>
+          <TabsTrigger value="savings" className="text-xs md:text-sm">Savings</TabsTrigger>
+          <TabsTrigger value="equipment" className="text-xs md:text-sm">Equipment</TabsTrigger>
         </TabsList>
 
         {/* Business Setup Tab */}
