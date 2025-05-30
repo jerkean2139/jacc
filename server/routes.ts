@@ -1535,7 +1535,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         extractedData,
         fileName: req.file.originalname,
         fileSize: req.file.size,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        // Include raw text for debugging (first 1000 chars)
+        rawTextSample: content.substring(0, 1000),
+        contentLength: content.length
       });
 
       // Clean up uploaded file

@@ -315,6 +315,20 @@ export default function ISOAmpCalculator() {
                         Review and adjust as needed before proceeding.
                       </AlertDescription>
                     </Alert>
+
+                    {/* Debug information */}
+                    {analysisResults.rawTextSample && (
+                      <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded border">
+                        <details className="cursor-pointer">
+                          <summary className="text-sm font-medium mb-2">
+                            Debug: Extracted Text Sample ({analysisResults.contentLength} total characters)
+                          </summary>
+                          <pre className="text-xs text-gray-600 dark:text-gray-400 whitespace-pre-wrap max-h-40 overflow-y-auto">
+                            {analysisResults.rawTextSample}
+                          </pre>
+                        </details>
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex justify-end">

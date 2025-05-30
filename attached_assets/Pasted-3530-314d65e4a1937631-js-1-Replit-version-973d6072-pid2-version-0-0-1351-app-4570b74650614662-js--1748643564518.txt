@@ -1,0 +1,947 @@
+3530-314d65e4a1937631.js:1 Replit version 973d6072, pid2 version 0.0.1351
+_app-4570b74650614662.js:38 
+      /////////////////////
+   ///////////////////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////        Curious and driven?
+  ///////////////@@@@@@@///////        Work with us!
+  ///////////////@@@@@@@///////
+  ///////////////@@@@@@@///////        https://join.replit.com/hack.with.us
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@#//////////////
+   ///////////////////////////
+      /////////////////////
+      
+_app-4570b74650614662.js:38 [LaunchDarkly] LaunchDarkly client initialized
+contentScript.bundle.js:69 Loaded contentScript
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+framework-0d8cc2a8bb65a9a3.js:1 Unrecognized feature: 'ambient-light-sensor'.
+_ @ framework-0d8cc2a8bb65a9a3.js:1
+framework-0d8cc2a8bb65a9a3.js:1 Unrecognized feature: 'battery'.
+_ @ framework-0d8cc2a8bb65a9a3.js:1
+framework-0d8cc2a8bb65a9a3.js:1 Unrecognized feature: 'execution-while-not-rendered'.
+_ @ framework-0d8cc2a8bb65a9a3.js:1
+framework-0d8cc2a8bb65a9a3.js:1 Unrecognized feature: 'execution-while-out-of-viewport'.
+_ @ framework-0d8cc2a8bb65a9a3.js:1
+framework-0d8cc2a8bb65a9a3.js:1 Unrecognized feature: 'layout-animations'.
+_ @ framework-0d8cc2a8bb65a9a3.js:1
+framework-0d8cc2a8bb65a9a3.js:1 Unrecognized feature: 'legacy-image-formats'.
+_ @ framework-0d8cc2a8bb65a9a3.js:1
+framework-0d8cc2a8bb65a9a3.js:1 Unrecognized feature: 'navigation-override'.
+_ @ framework-0d8cc2a8bb65a9a3.js:1
+framework-0d8cc2a8bb65a9a3.js:1 Unrecognized feature: 'oversized-images'.
+_ @ framework-0d8cc2a8bb65a9a3.js:1
+framework-0d8cc2a8bb65a9a3.js:1 Unrecognized feature: 'publickey-credentials'.
+_ @ framework-0d8cc2a8bb65a9a3.js:1
+framework-0d8cc2a8bb65a9a3.js:1 Unrecognized feature: 'speaker-selection'.
+_ @ framework-0d8cc2a8bb65a9a3.js:1
+framework-0d8cc2a8bb65a9a3.js:1 Unrecognized feature: 'unoptimized-images'.
+_ @ framework-0d8cc2a8bb65a9a3.js:1
+framework-0d8cc2a8bb65a9a3.js:1 Unrecognized feature: 'unsized-media'.
+_ @ framework-0d8cc2a8bb65a9a3.js:1
+framework-0d8cc2a8bb65a9a3.js:1 Unrecognized feature: 'pointer-lock'.
+_ @ framework-0d8cc2a8bb65a9a3.js:1
+framework-0d8cc2a8bb65a9a3.js:1 Allow attribute will take precedence over 'allowfullscreen'.
+_ @ framework-0d8cc2a8bb65a9a3.js:1
+framework-0d8cc2a8bb65a9a3.js:1 Allow attribute will take precedence over 'allowpaymentrequest'.
+_ @ framework-0d8cc2a8bb65a9a3.js:1
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 updating page active status
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 updating page active status
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 updating page active status
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 updating page active status
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 updating page active status
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 updating page active status
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 updating page active status
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 updating page active status
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 updating page active status
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 updating page active status
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 updating page active status
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 updating page active status
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 updating page active status
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 updating page active status
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 updating page active status
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 updating page active status
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 updating page active status
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 updating page active status
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 updating page active status
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 updating page active status
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 updating page active status
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 updating page active status
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 updating page active status
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 updating page active status
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 updating page active status
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 updating page active status
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 updating page active status
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 updating page active status
+workspace_iframe.html:32 Unrecognized feature: 'ambient-light-sensor'.
+workspace_iframe.html:32 Unrecognized feature: 'battery'.
+workspace_iframe.html:32 Unrecognized feature: 'execution-while-not-rendered'.
+workspace_iframe.html:32 Unrecognized feature: 'execution-while-out-of-viewport'.
+workspace_iframe.html:32 Unrecognized feature: 'layout-animations'.
+workspace_iframe.html:32 Unrecognized feature: 'legacy-image-formats'.
+workspace_iframe.html:32 Unrecognized feature: 'navigation-override'.
+workspace_iframe.html:32 Unrecognized feature: 'oversized-images'.
+workspace_iframe.html:32 Unrecognized feature: 'publickey-credentials'.
+workspace_iframe.html:32 Unrecognized feature: 'speaker-selection'.
+workspace_iframe.html:32 Unrecognized feature: 'unoptimized-images'.
+workspace_iframe.html:32 Unrecognized feature: 'unsized-media'.
+workspace_iframe.html:32 Allow attribute will take precedence over 'allowfullscreen'.
+workspace_iframe.html:32 Allow attribute will take precedence over 'allowpaymentrequest'.
+Console.js:61 Warning: Received `%s` for a non-boolean attribute `%s`.
+
+If you want to write it to the DOM, pass a string instead: %s="%s" or %s={value.toString()}.%s true jsx jsx true jsx 
+    at style
+    at ContextualHelp (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/components/contextual-help.tsx:25:42)
+    at div
+    at GamificationProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/hooks/useGamification.tsx:22:40)
+    at AppContent (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/App.tsx?v=Fi5gvpUD3FyFSCtJ9haGS:117:20)
+    at Provider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-PLT6GTVM.js?v=27d5ca8d:38:15)
+    at TooltipProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=27d5ca8d:64:5)
+    at QueryClientProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=27d5ca8d:2805:3)
+    at App
+Mt.forEach.n.<computed> @ Console.js:61
+Console.js:61 Warning: Received `%s` for a non-boolean attribute `%s`.
+
+If you want to write it to the DOM, pass a string instead: %s="%s" or %s={value.toString()}.%s true global global true global 
+    at style
+    at ContextualHelp (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/components/contextual-help.tsx:25:42)
+    at div
+    at GamificationProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/hooks/useGamification.tsx:22:40)
+    at AppContent (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/App.tsx?v=Fi5gvpUD3FyFSCtJ9haGS:117:20)
+    at Provider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-PLT6GTVM.js?v=27d5ca8d:38:15)
+    at TooltipProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=27d5ca8d:64:5)
+    at QueryClientProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=27d5ca8d:2805:3)
+    at App
+Mt.forEach.n.<computed> @ Console.js:61
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 updating page active status
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 updating page active status
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 updating page active status
+iso-amp-calculator.tsx:1723 Uncaught TypeError: Cannot read properties of undefined (reading 'map')
+iso-amp-calculator.tsx:1723 Uncaught TypeError: Cannot read properties of undefined (reading 'map')
+Console.js:61 The above error occurred in the <ISOAmpCalculator> component:
+
+    at ISOAmpCalculator (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/pages/iso-amp-calculator.tsx:50:37)
+    at Route (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=27d5ca8d:323:16)
+    at Switch (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=27d5ca8d:379:17)
+    at Router
+    at GamificationProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/hooks/useGamification.tsx:22:40)
+    at AppContent (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/App.tsx?v=Fi5gvpUD3FyFSCtJ9haGS:117:20)
+    at Provider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-PLT6GTVM.js?v=27d5ca8d:38:15)
+    at TooltipProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=27d5ca8d:64:5)
+    at QueryClientProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=27d5ca8d:2805:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+Mt.forEach.n.<computed> @ Console.js:61
+chunk-WERSD76P.js?v=27d5ca8d:19413 Uncaught TypeError: Cannot read properties of undefined (reading 'map')
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 updating page active status
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 updating page active status
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 updating page active status
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 updating page active status
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 updating page active status
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 updating page active status
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 updating page active status
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 updating page active status
+Console.js:61 Warning: Received `true` for a non-boolean attribute `jsx`.
+
+If you want to write it to the DOM, pass a string instead: jsx="true" or jsx={value.toString()}.
+    at style
+    at ContextualHelp (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/components/contextual-help.tsx:25:42)
+    at div
+    at GamificationProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/hooks/useGamification.tsx:22:40)
+    at AppContent (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/App.tsx?t=1748643431970&v=GiCJduOnVJl1Z-8a-IecW:117:20)
+    at Provider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-PLT6GTVM.js?v=27d5ca8d:38:15)
+    at TooltipProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=27d5ca8d:64:5)
+    at QueryClientProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=27d5ca8d:2805:3)
+    at App
+Mt.forEach.n.<computed> @ Console.js:61
+Console.js:61 Warning: Received `true` for a non-boolean attribute `global`.
+
+If you want to write it to the DOM, pass a string instead: global="true" or global={value.toString()}.
+    at style
+    at ContextualHelp (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/components/contextual-help.tsx:25:42)
+    at div
+    at GamificationProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/hooks/useGamification.tsx:22:40)
+    at AppContent (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/App.tsx?t=1748643431970&v=GiCJduOnVJl1Z-8a-IecW:117:20)
+    at Provider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-PLT6GTVM.js?v=27d5ca8d:38:15)
+    at TooltipProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=27d5ca8d:64:5)
+    at QueryClientProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=27d5ca8d:2805:3)
+    at App
+Mt.forEach.n.<computed> @ Console.js:61
+
+                
+          
+          
+          
+         Chrome is moving towards a new experience that allows users to choose to browse without third-party cookies.
