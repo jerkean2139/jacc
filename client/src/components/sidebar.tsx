@@ -23,7 +23,8 @@ import {
   MoreVertical,
   Trash2,
   FolderPlus,
-  Download
+  Download,
+  Calculator
 } from "lucide-react";
 import { DocumentDownload } from "@/components/document-download";
 import type { User, Chat, Folder as FolderType } from "@shared/schema";
@@ -389,20 +390,26 @@ export default function Sidebar({
           </div>
         </div>
 
-        {/* Favorites Section */}
+        {/* ISO AMP Section */}
         <div className="mb-6">
           <h4 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3">
-            Favorites
+            ISO AMP
           </h4>
           <div className="space-y-1">
-            <div className="flex items-center space-x-3 p-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg cursor-pointer transition-colors">
-              <Star className="w-4 h-4 text-yellow-500" />
-              <span className="text-sm text-slate-700 dark:text-slate-300">Quick Rate Calculator</span>
-            </div>
-            <div className="flex items-center space-x-3 p-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg cursor-pointer transition-colors">
-              <Star className="w-4 h-4 text-yellow-500" />
-              <span className="text-sm text-slate-700 dark:text-slate-300">Enrollment Timeline</span>
-            </div>
+            <a 
+              href="/iso-amp-calculator" 
+              className="flex items-center space-x-3 p-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg cursor-pointer transition-colors"
+            >
+              <Calculator className="w-4 h-4 text-blue-500" />
+              <span className="text-sm text-slate-700 dark:text-slate-300">Rate Calculator</span>
+            </a>
+            <a 
+              href="/iso-amp-calculator" 
+              className="flex items-center space-x-3 p-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg cursor-pointer transition-colors"
+            >
+              <Calculator className="w-4 h-4 text-blue-500" />
+              <span className="text-sm text-slate-700 dark:text-slate-300">Business Analysis</span>
+            </a>
           </div>
         </div>
       </ScrollArea>
