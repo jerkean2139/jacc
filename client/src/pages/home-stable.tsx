@@ -205,12 +205,47 @@ export default function HomeStable() {
         </div>
 
         {/* Chat Panel - Flexible grid column */}
-        <div className="overflow-hidden">
-          <ChatInterface
-            chatId={activeChatId}
-            onChatUpdate={refetchChats}
-            onNewChatWithMessage={handleNewChatWithMessage}
-          />
+        <div className="overflow-hidden flex flex-col">
+          {/* Desktop Header Navigation */}
+          <div className="border-b border-border p-2 bg-background">
+            <div className="flex items-center gap-2">
+              <Link href="/calculator">
+                <Button variant="ghost" size="sm" className="gap-2">
+                  <Calculator className="w-4 h-4" />
+                  Calculator
+                </Button>
+              </Link>
+              <Link href="/prompts">
+                <Button variant="ghost" size="sm" className="gap-2">
+                  <MessageSquare className="w-4 h-4" />
+                  AI Prompts
+                </Button>
+              </Link>
+              <Link href="/guide">
+                <Button variant="ghost" size="sm" className="gap-2">
+                  <BookOpen className="w-4 h-4" />
+                  Guide
+                </Button>
+              </Link>
+              {user?.role === 'dev_admin' && (
+                <Link href="/admin">
+                  <Button variant="ghost" size="sm" className="gap-2">
+                    <Settings className="w-4 h-4" />
+                    Admin
+                  </Button>
+                </Link>
+              )}
+            </div>
+          </div>
+          
+          {/* Chat Interface */}
+          <div className="flex-1 overflow-hidden">
+            <ChatInterface
+              chatId={activeChatId}
+              onChatUpdate={refetchChats}
+              onNewChatWithMessage={handleNewChatWithMessage}
+            />
+          </div>
         </div>
       </div>
     </div>

@@ -7,7 +7,8 @@ import {
   Settings,
   Plus,
   Home,
-  HelpCircle
+  HelpCircle,
+  MessageSquare
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -33,6 +34,11 @@ const navItems: NavItem[] = [
     href: "/guide",
     icon: BookOpen,
     label: "Guide"
+  },
+  {
+    href: "/prompts",
+    icon: MessageSquare,
+    label: "Prompts"
   },
   {
     href: "/help",
