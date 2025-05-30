@@ -218,6 +218,46 @@ export default function ISOAmpCalculator() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
+              {/* Manual Input Option */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div>
+                  <Label htmlFor="quick-volume">Monthly Volume ($)</Label>
+                  <Input
+                    id="quick-volume"
+                    type="number"
+                    placeholder="e.g. 50000"
+                    onChange={(e) => {
+                      const volume = parseFloat(e.target.value) || 0;
+                      setBusinessData(prev => ({ ...prev, monthlyVolume: volume }));
+                    }}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="quick-transactions">Transaction Count</Label>
+                  <Input
+                    id="quick-transactions"
+                    type="number"
+                    placeholder="e.g. 588"
+                    onChange={(e) => {
+                      const count = parseInt(e.target.value) || 0;
+                      setBusinessData(prev => ({ ...prev, transactionCount: count }));
+                    }}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="quick-ticket">Average Ticket ($)</Label>
+                  <Input
+                    id="quick-ticket"
+                    type="number"
+                    placeholder="e.g. 85"
+                    onChange={(e) => {
+                      const ticket = parseFloat(e.target.value) || 0;
+                      setBusinessData(prev => ({ ...prev, averageTicket: ticket }));
+                    }}
+                  />
+                </div>
+              </div>
+
               {/* File Upload Section */}
               <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6">
                 <div className="text-center">
@@ -225,10 +265,10 @@ export default function ISOAmpCalculator() {
                   <div className="mt-4">
                     <label htmlFor="statement-upload" className="cursor-pointer">
                       <span className="mt-2 block text-sm font-medium text-gray-900 dark:text-gray-100">
-                        Upload Processing Statement or Bank Statement
+                        Or Upload Processing Statement (Optional)
                       </span>
                       <span className="mt-1 block text-xs text-gray-500 dark:text-gray-400">
-                        PDF, CSV, or Excel files up to 10MB
+                        PDF parsing in development - use manual input above for now
                       </span>
                     </label>
                     <input
