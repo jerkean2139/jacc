@@ -1,8 +1,12 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import crypto from "crypto";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupAuth as setupReplitAuth, isAuthenticated as isReplitAuthenticated } from "./replitAuth";
 import { setupDevAuth, isDevAuthenticated } from "./dev-auth";
+import { setupAuth, isAuthenticated, requireRole, hashPassword, comparePasswords } from "./auth";
+import { authenticateApiKey, requireApiPermission, generateApiKey, hashApiKey } from "./api-auth";
+import { insertUserSchema, insertApiKeySchema } from "@shared/schema";
 import { generateChatResponse, analyzeDocument, generateTitle } from "./openai";
 import { enhancedAIService } from "./enhanced-ai";
 import { googleDriveService } from "./google-drive";
@@ -52,16 +56,373 @@ const upload = multer({
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Setup development auth first for simple session management
+  // Setup authentication system
+  setupAuth(app);
+  
+  // Setup development auth for testing
   if (true) {
     setupDevAuth(app);
   }
   
-  // Auth middleware
-  await setupAuth(app);
-  
   // Setup OAuth helper for Google Drive credentials
   setupOAuthHelper(app);
+
+  // === Authentication Routes ===
+  
+  // User Registration
+  app.post('/api/auth/register', async (req, res) => {
+    try {
+      const validation = insertUserSchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ 
+          error: 'Invalid registration data', 
+          details: validation.error.errors 
+        });
+      }
+
+      const { username, email, password, firstName, lastName, role } = validation.data;
+
+      // Check if user already exists
+      const existingUser = await storage.getUserByUsername(username) || await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(409).json({ 
+          error: 'User already exists', 
+          message: 'A user with this username or email already exists' 
+        });
+      }
+
+      // Hash password and create user
+      const passwordHash = await hashPassword(password);
+      const newUser = await storage.createUser({
+        id: crypto.randomUUID(),
+        username,
+        email,
+        passwordHash,
+        firstName,
+        lastName,
+        role: role || 'sales-agent'
+      });
+
+      // Remove password hash from response
+      const { passwordHash: _, ...userResponse } = newUser;
+      
+      res.status(201).json({ 
+        message: 'User created successfully', 
+        user: userResponse 
+      });
+    } catch (error) {
+      console.error('Registration error:', error);
+      res.status(500).json({ 
+        error: 'Registration failed', 
+        message: 'Internal server error during registration' 
+      });
+    }
+  });
+
+  // User Login
+  app.post('/api/auth/login', async (req, res) => {
+    try {
+      const { username, password } = req.body;
+
+      if (!username || !password) {
+        return res.status(400).json({ 
+          error: 'Missing credentials', 
+          message: 'Username and password are required' 
+        });
+      }
+
+      // Find user by username or email
+      const user = await storage.getUserByUsername(username) || await storage.getUserByEmail(username);
+      if (!user || !user.isActive) {
+        return res.status(401).json({ 
+          error: 'Invalid credentials', 
+          message: 'Username or password is incorrect' 
+        });
+      }
+
+      // Verify password
+      const isValidPassword = await comparePasswords(password, user.passwordHash);
+      if (!isValidPassword) {
+        return res.status(401).json({ 
+          error: 'Invalid credentials', 
+          message: 'Username or password is incorrect' 
+        });
+      }
+
+      // Create session
+      const { passwordHash: _, ...sessionUser } = user;
+      (req.session as any).user = sessionUser;
+
+      res.json({ 
+        message: 'Login successful', 
+        user: sessionUser 
+      });
+    } catch (error) {
+      console.error('Login error:', error);
+      res.status(500).json({ 
+        error: 'Login failed', 
+        message: 'Internal server error during login' 
+      });
+    }
+  });
+
+  // User Logout
+  app.post('/api/auth/logout', (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        console.error('Logout error:', err);
+        return res.status(500).json({ 
+          error: 'Logout failed', 
+          message: 'Failed to destroy session' 
+        });
+      }
+      res.json({ message: 'Logout successful' });
+    });
+  });
+
+  // Get current user
+  app.get('/api/auth/me', isAuthenticated, async (req, res) => {
+    try {
+      const user = await storage.getUser((req as any).user.id);
+      if (!user) {
+        return res.status(404).json({ 
+          error: 'User not found', 
+          message: 'User account no longer exists' 
+        });
+      }
+
+      const { passwordHash: _, ...userResponse } = user;
+      res.json(userResponse);
+    } catch (error) {
+      console.error('Get user error:', error);
+      res.status(500).json({ 
+        error: 'Failed to get user', 
+        message: 'Internal server error' 
+      });
+    }
+  });
+
+  // === API Key Management Routes ===
+  
+  // Create API Key
+  app.post('/api/auth/api-keys', isAuthenticated, async (req, res) => {
+    try {
+      const { name, permissions, expiresAt } = req.body;
+      const userId = (req as any).user.id;
+
+      if (!name) {
+        return res.status(400).json({ 
+          error: 'Missing name', 
+          message: 'API key name is required' 
+        });
+      }
+
+      // Generate API key
+      const apiKey = generateApiKey();
+      const keyHash = hashApiKey(apiKey);
+
+      // Create API key record
+      const newApiKey = await storage.createApiKey({
+        name,
+        keyHash,
+        userId,
+        permissions: permissions || ['read'],
+        expiresAt: expiresAt ? new Date(expiresAt) : null
+      });
+
+      // Return the actual API key only once
+      res.status(201).json({ 
+        message: 'API key created successfully',
+        apiKey: apiKey,
+        keyInfo: {
+          id: newApiKey.id,
+          name: newApiKey.name,
+          permissions: newApiKey.permissions,
+          expiresAt: newApiKey.expiresAt,
+          createdAt: newApiKey.createdAt
+        }
+      });
+    } catch (error) {
+      console.error('API key creation error:', error);
+      res.status(500).json({ 
+        error: 'Failed to create API key', 
+        message: 'Internal server error' 
+      });
+    }
+  });
+
+  // List user's API keys
+  app.get('/api/auth/api-keys', isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req as any).user.id;
+      const apiKeys = await storage.getUserApiKeys(userId);
+      
+      // Remove sensitive key hashes from response
+      const safeApiKeys = apiKeys.map(({ keyHash, ...key }) => key);
+      
+      res.json(safeApiKeys);
+    } catch (error) {
+      console.error('Get API keys error:', error);
+      res.status(500).json({ 
+        error: 'Failed to get API keys', 
+        message: 'Internal server error' 
+      });
+    }
+  });
+
+  // Delete API key
+  app.delete('/api/auth/api-keys/:id', isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const userId = (req as any).user.id;
+
+      // Verify the API key belongs to the user
+      const apiKeys = await storage.getUserApiKeys(userId);
+      const keyToDelete = apiKeys.find(key => key.id === id);
+
+      if (!keyToDelete) {
+        return res.status(404).json({ 
+          error: 'API key not found', 
+          message: 'The specified API key does not exist or does not belong to you' 
+        });
+      }
+
+      await storage.deleteApiKey(id);
+      res.json({ message: 'API key deleted successfully' });
+    } catch (error) {
+      console.error('Delete API key error:', error);
+      res.status(500).json({ 
+        error: 'Failed to delete API key', 
+        message: 'Internal server error' 
+      });
+    }
+  });
+
+  // === External API Routes (Protected by API Key) ===
+  
+  // Get user chats via API
+  app.get('/api/v1/chats', authenticateApiKey, requireApiPermission('read'), async (req, res) => {
+    try {
+      const userId = (req as any).apiUser.id;
+      const chats = await storage.getUserChats(userId);
+      res.json({ 
+        success: true, 
+        data: chats,
+        count: chats.length 
+      });
+    } catch (error) {
+      console.error('API get chats error:', error);
+      res.status(500).json({ 
+        error: 'Failed to get chats', 
+        message: 'Internal server error' 
+      });
+    }
+  });
+
+  // Create chat via API
+  app.post('/api/v1/chats', authenticateApiKey, requireApiPermission('write'), async (req, res) => {
+    try {
+      const userId = (req as any).apiUser.id;
+      const validation = insertChatSchema.safeParse({ ...req.body, userId });
+      
+      if (!validation.success) {
+        return res.status(400).json({ 
+          error: 'Invalid chat data', 
+          details: validation.error.errors 
+        });
+      }
+
+      const newChat = await storage.createChat(validation.data);
+      res.status(201).json({ 
+        success: true, 
+        data: newChat 
+      });
+    } catch (error) {
+      console.error('API create chat error:', error);
+      res.status(500).json({ 
+        error: 'Failed to create chat', 
+        message: 'Internal server error' 
+      });
+    }
+  });
+
+  // Send message via API
+  app.post('/api/v1/chats/:chatId/messages', authenticateApiKey, requireApiPermission('write'), async (req, res) => {
+    try {
+      const { chatId } = req.params;
+      const { content } = req.body;
+      const userId = (req as any).apiUser.id;
+
+      if (!content) {
+        return res.status(400).json({ 
+          error: 'Missing content', 
+          message: 'Message content is required' 
+        });
+      }
+
+      // Verify chat belongs to user
+      const chat = await storage.getChat(chatId);
+      if (!chat || chat.userId !== userId) {
+        return res.status(404).json({ 
+          error: 'Chat not found', 
+          message: 'The specified chat does not exist or does not belong to you' 
+        });
+      }
+
+      // Create user message
+      const userMessage = await storage.createMessage({
+        chatId,
+        content,
+        role: 'user'
+      });
+
+      // Generate AI response
+      const messages = await storage.getChatMessages(chatId);
+      const aiResponse = await enhancedAIService.generateChainedResponse(
+        content,
+        messages.map(m => ({ role: m.role as 'user' | 'assistant', content: m.content })),
+        userId
+      );
+
+      // Create AI message
+      const aiMessage = await storage.createMessage({
+        chatId,
+        content: aiResponse.message,
+        role: 'assistant',
+        metadata: aiResponse.sources ? { sources: aiResponse.sources } : null
+      });
+
+      res.json({ 
+        success: true, 
+        data: {
+          userMessage,
+          aiMessage,
+          response: aiResponse
+        }
+      });
+    } catch (error) {
+      console.error('API send message error:', error);
+      res.status(500).json({ 
+        error: 'Failed to send message', 
+        message: 'Internal server error' 
+      });
+    }
+  });
+
+  // API status endpoint
+  app.get('/api/v1/status', authenticateApiKey, (req, res) => {
+    const user = (req as any).apiUser;
+    res.json({ 
+      success: true, 
+      message: 'API is working', 
+      user: {
+        id: user.id,
+        username: user.username,
+        role: user.role
+      },
+      timestamp: new Date().toISOString()
+    });
+  });
 
   // Simplified authentication for document uploads
   app.post('/api/auth/simple-login', async (req, res) => {
