@@ -71,10 +71,9 @@ export default function MessageBubble({ message, actions }: MessageBubbleProps) 
     return date.toLocaleDateString();
   };
 
-  // Check if message contains structured data (like rate comparisons)
-  const hasStructuredData = message.content?.includes('Medicare Advantage') || 
-                            message.content?.includes('rate comparison') ||
-                            message.content?.includes('comparison table');
+  // Check if message contains structured data (like merchant processing rate comparisons)
+  const hasStructuredData = message.content?.includes('processing rate comparison') ||
+                            message.content?.includes('merchant rate table');
 
   return (
     <div className={cn(
@@ -99,46 +98,7 @@ export default function MessageBubble({ message, actions }: MessageBubbleProps) 
         )}>
           {/* Message Content */}
           <div className="prose prose-sm max-w-none">
-            {hasStructuredData && isAssistant ? (
-              <div>
-                <p className="mb-3">{message.content.split('\n')[0]}</p>
-                
-                {/* Mock Rate Comparison Table */}
-                <Card className="mb-3">
-                  <CardHeader className="py-2 px-3 bg-slate-50 dark:bg-slate-700">
-                    <h4 className="font-medium text-slate-900 dark:text-white text-sm">
-                      Medicare Advantage Plans - Florida (Age 67)
-                    </h4>
-                  </CardHeader>
-                  <CardContent className="p-3">
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-700 rounded-md">
-                        <div>
-                          <p className="font-medium text-slate-900 dark:text-white text-sm">UnitedHealthcare AARP</p>
-                          <p className="text-xs text-slate-600 dark:text-slate-400">Plan G-1</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-semibold text-green-600 text-sm">$0/month</p>
-                          <p className="text-xs text-slate-500">$1,500 deductible</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-700 rounded-md">
-                        <div>
-                          <p className="font-medium text-slate-900 dark:text-white text-sm">Humana Gold Plus</p>
-                          <p className="text-xs text-slate-600 dark:text-slate-400">HMO Plan</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-semibold text-green-600 text-sm">$23/month</p>
-                          <p className="text-xs text-slate-500">$0 deductible</p>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            ) : (
-              <MessageContent content={message.content} />
-            )}
+            <MessageContent content={message.content} />
           </div>
 
           {/* Action Buttons for AI responses */}
