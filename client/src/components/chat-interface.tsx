@@ -34,6 +34,7 @@ import { cn } from "@/lib/utils";
 interface ChatInterfaceProps {
   chatId: string | null;
   onChatUpdate: () => void;
+  onNewChatWithMessage?: (message: string) => void;
 }
 
 interface MessageWithActions extends Message {
@@ -45,7 +46,7 @@ interface MessageWithActions extends Message {
   suggestions?: string[];
 }
 
-export default function ChatInterface({ chatId, onChatUpdate }: ChatInterfaceProps) {
+export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessage }: ChatInterfaceProps) {
   const [input, setInput] = useState("");
   const [showFileUpload, setShowFileUpload] = useState(false);
   const [isListening, setIsListening] = useState(false);
@@ -199,7 +200,11 @@ export default function ChatInterface({ chatId, onChatUpdate }: ChatInterfacePro
   };
 
   const handleQuickAction = (action: string) => {
-    setInput(action);
+    if (onNewChatWithMessage) {
+      onNewChatWithMessage(action);
+    } else {
+      setInput(action);
+    }
   };
 
   if (!chatId) {

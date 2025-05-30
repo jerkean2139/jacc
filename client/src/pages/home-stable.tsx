@@ -67,6 +67,40 @@ export default function HomeStable() {
     createChatMutation.mutate();
   };
 
+  const handleNewChatWithMessage = async (message: string) => {
+    try {
+      const response = await apiRequest("POST", "/api/chats", {
+        title: "New Chat",
+      });
+      const newChat = await response.json();
+      
+      // Navigate to the new chat
+      navigate(`/chat/${newChat.id}`);
+      
+      // Send the message after a brief delay to allow navigation
+      setTimeout(async () => {
+        await fetch(`/api/chats/${newChat.id}/messages`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            content: message,
+            role: "user"
+          }),
+        });
+        
+        // Refresh the chats list
+        queryClient.invalidateQueries({ queryKey: ["/api/chats"] });
+      }, 100);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create new chat",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleChatSelect = (chatId: string) => {
     navigate(`/chat/${chatId}`);
   };
@@ -122,6 +156,7 @@ export default function HomeStable() {
         <ChatInterface 
           chatId={activeChatId} 
           onChatUpdate={refetchChats}
+          onNewChatWithMessage={handleNewChatWithMessage}
         />
       </div>
 
@@ -146,6 +181,7 @@ export default function HomeStable() {
           <ChatInterface
             chatId={activeChatId}
             onChatUpdate={refetchChats}
+            onNewChatWithMessage={handleNewChatWithMessage}
           />
         </div>
       </div>
