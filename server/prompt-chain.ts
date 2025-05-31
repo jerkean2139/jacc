@@ -41,13 +41,17 @@ export class PromptChainService {
     const classificationStep = await this.classifyQueryIntent(query, conversationHistory);
     steps.push(classificationStep);
     
-    const classification = JSON.parse(classificationStep.response) as QueryClassification;
+    // Extract JSON from response that might contain markdown code blocks
+    const cleanClassificationResponse = classificationStep.response.replace(/```json\n?|\n?```/g, '').trim();
+    const classification = JSON.parse(cleanClassificationResponse) as QueryClassification;
     
     // Step 2: Smart Folder Routing
     const routingStep = await this.determineFolderRouting(classification, userId);
     steps.push(routingStep);
     
-    const namespaces = JSON.parse(routingStep.response).suggestedNamespaces;
+    // Extract JSON from response that might contain markdown code blocks
+    const cleanRoutingResponse = routingStep.response.replace(/```json\n?|\n?```/g, '').trim();
+    const namespaces = JSON.parse(cleanRoutingResponse).suggestedNamespaces;
     
     // Step 3: Document Search with Smart Routing
     const searchStep = await this.executeSmartDocumentSearch(query, namespaces);

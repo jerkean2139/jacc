@@ -7,6 +7,7 @@ import {
   favorites,
   apiKeys,
   userChatLogs,
+  userPrompts,
   type User, 
   type UpsertUser,
   type InsertUser,
@@ -23,10 +24,12 @@ import {
   type InsertDocument,
   type InsertFavorite,
   type InsertUserChatLog,
-  type UserChatLog
+  type UserChatLog,
+  type UserPrompt,
+  type InsertUserPrompt
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 
 // Interface for storage operations
 export interface IStorage {
