@@ -128,49 +128,25 @@ export default function DocumentsPage() {
             </CardHeader>
             {filteredDocuments.length > 0 && (
               <CardContent>
-                <div className="space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {filteredDocuments.map((doc) => (
-                    <div
+                    <DraggableDocument
                       key={doc.id}
-                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50"
-                    >
-                      <div className="flex items-center gap-3 flex-1">
-                        <FileText className="h-5 w-5 text-blue-500" />
-                        <div className="flex-1">
-                          <h3 className="font-medium">{doc.name}</h3>
-                          <p className="text-sm text-muted-foreground">{doc.originalName}</p>
-                          <div className="flex items-center gap-2 mt-1">
-                            <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded">
-                              {doc.mimeType.split('/')[1].toUpperCase() || 'Document'}
-                            </span>
-                            {doc.isFavorite && (
-                              <span className="text-xs px-2 py-1 bg-yellow-100 text-yellow-800 rounded">
-                                Favorite
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {doc.path && (
-                          <Button variant="outline" size="sm" asChild>
-                            <a href={`/uploads/${doc.path}`} target="_blank" rel="noopener noreferrer">
-                              View
-                            </a>
-                          </Button>
-                        )}
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          onClick={() => deleteMutation.mutate(doc.id)}
-                          disabled={deleteMutation.isPending}
-                          className="text-red-600 hover:text-red-700"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
+                      document={doc}
+                      onMove={handleDocumentMove}
+                    />
                   ))}
+                </div>
+              </CardContent>
+            )}
+            {filteredDocuments.length === 0 && (
+              <CardContent>
+                <div className="text-center py-8">
+                  <FileText className="mx-auto h-12 w-12 text-muted-foreground" />
+                  <h3 className="mt-2 text-sm font-semibold text-gray-900">No documents found</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {searchQuery ? 'Try adjusting your search terms.' : 'Upload some documents to get started.'}
+                  </p>
                 </div>
               </CardContent>
             )}
@@ -186,27 +162,40 @@ export default function DocumentsPage() {
               </p>
             </CardHeader>
             <CardContent>
+              <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-950 rounded-lg border-2 border-dashed border-blue-200 dark:border-blue-800">
+                <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">Drag & Drop Instructions</h4>
+                <p className="text-sm text-blue-700 dark:text-blue-200">
+                  • Drag documents from the "Manage Documents" tab to any folder below to organize them
+                </p>
+                <p className="text-sm text-blue-700 dark:text-blue-200">
+                  • Folders will highlight when you can drop documents into them
+                </p>
+              </div>
+              
               {folders.length > 0 ? (
-                <div className="space-y-2">
-                  {folders.map((folder) => (
-                    <div
-                      key={folder.id}
-                      className="flex items-center gap-3 p-3 border rounded-lg"
-                    >
-                      <Folder className="h-5 w-5 text-blue-500" />
-                      <div className="flex-1">
-                        <h3 className="font-medium">{folder.name}</h3>
-                        {folder.description && (
-                          <p className="text-sm text-muted-foreground">{folder.description}</p>
-                        )}
-                      </div>
-                    </div>
-                  ))}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {folders.map((folder) => {
+                    const documentsInFolder = documents.filter(doc => doc.folderId === folder.id);
+                    return (
+                      <DroppableFolder
+                        key={folder.id}
+                        folder={{
+                          ...folder,
+                          documentCount: documentsInFolder.length
+                        }}
+                        onDocumentMove={handleDocumentMove}
+                      />
+                    );
+                  })}
                 </div>
               ) : (
-                <p className="text-center text-muted-foreground py-8">
-                  No folders created yet. Folders will be created automatically when you upload documents.
-                </p>
+                <div className="text-center py-8">
+                  <Folder className="mx-auto h-12 w-12 text-muted-foreground" />
+                  <h3 className="mt-2 text-sm font-semibold text-gray-900">No folders available</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Folders will be created automatically when you upload documents.
+                  </p>
+                </div>
               )}
             </CardContent>
           </Card>
