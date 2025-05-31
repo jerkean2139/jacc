@@ -94,8 +94,8 @@ export default function MerchantInsights() {
 
   const generateInsightsMutation = useMutation({
     mutationFn: (data: MerchantData) => apiRequest('POST', '/api/merchant-insights/generate', data),
-    onSuccess: (data) => {
-      setInsights(data.insights);
+    onSuccess: (response: any) => {
+      setInsights(response.insights);
       toast({
         title: "Insights Generated",
         description: "Comprehensive merchant analysis completed successfully.",

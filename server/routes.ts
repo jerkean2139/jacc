@@ -1668,6 +1668,8 @@ async function analyzeStatementContent(content: string) {
     }
   };
   
+  initializeGamification();
+
 // Merchant insights generation function
 async function generateMerchantInsights(merchantData: any) {
   try {
