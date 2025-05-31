@@ -212,6 +212,16 @@ export const documentTagRelations = pgTable("document_tag_relations", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Document Chunks for Search
+export const documentChunks = pgTable("document_chunks", {
+  id: varchar("id").primaryKey(),
+  documentId: uuid("document_id").notNull().references(() => documents.id, { onDelete: "cascade" }),
+  content: text("content").notNull(),
+  chunkIndex: integer("chunk_index").notNull(),
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // ISO AMP Integration Data
 export const merchantApplications = pgTable("merchant_applications", {
   id: uuid("id").primaryKey().defaultRandom(),
