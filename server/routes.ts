@@ -13,6 +13,8 @@ import { googleDriveService } from "./google-drive";
 import { pineconeVectorService } from "./pinecone-vector";
 import { smartRoutingService } from "./smart-routing";
 import { duplicateDetectionService } from "./duplicate-detector";
+import { aiEnhancedSearchService } from "./ai-enhanced-search";
+import { perplexitySearchService } from "./perplexity-search";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
