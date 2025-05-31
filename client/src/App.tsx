@@ -22,6 +22,7 @@ import ISOAmpCalculator from "@/pages/iso-amp-calculator";
 import PromptCustomization from "@/pages/prompt-customization";
 import UserGuide from "@/pages/user-guide";
 import DocumentsPage from "@/pages/documents-page";
+import DocumentViewer from "@/pages/document-viewer";
 import MerchantInsights from "@/pages/merchant-insights";
 
 function Router() {
@@ -40,6 +41,7 @@ function Router() {
           <Route path="/iso-amp-calculator" component={ISOAmpCalculator} />
           <Route path="/guide" component={UserGuide} />
           <Route path="/documents" component={DocumentsPage} />
+          <Route path="/documents/:documentId" component={DocumentViewer} />
           <Route path="/prompts" component={PromptCustomization} />
           <Route path="/merchant-insights" component={MerchantInsights} />
           <Route path="/admin" component={AdminPanel} />

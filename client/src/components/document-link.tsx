@@ -31,9 +31,9 @@ export function DocumentLink({ documentId, documentName, className = '' }: Docum
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     
-    // Open document in new tab/window for viewing
-    const viewUrl = `/api/documents/${documentId}/view`;
-    window.open(viewUrl, '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes');
+    // Update browser URL and open document in same tab for better UX
+    const viewUrl = `/documents/${documentId}`;
+    window.location.href = viewUrl;
   };
 
   const handleDownload = (e: React.MouseEvent) => {
