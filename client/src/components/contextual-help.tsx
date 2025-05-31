@@ -241,34 +241,7 @@ export default function ContextualHelp({ enabled = true }: ContextualHelpProps) 
         </div>
       )}
 
-      {/* Help Highlight Styles */}
-      <style jsx={true} global={true}>{`
-        .help-highlight {
-          outline: 2px solid #3b82f6 !important;
-          outline-offset: 2px !important;
-          border-radius: 4px !important;
-          background-color: rgba(59, 130, 246, 0.1) !important;
-          transition: all 0.3s ease !important;
-        }
-        
-        .help-highlight::before {
-          content: '';
-          position: absolute;
-          top: -4px;
-          left: -4px;
-          right: -4px;
-          bottom: -4px;
-          border: 2px solid #3b82f6;
-          border-radius: 6px;
-          pointer-events: none;
-          animation: helpPulse 2s infinite;
-        }
-        
-        @keyframes helpPulse {
-          0%, 100% { opacity: 1; transform: scale(1); }
-          50% { opacity: 0.7; transform: scale(1.02); }
-        }
-      `}</style>
+
     </>
   );
 }

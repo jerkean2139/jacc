@@ -242,10 +242,10 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
               className="p-4 h-auto text-left justify-start hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-300 hover:border-blue-200 dark:hover:border-blue-700 transition-colors"
               onClick={() => handleQuickAction("Calculate processing rates for a restaurant")}
             >
-              <Calculator className="mr-3 h-5 w-5 text-blue-600" />
-              <div>
+              <Calculator className="mr-3 h-5 w-5 text-blue-600 flex-shrink-0" />
+              <div className="flex-1 min-w-0">
                 <div className="font-medium mb-1">Calculate Rates</div>
-                <div className="text-sm text-slate-500 group-hover:text-blue-600 dark:group-hover:text-blue-400">Get processing rates for different business types</div>
+                <div className="text-sm text-slate-500 group-hover:text-blue-600 dark:group-hover:text-blue-400 break-words">Get processing rates for different business types</div>
               </div>
             </Button>
 
@@ -254,10 +254,10 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
               className="p-4 h-auto text-left justify-start hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-700 dark:hover:text-green-300 hover:border-green-200 dark:hover:border-green-700 transition-colors"
               onClick={() => handleQuickAction("Search current Square pricing and fees")}
             >
-              <Globe className="mr-3 h-5 w-5 text-green-600" />
-              <div>
+              <Globe className="mr-3 h-5 w-5 text-green-600 flex-shrink-0" />
+              <div className="flex-1 min-w-0">
                 <div className="font-medium mb-1">Real-Time Market Intelligence</div>
-                <div className="text-sm text-slate-500 group-hover:text-green-600 dark:group-hover:text-green-400">Get current processor pricing and industry trends</div>
+                <div className="text-sm text-slate-500 group-hover:text-green-600 dark:group-hover:text-green-400 break-words">Get current processor pricing and industry trends</div>
               </div>
             </Button>
             
@@ -266,10 +266,10 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
               className="p-4 h-auto text-left justify-start hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-700 dark:hover:text-purple-300 hover:border-purple-200 dark:hover:border-purple-700 transition-colors"
               onClick={() => handleQuickAction("Analyze Stripe vs Square vs Clover for my restaurant client")}
             >
-              <Brain className="mr-3 h-5 w-5 text-purple-600" />
-              <div>
+              <Brain className="mr-3 h-5 w-5 text-purple-600 flex-shrink-0" />
+              <div className="flex-1 min-w-0">
                 <div className="font-medium mb-1">AI Competitor Analysis</div>
-                <div className="text-sm text-slate-500 group-hover:text-purple-600 dark:group-hover:text-purple-400">Compare processors with real-time intelligence</div>
+                <div className="text-sm text-slate-500 group-hover:text-purple-600 dark:group-hover:text-purple-400 break-words">Compare processors with real-time intelligence</div>
               </div>
             </Button>
             
@@ -278,10 +278,10 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
               className="p-4 h-auto text-left justify-start hover:bg-yellow-50 dark:hover:bg-yellow-900/20 hover:text-yellow-700 dark:hover:text-yellow-300 hover:border-yellow-200 dark:hover:border-yellow-700 transition-colors"
               onClick={() => handleQuickAction("Get current payment processing industry trends and market analysis")}
             >
-              <Zap className="mr-3 h-5 w-5 text-yellow-600" />
-              <div>
+              <Zap className="mr-3 h-5 w-5 text-yellow-600 flex-shrink-0" />
+              <div className="flex-1 min-w-0">
                 <div className="font-medium mb-1">Industry Intelligence</div>
-                <div className="text-sm text-slate-500 group-hover:text-yellow-600 dark:group-hover:text-yellow-400">Real-time market trends and analysis</div>
+                <div className="text-sm text-slate-500 group-hover:text-yellow-600 dark:group-hover:text-yellow-400 break-words">Real-time market trends and analysis</div>
               </div>
             </Button>
             
@@ -290,9 +290,10 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
               className="p-4 h-auto text-left justify-start hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-300 hover:border-blue-200 dark:hover:border-blue-700 transition-colors"
               onClick={() => handleQuickAction("Help me prepare a proposal for a new client")}
             >
-              <div>
+              <FileText className="mr-3 h-5 w-5 text-blue-600 flex-shrink-0" />
+              <div className="flex-1 min-w-0">
                 <div className="font-medium mb-1">Create Proposal</div>
-                <div className="text-sm text-slate-500 group-hover:text-blue-600 dark:group-hover:text-blue-400">Generate client proposals and documents</div>
+                <div className="text-sm text-slate-500 group-hover:text-blue-600 dark:group-hover:text-blue-400 break-words">Generate client proposals and documents</div>
               </div>
             </Button>
           </div>
