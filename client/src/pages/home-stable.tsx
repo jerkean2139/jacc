@@ -209,12 +209,15 @@ export default function HomeStable() {
           {/* Desktop Header Navigation */}
           <div className="border-b border-border p-2 bg-background">
             <div className="flex items-center gap-2">
-              <Link href="/calculator">
-                <Button variant="ghost" size="sm" className="gap-2">
-                  <Calculator className="w-4 h-4" />
-                  Calculator
-                </Button>
-              </Link>
+              {/* Calculator link hidden for MVP - Version 2 feature */}
+              {false && (
+                <Link href="/calculator">
+                  <Button variant="ghost" size="sm" className="gap-2">
+                    <Calculator className="w-4 h-4" />
+                    Calculator
+                  </Button>
+                </Link>
+              )}
               <Link href="/prompts">
                 <Button variant="ghost" size="sm" className="gap-2">
                   <MessageSquare className="w-4 h-4" />

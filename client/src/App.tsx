@@ -21,6 +21,7 @@ import ISOAmpCalculator from "@/pages/iso-amp-calculator";
 import PromptCustomization from "@/pages/prompt-customization";
 import UserGuide from "@/pages/user-guide";
 import DocumentsPage from "@/pages/documents-page";
+import MerchantInsights from "@/pages/merchant-insights";
 
 function Router() {
   // Temporarily bypass auth for testing - you can access the main app now
@@ -39,6 +40,7 @@ function Router() {
           <Route path="/guide" component={UserGuide} />
           <Route path="/documents" component={DocumentsPage} />
           <Route path="/prompts" component={PromptCustomization} />
+          <Route path="/merchant-insights" component={MerchantInsights} />
           <Route path="/admin" component={AdminSettings} />
           <Route path="/admin/dashboard" component={AdminDashboard} />
           <Route path="/login" component={Landing} />
