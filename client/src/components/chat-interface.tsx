@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import MessageBubble from "./message-bubble";
 import FileUpload from "./file-upload";
+import { ExternalSearchDialog } from "./external-search-dialog";
 import type { Message } from "@shared/schema";
 import { cn } from "@/lib/utils";
 
@@ -39,17 +40,21 @@ interface ChatInterfaceProps {
 
 interface MessageWithActions extends Message {
   actions?: Array<{
-    type: 'save_to_folder' | 'download' | 'create_proposal';
+    type: 'save_to_folder' | 'download' | 'create_proposal' | 'external_search_request';
     label: string;
     data?: any;
+    query?: string;
   }>;
   suggestions?: string[];
+  needsExternalSearchPermission?: boolean;
 }
 
 export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessage }: ChatInterfaceProps) {
   const [input, setInput] = useState("");
   const [showFileUpload, setShowFileUpload] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [showExternalSearchDialog, setShowExternalSearchDialog] = useState(false);
+  const [pendingExternalQuery, setPendingExternalQuery] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();

@@ -16,6 +16,7 @@ const anthropic = new Anthropic({
 export interface EnhancedAIResponse extends AIResponse {
   sources?: DocumentSource[];
   reasoning?: string;
+  needsExternalSearchPermission?: boolean;
 }
 
 export interface DocumentSource {
@@ -48,30 +49,37 @@ export class EnhancedAIService {
     userId: string
   ): Promise<EnhancedAIResponse> {
     try {
-      console.log(`🔗 Starting prompt chain for user ${userId}`);
+      console.log(`🔍 Step 1: Searching internal document database for user ${userId}`);
       
-      // Initialize default folders if they don't exist
-      await smartRoutingService.initializeDefaultFolders(userId);
+      // Step 1: Search internal documents only
+      const documentResults = await this.searchDocuments(message);
       
-      // Execute the prompt chain
-      const chainResult = await promptChainService.executeChain(
-        message,
-        userId,
-        conversationHistory
-      );
-      
-      console.log(`✅ Prompt chain completed with ${chainResult.steps.length} steps, confidence: ${(chainResult.confidence * 100).toFixed(1)}%`);
-      
-      return {
-        message: chainResult.finalResponse,
-        sources: chainResult.sources,
-        reasoning: chainResult.reasoning,
-        suggestions: this.extractSuggestions(chainResult.finalResponse),
-        actions: this.extractActions(chainResult.finalResponse)
-      };
+      if (documentResults.length > 0) {
+        console.log(`✅ Found ${documentResults.length} relevant documents in internal database`);
+        
+        // Generate response with document context
+        return await this.generateResponseWithDocuments(
+          message,
+          documentResults,
+          conversationHistory,
+          userId
+        );
+      } else {
+        console.log(`❌ No relevant documents found in internal database`);
+        
+        // Return response indicating no documents found and asking for permission to search externally
+        return {
+          message: "I searched our internal document database but didn't find specific information about your query. Would you like me to search external sources for additional information?",
+          sources: [],
+          reasoning: "No relevant documents found in internal database",
+          suggestions: ["Search external sources", "Try a different search term", "Upload relevant documents"],
+          actions: [{ type: 'external_search_request', query: message }],
+          needsExternalSearchPermission: true
+        };
+      }
       
     } catch (error) {
-      console.error('Prompt chain failed, falling back to standard response:', error);
+      console.error('Document search failed, falling back to standard response:', error);
       return await this.generateStandardResponse(message, conversationHistory, userId);
     }
   }
