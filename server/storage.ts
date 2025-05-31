@@ -78,6 +78,18 @@ export interface IStorage {
   // Admin logging operations
   logUserChatRequest(chatLog: InsertUserChatLog): Promise<UserChatLog>;
   getUserChatLogs(userId?: string): Promise<UserChatLog[]>;
+
+  // Admin operations
+  getAllUsers(): Promise<User[]>;
+  deleteUser(userId: string): Promise<void>;
+  getAllDocuments(): Promise<Document[]>;
+  updateDocumentPermissions(documentId: string, permissions: any): Promise<Document>;
+  getAllPrompts(): Promise<any[]>;
+  createPrompt(prompt: any): Promise<any>;
+  updatePrompt(promptId: string, updates: any): Promise<any>;
+  deletePrompt(promptId: string): Promise<void>;
+  getAdminSettings(): Promise<any>;
+  updateAdminSettings(settings: any): Promise<any>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -357,6 +369,77 @@ export class DatabaseStorage implements IStorage {
     
     const [prompt] = await query;
     return prompt;
+  }
+
+  // Admin operations
+  async getAllUsers(): Promise<User[]> {
+    return await db.select().from(users).orderBy(users.createdAt);
+  }
+
+  async deleteUser(userId: string): Promise<void> {
+    await db.delete(users).where(eq(users.id, userId));
+  }
+
+  async getAllDocuments(): Promise<Document[]> {
+    return await db.select().from(documents).orderBy(documents.createdAt);
+  }
+
+  async updateDocumentPermissions(documentId: string, permissions: any): Promise<Document> {
+    const [document] = await db
+      .update(documents)
+      .set(permissions)
+      .where(eq(documents.id, documentId))
+      .returning();
+    return document;
+  }
+
+  async getAllPrompts(): Promise<any[]> {
+    return await db.select().from(userPrompts).orderBy(userPrompts.createdAt);
+  }
+
+  async createPrompt(prompt: any): Promise<any> {
+    const [newPrompt] = await db
+      .insert(userPrompts)
+      .values(prompt)
+      .returning();
+    return newPrompt;
+  }
+
+  async updatePrompt(promptId: string, updates: any): Promise<any> {
+    const [prompt] = await db
+      .update(userPrompts)
+      .set(updates)
+      .where(eq(userPrompts.id, promptId))
+      .returning();
+    return prompt;
+  }
+
+  async deletePrompt(promptId: string): Promise<void> {
+    await db.delete(userPrompts).where(eq(userPrompts.id, promptId));
+  }
+
+  async getAdminSettings(): Promise<any> {
+    const [settings] = await db.select().from(adminSettings).where(eq(adminSettings.id, 'default'));
+    return settings || {
+      defaultTemperature: 0.7,
+      maxTokens: 1000,
+      enableExternalSearch: true,
+      enableDocumentAnalysis: true,
+      enableProposalGeneration: true,
+      systemPrompt: ''
+    };
+  }
+
+  async updateAdminSettings(settingsData: any): Promise<any> {
+    const [settings] = await db
+      .insert(adminSettings)
+      .values({ id: 'default', ...settingsData })
+      .onConflictDoUpdate({
+        target: adminSettings.id,
+        set: settingsData
+      })
+      .returning();
+    return settings;
   }
 }
 

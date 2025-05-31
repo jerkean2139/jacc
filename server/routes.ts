@@ -1831,6 +1831,146 @@ Provide actionable, data-driven insights that would help a payment processing sa
     }
   });
 
+  // Admin middleware to check admin role
+  const requireAdmin = (req: any, res: any, next: any) => {
+    if (!req.user || req.user.role !== 'admin') {
+      return res.status(403).json({ message: "Admin access required" });
+    }
+    next();
+  };
+
+  // Admin API Routes
+  // User Management
+  app.get('/api/admin/users', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      res.json(users);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  app.post('/api/admin/users', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const userData = {
+        id: crypto.randomUUID(),
+        ...req.body,
+        passwordHash: await hashPassword(req.body.password)
+      };
+      delete userData.password;
+      
+      const user = await storage.createUser(userData);
+      res.json(user);
+    } catch (error) {
+      console.error("Error creating user:", error);
+      res.status(500).json({ message: "Failed to create user" });
+    }
+  });
+
+  app.delete('/api/admin/users/:id', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const userId = req.params.id;
+      await storage.deleteUser(userId);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      res.status(500).json({ message: "Failed to delete user" });
+    }
+  });
+
+  // Document Management
+  app.get('/api/admin/documents', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const documents = await storage.getAllDocuments();
+      res.json(documents);
+    } catch (error) {
+      console.error("Error fetching documents:", error);
+      res.status(500).json({ message: "Failed to fetch documents" });
+    }
+  });
+
+  app.patch('/api/admin/documents/:id/permissions', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const documentId = req.params.id;
+      const permissions = req.body;
+      const document = await storage.updateDocumentPermissions(documentId, permissions);
+      res.json(document);
+    } catch (error) {
+      console.error("Error updating document permissions:", error);
+      res.status(500).json({ message: "Failed to update permissions" });
+    }
+  });
+
+  // Prompt Management
+  app.get('/api/admin/prompts', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const prompts = await storage.getAllPrompts();
+      res.json(prompts);
+    } catch (error) {
+      console.error("Error fetching prompts:", error);
+      res.status(500).json({ message: "Failed to fetch prompts" });
+    }
+  });
+
+  app.post('/api/admin/prompts', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const promptData = {
+        id: crypto.randomUUID(),
+        userId: req.user.claims.sub,
+        ...req.body
+      };
+      const prompt = await storage.createPrompt(promptData);
+      res.json(prompt);
+    } catch (error) {
+      console.error("Error creating prompt:", error);
+      res.status(500).json({ message: "Failed to create prompt" });
+    }
+  });
+
+  app.put('/api/admin/prompts/:id', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const promptId = req.params.id;
+      const prompt = await storage.updatePrompt(promptId, req.body);
+      res.json(prompt);
+    } catch (error) {
+      console.error("Error updating prompt:", error);
+      res.status(500).json({ message: "Failed to update prompt" });
+    }
+  });
+
+  app.delete('/api/admin/prompts/:id', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const promptId = req.params.id;
+      await storage.deletePrompt(promptId);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting prompt:", error);
+      res.status(500).json({ message: "Failed to delete prompt" });
+    }
+  });
+
+  // Settings Management
+  app.get('/api/admin/settings', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const settings = await storage.getAdminSettings();
+      res.json(settings);
+    } catch (error) {
+      console.error("Error fetching settings:", error);
+      res.status(500).json({ message: "Failed to fetch settings" });
+    }
+  });
+
+  app.patch('/api/admin/settings', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const settings = await storage.updateAdminSettings(req.body);
+      res.json(settings);
+    } catch (error) {
+      console.error("Error updating settings:", error);
+      res.status(500).json({ message: "Failed to update settings" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

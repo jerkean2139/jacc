@@ -17,6 +17,7 @@ import HomeStable from "@/pages/home-stable";
 import NotFound from "@/pages/not-found";
 import AdminSettings from "@/pages/admin-settings";
 import AdminDashboard from "@/pages/admin-dashboard";
+import AdminPanel from "@/pages/admin-panel";
 import ISOAmpCalculator from "@/pages/iso-amp-calculator";
 import PromptCustomization from "@/pages/prompt-customization";
 import UserGuide from "@/pages/user-guide";
@@ -41,8 +42,9 @@ function Router() {
           <Route path="/documents" component={DocumentsPage} />
           <Route path="/prompts" component={PromptCustomization} />
           <Route path="/merchant-insights" component={MerchantInsights} />
-          <Route path="/admin" component={AdminSettings} />
+          <Route path="/admin" component={AdminPanel} />
           <Route path="/admin/dashboard" component={AdminDashboard} />
+          <Route path="/admin/settings" component={AdminSettings} />
           <Route path="/login" component={Landing} />
         </>
       )}
