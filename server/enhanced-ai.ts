@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { pineconeVectorService, type VectorSearchResult } from "./pinecone-vector";
-import { perplexitySearchService } from "./perplexity-search";
+import { perplexitySearchService, type ExternalSearchResult } from "./perplexity-search";
+import { aiEnhancedSearchService } from "./ai-enhanced-search";
 import { promptChainService } from "./prompt-chain";
 import { smartRoutingService } from "./smart-routing";
 import { db } from "./db";

@@ -2255,6 +2255,79 @@ Provide actionable, data-driven insights that would help a payment processing sa
     }
   });
 
+  // State-of-the-art AI Search Endpoints
+  app.post('/api/ai-enhanced-search', async (req, res) => {
+    try {
+      const { query } = req.body;
+      
+      if (!query) {
+        return res.status(400).json({ error: 'Query is required' });
+      }
+      
+      console.log(`🧠 AI Enhanced Search: "${query}"`);
+      const results = await aiEnhancedSearchService.intelligentDocumentSearch(query);
+      
+      res.json({
+        results,
+        searchType: 'ai-enhanced',
+        timestamp: new Date()
+      });
+    } catch (error) {
+      console.error('AI Enhanced Search error:', error);
+      res.status(500).json({ error: 'Search temporarily unavailable' });
+    }
+  });
+  
+  app.post('/api/external-search', async (req, res) => {
+    try {
+      const { query, searchType = 'industry' } = req.body;
+      
+      if (!query) {
+        return res.status(400).json({ error: 'Query is required' });
+      }
+      
+      console.log(`🌐 External Search: "${query}" (${searchType})`);
+      
+      let result;
+      switch (searchType) {
+        case 'pricing':
+          result = await perplexitySearchService.searchPricingIntelligence(query);
+          break;
+        case 'competitor':
+          result = await perplexitySearchService.searchCompetitorAnalysis(query);
+          break;
+        default:
+          result = await perplexitySearchService.searchIndustryIntelligence(query);
+      }
+      
+      res.json(result);
+    } catch (error) {
+      console.error('External search error:', error);
+      res.status(500).json({ error: error.message || 'External search unavailable' });
+    }
+  });
+  
+  app.post('/api/smart-summary', async (req, res) => {
+    try {
+      const { query, searchResults } = req.body;
+      
+      if (!query || !searchResults) {
+        return res.status(400).json({ error: 'Query and search results are required' });
+      }
+      
+      console.log(`📝 Generating smart summary for: "${query}"`);
+      const summary = await aiEnhancedSearchService.generateSmartSummary(searchResults, query);
+      
+      res.json({
+        summary,
+        generatedAt: new Date()
+      });
+    } catch (error) {
+      console.error('Smart summary error:', error);
+      res.status(500).json({ error: 'Summary generation unavailable' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
