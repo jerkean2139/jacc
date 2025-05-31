@@ -1950,6 +1950,131 @@ Provide actionable, data-driven insights that would help a payment processing sa
     }
   });
 
+  // Helper function for creating text chunks
+  function createTextChunks(content: string, document: any, maxChunkSize = 1000) {
+    const chunks = [];
+    const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 0);
+    
+    let currentChunk = '';
+    let chunkIndex = 0;
+    
+    for (const sentence of sentences) {
+      if (currentChunk.length + sentence.length > maxChunkSize && currentChunk.length > 0) {
+        // Save current chunk
+        chunks.push({
+          id: `${document.id}-chunk-${chunkIndex}`,
+          documentId: document.id,
+          content: currentChunk.trim(),
+          chunkIndex: chunkIndex,
+          metadata: {
+            documentName: document.name,
+            originalName: document.originalName,
+            mimeType: document.mimeType,
+            startChar: 0,
+            endChar: currentChunk.length
+          }
+        });
+        
+        currentChunk = sentence.trim();
+        chunkIndex++;
+      } else {
+        currentChunk += (currentChunk ? ' ' : '') + sentence.trim();
+      }
+    }
+    
+    // Add final chunk if there's content
+    if (currentChunk.trim().length > 0) {
+      chunks.push({
+        id: `${document.id}-chunk-${chunkIndex}`,
+        documentId: document.id,
+        content: currentChunk.trim(),
+        chunkIndex: chunkIndex,
+        metadata: {
+          documentName: document.name,
+          originalName: document.originalName,
+          mimeType: document.mimeType,
+          startChar: 0,
+          endChar: currentChunk.length
+        }
+      });
+    }
+    
+    return chunks;
+  }
+
+  // Document Processing
+  app.post('/api/process-all-documents', isAuthenticated, async (req: any, res) => {
+    try {
+      console.log('🔄 Starting document processing...');
+      
+      // Get all documents from database
+      const allDocs = await storage.getAllDocuments();
+      console.log(`📚 Found ${allDocs.length} documents to process`);
+      
+      let processedCount = 0;
+      let errorCount = 0;
+      
+      for (const doc of allDocs) {
+        try {
+          // Check if already has chunks
+          const existingChunks = await db
+            .select()
+            .from(documentChunks)
+            .where(eq(documentChunks.documentId, doc.id))
+            .limit(1);
+            
+          if (existingChunks.length > 0) {
+            continue; // Already processed
+          }
+          
+          let content = '';
+          
+          // Extract content based on file type - skip PDFs for now to avoid library issues
+          if ((doc.mimeType === 'text/csv' || doc.mimeType === 'text/plain') && doc.path && fs.existsSync(doc.path)) {
+            try {
+              content = fs.readFileSync(doc.path, 'utf8');
+            } catch (error) {
+              console.log(`Error reading text file ${doc.name}: ${error}`);
+              continue;
+            }
+          } else {
+            continue; // Skip unsupported or missing files
+          }
+          
+          if (!content || content.trim().length < 10) {
+            continue; // Skip empty content
+          }
+          
+          // Create chunks from content
+          const chunks = createTextChunks(content, doc);
+          
+          if (chunks.length > 0) {
+            // Insert chunks into database
+            await db.insert(documentChunks).values(chunks);
+            console.log(`✅ Processed ${doc.name}: ${chunks.length} chunks`);
+            processedCount++;
+          }
+          
+        } catch (error) {
+          console.log(`❌ Error processing ${doc.name}: ${error}`);
+          errorCount++;
+        }
+      }
+      
+      console.log(`🎉 Processing complete! Processed: ${processedCount}, Errors: ${errorCount}`);
+      res.json({ 
+        message: 'Document processing complete',
+        processed: processedCount,
+        errors: errorCount,
+        total: allDocs.length
+      });
+      
+    } catch (error) {
+      console.error('❌ Document processing failed:', error);
+      res.status(500).json({ message: 'Document processing failed' });
+    }
+  });
+
   // Settings Management
   app.get('/api/admin/settings', isAuthenticated, requireAdmin, async (req: any, res) => {
     try {

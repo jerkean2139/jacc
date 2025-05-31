@@ -1,6 +1,6 @@
 // Script to process all documents and make them searchable
-import { db } from './server/db.js';
-import { documents, documentChunks } from './shared/schema.js';
+import { db } from './server/db.ts';
+import { documents, documentChunks } from './shared/schema.ts';
 import fs from 'fs';
 import path from 'path';
 import pdf from 'pdf-parse';
