@@ -514,29 +514,64 @@ IMPORTANT: When referencing this document in your response, always include the c
       
       // Search using each search term from knowledge base guidance
       for (const searchTerm of searchTerms) {
+        // Get document chunks that have been processed for search
+        const { documentChunks } = await import('./shared/schema');
+        const { db } = await import('./db');
+        const { eq, like, or } = await import('drizzle-orm');
+        
+        // Search in document chunks for content matches
+        const contentMatches = await db
+          .select()
+          .from(documentChunks)
+          .where(
+            or(
+              like(documentChunks.content, `%${searchTerm}%`),
+              like(documentChunks.content, `%${searchTerm.toLowerCase()}%`),
+              like(documentChunks.content, `%${searchTerm.toUpperCase()}%`)
+            )
+          )
+          .limit(10);
+
+        if (contentMatches.length > 0) {
+          console.log(`📄 Found ${contentMatches.length} content matches for "${searchTerm}"`);
+          
+          // Convert chunks to search results
+          const chunkResults = contentMatches.map(chunk => ({
+            id: chunk.id,
+            score: 0.8,
+            documentId: chunk.documentId,
+            content: chunk.content,
+            chunk: {
+              id: chunk.id,
+              content: chunk.content,
+              chunkIndex: chunk.chunkIndex
+            },
+            document: {
+              id: chunk.documentId,
+              name: chunk.metadata?.documentName || 'Document',
+              mimeType: chunk.metadata?.mimeType || 'application/pdf'
+            },
+            similarity: 0.8
+          }));
+          
+          return chunkResults;
+        }
+        
+        // Fallback to document name matching if no content matches found
         const termMatches = documents.filter(doc => {
           const searchText = `${doc.name} ${doc.originalName}`.toLowerCase();
           const termLower = searchTerm.toLowerCase();
           
-          // Split search term into individual words for better matching
-          const searchWords = termLower.split(' ').filter(word => word.length > 2);
-          
-          // Enhanced keyword matching - check if document contains any of the search words
+          // Enhanced keyword matching for document names
           const keywordMatches = [
-            // Direct term match
             searchText.includes(termLower),
-            // Individual word matching
-            ...searchWords.map(word => searchText.includes(word)),
-            // Processor name matching
-            searchText.includes('clearent') && (termLower.includes('clearent') || termLower.includes('pricing') || termLower.includes('equipment')),
-            searchText.includes('tsys') && (termLower.includes('tsys') || termLower.includes('pricing')),
-            searchText.includes('voyager') && (termLower.includes('voyager') || termLower.includes('pricing')),
-            searchText.includes('shift') && (termLower.includes('shift') || termLower.includes('shift4')),
-            // Service type matching
-            searchText.includes('equipment') && termLower.includes('equipment'),
+            searchText.includes('clearent') && termLower.includes('clearent'),
+            searchText.includes('tsys') && termLower.includes('tsys'),
+            searchText.includes('voyager') && termLower.includes('voyager'),
+            searchText.includes('shift') && termLower.includes('shift'),
             searchText.includes('pricing') && termLower.includes('pricing'),
-            searchText.includes('price') && (termLower.includes('price') || termLower.includes('pricing')),
-            searchText.includes('rates') && (termLower.includes('rates') || termLower.includes('pricing'))
+            searchText.includes('rates') && termLower.includes('rates'),
+            searchText.includes('equipment') && termLower.includes('equipment')
           ];
           
           return keywordMatches.some(match => match);
