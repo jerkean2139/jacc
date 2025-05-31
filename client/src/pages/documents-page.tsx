@@ -6,6 +6,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import DocumentUpload from "@/components/document-upload";
+import { DraggableDocument } from "@/components/draggable-document";
+import { DroppableFolder } from "@/components/droppable-folder";
+import { apiRequest } from "@/lib/queryClient";
 import { Search, FileText, Upload, Folder, Trash2 } from "lucide-react";
 import type { Document, Folder as FolderType } from "@shared/schema";
 
@@ -49,6 +52,31 @@ export default function DocumentsPage() {
       });
     },
   });
+
+  // Document move mutation for drag-and-drop
+  const moveMutation = useMutation({
+    mutationFn: async ({ documentId, folderId }: { documentId: string; folderId: string }) => {
+      return await apiRequest(`/api/documents/${documentId}/move`, {
+        method: 'PATCH',
+        body: { folderId },
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/documents"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/folders"] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Move failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleDocumentMove = async (documentId: string, targetFolderId: string) => {
+    await moveMutation.mutateAsync({ documentId, folderId: targetFolderId });
+  };
 
   const filteredDocuments = documents.filter(doc =>
     doc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||

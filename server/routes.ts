@@ -866,6 +866,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Document move endpoint for drag-and-drop
+  app.patch('/api/documents/:id/move', async (req: any, res) => {
+    try {
+      const userId = 'simple-user-001'; // Use test user for document testing
+      const { id } = req.params;
+      const { folderId } = req.body;
+      
+      // Verify document belongs to user
+      const document = await storage.getDocument(id);
+      if (!document || document.userId !== userId) {
+        return res.status(404).json({ message: "Document not found" });
+      }
+      
+      // Verify folder exists and belongs to user (if not null)
+      if (folderId) {
+        const folder = await storage.getFolder(folderId);
+        if (!folder || folder.userId !== userId) {
+          return res.status(404).json({ message: "Target folder not found" });
+        }
+      }
+      
+      // Update document folder
+      const updatedDocument = await storage.updateDocument(id, { folderId });
+      res.json(updatedDocument);
+    } catch (error) {
+      console.error("Error moving document:", error);
+      res.status(500).json({ message: "Failed to move document" });
+    }
+  });
+
   // Document routes
   app.get('/api/documents', async (req: any, res) => {
     try {

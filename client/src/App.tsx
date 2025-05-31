@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import { GamificationProvider } from "@/hooks/useGamification";
+import { DragDropProvider } from "@/components/drag-drop-provider";
 import PWAStatus from "@/components/pwa-status";
 import OfflineIndicator from "@/components/offline-indicator";
 import ContextualHelp from "@/components/contextual-help";
@@ -60,16 +61,18 @@ function AppContent() {
   
   return (
     <GamificationProvider userId={user?.id}>
-      <Toaster />
-      <PWAStatus />
-      <OfflineIndicator />
-      <div className="hidden md:block">
-        <ContextualHelp />
-      </div>
-      <InteractiveTutorial />
-      <PWAInstallPrompt />
-      <Router />
-      <BottomNav />
+      <DragDropProvider>
+        <Toaster />
+        <PWAStatus />
+        <OfflineIndicator />
+        <div className="hidden md:block">
+          <ContextualHelp />
+        </div>
+        <InteractiveTutorial />
+        <PWAInstallPrompt />
+        <Router />
+        <BottomNav />
+      </DragDropProvider>
     </GamificationProvider>
   );
 }
