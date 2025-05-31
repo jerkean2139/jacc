@@ -896,7 +896,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Document search endpoint
+  // Advanced document search endpoint
   app.get('/api/documents/search', async (req: any, res) => {
     try {
       const { query } = req.query;
@@ -905,11 +905,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Query parameter is required" });
       }
       
-      const results = await enhancedAIService.searchDocuments(query);
+      const { advancedSearchService } = await import('./advanced-search');
+      const results = await advancedSearchService.performAdvancedSearch(query, 'simple-user-001');
       res.json(results);
     } catch (error) {
       console.error("Error searching documents:", error);
       res.status(500).json({ message: "Failed to search documents" });
+    }
+  });
+
+  // Search suggestions endpoint
+  app.get('/api/documents/search/suggestions', async (req: any, res) => {
+    try {
+      const { query } = req.query;
+      
+      if (!query || typeof query !== 'string') {
+        return res.status(400).json({ message: "Query parameter is required" });
+      }
+      
+      const { advancedSearchService } = await import('./advanced-search');
+      const suggestions = await advancedSearchService.generateSearchSuggestions(query);
+      res.json(suggestions);
+    } catch (error) {
+      console.error("Error generating suggestions:", error);
+      res.status(500).json({ message: "Failed to generate suggestions" });
     }
   });
 
@@ -1389,22 +1408,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get all user documents
       const documents = await storage.getUserDocuments(userId);
       
-      // Simple text search in document names and content
-      const searchResults = documents.filter(doc => 
-        doc.name.toLowerCase().includes(query.toLowerCase()) ||
-        doc.originalName.toLowerCase().includes(query.toLowerCase())
-      ).map(doc => ({
-        id: doc.id,
-        score: 0.8,
-        documentId: doc.id,
-        content: `Document: ${doc.name}`,
-        metadata: {
-          documentName: doc.name,
-          webViewLink: `/documents/${doc.id}`,
-          chunkIndex: 0,
-          mimeType: doc.mimeType
-        }
-      }));
+      // Use advanced search service for better results
+      const { advancedSearchService } = await import('./advanced-search');
+      const searchResults = await advancedSearchService.performAdvancedSearch(query, userId);
       
       console.log(`Found ${searchResults.length} documents matching query: "${query}"`);
       res.json(searchResults);
