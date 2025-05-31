@@ -242,7 +242,7 @@ export default function ContextualHelp({ enabled = true }: ContextualHelpProps) 
       )}
 
       {/* Help Highlight Styles */}
-      <style jsx global>{`
+      <style jsx={true} global={true}>{`
         .help-highlight {
           outline: 2px solid #3b82f6 !important;
           outline-offset: 2px !important;
