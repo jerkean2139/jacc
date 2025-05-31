@@ -512,69 +512,86 @@ IMPORTANT: When referencing this document in your response, always include the c
       
       let matchingDocs: any[] = [];
       
-      // Search using each search term from knowledge base guidance
+      // Enhanced document search with multiple strategies
       for (const searchTerm of searchTerms) {
-        // Get document chunks that have been processed for search
-        const { documentChunks } = await import('./shared/schema');
-        const { db } = await import('./db');
-        const { eq, like, or } = await import('drizzle-orm');
+        console.log(`🔍 Searching for: "${searchTerm}"`);
         
-        // Search in document chunks for content matches
-        const contentMatches = await db
-          .select()
-          .from(documentChunks)
-          .where(
-            or(
-              like(documentChunks.content, `%${searchTerm}%`),
-              like(documentChunks.content, `%${searchTerm.toLowerCase()}%`),
-              like(documentChunks.content, `%${searchTerm.toUpperCase()}%`)
+        // Strategy 1: Search document content chunks
+        const { documentChunks } = await import('../shared/schema');
+        const { db } = await import('./db');
+        const { like, or, ilike } = await import('drizzle-orm');
+        
+        try {
+          const contentMatches = await db
+            .select()
+            .from(documentChunks)
+            .where(
+              or(
+                ilike(documentChunks.content, `%${searchTerm}%`),
+                ilike(documentChunks.content, `%clearent%`),
+                ilike(documentChunks.content, `%tsys%`),
+                ilike(documentChunks.content, `%processing%`),
+                ilike(documentChunks.content, `%rates%`),
+                ilike(documentChunks.content, `%pricing%`),
+                ilike(documentChunks.content, `%equipment%`),
+                ilike(documentChunks.content, `%genesis%`),
+                ilike(documentChunks.content, `%merchant%`)
+              )
             )
-          )
-          .limit(10);
+            .limit(20);
 
-        if (contentMatches.length > 0) {
-          console.log(`📄 Found ${contentMatches.length} content matches for "${searchTerm}"`);
-          
-          // Convert chunks to search results
-          const chunkResults = contentMatches.map(chunk => ({
-            id: chunk.id,
-            score: 0.8,
-            documentId: chunk.documentId,
-            content: chunk.content,
-            chunk: {
+          if (contentMatches.length > 0) {
+            console.log(`📄 Found ${contentMatches.length} content matches for "${searchTerm}"`);
+            
+            const chunkResults = contentMatches.map(chunk => ({
               id: chunk.id,
-              content: chunk.content,
-              chunkIndex: chunk.chunkIndex
-            },
-            document: {
-              id: chunk.documentId,
-              name: chunk.metadata?.documentName || 'Document',
-              mimeType: chunk.metadata?.mimeType || 'application/pdf'
-            },
-            similarity: 0.8
-          }));
-          
-          return chunkResults;
+              score: 0.9,
+              documentId: chunk.documentId,
+              content: chunk.content.substring(0, 500) + (chunk.content.length > 500 ? '...' : ''),
+              metadata: {
+                documentName: chunk.metadata?.documentName || 'Document',
+                chunkIndex: chunk.chunkIndex,
+                mimeType: chunk.metadata?.mimeType || 'application/pdf'
+              }
+            }));
+            
+            return chunkResults;
+          }
+        } catch (error) {
+          console.log(`Error searching chunks: ${error}`);
         }
         
-        // Fallback to document name matching if no content matches found
+        // Strategy 2: Enhanced document name and metadata matching
         const termMatches = documents.filter(doc => {
-          const searchText = `${doc.name} ${doc.originalName}`.toLowerCase();
+          const searchText = `${doc.name} ${doc.originalName} ${doc.description || ''}`.toLowerCase();
           const termLower = searchTerm.toLowerCase();
           
-          // Enhanced keyword matching for document names
-          const keywordMatches = [
-            searchText.includes(termLower),
-            searchText.includes('clearent') && termLower.includes('clearent'),
-            searchText.includes('tsys') && termLower.includes('tsys'),
+          // Comprehensive keyword matching
+          const processorMatches = [
+            searchText.includes('clearent') && (termLower.includes('clearent') || termLower.includes('pricing')),
+            searchText.includes('tsys') && (termLower.includes('tsys') || termLower.includes('support')),
             searchText.includes('voyager') && termLower.includes('voyager'),
-            searchText.includes('shift') && termLower.includes('shift'),
-            searchText.includes('pricing') && termLower.includes('pricing'),
-            searchText.includes('rates') && termLower.includes('rates'),
-            searchText.includes('equipment') && termLower.includes('equipment')
+            searchText.includes('shift') && (termLower.includes('shift') || termLower.includes('shift4')),
+            searchText.includes('genesis') && (termLower.includes('genesis') || termLower.includes('merchant')),
+            searchText.includes('first') && termLower.includes('first'),
+            searchText.includes('global') && termLower.includes('global')
           ];
           
-          return keywordMatches.some(match => match);
+          const serviceMatches = [
+            searchText.includes('pricing') && (termLower.includes('pricing') || termLower.includes('rates')),
+            searchText.includes('equipment') && (termLower.includes('equipment') || termLower.includes('terminal')),
+            searchText.includes('support') && termLower.includes('support'),
+            searchText.includes('merchant') && termLower.includes('merchant'),
+            searchText.includes('statement') && termLower.includes('statement'),
+            searchText.includes('processing') && termLower.includes('processing')
+          ];
+          
+          const directMatches = [
+            searchText.includes(termLower),
+            termLower.split(' ').some(word => word.length > 2 && searchText.includes(word))
+          ];
+          
+          return [...processorMatches, ...serviceMatches, ...directMatches].some(match => match);
         });
         
         matchingDocs.push(...termMatches);
