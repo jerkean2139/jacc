@@ -518,26 +518,25 @@ IMPORTANT: When referencing this document in your response, always include the c
           const searchText = `${doc.name} ${doc.originalName}`.toLowerCase();
           const termLower = searchTerm.toLowerCase();
           
-          // Enhanced keyword matching using guided terms
+          // Split search term into individual words for better matching
+          const searchWords = termLower.split(' ').filter(word => word.length > 2);
+          
+          // Enhanced keyword matching - check if document contains any of the search words
           const keywordMatches = [
             // Direct term match
             searchText.includes(termLower),
-            // Processor names from knowledge base
-            (searchText.includes('tsys') && termLower.includes('tsys')),
-            (searchText.includes('clearent') && termLower.includes('clearent')),
-            (searchText.includes('voyager') && termLower.includes('voyager')),
-            (searchText.includes('trx') && termLower.includes('trx')),
-            (searchText.includes('shift') && (termLower.includes('shift') || termLower.includes('shift4'))),
-            (searchText.includes('skytab') && (termLower.includes('skytab') || termLower.includes('sky tab'))),
-            (searchText.includes('clover') && termLower.includes('clover')),
-            (searchText.includes('micamp') && termLower.includes('micamp')),
-            (searchText.includes('hubwallet') && termLower.includes('hubwallet')),
-            (searchText.includes('quantic') && termLower.includes('quantic')),
-            // Service types from knowledge base
-            (searchText.includes('restaurant') && termLower.includes('restaurant')),
-            (searchText.includes('pos') && (termLower.includes('pos') || termLower.includes('point of sale'))),
-            (searchText.includes('processing') && termLower.includes('processing')),
-            (searchText.includes('rates') && (termLower.includes('rates') || termLower.includes('pricing')))
+            // Individual word matching
+            ...searchWords.map(word => searchText.includes(word)),
+            // Processor name matching
+            searchText.includes('clearent') && (termLower.includes('clearent') || termLower.includes('pricing') || termLower.includes('equipment')),
+            searchText.includes('tsys') && (termLower.includes('tsys') || termLower.includes('pricing')),
+            searchText.includes('voyager') && (termLower.includes('voyager') || termLower.includes('pricing')),
+            searchText.includes('shift') && (termLower.includes('shift') || termLower.includes('shift4')),
+            // Service type matching
+            searchText.includes('equipment') && termLower.includes('equipment'),
+            searchText.includes('pricing') && termLower.includes('pricing'),
+            searchText.includes('price') && (termLower.includes('price') || termLower.includes('pricing')),
+            searchText.includes('rates') && (termLower.includes('rates') || termLower.includes('pricing'))
           ];
           
           return keywordMatches.some(match => match);

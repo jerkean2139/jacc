@@ -103,6 +103,10 @@ export const documents = pgTable("documents", {
   isFavorite: boolean("is_favorite").default(false),
   contentHash: varchar("content_hash", { length: 64 }), // SHA256 hash for duplicate detection
   nameHash: varchar("name_hash", { length: 32 }), // MD5 hash of normalized filename
+  // Permission settings
+  isPublic: boolean("is_public").default(true), // Visible to all users
+  adminOnly: boolean("admin_only").default(false), // Only admins can view
+  managerOnly: boolean("manager_only").default(false), // Admins and managers can view
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
