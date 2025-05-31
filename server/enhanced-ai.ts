@@ -508,7 +508,7 @@ IMPORTANT: When referencing this document in your response, always include the c
 
       // PRIORITY 2: Search uploaded documents using guidance from knowledge base
       const { storage } = await import('./storage');
-      const documents = await storage.getUserDocuments('dev-user-123');
+      const documents = await storage.getUserDocuments('simple-user-001');
       
       let matchingDocs: any[] = [];
       
