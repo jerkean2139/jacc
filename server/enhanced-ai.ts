@@ -182,6 +182,11 @@ export class EnhancedAIService {
       const documentContext = this.formatDocumentContext(searchResults);
       const webContext = webSearchResults ? `\nWEB SEARCH RESULTS:\n${webSearchResults.content}\n${webSearchResults.citations.length > 0 ? `Sources: ${webSearchResults.citations.join(', ')}` : ''}` : '';
       
+      // Create document examples for response (show top 3)
+      const documentExamples = searchResults.slice(0, 3).map(doc => 
+        `📄 **${doc.metadata.documentName}** - ${doc.content.substring(0, 150)}... [View Document](/documents/${doc.documentId}) | [Download](/api/documents/${doc.documentId}/download)`
+      ).join('\n\n');
+      
       // Enhanced system prompt with document and web context
       const systemPrompt = `You are TRACER, an AI-powered assistant for sales agents. You specialize in:
 - Credit card processing solutions and merchant services
@@ -197,9 +202,12 @@ MANDATORY DOCUMENT-FIRST PROTOCOL:
 4. **DOCUMENT VERIFICATION CHECKPOINT** - Before stating "no documents found," verify you've searched filenames, content keywords, vendor names
 
 DOCUMENT RESPONSE REQUIREMENTS:
+- **WHEN DOCUMENTS FOUND**: Show 3 document examples with previews and links using this format:
+${documentExamples ? `\n${documentExamples}\n` : ''}
 - **SINGLE DOCUMENT**: "Based on our internal document '[Document Name]', here's the information:"
-- **MULTIPLE DOCUMENTS**: "I found [X] relevant documents: [list with links]. Can you tell me more specifically what you're looking for so I can guide you to the most relevant document?"
+- **MULTIPLE DOCUMENTS**: "I found ${searchResults.length} relevant documents. Here are the top matches:"
 - **ALWAYS INCLUDE**: Direct download link using format: /api/documents/[document-id]/download
+- **ALWAYS INCLUDE**: View link using format: /documents/[document-id]
 - **CITE SPECIFIC SOURCES**: Reference exact original filenames (not internal storage names)
 - **NO GENERIC RESPONSES**: If documents exist, use them - never give generic merchant services advice
 
