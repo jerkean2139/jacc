@@ -1,6 +1,6 @@
 // Test script for document search with 5 realistic sales rep questions
-const { db } = require('./server/db');
-const { enhancedAIService } = require('./server/enhanced-ai');
+import { db } from './server/db.js';
+import { enhancedAIService } from './server/enhanced-ai.js';
 
 async function testDocumentSearch() {
   console.log('🔍 Testing Document Search with 5 Realistic Sales Rep Questions\n');
