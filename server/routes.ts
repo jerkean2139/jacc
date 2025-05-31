@@ -1668,7 +1668,116 @@ async function analyzeStatementContent(content: string) {
     }
   };
   
-  initializeGamification();
+// Merchant insights generation function
+async function generateMerchantInsights(merchantData: any) {
+  try {
+    // the newest Anthropic model is "claude-3-7-sonnet-20250219" which was released February 24, 2025
+    const Anthropic = await import('@anthropic-ai/sdk');
+    const anthropic = new Anthropic.default({
+      apiKey: process.env.ANTHROPIC_API_KEY,
+    });
+
+    const prompt = `As an expert business intelligence analyst specializing in merchant services and payment processing, analyze the following merchant data and provide comprehensive insights:
+
+Business Information:
+- Name: ${merchantData.businessName}
+- Type: ${merchantData.businessType}
+- Industry: ${merchantData.industry}
+- Location: ${merchantData.location}
+- Years in Business: ${merchantData.yearsInBusiness}
+- Monthly Volume: $${merchantData.monthlyVolume?.toLocaleString() || 0}
+- Average Ticket: $${merchantData.averageTicket?.toFixed(2) || 0}
+- Transaction Count: ${merchantData.transactionCount?.toLocaleString() || 0}/month
+- Current Processor: ${merchantData.currentProcessor}
+- Current Rate: ${merchantData.currentRates?.qualifiedRate || 0}%
+- Monthly Fee: $${merchantData.currentRates?.monthlyFee || 0}
+- Business Challenges: ${merchantData.businessChallenges}
+- Goals: ${merchantData.goals}
+
+Provide a comprehensive analysis in the following JSON format:
+{
+  "overallScore": (number 0-100),
+  "insights": [
+    {
+      "category": "string",
+      "title": "string", 
+      "description": "string",
+      "impact": "high|medium|low",
+      "actionable": boolean,
+      "recommendations": ["string"]
+    }
+  ],
+  "competitiveAnalysis": {
+    "marketPosition": "string",
+    "opportunities": ["string"],
+    "threats": ["string"]
+  },
+  "growthRecommendations": {
+    "shortTerm": ["string"],
+    "longTerm": ["string"]
+  },
+  "riskAssessment": {
+    "level": "low|medium|high",
+    "factors": ["string"],
+    "mitigation": ["string"]
+  }
+}
+
+Focus on:
+1. Processing cost optimization opportunities
+2. Industry-specific insights and benchmarking
+3. Growth potential analysis
+4. Risk factors and mitigation strategies
+5. Competitive positioning
+6. Operational efficiency improvements
+7. Technology recommendations
+8. Market expansion opportunities
+
+Provide actionable, data-driven insights that would help a payment processing sales agent provide value to this merchant.`;
+
+    const response = await anthropic.messages.create({
+      model: 'claude-3-7-sonnet-20250219',
+      max_tokens: 4000,
+      messages: [
+        { role: 'user', content: prompt }
+      ],
+    });
+
+    const content = response.content[0].type === 'text' ? response.content[0].text : '';
+    
+    // Extract JSON from the response
+    const jsonMatch = content.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      throw new Error('No valid JSON found in AI response');
+    }
+
+    const insights = JSON.parse(jsonMatch[0]);
+    return insights;
+
+  } catch (error) {
+    console.error('Error generating merchant insights:', error);
+    throw new Error('Failed to generate insights: ' + error.message);
+  }
+}
+
+  // Merchant Insights API Routes
+  app.post('/api/merchant-insights/generate', async (req, res) => {
+    try {
+      const merchantData = req.body;
+      
+      // Generate comprehensive AI-powered business insights
+      const insights = await generateMerchantInsights(merchantData);
+      
+      res.json({ 
+        success: true, 
+        insights, 
+        timestamp: new Date().toISOString() 
+      });
+    } catch (error) {
+      console.error('Merchant insights generation error:', error);
+      res.status(500).json({ error: 'Failed to generate merchant insights' });
+    }
+  });
 
   // User prompt customization routes
   app.get('/api/user/prompts', isAuthenticated, async (req: any, res) => {
