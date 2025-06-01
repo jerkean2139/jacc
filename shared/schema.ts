@@ -242,6 +242,8 @@ export const merchantApplications = pgTable("merchant_applications", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+
+
 // Help Content for Contextual Bubbles
 export const helpContent = pgTable("help_content", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -297,10 +299,12 @@ export const userChatLogs = pgTable("user_chat_logs", {
 });
 
 // Define relations
-export const usersRelations = relations(users, ({ many }) => ({
+export const usersRelations = relations(users, ({ one, many }) => ({
   folders: many(folders),
   chats: many(chats),
   documents: many(documents),
+  stats: one(userStats, { fields: [users.id], references: [userStats.userId] }),
+  userAchievements: many(userAchievements),
   favorites: many(favorites),
 }));
 
@@ -444,6 +448,14 @@ export const insertUserStatsSchema = createInsertSchema(userStats).omit({
   id: true,
   updatedAt: true,
 });
+
+// Gamification Types
+export type UserStats = typeof userStats.$inferSelect;
+export type InsertUserStats = z.infer<typeof insertUserStatsSchema>;
+export type Achievement = typeof achievements.$inferSelect;
+export type InsertAchievement = z.infer<typeof insertAchievementSchema>;
+export type UserAchievement = typeof userAchievements.$inferSelect;
+export type InsertUserAchievement = z.infer<typeof insertUserAchievementSchema>;
 
 export const insertFaqSchema = createInsertSchema(faqKnowledgeBase).omit({
   id: true,
