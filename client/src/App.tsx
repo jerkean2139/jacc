@@ -25,6 +25,7 @@ import UserGuide from "@/pages/user-guide";
 import DocumentsPage from "@/pages/documents-page";
 import DocumentViewer from "@/pages/document-viewer";
 import MerchantInsights from "@/pages/merchant-insights";
+import GamificationPage from "@/pages/gamification-page";
 
 function Router() {
   // Temporarily bypass auth for testing - you can access the main app now
@@ -45,6 +46,7 @@ function Router() {
           <Route path="/documents/:documentId" component={DocumentViewer} />
           <Route path="/prompts" component={PromptCustomization} />
           <Route path="/merchant-insights" component={MerchantInsights} />
+          <Route path="/leaderboard" component={GamificationPage} />
           <Route path="/admin" component={AdminPanel} />
           <Route path="/admin/dashboard" component={AdminDashboard} />
           <Route path="/admin/settings" component={AdminSettings} />

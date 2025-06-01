@@ -8,7 +8,8 @@ import {
   Plus,
   Home,
   HelpCircle,
-  MessageSquare
+  MessageSquare,
+  Trophy
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -34,6 +35,11 @@ const navItems: NavItem[] = [
     href: "/guide",
     icon: BookOpen,
     label: "Guide"
+  },
+  {
+    href: "/leaderboard",
+    icon: Trophy,
+    label: "Leaderboard"
   },
   {
     href: "/prompts",
