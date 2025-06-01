@@ -121,12 +121,12 @@ export default function InteractiveTutorial() {
                   // Simulate typing in chat
                   const chatInput = document.querySelector('textarea') as HTMLTextAreaElement;
                   if (chatInput) {
-                    chatInput.value = "What documents do I have about pricing?";
+                    chatInput.value = "Find TRX processing information";
                     chatInput.focus();
                   }
                 }}
               >
-                <div className="text-sm font-medium">"What documents do I have about pricing?"</div>
+                <div className="text-sm font-medium">"Find TRX processing information"</div>
                 <div className="text-xs text-muted-foreground mt-1">Click to try this question</div>
               </div>
               
@@ -135,12 +135,40 @@ export default function InteractiveTutorial() {
                 onClick={() => {
                   const chatInput = document.querySelector('textarea') as HTMLTextAreaElement;
                   if (chatInput) {
-                    chatInput.value = "Find information about merchant applications";
+                    chatInput.value = "What do you know about Clearent pricing?";
                     chatInput.focus();
                   }
                 }}
               >
-                <div className="text-sm font-medium">"Find information about merchant applications"</div>
+                <div className="text-sm font-medium">"What do you know about Clearent pricing?"</div>
+                <div className="text-xs text-muted-foreground mt-1">Click to try this question</div>
+              </div>
+              
+              <div 
+                className="p-3 bg-white dark:bg-gray-800 rounded-lg cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900 transition-colors border border-gray-200 dark:border-gray-700"
+                onClick={() => {
+                  const chatInput = document.querySelector('textarea') as HTMLTextAreaElement;
+                  if (chatInput) {
+                    chatInput.value = "Tell me about Sky Tab and Shift 4 for restaurants";
+                    chatInput.focus();
+                  }
+                }}
+              >
+                <div className="text-sm font-medium">"Tell me about Sky Tab and Shift 4 for restaurants"</div>
+                <div className="text-xs text-muted-foreground mt-1">Click to try this question</div>
+              </div>
+              
+              <div 
+                className="p-3 bg-white dark:bg-gray-800 rounded-lg cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900 transition-colors border border-gray-200 dark:border-gray-700"
+                onClick={() => {
+                  const chatInput = document.querySelector('textarea') as HTMLTextAreaElement;
+                  if (chatInput) {
+                    chatInput.value = "What are TSYS offerings?";
+                    chatInput.focus();
+                  }
+                }}
+              >
+                <div className="text-sm font-medium">"What are TSYS offerings?"</div>
                 <div className="text-xs text-muted-foreground mt-1">Click to try this question</div>
               </div>
             </div>

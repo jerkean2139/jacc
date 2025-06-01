@@ -152,12 +152,12 @@ export default function OnboardingWalkthrough() {
       content: (
         <div className="space-y-4">
           <div className="p-4 bg-gradient-to-r from-blue-50 to-green-50 dark:from-blue-950 dark:to-green-950 rounded-lg">
-            <h4 className="font-semibold mb-2">Ask About Your Documents</h4>
+            <h4 className="font-semibold mb-2">Popular Searches</h4>
             <div className="text-sm space-y-1">
-              <div>• "What documents do I have about pricing?"</div>
-              <div>• "Find my training materials"</div>
-              <div>• "Search for merchant application forms"</div>
-              <div>• "What processing documents are available?"</div>
+              <div>• "Find TRX processing information"</div>
+              <div>• "What do you know about Clearent pricing?"</div>
+              <div>• "Tell me about Sky Tab and Shift 4 for restaurants"</div>
+              <div>• "What are TSYS offerings?"</div>
             </div>
           </div>
           
@@ -265,13 +265,13 @@ export default function OnboardingWalkthrough() {
             <h4 className="font-semibold text-green-700 dark:text-green-300 mb-2">Suggested First Questions:</h4>
             <div className="space-y-2 text-sm">
               <div className="p-2 bg-white dark:bg-gray-800 rounded cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700">
-                "Search my documents for pricing information"
+                "Find TRX processing information"
               </div>
               <div className="p-2 bg-white dark:bg-gray-800 rounded cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700">
-                "What training materials do I have?"
+                "What do you know about Clearent pricing?"
               </div>
               <div className="p-2 bg-white dark:bg-gray-800 rounded cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700">
-                "Find documents about payment processing"
+                "What are TSYS offerings?"
               </div>
             </div>
           </div>
