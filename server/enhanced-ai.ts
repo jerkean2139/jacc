@@ -18,6 +18,18 @@ export interface EnhancedAIResponse extends AIResponse {
   sources?: DocumentSource[];
   reasoning?: string;
   needsExternalSearchPermission?: boolean;
+  actionItems?: Array<{
+    task: string;
+    priority: 'high' | 'medium' | 'low';
+    assignee?: string;
+    dueDate?: string;
+    category: string;
+  }>;
+  followupTasks?: Array<{
+    task: string;
+    timeframe: string;
+    type: 'call' | 'email' | 'meeting' | 'document' | 'other';
+  }>;
 }
 
 export interface DocumentSource {
@@ -235,7 +247,14 @@ User context: ${context?.userRole || 'Merchant Services Sales Agent'}
 DOCUMENT CONTEXT:
 ${documentContext}
 
-When appropriate, suggest actions like saving payment processing information to folders, downloading rate comparisons, or creating merchant proposals.`;
+ACTION ITEMS AND TASK EXTRACTION:
+- **AUTOMATICALLY IDENTIFY**: Extract action items, follow-up tasks, and deadlines from transcriptions and conversations
+- **CATEGORIZE TASKS**: Organize by type (Client Communication, Documentation, Internal Process, Scheduling)
+- **PRIORITY ASSESSMENT**: Assign priority levels (high, medium, low) based on urgency indicators
+- **FOLLOW-UP TRACKING**: Identify callback requirements, meeting schedules, and document preparation needs
+- **TASK FORMATTING**: Present action items with clear assignees, due dates, and next steps
+
+When appropriate, suggest actions like saving payment processing information to folders, downloading rate comparisons, creating merchant proposals, and tracking action items from conversations.`;
 
       const response = await anthropic.messages.create({
         model: "claude-3-haiku-20240307",
@@ -249,6 +268,10 @@ When appropriate, suggest actions like saving payment processing information to 
       });
 
       const content = response.content[0].type === 'text' ? response.content[0].text : "";
+      
+      // Extract action items and follow-up tasks
+      const actionItems = this.extractActionItems(content);
+      const followupTasks = this.extractFollowupTasks(content);
       
       // Parse response for potential actions
       const actions = this.extractActions(content);
@@ -264,6 +287,8 @@ When appropriate, suggest actions like saving payment processing information to 
         actions: actions.length > 0 ? actions : undefined,
         sources: sources.length > 0 ? sources : undefined,
         reasoning,
+        actionItems: actionItems.length > 0 ? actionItems : undefined,
+        followupTasks: followupTasks.length > 0 ? followupTasks : undefined,
         suggestions: [
           "Find similar merchant documents in our knowledge base",
           "Create a merchant proposal from this information",
@@ -321,11 +346,31 @@ IMPORTANT: When referencing this document in your response, always include the c
   }
 
   private extractActions(content: string): Array<{
-    type: 'save_to_folder' | 'download' | 'create_proposal' | 'find_documents';
+    type: 'save_to_folder' | 'download' | 'create_proposal' | 'find_documents' | 'action_items' | 'schedule_followup';
     label: string;
     data?: any;
   }> {
     const actions = [];
+
+    // Extract action items from content
+    const actionItems = this.extractActionItems(content);
+    if (actionItems.length > 0) {
+      actions.push({
+        type: 'action_items' as const,
+        label: `${actionItems.length} Action Items Identified`,
+        data: { actionItems }
+      });
+    }
+
+    // Extract follow-up tasks
+    const followupTasks = this.extractFollowupTasks(content);
+    if (followupTasks.length > 0) {
+      actions.push({
+        type: 'schedule_followup' as const,
+        label: 'Schedule Follow-up Tasks',
+        data: { tasks: followupTasks }
+      });
+    }
 
     if (content.toLowerCase().includes('save') || content.toLowerCase().includes('folder')) {
       actions.push({
@@ -360,6 +405,133 @@ IMPORTANT: When referencing this document in your response, always include the c
     }
 
     return actions;
+  }
+
+  private extractActionItems(content: string): Array<{
+    task: string;
+    priority: 'high' | 'medium' | 'low';
+    assignee?: string;
+    dueDate?: string;
+    category: string;
+  }> {
+    const actionItems = [];
+    const actionPatterns = [
+      /(?:need to|must|should|will|action item:?|task:?|todo:?)\s+([^.!?]+)/gi,
+      /(?:follow up|follow-up|callback|contact)\s+([^.!?]+)/gi,
+      /(?:send|email|call|schedule|prepare|create|update|review)\s+([^.!?]+)/gi,
+      /(?:by|before|due)\s+([^.!?]+)/gi
+    ];
+
+    const priorityKeywords = {
+      high: ['urgent', 'asap', 'immediately', 'critical', 'priority'],
+      medium: ['soon', 'important', 'this week'],
+      low: ['eventually', 'when possible', 'low priority']
+    };
+
+    const categoryKeywords = {
+      'Client Communication': ['call', 'email', 'contact', 'follow up', 'callback'],
+      'Documentation': ['send', 'prepare', 'create document', 'proposal'],
+      'Internal Process': ['review', 'update', 'check', 'verify'],
+      'Scheduling': ['schedule', 'meeting', 'appointment', 'calendar']
+    };
+
+    for (const pattern of actionPatterns) {
+      let match;
+      while ((match = pattern.exec(content)) !== null) {
+        const task = match[1].trim();
+        if (task.length > 10) { // Filter out very short matches
+          
+          // Determine priority
+          let priority: 'high' | 'medium' | 'low' = 'medium';
+          for (const [level, keywords] of Object.entries(priorityKeywords)) {
+            if (keywords.some(keyword => content.toLowerCase().includes(keyword))) {
+              priority = level as 'high' | 'medium' | 'low';
+              break;
+            }
+          }
+
+          // Determine category
+          let category = 'General';
+          for (const [cat, keywords] of Object.entries(categoryKeywords)) {
+            if (keywords.some(keyword => task.toLowerCase().includes(keyword))) {
+              category = cat;
+              break;
+            }
+          }
+
+          // Extract assignee if mentioned
+          const assigneeMatch = content.match(/(?:assign|delegate|give to|for)\s+(\w+)/i);
+          const assignee = assigneeMatch ? assigneeMatch[1] : undefined;
+
+          // Extract due date if mentioned
+          const dateMatch = content.match(/(?:by|before|due)\s+([\w\s,]+?)(?:\.|$)/i);
+          const dueDate = dateMatch ? dateMatch[1].trim() : undefined;
+
+          actionItems.push({
+            task,
+            priority,
+            assignee,
+            dueDate,
+            category
+          });
+        }
+      }
+    }
+
+    return actionItems.slice(0, 5); // Limit to top 5 action items
+  }
+
+  private extractFollowupTasks(content: string): Array<{
+    task: string;
+    timeframe: string;
+    type: 'call' | 'email' | 'meeting' | 'document' | 'other';
+  }> {
+    const followupTasks = [];
+    const followupPatterns = [
+      /(?:follow up|callback|call back)\s+([^.!?]+)/gi,
+      /(?:schedule|set up|arrange)\s+([^.!?]+)/gi,
+      /(?:next steps?:?|action:?)\s+([^.!?]+)/gi
+    ];
+
+    const timeframePatterns = [
+      /(?:in|within)\s+(\d+\s+(?:days?|weeks?|months?))/gi,
+      /(?:next|this)\s+(week|month|quarter)/gi,
+      /(tomorrow|today|asap|soon)/gi
+    ];
+
+    for (const pattern of followupPatterns) {
+      let match;
+      while ((match = pattern.exec(content)) !== null) {
+        const task = match[1].trim();
+        if (task.length > 5) {
+          
+          // Determine task type
+          let type: 'call' | 'email' | 'meeting' | 'document' | 'other' = 'other';
+          if (/call|phone|telephone/i.test(task)) type = 'call';
+          else if (/email|send|message/i.test(task)) type = 'email';
+          else if (/meeting|meet|appointment/i.test(task)) type = 'meeting';
+          else if (/document|proposal|send|prepare/i.test(task)) type = 'document';
+
+          // Extract timeframe
+          let timeframe = 'Not specified';
+          for (const timePattern of timeframePatterns) {
+            const timeMatch = timePattern.exec(content);
+            if (timeMatch) {
+              timeframe = timeMatch[1] || timeMatch[0];
+              break;
+            }
+          }
+
+          followupTasks.push({
+            task,
+            timeframe,
+            type
+          });
+        }
+      }
+    }
+
+    return followupTasks.slice(0, 3); // Limit to top 3 follow-up tasks
   }
 
   private async generateReasoning(
