@@ -8,6 +8,9 @@ import {
   apiKeys,
   userChatLogs,
   userPrompts,
+  userStats,
+  achievements,
+  userAchievements,
   type User, 
   type UpsertUser,
   type InsertUser,
@@ -26,7 +29,11 @@ import {
   type InsertUserChatLog,
   type UserChatLog,
   type UserPrompt,
-  type InsertUserPrompt
+  type InsertUserPrompt,
+  type UserStats,
+  type InsertUserStats,
+  type Achievement,
+  type UserAchievement
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and } from "drizzle-orm";
@@ -78,6 +85,12 @@ export interface IStorage {
   // Admin logging operations
   logUserChatRequest(chatLog: InsertUserChatLog): Promise<UserChatLog>;
   getUserChatLogs(userId?: string): Promise<UserChatLog[]>;
+
+  // Gamification operations
+  getLeaderboard(limit: number): Promise<any[]>;
+  getUserStatsWithRank(userId: string): Promise<any>;
+  getUserStats(userId: string): Promise<UserStats | null>;
+  updateUserStats(userId: string, updates: Partial<UserStats>): Promise<void>;
 
   // Admin operations
   getAllUsers(): Promise<User[]>;
@@ -440,6 +453,116 @@ export class DatabaseStorage implements IStorage {
       })
       .returning();
     return settings;
+  }
+
+  // Gamification operations
+  async getLeaderboard(limit: number): Promise<any[]> {
+    const leaderboardData = await db
+      .select({
+        id: users.id,
+        username: users.username,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        profileImageUrl: users.profileImageUrl,
+        totalChats: userStats.totalChats,
+        totalMessages: userStats.totalMessages,
+        calculationsPerformed: userStats.calculationsPerformed,
+        documentsAnalyzed: userStats.documentsAnalyzed,
+        proposalsGenerated: userStats.proposalsGenerated,
+        currentStreak: userStats.currentStreak,
+        longestStreak: userStats.longestStreak,
+        totalPoints: userStats.totalPoints,
+        level: userStats.level,
+      })
+      .from(users)
+      .leftJoin(userStats, eq(users.id, userStats.userId))
+      .orderBy(desc(userStats.totalPoints))
+      .limit(limit);
+
+    return leaderboardData.map((user, index) => ({
+      ...user,
+      rank: index + 1,
+      stats: {
+        totalChats: user.totalChats || 0,
+        totalMessages: user.totalMessages || 0,
+        calculationsPerformed: user.calculationsPerformed || 0,
+        documentsAnalyzed: user.documentsAnalyzed || 0,
+        proposalsGenerated: user.proposalsGenerated || 0,
+        currentStreak: user.currentStreak || 0,
+        longestStreak: user.longestStreak || 0,
+        totalPoints: user.totalPoints || 0,
+        level: user.level || 1,
+      }
+    }));
+  }
+
+  async getUserStatsWithRank(userId: string): Promise<any> {
+    const userWithStats = await db
+      .select({
+        id: users.id,
+        username: users.username,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        profileImageUrl: users.profileImageUrl,
+        totalChats: userStats.totalChats,
+        totalMessages: userStats.totalMessages,
+        calculationsPerformed: userStats.calculationsPerformed,
+        documentsAnalyzed: userStats.documentsAnalyzed,
+        proposalsGenerated: userStats.proposalsGenerated,
+        currentStreak: userStats.currentStreak,
+        longestStreak: userStats.longestStreak,
+        totalPoints: userStats.totalPoints,
+        level: userStats.level,
+      })
+      .from(users)
+      .leftJoin(userStats, eq(users.id, userStats.userId))
+      .where(eq(users.id, userId));
+
+    if (userWithStats.length === 0) return null;
+
+    const user = userWithStats[0];
+    
+    // Calculate rank by counting users with higher points
+    const higherRankedUsers = await db
+      .select({ count: userStats.totalPoints })
+      .from(userStats)
+      .where(desc(userStats.totalPoints));
+    
+    const rank = higherRankedUsers.filter(u => (u.count || 0) > (user.totalPoints || 0)).length + 1;
+
+    return {
+      ...user,
+      rank,
+      stats: {
+        totalChats: user.totalChats || 0,
+        totalMessages: user.totalMessages || 0,
+        calculationsPerformed: user.calculationsPerformed || 0,
+        documentsAnalyzed: user.documentsAnalyzed || 0,
+        proposalsGenerated: user.proposalsGenerated || 0,
+        currentStreak: user.currentStreak || 0,
+        longestStreak: user.longestStreak || 0,
+        totalPoints: user.totalPoints || 0,
+        level: user.level || 1,
+      }
+    };
+  }
+
+  async getUserStats(userId: string): Promise<UserStats | null> {
+    const [stats] = await db
+      .select()
+      .from(userStats)
+      .where(eq(userStats.userId, userId));
+    return stats || null;
+  }
+
+  async updateUserStats(userId: string, updates: Partial<UserStats>): Promise<void> {
+    await db
+      .insert(userStats)
+      .values({ userId, ...updates })
+      .onConflictDoUpdate({
+        target: userStats.userId,
+        set: updates
+      });
   }
 }
 

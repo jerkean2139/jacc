@@ -2384,6 +2384,40 @@ Provide actionable, data-driven insights that would help a payment processing sa
     }
   });
 
+  // Gamification API Routes
+  app.get('/api/gamification/leaderboard', async (req: any, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 10;
+      const leaderboard = await storage.getLeaderboard(limit);
+      res.json(leaderboard);
+    } catch (error) {
+      console.error('Error fetching leaderboard:', error);
+      res.status(500).json({ error: 'Failed to fetch leaderboard' });
+    }
+  });
+
+  app.get('/api/gamification/user-stats/:userId', async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      const userStats = await storage.getUserStatsWithRank(userId);
+      res.json(userStats);
+    } catch (error) {
+      console.error('Error fetching user stats:', error);
+      res.status(500).json({ error: 'Failed to fetch user stats' });
+    }
+  });
+
+  app.get('/api/gamification/achievements/:userId', async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      const achievements = await gamificationService.getUserAchievements(userId);
+      res.json(achievements);
+    } catch (error) {
+      console.error('Error fetching user achievements:', error);
+      res.status(500).json({ error: 'Failed to fetch achievements' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
