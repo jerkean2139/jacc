@@ -152,12 +152,12 @@ export default function OnboardingWalkthrough() {
       content: (
         <div className="space-y-4">
           <div className="p-4 bg-gradient-to-r from-blue-50 to-green-50 dark:from-blue-950 dark:to-green-950 rounded-lg">
-            <h4 className="font-semibold mb-2">Ask Anything About Merchant Services</h4>
+            <h4 className="font-semibold mb-2">Ask About Your Documents</h4>
             <div className="text-sm space-y-1">
-              <div>• "What's our rate for restaurants processing $50K monthly?"</div>
-              <div>• "Which terminal works best for mobile businesses?"</div>
-              <div>• "What are the PCI compliance requirements?"</div>
-              <div>• "How do I handle pricing objections?"</div>
+              <div>• "What documents do I have about pricing?"</div>
+              <div>• "Find my training materials"</div>
+              <div>• "Search for merchant application forms"</div>
+              <div>• "What processing documents are available?"</div>
             </div>
           </div>
           
@@ -265,13 +265,13 @@ export default function OnboardingWalkthrough() {
             <h4 className="font-semibold text-green-700 dark:text-green-300 mb-2">Suggested First Questions:</h4>
             <div className="space-y-2 text-sm">
               <div className="p-2 bg-white dark:bg-gray-800 rounded cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700">
-                "What's our competitive rate for retail businesses?"
+                "Search my documents for pricing information"
               </div>
               <div className="p-2 bg-white dark:bg-gray-800 rounded cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700">
-                "How do I explain interchange plus pricing?"
+                "What training materials do I have?"
               </div>
               <div className="p-2 bg-white dark:bg-gray-800 rounded cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700">
-                "What equipment do restaurants need?"
+                "Find documents about payment processing"
               </div>
             </div>
           </div>

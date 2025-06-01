@@ -121,12 +121,12 @@ export default function InteractiveTutorial() {
                   // Simulate typing in chat
                   const chatInput = document.querySelector('textarea') as HTMLTextAreaElement;
                   if (chatInput) {
-                    chatInput.value = "What's our competitive rate for restaurants processing $50,000 monthly?";
+                    chatInput.value = "What documents do I have about pricing?";
                     chatInput.focus();
                   }
                 }}
               >
-                <div className="text-sm font-medium">"What's our competitive rate for restaurants processing $50,000 monthly?"</div>
+                <div className="text-sm font-medium">"What documents do I have about pricing?"</div>
                 <div className="text-xs text-muted-foreground mt-1">Click to try this question</div>
               </div>
               
@@ -135,12 +135,12 @@ export default function InteractiveTutorial() {
                 onClick={() => {
                   const chatInput = document.querySelector('textarea') as HTMLTextAreaElement;
                   if (chatInput) {
-                    chatInput.value = "Which payment terminal works best for mobile businesses?";
+                    chatInput.value = "Find information about merchant applications";
                     chatInput.focus();
                   }
                 }}
               >
-                <div className="text-sm font-medium">"Which payment terminal works best for mobile businesses?"</div>
+                <div className="text-sm font-medium">"Find information about merchant applications"</div>
                 <div className="text-xs text-muted-foreground mt-1">Click to try this question</div>
               </div>
             </div>
