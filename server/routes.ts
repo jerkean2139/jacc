@@ -1732,7 +1732,7 @@ async function generateMerchantInsights(merchantData: any) {
     // the newest Anthropic model is "claude-3-7-sonnet-20250219" which was released February 24, 2025
     const Anthropic = await import('@anthropic-ai/sdk');
     const anthropic = new Anthropic.default({
-      apiKey: process.env.ANTHROPIC_API_KEY,
+      apiKey: process.env.ANTHROPIC_API_KEY_JACC,
     });
 
     const prompt = `As an expert business intelligence analyst specializing in merchant services and payment processing, analyze the following merchant data and provide comprehensive insights:
@@ -1825,9 +1825,9 @@ Provide actionable, data-driven insights that would help a payment processing sa
       console.log('Request method:', req.method);
       console.log('Request body:', JSON.stringify(req.body, null, 2));
       console.log('Environment check:');
-      console.log('- ANTHROPIC_API_KEY exists:', !!process.env.ANTHROPIC_API_KEY);
-      console.log('- ANTHROPIC_API_KEY length:', process.env.ANTHROPIC_API_KEY?.length || 0);
-      console.log('- ANTHROPIC_API_KEY starts with:', process.env.ANTHROPIC_API_KEY?.substring(0, 10) || 'undefined');
+      console.log('- ANTHROPIC_API_KEY_JACC exists:', !!process.env.ANTHROPIC_API_KEY_JACC);
+      console.log('- ANTHROPIC_API_KEY_JACC length:', process.env.ANTHROPIC_API_KEY_JACC?.length || 0);
+      console.log('- ANTHROPIC_API_KEY_JACC starts with:', process.env.ANTHROPIC_API_KEY_JACC?.substring(0, 10) || 'undefined');
       
       const merchantData = req.body;
       
