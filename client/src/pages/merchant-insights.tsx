@@ -348,12 +348,22 @@ export default function MerchantInsights() {
           </Card>
         </div>
 
-        {/* Results */}
-        <div id="insights-results" className="space-y-6">
-          {insights ? (
-            <>
+        {/* Results Panel */}
+        <div>
+          {generateInsightsMutation.isPending ? (
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center py-12">
+                <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4" />
+                <h3 className="text-lg font-semibold mb-2">Analyzing Business Data</h3>
+                <p className="text-muted-foreground text-center">
+                  AI is generating comprehensive insights for {merchantData.businessName}...
+                </p>
+              </CardContent>
+            </Card>
+          ) : insights ? (
+            <div className="space-y-4">
               {/* Success Header */}
-              <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 mb-6">
+              <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
                 <div className="flex items-center gap-3">
                   <CheckCircle className="w-6 h-6 text-green-600" />
                   <div>
@@ -361,161 +371,116 @@ export default function MerchantInsights() {
                       Analysis Complete for {merchantData.businessName}
                     </h3>
                     <p className="text-sm text-green-600 dark:text-green-300">
-                      Comprehensive merchant insights generated successfully
+                      AI-powered merchant insights generated successfully
                     </p>
                   </div>
                 </div>
               </div>
 
-              {/* Overall Score */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <BarChart3 className="w-5 h-5" />
-                    Business Health Score
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center gap-4">
-                    <div className="text-4xl font-bold text-blue-600 dark:text-blue-400">
-                      {insights.overallScore}/100
-                    </div>
-                    <div className="flex-1">
-                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
-                        <div 
-                          className="bg-gradient-to-r from-blue-500 to-green-500 h-3 rounded-full transition-all duration-500"
-                          style={{ width: `${insights.overallScore}%` }}
-                        />
+              {/* Business Health Score */}
+              {insights.overallScore && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <BarChart3 className="w-5 h-5" />
+                      Business Health Score
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center gap-4">
+                      <div className="text-3xl font-bold text-blue-600">{insights.overallScore}/100</div>
+                      <div className="flex-1">
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div 
+                            className="bg-blue-600 h-2 rounded-full" 
+                            style={{ width: `${insights.overallScore}%` }}
+                          />
+                        </div>
                       </div>
-                      <p className="text-sm text-muted-foreground mt-2">
-                        {insights.overallScore >= 80 ? 'Excellent' : 
-                         insights.overallScore >= 60 ? 'Good' : 
-                         insights.overallScore >= 40 ? 'Fair' : 'Needs Improvement'}
-                      </p>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              )}
 
               {/* Key Insights */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Lightbulb className="w-5 h-5" />
-                    Key Insights
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {insights.insights.map((insight, index) => (
-                    <div key={index} className="border rounded-lg p-4">
-                      <div className="flex items-start justify-between gap-3 mb-2">
-                        <h4 className="font-semibold">{insight.title}</h4>
-                        <Badge className={getImpactColor(insight.impact)}>
-                          {insight.impact} impact
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground mb-3">
-                        {insight.description}
-                      </p>
-                      {insight.recommendations.length > 0 && (
-                        <div>
-                          <p className="text-sm font-medium mb-2">Recommendations:</p>
+              {insights.insights && Array.isArray(insights.insights) && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Target className="w-5 h-5" />
+                      Key Business Insights
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {insights.insights.map((insight: any, idx: number) => (
+                      <div key={idx} className="border-l-4 border-blue-500 pl-4">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h4 className="font-semibold">{insight.title || insight.category}</h4>
+                          {insight.impact && (
+                            <Badge variant="outline" className={getImpactColor(insight.impact)}>
+                              {insight.impact.toUpperCase()}
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-sm text-muted-foreground mb-2">
+                          {insight.description}
+                        </p>
+                        {insight.recommendations && Array.isArray(insight.recommendations) && (
                           <ul className="text-sm space-y-1">
-                            {insight.recommendations.map((rec, idx) => (
-                              <li key={idx} className="flex items-start gap-2">
-                                <ArrowRight className="w-3 h-3 mt-1 text-blue-500 flex-shrink-0" />
+                            {insight.recommendations.map((rec: string, recIdx: number) => (
+                              <li key={recIdx} className="flex items-start gap-2">
+                                <CheckCircle className="w-3 h-3 mt-1 text-green-500 flex-shrink-0" />
                                 {rec}
                               </li>
                             ))}
                           </ul>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
+                        )}
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              )}
 
-              {/* Risk Assessment */}
+              {/* Competitive Analysis */}
+              {insights.competitiveAnalysis && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <TrendingUp className="w-5 h-5" />
+                      Market Position
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm mb-3">{insights.competitiveAnalysis.marketPosition}</p>
+                    {insights.competitiveAnalysis.opportunities && (
+                      <div>
+                        <h4 className="font-semibold mb-2">Growth Opportunities:</h4>
+                        <ul className="text-sm space-y-1">
+                          {insights.competitiveAnalysis.opportunities.map((opp: string, idx: number) => (
+                            <li key={idx} className="flex items-start gap-2">
+                              <TrendingUp className="w-3 h-3 mt-1 text-green-500 flex-shrink-0" />
+                              {opp}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Raw Data Display for Debugging */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <AlertTriangle className="w-5 h-5" />
-                    Risk Assessment
-                  </CardTitle>
+                  <CardTitle>Complete Analysis Data</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium">Risk Level:</span>
-                      <Badge className={getRiskColor(insights.riskAssessment.level)}>
-                        {insights.riskAssessment.level.toUpperCase()}
-                      </Badge>
-                    </div>
-                    
-                    <div>
-                      <p className="text-sm font-medium mb-2">Risk Factors:</p>
-                      <ul className="text-sm space-y-1">
-                        {insights.riskAssessment.factors.map((factor, idx) => (
-                          <li key={idx} className="flex items-start gap-2">
-                            <AlertTriangle className="w-3 h-3 mt-1 text-yellow-500 flex-shrink-0" />
-                            {factor}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    <div>
-                      <p className="text-sm font-medium mb-2">Mitigation Strategies:</p>
-                      <ul className="text-sm space-y-1">
-                        {insights.riskAssessment.mitigation.map((strategy, idx) => (
-                          <li key={idx} className="flex items-start gap-2">
-                            <CheckCircle className="w-3 h-3 mt-1 text-green-500 flex-shrink-0" />
-                            {strategy}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
+                  <pre className="text-xs bg-gray-100 dark:bg-gray-800 p-3 rounded overflow-auto max-h-96">
+                    {JSON.stringify(insights, null, 2)}
+                  </pre>
                 </CardContent>
               </Card>
-
-              {/* Growth Recommendations */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Target className="w-5 h-5" />
-                    Growth Opportunities
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <h4 className="font-semibold mb-2">Short-term (3-6 months)</h4>
-                    <ul className="text-sm space-y-1">
-                      {insights.growthRecommendations.shortTerm.map((rec, idx) => (
-                        <li key={idx} className="flex items-start gap-2">
-                          <Calendar className="w-3 h-3 mt-1 text-blue-500 flex-shrink-0" />
-                          {rec}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <Separator />
-
-                  <div>
-                    <h4 className="font-semibold mb-2">Long-term (6-12 months)</h4>
-                    <ul className="text-sm space-y-1">
-                      {insights.growthRecommendations.longTerm.map((rec, idx) => (
-                        <li key={idx} className="flex items-start gap-2">
-                          <TrendingUp className="w-3 h-3 mt-1 text-green-500 flex-shrink-0" />
-                          {rec}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </CardContent>
-              </Card>
-            </>
+            </div>
           ) : (
             <Card>
               <CardContent className="flex flex-col items-center justify-center py-12">
