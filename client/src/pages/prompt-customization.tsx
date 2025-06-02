@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Edit3, Trash2, MessageSquare, Mail, TrendingUp, Users, Home, ChevronRight, Wand2, Cloud, Tag } from "lucide-react";
+import { Plus, Edit3, Trash2, MessageSquare, Mail, TrendingUp, Users, Home, ChevronRight, Wand2, Cloud, Tag, Camera, Monitor, BarChart, MapPin, Presentation } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
 
@@ -27,15 +27,102 @@ interface UserPrompt {
   updatedAt: string;
 }
 
-const DEFAULT_PROMPTS = [
+// Internal Strategy Prompts (Agent-facing)
+const INTERNAL_STRATEGY_PROMPTS = [
   {
     name: "Processing Rate Calculator",
-    category: "calculations",
+    category: "internal-calculations",
+    type: "internal",
     icon: TrendingUp,
     writingStyle: "Precise, analytical, and professional",
     systemRules: "Always search internal documents for current processing rates, fee structures, and industry benchmarks before calculating. Present calculations clearly with breakdown.",
     promptTemplate: "Calculate processing rates for [BUSINESS_TYPE] with [MONTHLY_VOLUME] in sales. Search internal rate sheets and pricing documents first. Show: effective rate, monthly fees, per-transaction costs, and comparison to industry averages."
   },
+  {
+    name: "Market Research & Competitive Analysis",
+    category: "internal-strategy",
+    type: "internal",
+    icon: TrendingUp,
+    writingStyle: "Strategic, data-driven, and comprehensive",
+    systemRules: "Use Perplexity to research current market trends, competitor analysis, and industry insights for strategic planning.",
+    promptTemplate: "Research [INDUSTRY/NICHE] market trends and competitive landscape. Include: current processing rate standards, key competitors, market opportunities, regulatory changes, and strategic recommendations for positioning."
+  },
+  {
+    name: "Lead Qualification & Scoring",
+    category: "internal-sales",
+    type: "internal", 
+    icon: Users,
+    writingStyle: "Analytical, strategic, and objective",
+    systemRules: "Create systematic lead scoring criteria based on ideal customer profiles and conversion data.",
+    promptTemplate: "Analyze lead [LEAD_DETAILS] and provide qualification score (1-10). Consider: business size, processing volume, industry type, decision-making authority, timeline, and pain points. Include next steps and approach strategy."
+  },
+  {
+    name: "Territory Planning & Target List Building",
+    category: "internal-strategy",
+    type: "internal",
+    icon: MapPin,
+    writingStyle: "Strategic, organized, and actionable",
+    systemRules: "Use market data and demographic analysis to build targeted prospect lists and territory plans.",
+    promptTemplate: "Create a territory plan for [GEOGRAPHIC_AREA] focusing on [TARGET_INDUSTRIES]. Include: prospect identification criteria, approach sequences, competitive positioning, and monthly activity goals."
+  }
+];
+
+// Client-Facing Content Prompts (with Image Generation)
+const CLIENT_CONTENT_PROMPTS = [
+  {
+    name: "Social Media Post with Image",
+    category: "client-content",
+    type: "client-facing",
+    hasImageGeneration: true,
+    icon: Camera,
+    writingStyle: "Engaging, professional, and visually appealing",
+    systemRules: "Create compelling social media content with matching visual concepts. Use DALL-E 3 for image generation when specified.",
+    promptTemplate: "Create a social media post for [BUSINESS_TYPE] about [TOPIC]. Include: engaging caption, relevant hashtags, and generate an image showing [IMAGE_DESCRIPTION]. Make it professional yet approachable for their target audience."
+  },
+  {
+    name: "Newsletter Content & Header Image",
+    category: "client-content", 
+    type: "client-facing",
+    hasImageGeneration: true,
+    icon: Mail,
+    writingStyle: "Informative, engaging, and brand-consistent",
+    systemRules: "Create newsletter content with accompanying visual elements. Focus on value-driven content that builds trust.",
+    promptTemplate: "Write a newsletter section for [BUSINESS_TYPE] covering [TOPIC]. Include: compelling headline, value-rich content, call-to-action, and generate a professional header image featuring [IMAGE_CONCEPT]."
+  },
+  {
+    name: "Website Banner & Copy",
+    category: "client-content",
+    type: "client-facing", 
+    hasImageGeneration: true,
+    icon: Monitor,
+    writingStyle: "Clear, conversion-focused, and professional",
+    systemRules: "Create website copy with matching banner visuals that drive conversions and communicate value clearly.",
+    promptTemplate: "Create website banner copy for [BUSINESS_TYPE] highlighting [VALUE_PROPOSITION]. Include: headline, subheadline, benefit bullets, CTA button text, and generate a banner image showing [VISUAL_CONCEPT]."
+  },
+  {
+    name: "Presentation Slide Content & Graphics",
+    category: "client-content",
+    type: "client-facing",
+    hasImageGeneration: true,
+    icon: Presentation,
+    writingStyle: "Clear, persuasive, and data-driven",
+    systemRules: "Create presentation content with supporting visual elements that enhance understanding and engagement.",
+    promptTemplate: "Create presentation slides for [BUSINESS_TYPE] about [TOPIC]. Include: slide titles, bullet points, speaker notes, and generate supporting graphics showing [CHART_OR_VISUAL_CONCEPT]."
+  },
+  {
+    name: "Infographic Content & Design",
+    category: "client-content",
+    type: "client-facing",
+    hasImageGeneration: true, 
+    icon: BarChart,
+    writingStyle: "Data-driven, easy to understand, and visually structured",
+    systemRules: "Create infographic content with clear data visualization concepts. Focus on making complex information digestible.",
+    promptTemplate: "Create infographic content for [BUSINESS_TYPE] about [DATA_TOPIC]. Include: key statistics, process steps, visual hierarchy suggestions, and generate an infographic design showing [DATA_VISUALIZATION]."
+  }
+];
+
+// Marketing Strategy Prompts (Internal Use)
+const DEFAULT_PROMPTS = [
   {
     name: "Alex Hormozi Value Stacking",
     category: "marketing",
