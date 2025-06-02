@@ -411,6 +411,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Paginated document search endpoint
+  app.get('/api/documents/search', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { query, page = 0, limit = 5 } = req.query;
+      
+      if (!query) {
+        return res.status(400).json({ message: "Query parameter required" });
+      }
+      
+      // Search all documents but paginate results
+      const searchResults = await enhancedAIService.searchDocuments(query);
+      
+      const startIndex = parseInt(page) * parseInt(limit);
+      const endIndex = startIndex + parseInt(limit);
+      const paginatedResults = searchResults.slice(startIndex, endIndex);
+      
+      res.json({
+        documents: paginatedResults,
+        totalCount: searchResults.length,
+        currentPage: parseInt(page),
+        hasMore: endIndex < searchResults.length,
+        remainingCount: Math.max(0, searchResults.length - endIndex)
+      });
+    } catch (error) {
+      console.error("Document search error:", error);
+      res.status(500).json({ message: "Failed to search documents" });
+    }
+  });
+
   // API status endpoint
   app.get('/api/v1/status', authenticateApiKey, (req, res) => {
     const user = (req as any).apiUser;

@@ -205,7 +205,8 @@ export class EnhancedAIService {
       const webContext = webSearchResults ? `\nWEB SEARCH RESULTS:\n${webSearchResults.content}\n${webSearchResults.citations.length > 0 ? `Sources: ${webSearchResults.citations.join(', ')}` : ''}` : '';
       
       // Create document examples for response (show top 3)
-      const documentExamples = searchResults.slice(0, 3).map(doc => 
+      const topDocuments = searchResults.slice(0, 3);
+      const documentExamples = topDocuments.map(doc => 
         `📄 **${doc.metadata?.documentName || 'Document'}** - ${doc.content.substring(0, 100)}...\n🔗 [View Document](/documents/${doc.documentId}) | [Download](/api/documents/${doc.documentId}/download)`
       ).join('\n\n');
       
@@ -300,6 +301,22 @@ When appropriate, suggest actions like saving payment processing information to 
         reasoning,
         actionItems: actionItems.length > 0 ? actionItems : undefined,
         followupTasks: followupTasks.length > 0 ? followupTasks : undefined,
+        // Include document metadata for pagination
+        documentResults: searchResults.length > 0 ? {
+          query: lastUserMessage.content,
+          documents: topDocuments.map(doc => ({
+            id: doc.id,
+            score: doc.score,
+            documentId: doc.documentId,
+            content: doc.content,
+            metadata: {
+              documentName: doc.metadata?.documentName || 'Document',
+              relevanceScore: doc.score,
+              mimeType: doc.metadata?.mimeType || 'application/octet-stream'
+            }
+          })),
+          totalCount: searchResults.length
+        } : undefined,
         suggestions: [
           "Find similar merchant documents in our knowledge base",
           "Create a merchant proposal from this information",
