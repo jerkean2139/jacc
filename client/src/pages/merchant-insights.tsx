@@ -93,7 +93,10 @@ export default function MerchantInsights() {
   const { toast } = useToast();
 
   const generateInsightsMutation = useMutation({
-    mutationFn: (data: MerchantData) => apiRequest('POST', '/api/merchant-insights/generate', data),
+    mutationFn: async (data: MerchantData) => {
+      const response = await apiRequest('POST', '/api/merchant-insights/generate', data);
+      return await response.json();
+    },
     onSuccess: (response: any) => {
       console.log('=== FRONTEND DEBUG ===');
       console.log('Full API response:', response);
