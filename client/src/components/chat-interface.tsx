@@ -320,6 +320,36 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
       name: 'Niche Pain Point Research',
       promptTemplate: 'Research and identify the top 5 payment processing pain points specific to [NICHE] businesses. Include why each pain point matters, how it impacts their business, and what questions to ask to uncover these issues during sales conversations.',
       category: 'research'
+    },
+    {
+      id: 'default-16',
+      name: 'Daily Success Routine Builder',
+      promptTemplate: 'Create a high-performance daily routine for a merchant services sales rep focusing on [GOAL]. Include morning rituals, prospecting blocks, mindset practices, and evening review. Base it on habits of top performers like Brian Tracy and Hal Elrod.',
+      category: 'personal-growth'
+    },
+    {
+      id: 'default-17',
+      name: 'Rejection Recovery System',
+      promptTemplate: 'Design a system to bounce back from rejection and maintain motivation in sales. Include mental reframes, confidence builders, and action steps to turn rejection into fuel for success. Draw from resilience psychology and sales psychology.',
+      category: 'personal-growth'
+    },
+    {
+      id: 'default-18',
+      name: 'Goal Achievement Blueprint',
+      promptTemplate: 'Create a 90-day goal achievement plan for [SPECIFIC_GOAL] in my sales career. Include weekly milestones, daily actions, accountability measures, and obstacle management strategies using proven goal-setting methodologies.',
+      category: 'personal-growth'
+    },
+    {
+      id: 'default-19',
+      name: 'Confidence Building Exercises',
+      promptTemplate: 'Provide specific exercises and techniques to build unshakeable confidence for sales conversations. Include visualization techniques, power posing, affirmations, and real-world practice scenarios to overcome fear and self-doubt.',
+      category: 'personal-growth'
+    },
+    {
+      id: 'default-20',
+      name: 'Peak Performance State',
+      promptTemplate: 'Design a system to enter peak performance state before important sales calls or meetings. Include breathing techniques, mental preparation, energy management, and focus optimization strategies from high-performance psychology.',
+      category: 'personal-growth'
     }
   ];
 
