@@ -8,9 +8,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Edit3, Trash2, MessageSquare, Mail, TrendingUp, Users, Home, ChevronRight, Wand2, Cloud, Tag, Camera, Monitor, BarChart, MapPin, Presentation } from "lucide-react";
+import { Plus, Edit3, Trash2, MessageSquare, Mail, TrendingUp, Users, Home, ChevronRight, Wand2, Cloud, Tag, Camera, Monitor, BarChart, MapPin, Presentation, HelpCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
+import PromptTutorial, { PromptTooltip } from "@/components/prompt-tutorial";
 
 interface UserPrompt {
   id: string;
@@ -120,6 +121,8 @@ const CLIENT_CONTENT_PROMPTS = [
     promptTemplate: "Create infographic content for [BUSINESS_TYPE] about [DATA_TOPIC]. Include: key statistics, process steps, visual hierarchy suggestions, and generate an infographic design showing [DATA_VISUALIZATION]."
   }
 ];
+
+
 
 // Marketing Strategy Prompts (Internal Use)
 const DEFAULT_PROMPTS = [
@@ -390,32 +393,44 @@ export default function PromptCustomization() {
         
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold">AI Prompt Customization</h1>
+            <h1 className="text-2xl font-bold flex items-center gap-3">
+              AI Prompt Customization
+              <PromptTooltip content="Create personalized AI instructions that help you work faster and get better results. These prompts understand your business and writing style.">
+                <HelpCircle className="w-5 h-5 text-muted-foreground hover:text-foreground cursor-help" />
+              </PromptTooltip>
+            </h1>
             <p className="text-muted-foreground">
               Create personalized prompts that match your writing style and prioritize internal knowledge
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button variant="outline" onClick={runWizard} className="gap-2 text-sm">
-              <Wand2 className="w-4 h-4" />
-              <span className="hidden sm:inline">Quick Setup</span>
-              <span className="sm:hidden">Setup</span>
-            </Button>
-            <Button 
-              variant="outline" 
-              onClick={() => syncMutation.mutate()} 
-              disabled={syncMutation.isPending}
-              className="gap-2 text-sm"
-            >
-              <Cloud className="w-4 h-4" />
-              <span className="hidden sm:inline">{syncMutation.isPending ? "Syncing..." : "Sync"}</span>
-              <span className="sm:hidden">{syncMutation.isPending ? "..." : "Sync"}</span>
-            </Button>
-            <Button onClick={() => setIsEditing(true)} className="gap-2 text-sm">
-              <Plus className="w-4 h-4" />
-              <span className="hidden sm:inline">New Prompt</span>
-              <span className="sm:hidden">New</span>
-            </Button>
+            <PromptTutorial />
+            <PromptTooltip content="Set up your writing style and preferences quickly">
+              <Button variant="outline" onClick={runWizard} className="gap-2 text-sm">
+                <Wand2 className="w-4 h-4" />
+                <span className="hidden sm:inline">Quick Setup</span>
+                <span className="sm:hidden">Setup</span>
+              </Button>
+            </PromptTooltip>
+            <PromptTooltip content="Save your prompts to the cloud for access across devices">
+              <Button 
+                variant="outline" 
+                onClick={() => syncMutation.mutate()} 
+                disabled={syncMutation.isPending}
+                className="gap-2 text-sm"
+              >
+                <Cloud className="w-4 h-4" />
+                <span className="hidden sm:inline">{syncMutation.isPending ? "Syncing..." : "Sync"}</span>
+                <span className="sm:hidden">{syncMutation.isPending ? "..." : "Sync"}</span>
+              </Button>
+            </PromptTooltip>
+            <PromptTooltip content="Create a custom prompt from scratch">
+              <Button onClick={() => setIsEditing(true)} className="gap-2 text-sm">
+                <Plus className="w-4 h-4" />
+                <span className="hidden sm:inline">New Prompt</span>
+                <span className="sm:hidden">New</span>
+              </Button>
+            </PromptTooltip>
           </div>
         </div>
       </div>
@@ -496,38 +511,140 @@ export default function PromptCustomization() {
             </div>
           )}
 
-          {/* Default Prompt Templates */}
+          {/* Internal Strategy Templates */}
           <div className="space-y-4">
-            <h3 className="text-md font-medium">Quick Start Templates</h3>
+            <div className="flex items-center gap-2">
+              <h3 className="text-md font-medium">Internal Strategy Templates</h3>
+              <PromptTooltip content="These prompts help you analyze data, research markets, and make strategic business decisions. Use these for your internal planning and analysis work.">
+                <HelpCircle className="w-4 h-4 text-muted-foreground hover:text-foreground cursor-help" />
+              </PromptTooltip>
+            </div>
+            <div className="space-y-2">
+              {INTERNAL_STRATEGY_PROMPTS.map((template, index) => {
+                const IconComponent = template.icon;
+                const exists = prompts.some(p => p.name === template.name);
+                
+                return (
+                  <PromptTooltip key={index} content={`${template.systemRules} Click to add this template to your collection.`}>
+                    <Card className="hover:shadow-md transition-shadow cursor-help">
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <IconComponent className="w-5 h-5 text-blue-500" />
+                            <div>
+                              <h4 className="font-medium">{template.name}</h4>
+                              <p className="text-sm text-muted-foreground">
+                                {template.writingStyle}
+                              </p>
+                            </div>
+                          </div>
+                          <Button
+                            variant={exists ? "secondary" : "default"}
+                            size="sm"
+                            disabled={exists}
+                            onClick={() => createDefaultPrompt(template)}
+                          >
+                            {exists ? "Added" : "Use Template"}
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </PromptTooltip>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Client-Facing Content Templates */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <h3 className="text-md font-medium">Client-Facing Content Templates</h3>
+              <PromptTooltip content="These prompts create professional materials for your clients, including content with AI-generated images. Perfect for presentations, social media, and marketing materials you deliver to customers.">
+                <HelpCircle className="w-4 h-4 text-muted-foreground hover:text-foreground cursor-help" />
+              </PromptTooltip>
+            </div>
+            <div className="space-y-2">
+              {CLIENT_CONTENT_PROMPTS.map((template, index) => {
+                const IconComponent = template.icon;
+                const exists = prompts.some(p => p.name === template.name);
+                
+                return (
+                  <PromptTooltip key={index} content={`${template.systemRules} ${template.hasImageGeneration ? 'Includes AI image generation with DALL-E 3.' : ''} Click to add this template.`}>
+                    <Card className="hover:shadow-md transition-shadow cursor-help border-green-200 dark:border-green-800">
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <IconComponent className="w-5 h-5 text-green-500" />
+                            <div>
+                              <h4 className="font-medium flex items-center gap-2">
+                                {template.name}
+                                {template.hasImageGeneration && (
+                                  <PromptTooltip content="This template can generate images using DALL-E 3">
+                                    <Camera className="w-4 h-4 text-purple-500" />
+                                  </PromptTooltip>
+                                )}
+                              </h4>
+                              <p className="text-sm text-muted-foreground">
+                                {template.writingStyle}
+                              </p>
+                            </div>
+                          </div>
+                          <Button
+                            variant={exists ? "secondary" : "default"}
+                            size="sm"
+                            disabled={exists}
+                            onClick={() => createDefaultPrompt(template)}
+                          >
+                            {exists ? "Added" : "Use Template"}
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </PromptTooltip>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Marketing Strategy Templates */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <h3 className="text-md font-medium">Marketing & Sales Templates</h3>
+              <PromptTooltip content="These prompts help you find prospects, create outreach sequences, and convert leads using proven sales methodologies. Use these for your marketing and sales activities.">
+                <HelpCircle className="w-4 h-4 text-muted-foreground hover:text-foreground cursor-help" />
+              </PromptTooltip>
+            </div>
             <div className="space-y-2">
               {DEFAULT_PROMPTS.map((template, index) => {
                 const IconComponent = template.icon;
                 const exists = prompts.some(p => p.name === template.name);
                 
                 return (
-                  <Card key={index} className="hover:shadow-md transition-shadow">
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <IconComponent className="w-5 h-5 text-primary" />
-                          <div>
-                            <h4 className="font-medium">{template.name}</h4>
-                            <p className="text-sm text-muted-foreground">
-                              {template.writingStyle}
-                            </p>
+                  <PromptTooltip key={index} content={`${template.systemRules} Click to add this template to your collection.`}>
+                    <Card className="hover:shadow-md transition-shadow cursor-help border-purple-200 dark:border-purple-800">
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <IconComponent className="w-5 h-5 text-purple-500" />
+                            <div>
+                              <h4 className="font-medium">{template.name}</h4>
+                              <p className="text-sm text-muted-foreground">
+                                {template.writingStyle}
+                              </p>
+                            </div>
                           </div>
+                          <Button
+                            variant={exists ? "secondary" : "default"}
+                            size="sm"
+                            disabled={exists}
+                            onClick={() => createDefaultPrompt(template)}
+                          >
+                            {exists ? "Added" : "Use Template"}
+                          </Button>
                         </div>
-                        <Button
-                          variant={exists ? "secondary" : "default"}
-                          size="sm"
-                          disabled={exists}
-                          onClick={() => createDefaultPrompt(template)}
-                        >
-                          {exists ? "Added" : "Use Template"}
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
+                      </CardContent>
+                    </Card>
+                  </PromptTooltip>
                 );
               })}
             </div>
