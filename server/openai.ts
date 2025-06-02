@@ -57,8 +57,8 @@ Available documents: ${context?.documents?.map(d => d.name).join(', ') || 'Exten
         { role: "system", content: systemPrompt },
         ...messages
       ],
-      temperature: 0.7,
-      max_tokens: 1000,
+      temperature: 0.3,
+      max_tokens: 300,
     });
 
     const content = response.choices[0].message.content || "";

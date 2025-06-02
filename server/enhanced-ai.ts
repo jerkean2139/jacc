@@ -318,23 +318,11 @@ When appropriate, suggest actions like saving payment processing information to 
       return "No relevant documents found in the knowledge base.";
     }
 
-    if (searchResults.length > 3) {
-      return `MULTIPLE DOCUMENTS FOUND (${searchResults.length} total):
-${searchResults.map((result, index) => 
-  `${index + 1}. [${result.metadata.documentName}](${result.metadata.webViewLink}) ${result.metadata.mimeType?.includes('pdf') ? '📄' : '📊'}`
-).join('\n')}
-
-INSTRUCTION: Since multiple documents were found, ask the user to be more specific about what they're looking for so you can guide them to the most relevant document(s).`;
-    }
-
-    return searchResults.map((result, index) => {
-      return `Document ${index + 1}: [${result.metadata.documentName}](${result.metadata.webViewLink}) ${result.metadata.mimeType?.includes('pdf') ? '📄' : '📊'}
-Content: ${result.content}
-Relevance Score: ${(result.score * 100).toFixed(1)}%
-
-IMPORTANT: When referencing this document in your response, always include the clickable link: [${result.metadata.documentName}](${result.metadata.webViewLink})
----`;
-    }).join('\n');
+    // Always keep context concise - show max 3 documents
+    const topResults = searchResults.slice(0, 3);
+    return topResults.map(result => 
+      `${result.metadata.documentName}: ${result.content.substring(0, 150)}...`
+    ).join('\n\n');
   }
 
   private formatSources(searchResults: VectorSearchResult[]): DocumentSource[] {
