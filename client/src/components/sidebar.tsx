@@ -66,6 +66,8 @@ export default function Sidebar({
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
   const [creatingFolder, setCreatingFolder] = useState(false);
   const [newFolderName, setNewFolderName] = useState("");
+  const [showAllChats, setShowAllChats] = useState(false);
+  const [showAllFolders, setShowAllFolders] = useState(false);
 
   const handleLogout = () => {
     window.location.href = "/api/logout";
@@ -100,8 +102,10 @@ export default function Sidebar({
 
   const recentChats = chats
     .filter(chat => chat.isActive)
-    .sort((a, b) => new Date(b.updatedAt!).getTime() - new Date(a.updatedAt!).getTime())
-    .slice(0, 10);
+    .sort((a, b) => new Date(b.updatedAt!).getTime() - new Date(a.updatedAt!).getTime());
+
+  const displayedChats = showAllChats ? recentChats : recentChats.slice(0, 7);
+  const displayedFolders = showAllFolders ? folders : folders.slice(0, 7);
 
   if (collapsed) {
     return (
@@ -214,7 +218,7 @@ export default function Sidebar({
 
           
           <div className="space-y-1">
-            {recentChats.map((chat) => (
+            {displayedChats.map((chat) => (
               <div
                 key={chat.id}
                 className={cn(
@@ -316,6 +320,21 @@ export default function Sidebar({
                 </DropdownMenu>
               </div>
             ))}
+            
+            {recentChats.length > 7 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowAllChats(!showAllChats)}
+                className="w-full mt-2 text-xs text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+              >
+                {showAllChats ? "Show Less" : `Show ${recentChats.length - 7} More`}
+                <ChevronDown className={cn(
+                  "w-3 h-3 ml-1 transition-transform",
+                  showAllChats && "rotate-180"
+                )} />
+              </Button>
+            )}
           </div>
         </div>
 
@@ -355,7 +374,7 @@ export default function Sidebar({
           )}
 
           <div className="space-y-1">
-            {folders.filter(folder => !folder.parentId).map((folder) => (
+            {displayedFolders.filter(folder => !folder.parentId).map((folder) => (
               <Collapsible
                 key={folder.id}
                 open={expandedFolders.has(folder.id)}
@@ -403,6 +422,21 @@ export default function Sidebar({
                 </CollapsibleContent>
               </Collapsible>
             ))}
+            
+            {folders.filter(folder => !folder.parentId).length > 7 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowAllFolders(!showAllFolders)}
+                className="w-full mt-2 text-xs text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+              >
+                {showAllFolders ? "Show Less" : `Show ${folders.filter(folder => !folder.parentId).length - 7} More`}
+                <ChevronDown className={cn(
+                  "w-3 h-3 ml-1 transition-transform",
+                  showAllFolders && "rotate-180"
+                )} />
+              </Button>
+            )}
           </div>
         </div>
 
