@@ -135,7 +135,7 @@ export default function PromptCustomization() {
   const createPromptMutation = useMutation({
     mutationFn: (data: any) => {
       console.log("Creating prompt with data:", data);
-      return apiRequest("/api/user/prompts", "POST", data);
+      return apiRequest("POST", "/api/user/prompts", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/user/prompts"] });
@@ -149,7 +149,7 @@ export default function PromptCustomization() {
   });
 
   const updatePromptMutation = useMutation({
-    mutationFn: ({ id, ...data }: any) => apiRequest(`/api/user/prompts/${id}`, "PUT", data),
+    mutationFn: ({ id, ...data }: any) => apiRequest("PUT", `/api/user/prompts/${id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/user/prompts"] });
       resetForm();
