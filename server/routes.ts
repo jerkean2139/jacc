@@ -2080,13 +2080,175 @@ Provide actionable, data-driven insights that would help a payment processing sa
     }
   });
 
-  // Session tracking middleware
-  app.use((req: any, res: any, next: any) => {
-    if (req.user && req.path.startsWith('/api/')) {
-      // Track API usage for session analytics
-      storage.trackUserActivity(req.user.id, req.path, req.method, req.ip, req.get('User-Agent'));
+  // Simplified Admin Analytics Routes (working with existing database)
+  app.get('/api/admin/simple-analytics', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const { range = '7d' } = req.query;
+      
+      // Get users, chats, messages, documents, and prompts from existing tables
+      const [allUsers, allChats, allMessages, allDocuments, allPrompts] = await Promise.all([
+        storage.getAllUsers(),
+        storage.getAllChats(),
+        storage.getAllMessages(), 
+        storage.getAllDocuments(),
+        storage.getAllPrompts()
+      ]);
+
+      const analytics = {
+        totalUsers: allUsers.length,
+        newUsers: allUsers.filter(u => new Date(u.createdAt).getTime() > Date.now() - 7 * 24 * 60 * 60 * 1000).length,
+        totalChats: allChats.length,
+        avgChatsPerUser: Math.round(allChats.length / Math.max(allUsers.length, 1)),
+        totalMessages: allMessages.length,
+        avgMessagesPerChat: Math.round(allMessages.length / Math.max(allChats.length, 1)),
+        totalDocuments: allDocuments.length,
+        documentsPerUser: Math.round(allDocuments.length / Math.max(allUsers.length, 1)),
+        users: allUsers.map(user => ({
+          ...user,
+          chatCount: allChats.filter(c => c.userId === user.id).length,
+          messageCount: allMessages.filter(m => allChats.find(c => c.id === m.chatId && c.userId === user.id)).length,
+          documentCount: allDocuments.filter(d => d.userId === user.id).length,
+          lastActivity: allChats.filter(c => c.userId === user.id).sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())[0]?.updatedAt
+        })),
+        chats: allChats.map(chat => {
+          const user = allUsers.find(u => u.id === chat.userId);
+          const chatMessages = allMessages.filter(m => m.chatId === chat.id);
+          const firstMessage = chatMessages.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())[0];
+          return {
+            ...chat,
+            username: user?.username || 'Unknown',
+            messageCount: chatMessages.length,
+            firstMessage: firstMessage?.content || ''
+          };
+        }).slice(0, 50), // Limit to recent 50 chats
+        recentMessages: allMessages.map(message => {
+          const chat = allChats.find(c => c.id === message.chatId);
+          const user = allUsers.find(u => u.id === chat?.userId);
+          return {
+            ...message,
+            username: user?.username || 'Unknown',
+            chatTitle: chat?.title || 'Unknown Chat'
+          };
+        }).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 100), // Limit to recent 100 messages
+        prompts: allPrompts.map(prompt => {
+          const user = allUsers.find(u => u.id === prompt.userId);
+          return {
+            ...prompt,
+            username: user?.username || 'Unknown'
+          };
+        })
+      };
+
+      res.json(analytics);
+    } catch (error) {
+      console.error("Error fetching simple analytics:", error);
+      res.status(500).json({ message: "Failed to fetch analytics" });
     }
-    next();
+  });
+
+  // CSV Export Routes for simplified analytics
+  app.get('/api/admin/export-simple/users', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const allUsers = await storage.getAllUsers();
+      const allChats = await storage.getAllChats();
+      const allMessages = await storage.getAllMessages();
+      const allDocuments = await storage.getAllDocuments();
+      
+      const csvHeaders = 'Username,Email,Role,Total Chats,Total Messages,Documents,Created At,Last Activity';
+      const csvRows = allUsers.map(user => {
+        const userChats = allChats.filter(c => c.userId === user.id);
+        const userMessages = allMessages.filter(m => userChats.find(c => c.id === m.chatId));
+        const userDocuments = allDocuments.filter(d => d.userId === user.id);
+        const lastActivity = userChats.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())[0]?.updatedAt || user.createdAt;
+        
+        return `"${user.username}","${user.email}","${user.role}",${userChats.length},${userMessages.length},${userDocuments.length},"${new Date(user.createdAt).toLocaleDateString()}","${new Date(lastActivity).toLocaleDateString()}"`;
+      });
+      
+      const csvContent = [csvHeaders, ...csvRows].join('\n');
+      
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename="user-analytics-${new Date().toISOString().split('T')[0]}.csv"`);
+      res.send(csvContent);
+    } catch (error) {
+      console.error("Error exporting user data:", error);
+      res.status(500).json({ message: "Failed to export user data" });
+    }
+  });
+
+  app.get('/api/admin/export-simple/chats', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const allUsers = await storage.getAllUsers();
+      const allChats = await storage.getAllChats();
+      const allMessages = await storage.getAllMessages();
+      
+      const csvHeaders = 'Chat Title,Username,First Message,Message Count,Created,Last Updated';
+      const csvRows = allChats.map(chat => {
+        const user = allUsers.find(u => u.id === chat.userId);
+        const chatMessages = allMessages.filter(m => m.chatId === chat.id);
+        const firstMessage = chatMessages.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())[0];
+        const cleanFirstMessage = (firstMessage?.content || '').replace(/"/g, '""').replace(/\n/g, ' ');
+        
+        return `"${chat.title}","${user?.username || 'Unknown'}","${cleanFirstMessage}",${chatMessages.length},"${new Date(chat.createdAt).toLocaleDateString()}","${new Date(chat.updatedAt).toLocaleDateString()}"`;
+      });
+      
+      const csvContent = [csvHeaders, ...csvRows].join('\n');
+      
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename="chat-analytics-${new Date().toISOString().split('T')[0]}.csv"`);
+      res.send(csvContent);
+    } catch (error) {
+      console.error("Error exporting chat data:", error);
+      res.status(500).json({ message: "Failed to export chat data" });
+    }
+  });
+
+  app.get('/api/admin/export-simple/messages', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const allUsers = await storage.getAllUsers();
+      const allChats = await storage.getAllChats();
+      const allMessages = await storage.getAllMessages();
+      
+      const csvHeaders = 'Username,Chat Title,Role,Message Content,Timestamp';
+      const csvRows = allMessages.map(message => {
+        const chat = allChats.find(c => c.id === message.chatId);
+        const user = allUsers.find(u => u.id === chat?.userId);
+        const cleanContent = (message.content || '').replace(/"/g, '""').replace(/\n/g, ' ');
+        
+        return `"${user?.username || 'Unknown'}","${chat?.title || 'Unknown Chat'}","${message.role}","${cleanContent}","${new Date(message.createdAt).toLocaleString()}"`;
+      });
+      
+      const csvContent = [csvHeaders, ...csvRows].join('\n');
+      
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename="message-logs-${new Date().toISOString().split('T')[0]}.csv"`);
+      res.send(csvContent);
+    } catch (error) {
+      console.error("Error exporting message data:", error);
+      res.status(500).json({ message: "Failed to export message data" });
+    }
+  });
+
+  app.get('/api/admin/export-simple/prompts', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const allUsers = await storage.getAllUsers();
+      const allPrompts = await storage.getAllPrompts();
+      
+      const csvHeaders = 'Prompt Name,Creator,Category,Writing Style,Created,Last Updated';
+      const csvRows = allPrompts.map(prompt => {
+        const user = allUsers.find(u => u.id === prompt.userId);
+        
+        return `"${prompt.name}","${user?.username || 'Unknown'}","${prompt.category}","${prompt.writingStyle || ''}","${new Date(prompt.createdAt).toLocaleDateString()}","${new Date(prompt.updatedAt).toLocaleDateString()}"`;
+      });
+      
+      const csvContent = [csvHeaders, ...csvRows].join('\n');
+      
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename="prompt-analytics-${new Date().toISOString().split('T')[0]}.csv"`);
+      res.send(csvContent);
+    } catch (error) {
+      console.error("Error exporting prompt data:", error);
+      res.status(500).json({ message: "Failed to export prompt data" });
+    }
   });
 
   // Document Management
