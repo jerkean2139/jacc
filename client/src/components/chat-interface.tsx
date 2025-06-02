@@ -350,6 +350,36 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
       name: 'Peak Performance State',
       promptTemplate: 'Design a system to enter peak performance state before important sales calls or meetings. Include breathing techniques, mental preparation, energy management, and focus optimization strategies from high-performance psychology.',
       category: 'personal-growth'
+    },
+    {
+      id: 'default-21',
+      name: 'Mel Robbins 5 Second Rule for Sales',
+      promptTemplate: 'Apply Mel Robbins 5 Second Rule to overcome [SALES_CHALLENGE]. Create specific countdown strategies to push through fear, make difficult calls, approach prospects, and take action when motivation fails. Include daily implementation tactics.',
+      category: 'personal-growth'
+    },
+    {
+      id: 'default-22',
+      name: 'Good to Great Sales Strategy',
+      promptTemplate: 'Using Jim Collins Good to Great principles, analyze my sales approach and create a plan to go from good to great. Focus on disciplined people, disciplined thought, and disciplined action. Include hedgehog concept for my niche and flywheel momentum strategy.',
+      category: 'strategy'
+    },
+    {
+      id: 'default-23',
+      name: 'EOS Sales System Implementation',
+      promptTemplate: 'Design an EOS-based sales system for merchant services reps. Include Vision (goals), Traction (90-day rocks), and People (accountability). Create weekly Level 10 meeting structure and scorecard metrics for consistent sales performance.',
+      category: 'strategy'
+    },
+    {
+      id: 'default-24',
+      name: 'StoryBrand Sales Framework',
+      promptTemplate: 'Using Donald Miller StoryBrand framework, craft a compelling sales story for [PROSPECT_TYPE]. Position the prospect as hero, identify their problem, present yourself as guide, provide clear plan, call to action that avoids failure and achieves success.',
+      category: 'sales'
+    },
+    {
+      id: 'default-25',
+      name: 'Duct Tape Marketing for Payment Processing',
+      promptTemplate: 'Apply John Jantsch Duct Tape Marketing system to create a systematic marketing approach for [NICHE]. Include referral system design, strategic partnerships, and total customer experience that turns clients into marketing assets.',
+      category: 'marketing'
     }
   ];
 
