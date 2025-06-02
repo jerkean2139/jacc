@@ -257,8 +257,15 @@ When appropriate, suggest actions like saving payment processing information to 
 
       let content = response.content[0].type === 'text' ? response.content[0].text : "";
       
-      // Always append document links if we found documents
+      // Always append document analysis and links if we found documents
       if (searchResults.length > 0 && documentExamples) {
+        // Generate document analysis first
+        const documentAnalysis = await this.analyzeDocumentContent(searchResults, lastUserMessage.content);
+        
+        if (documentAnalysis) {
+          content += `\n\n${documentAnalysis}`;
+        }
+        
         content += `\n\n**Available Documents:**\n${documentExamples}`;
       }
       
@@ -927,6 +934,48 @@ IMPORTANT: When referencing this document in your response, always include the c
       console.log(`🔍 WEB SEARCH LOGGED: "${query}" - Reason: ${reason}`);
     } catch (error) {
       console.error('Failed to log web search usage:', error);
+    }
+  }
+
+  private async analyzeDocumentContent(searchResults: VectorSearchResult[], userQuery: string): Promise<string | null> {
+    try {
+      // Get the most relevant document content (top 5 results)
+      const relevantContent = searchResults.slice(0, 5).map(result => 
+        `Document: ${result.metadata?.documentName || 'Unknown'}\nContent: ${result.content.substring(0, 800)}...`
+      ).join('\n\n');
+
+      const analysisPrompt = `Analyze these document excerpts and provide a focused response to the user's question: "${userQuery}"
+
+DOCUMENT CONTENT:
+${relevantContent}
+
+Provide your analysis in this EXACT format:
+
+**📊 Document Analysis:**
+
+[1-2 paragraph summary of key findings from the documents]
+
+**Key Points:**
+• [3-5 specific bullet points with data, rates, or facts from the documents]
+• [Include any numbers, percentages, or specific details found]
+• [Focus on actionable information]
+
+[If comparing rates/prices, include a simple comparison table]
+[If calculations are relevant, show the math]
+
+Keep the analysis concise and data-driven. Only include information that's actually in the document content provided.`;
+
+      const response = await anthropic.messages.create({
+        model: "claude-3-haiku-20240307",
+        messages: [{ role: 'user', content: analysisPrompt }],
+        temperature: 0.3,
+        max_tokens: 800,
+      });
+
+      return response.content[0].type === 'text' ? response.content[0].text : null;
+    } catch (error) {
+      console.error('Document analysis failed:', error);
+      return null;
     }
   }
 
