@@ -1,0 +1,132 @@
+Debug: Merchant Insights API 500 Error
+Error Analysis
+/api/merchant-insights/generate 500 (Internal Server Error)
+Call Stack:
+
+apiRequest@queryClient.ts:15
+mutationFn@merchant-insights.tsx:96
+handleGenerateInsights@merchant-insights.tsx:122
+
+This suggests the error is happening in your merchant insights generation API endpoint.
+Step 1: Check Server-Side Logs
+First, check your server logs for the actual error. The 500 error is likely hiding the real issue:
+bash# Check your API logs - look for errors around merchant-insights
+tail -f logs/server.log | grep merchant-insights
+Step 2: Add Server-Side Debugging
+In your /api/merchant-insights/generate endpoint, add error logging:
+typescript// /api/merchant-insights/generate.ts (or similar)
+export default async function handler(req: Request, res: Response) {
+  try {
+    console.log('=== MERCHANT INSIGHTS DEBUG ===');
+    console.log('Request method:', req.method);
+    console.log('Request body:', JSON.stringify(req.body, null, 2));
+    console.log('Request headers:', req.headers);
+    
+    // Your existing merchant insights logic here
+    const insights = await generateMerchantInsights(req.body);
+    
+    console.log('Generated insights:', insights);
+    console.log('=== END MERCHANT INSIGHTS DEBUG ===');
+    
+    return res.json({ success: true, data: insights });
+    
+  } catch (error) {
+    console.error('=== MERCHANT INSIGHTS ERROR ===');
+    console.error('Error details:', error);
+    console.error('Error stack:', error.stack);
+    console.error('Request data:', req.body);
+    console.error('=== END ERROR ===');
+    
+    return res.status(500).json({ 
+      error: 'Merchant insights generation failed',
+      details: error.message 
+    });
+  }
+}
+Step 3: Check Client-Side Request
+In merchant-insights.tsx around line 96, add debugging:
+typescript// merchant-insights.tsx line ~96
+const mutationFn = async (data: any) => {
+  console.log('=== CLIENT DEBUG ===');
+  console.log('Sending request data:', data);
+  console.log('API endpoint:', '/api/merchant-insights/generate');
+  
+  try {
+    const response = await apiRequest({
+      url: '/api/merchant-insights/generate',
+      method: 'POST',
+      data: data
+    });
+    
+    console.log('Response received:', response);
+    return response;
+    
+  } catch (error) {
+    console.error('API request failed:', error);
+    console.error('Error response:', error.response?.data);
+    throw error;
+  }
+};
+Step 4: Common Causes for This Error
+Cause A: Database Connection Issue
+If the merchant insights uses the same database:
+typescript// Check if you applied the casing fix here too
+const db = drizzle({ 
+  connection: process.env.DATABASE_URL, 
+  casing: 'snake_case'  // Must be in ALL db connections
+});
+Cause B: Missing Environment Variables
+typescript// Check for required env vars
+if (!process.env.OPENAI_API_KEY) {
+  throw new Error('Missing OPENAI_API_KEY');
+}
+if (!process.env.DATABASE_URL) {
+  throw new Error('Missing DATABASE_URL');
+}
+Cause C: Data Validation Error
+typescript// Validate incoming data
+if (!req.body.merchantId) {
+  throw new Error('Missing merchantId in request');
+}
+if (!req.body.timeframe) {
+  throw new Error('Missing timeframe in request');
+}
+Cause D: AI/LLM API Timeout
+typescript// Add timeout handling
+const insights = await Promise.race([
+  generateMerchantInsights(req.body),
+  new Promise((_, reject) => 
+    setTimeout(() => reject(new Error('Timeout')), 30000)
+  )
+]);
+Step 5: Quick Diagnostic Tests
+Test A: Check API Endpoint Exists
+bashcurl -X POST https://your-domain.replit.dev/api/merchant-insights/generate \
+  -H "Content-Type: application/json" \
+  -d '{"test": true}'
+Test B: Check Database Connection
+typescript// Add to your API endpoint
+const testDb = await db.select().from(merchants).limit(1);
+console.log('DB test successful:', testDb);
+Test C: Check Required Services
+typescript// Test external dependencies
+console.log('Environment check:');
+console.log('- Database URL:', !!process.env.DATABASE_URL);
+console.log('- OpenAI Key:', !!process.env.OPENAI_API_KEY);
+console.log('- Other keys:', !!process.env.OTHER_REQUIRED_KEY);
+Step 6: Pattern Analysis
+Since this has "failed 5 times," check for patterns:
+
+Same input data each time? (Data validation issue)
+Random failures? (Timeout/connection issue)
+After the webhook fix? (Related database/casing issue)
+Specific time of day? (Rate limiting/resource issue)
+
+Next Actions
+
+Add the server-side debugging to see the actual error
+Check your server logs for the real error message
+Test with the debugging client code to see request/response data
+Share the actual error details from the server logs
+
+The 500 error is just a generic wrapper - we need to see what's actually failing inside the merchant insights generation logic.

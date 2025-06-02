@@ -1821,10 +1821,21 @@ Provide actionable, data-driven insights that would help a payment processing sa
   // Merchant Insights API Routes
   app.post('/api/merchant-insights/generate', async (req, res) => {
     try {
+      console.log('=== MERCHANT INSIGHTS DEBUG ===');
+      console.log('Request method:', req.method);
+      console.log('Request body:', JSON.stringify(req.body, null, 2));
+      console.log('Environment check:');
+      console.log('- ANTHROPIC_API_KEY exists:', !!process.env.ANTHROPIC_API_KEY);
+      console.log('- ANTHROPIC_API_KEY length:', process.env.ANTHROPIC_API_KEY?.length || 0);
+      console.log('- ANTHROPIC_API_KEY starts with:', process.env.ANTHROPIC_API_KEY?.substring(0, 10) || 'undefined');
+      
       const merchantData = req.body;
       
       // Generate comprehensive AI-powered business insights
       const insights = await generateMerchantInsights(merchantData);
+      
+      console.log('Generated insights successfully');
+      console.log('=== END MERCHANT INSIGHTS DEBUG ===');
       
       res.json({ 
         success: true, 
