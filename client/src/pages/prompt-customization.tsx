@@ -235,11 +235,19 @@ export default function PromptCustomization() {
       </nav>
 
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">AI Prompt Customization</h1>
-          <p className="text-muted-foreground">
-            Create personalized prompts that match your writing style and prioritize internal knowledge
-          </p>
+        <div className="flex items-center gap-4">
+          <Link href="/">
+            <Button variant="outline" className="gap-2">
+              <Home className="w-4 h-4" />
+              Back to Home
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-2xl font-bold">AI Prompt Customization</h1>
+            <p className="text-muted-foreground">
+              Create personalized prompts that match your writing style and prioritize internal knowledge
+            </p>
+          </div>
         </div>
         <Button onClick={() => setIsEditing(true)} className="gap-2">
           <Plus className="w-4 h-4" />
