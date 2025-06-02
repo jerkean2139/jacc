@@ -200,7 +200,7 @@ export class EnhancedAIService {
       
       // Create document examples for response (show top 3)
       const documentExamples = searchResults.slice(0, 3).map(doc => 
-        `📄 **${doc.metadata?.documentName || 'Document'}** - ${doc.content.substring(0, 100)}...`
+        `📄 **${doc.metadata?.documentName || 'Document'}** - ${doc.content.substring(0, 100)}...\n🔗 [View Document](/documents/${doc.documentId}) | [Download](/api/documents/${doc.documentId}/download)`
       ).join('\n\n');
       
       // Enhanced system prompt with document and web context
