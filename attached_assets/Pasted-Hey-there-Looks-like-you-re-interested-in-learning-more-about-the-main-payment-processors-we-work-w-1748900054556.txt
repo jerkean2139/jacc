@@ -1,0 +1,26 @@
+Hey there! Looks like you're interested in learning more about the main payment processors we work with. Let me take a look at the documents we have on that:
+📄 **Agent_Core_Cost_All_Processors (2).pdf** - This document provides an overview of the core costs and rates for the major processors we partner with, including Clearent, Worldpay, First Data, and Elavon.
+🔗 
+View Document
+ | Download
+The key processors we work with are:
+**• Clearent** - One of our top partners, known for their competitive rates, flexible pricing models, and user-friendly merchant portal.
+**• Worldpay** - A global payments leader with robust solutions for all business sizes, from small retailers to enterprise merchants.
+**• First Data** - A well-established processor with a wide range of products and services, including point-of-sale, ecommerce, and mobile payments.
+**• Elavon** - A subsidiary of U.S. Bank, offering secure and reliable payment processing for a variety of industries.
+Let me know if you need any other details on these processors or the specific services and rates they offer. I'm happy to provide more information or point you to the relevant documents.
+**Here's what I found in your documents:**
+Alright, based on the documents you provided, it looks like the main payment processors we work with are Clearent and Merchant Lynx. The documents cover things like account maintenance, closures, ACH changes, and mobile app details for these two processors. Seems like we have a good relationship with both of them and they offer a range of merchant services.
+**Key takeaways:**
+**• Clearent is one of our primary payment processors, handling things like ACH changes, cash discounting, and a mobile app integration.**
+**• Merchant Lynx is another key processor we work with, based on the account maintenance form provided.**
+**• The documents don't mention any specific rates or pricing, but they do indicate we have established partnerships with these two processors to serve our merchant clients.**
+**• There are a variety of merchant services and account management tools available through Clearent and Merchant Lynx.**
+The documents provide a good overview of the main payment processors we utilize, but don't get into the nitty-gritty details on things like rates or fees. Let me know if you need any clarification or have additional questions!
+**Available Documents:**
+📄 **Merchant_Lynx_Account_Maintenence_Form (1).pdf** - Found document: Merchant_Lynx_Account_Maintenence_Form (1).pdf - This document contains information ...
+🔗 View Document | Download
+📄 **Clearent_Account_Closure_Form (1).pdf** - Found document: Clearent_Account_Closure_Form (1).pdf - This document contains information relevant ...
+🔗 View Document | Download
+📄 **Clearent_ACH_Change (1).pdf** - Found document: Clearent_ACH_Change (1).pdf - This document contains information relevant to your qu...
+🔗 View Document | Download

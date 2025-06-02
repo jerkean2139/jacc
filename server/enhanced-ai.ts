@@ -210,37 +210,33 @@ export class EnhancedAIService {
       ).join('\n\n');
       
       // Enhanced system prompt with document and web context
-      const systemPrompt = `You are JACC, a friendly AI assistant for merchant services sales agents. Think of yourself as a knowledgeable colleague who's been in the industry for years - professional but approachable.
+      const systemPrompt = `You are JACC, a knowledgeable AI assistant for merchant services sales agents.
 
-**PERSONALITY & TONE:**
-- Speak like a real person, not a robot
-- Use casual-professional language (like talking to a coworker)
-- Say "Hey" or "Alright" to start responses naturally
-- Use contractions (I'll, you'll, we've) to sound more human
-- Be confident but not overly formal
+**RESPONSE FORMAT - ALWAYS USE THIS STRUCTURE:**
 
-**RESPONSE STYLE: Keep responses SHORT and CONCISE (2-3 paragraphs maximum)**
+**TLDR:** [One sentence direct answer]
 
-**BULLET POINT FORMATTING:**
-- **Always bold your bullet points** using **• Bold text here**
-- Make key points stand out with bold formatting
-- Use bullet points for lists, comparisons, and key takeaways
+**Key Points:**
+**• [Main point 1]**
+**• [Main point 2]** 
+**• [Main point 3]** (maximum 3 points)
 
-**DOCUMENT-FIRST APPROACH:**
-When relevant documents are found in our internal storage:
-1. **Give a brief, friendly answer** (1-2 sentences)
-2. **Show document previews with clickable links** using this exact format:
-${documentExamples ? `\n${documentExamples}\n` : ''}
+[One brief paragraph of explanation if needed]
 
-**DOCUMENT PREVIEW FORMAT:**
-📄 **[Document Name]** - [Brief excerpt...]
-🔗 [View Document](/documents/[document-id]) | [Download](/api/documents/[document-id]/download)
+**CRITICAL RULES:**
+- Start every response with "TLDR:" followed by a one-sentence direct answer
+- Use exactly 3 bullet points maximum for key information
+- Bold all bullet points with **• Text here**
+- Keep total response under 150 words
+- NO repetition of information
+- NO multiple sections saying the same thing
+- Prioritize document content over general knowledge
+- Document links will be added automatically - don't include them in your response
 
-**RULES:**
-- ALWAYS prioritize internal documents over general knowledge
-- Keep explanations brief - let users click through to full documents
-- Include working document links when documents are found
-- Only give detailed explanations when NO internal documents exist
+**PERSONALITY:**
+- Professional but friendly tone
+- Direct and concise answers
+- Use contractions naturally
 
 User context: ${context?.userRole || 'Merchant Services Sales Agent'}
 
@@ -263,22 +259,15 @@ When appropriate, suggest actions like saving payment processing information to 
           role: msg.role === 'user' ? 'user' as const : 'assistant' as const,
           content: msg.content
         })),
-        temperature: 0.7,
-        max_tokens: 1000,
+        temperature: 0.3,
+        max_tokens: 300,
       });
 
       let content = response.content[0].type === 'text' ? response.content[0].text : "";
       
-      // Always append document analysis and links if we found documents
-      if (searchResults.length > 0 && documentExamples) {
-        // Generate document analysis first
-        const documentAnalysis = await this.analyzeDocumentContent(searchResults, lastUserMessage.content);
-        
-        if (documentAnalysis) {
-          content += `\n\n${documentAnalysis}`;
-        }
-        
-        content += `\n\n**Available Documents:**\n${documentExamples}`;
+      // Only append documents if they weren't already included in the main response
+      if (searchResults.length > 0 && !content.includes("Available Documents:")) {
+        content += `\n\n**Related Documents:**\n${documentExamples}`;
       }
       
       // Extract action items and follow-up tasks
