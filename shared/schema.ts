@@ -42,6 +42,46 @@ export const users = pgTable("users", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// User session tracking for admin analytics
+export const userSessions = pgTable("user_sessions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  sessionStart: timestamp("session_start").defaultNow(),
+  sessionEnd: timestamp("session_end"),
+  firstMessage: text("first_message"),
+  messageCount: integer("message_count").default(0),
+  promptsUsed: integer("prompts_used").default(0),
+  ipAddress: varchar("ip_address"),
+  userAgent: text("user_agent"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Prompt usage analytics
+export const promptUsageLog = pgTable("prompt_usage_log", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  sessionId: uuid("session_id").references(() => userSessions.id, { onDelete: "cascade" }),
+  promptId: varchar("prompt_id").references(() => userPrompts.id, { onDelete: "set null" }),
+  promptName: varchar("prompt_name").notNull(),
+  promptCategory: varchar("prompt_category"),
+  usedAt: timestamp("used_at").defaultNow(),
+  executionTime: integer("execution_time_ms"),
+  success: boolean("success").default(true),
+  errorMessage: text("error_message"),
+});
+
+// Admin settings and configurations
+export const adminSettings = pgTable("admin_settings", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  settingKey: varchar("setting_key").unique().notNull(),
+  settingValue: text("setting_value"),
+  description: text("description"),
+  category: varchar("category").default("general"),
+  isActive: boolean("is_active").default(true),
+  updatedBy: varchar("updated_by").references(() => users.id),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // API Keys for external tool integration
 export const apiKeys = pgTable("api_keys", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -120,7 +160,8 @@ export const favorites = pgTable("favorites", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const adminSettings = pgTable("admin_settings", {
+// Consolidated admin settings table that includes both analytics and system configuration
+export const adminSettingsLegacy = pgTable("admin_settings_legacy", {
   id: varchar("id").primaryKey().notNull().default("default"),
   systemPrompt: text("system_prompt"),
   userInstructions: text("user_instructions"),
@@ -408,6 +449,30 @@ export type Chat = typeof chats.$inferSelect;
 export type InsertMessage = z.infer<typeof insertMessageSchema>;
 export type Message = typeof messages.$inferSelect;
 export type InsertDocument = z.infer<typeof insertDocumentSchema>;
+
+// New admin analytics types
+export type UserSession = typeof userSessions.$inferSelect;
+export type InsertUserSession = typeof userSessions.$inferInsert;
+export type PromptUsageLog = typeof promptUsageLog.$inferSelect;
+export type InsertPromptUsageLog = typeof promptUsageLog.$inferInsert;
+export type AdminSetting = typeof adminSettings.$inferSelect;
+export type InsertAdminSetting = typeof adminSettings.$inferInsert;
+
+// Insert schemas for admin tables
+export const insertUserSessionSchema = createInsertSchema(userSessions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertPromptUsageLogSchema = createInsertSchema(promptUsageLog).omit({
+  id: true,
+  usedAt: true,
+});
+
+export const insertAdminSettingSchema = createInsertSchema(adminSettings).omit({
+  id: true,
+  updatedAt: true,
+});
 export type Document = typeof documents.$inferSelect;
 export type InsertFavorite = z.infer<typeof insertFavoriteSchema>;
 export type Favorite = typeof favorites.$inferSelect;

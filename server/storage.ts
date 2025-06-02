@@ -11,6 +11,9 @@ import {
   userStats,
   achievements,
   userAchievements,
+  userSessions,
+  promptUsageLog,
+  adminSettings,
   type User, 
   type UpsertUser,
   type InsertUser,
@@ -33,7 +36,13 @@ import {
   type UserStats,
   type InsertUserStats,
   type Achievement,
-  type UserAchievement
+  type UserAchievement,
+  type UserSession,
+  type InsertUserSession,
+  type PromptUsageLog,
+  type InsertPromptUsageLog,
+  type AdminSetting,
+  type InsertAdminSetting
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and } from "drizzle-orm";
@@ -103,6 +112,17 @@ export interface IStorage {
   deletePrompt(promptId: string): Promise<void>;
   getAdminSettings(): Promise<any>;
   updateAdminSettings(settings: any): Promise<any>;
+
+  // Admin analytics operations
+  getAdminAnalytics(range: string, user: string): Promise<any>;
+  getUserAnalytics(range: string): Promise<any[]>;
+  getPromptAnalytics(range: string): Promise<any[]>;
+  getSessionData(range: string): Promise<any[]>;
+  updateAdminSetting(key: string, value: string, updatedBy: string): Promise<void>;
+  trackUserActivity(userId: string, path: string, method: string, ip: string, userAgent: string): Promise<void>;
+  logPromptUsage(userId: string, sessionId: string, promptId: string, promptName: string, category: string, executionTime: number, success: boolean, errorMessage?: string): Promise<void>;
+  createUserSession(userId: string, firstMessage: string, ipAddress: string, userAgent: string): Promise<UserSession>;
+  updateUserSession(sessionId: string, updates: Partial<UserSession>): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {

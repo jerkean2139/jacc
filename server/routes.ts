@@ -1944,6 +1944,151 @@ Provide actionable, data-driven insights that would help a payment processing sa
     }
   });
 
+  // Admin Analytics Routes
+  app.get('/api/admin/analytics', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const { range = '7d', user = 'all' } = req.query;
+      const analytics = await storage.getAdminAnalytics(range as string, user as string);
+      res.json(analytics);
+    } catch (error) {
+      console.error("Error fetching analytics:", error);
+      res.status(500).json({ message: "Failed to fetch analytics" });
+    }
+  });
+
+  app.get('/api/admin/user-analytics', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const { range = '7d' } = req.query;
+      const userAnalytics = await storage.getUserAnalytics(range as string);
+      res.json(userAnalytics);
+    } catch (error) {
+      console.error("Error fetching user analytics:", error);
+      res.status(500).json({ message: "Failed to fetch user analytics" });
+    }
+  });
+
+  app.get('/api/admin/prompt-analytics', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const { range = '7d' } = req.query;
+      const promptAnalytics = await storage.getPromptAnalytics(range as string);
+      res.json(promptAnalytics);
+    } catch (error) {
+      console.error("Error fetching prompt analytics:", error);
+      res.status(500).json({ message: "Failed to fetch prompt analytics" });
+    }
+  });
+
+  app.get('/api/admin/sessions', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const { range = '7d' } = req.query;
+      const sessions = await storage.getSessionData(range as string);
+      res.json(sessions);
+    } catch (error) {
+      console.error("Error fetching session data:", error);
+      res.status(500).json({ message: "Failed to fetch session data" });
+    }
+  });
+
+  app.get('/api/admin/settings', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const settings = await storage.getAdminSettings();
+      res.json(settings);
+    } catch (error) {
+      console.error("Error fetching admin settings:", error);
+      res.status(500).json({ message: "Failed to fetch admin settings" });
+    }
+  });
+
+  app.put('/api/admin/settings', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const { key, value } = req.body;
+      await storage.updateAdminSetting(key, value, req.user.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error updating admin setting:", error);
+      res.status(500).json({ message: "Failed to update admin setting" });
+    }
+  });
+
+  // CSV Export Routes
+  app.get('/api/admin/export/users', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const { range = '7d', user = 'all' } = req.query;
+      const userData = await storage.getUserAnalytics(range as string);
+      
+      // Generate CSV content
+      const csvHeaders = 'Username,Email,Role,Total Sessions,Total Messages,Prompts Used,First Message,Last Activity,Most Used Prompt';
+      const csvRows = userData.map((user: any) => {
+        const mostUsedPrompt = user.mostUsedPrompts?.[0]?.name || 'None';
+        const firstMessage = (user.firstMessage || '').replace(/"/g, '""').replace(/\n/g, ' ');
+        return `"${user.username}","${user.email}","${user.role}",${user.totalSessions},${user.totalMessages},${user.totalPrompts},"${firstMessage}","${user.lastActivity}","${mostUsedPrompt}"`;
+      });
+      
+      const csvContent = [csvHeaders, ...csvRows].join('\n');
+      
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename="user-analytics-${new Date().toISOString().split('T')[0]}.csv"`);
+      res.send(csvContent);
+    } catch (error) {
+      console.error("Error exporting user data:", error);
+      res.status(500).json({ message: "Failed to export user data" });
+    }
+  });
+
+  app.get('/api/admin/export/prompts', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const { range = '7d' } = req.query;
+      const promptData = await storage.getPromptAnalytics(range as string);
+      
+      // Generate CSV content
+      const csvHeaders = 'Prompt Name,Category,Total Uses,Unique Users,Avg Execution Time (ms),Success Rate %,Last Used';
+      const csvRows = promptData.map((prompt: any) => 
+        `"${prompt.name}","${prompt.category}",${prompt.totalUses},${prompt.uniqueUsers},${prompt.avgExecutionTime},${prompt.successRate},"${prompt.lastUsed}"`
+      );
+      
+      const csvContent = [csvHeaders, ...csvRows].join('\n');
+      
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename="prompt-analytics-${new Date().toISOString().split('T')[0]}.csv"`);
+      res.send(csvContent);
+    } catch (error) {
+      console.error("Error exporting prompt data:", error);
+      res.status(500).json({ message: "Failed to export prompt data" });
+    }
+  });
+
+  app.get('/api/admin/export/sessions', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const { range = '7d' } = req.query;
+      const sessionData = await storage.getSessionData(range as string);
+      
+      // Generate CSV content
+      const csvHeaders = 'Username,Session Start,Session End,Duration (minutes),First Message,Message Count,Prompts Used,IP Address';
+      const csvRows = sessionData.map((session: any) => {
+        const firstMessage = (session.firstMessage || '').replace(/"/g, '""').replace(/\n/g, ' ');
+        return `"${session.username}","${session.sessionStart}","${session.sessionEnd || 'Active'}",${Math.round(session.duration / 60)},"${firstMessage}",${session.messageCount},${session.promptsUsed},"${session.ipAddress}"`;
+      });
+      
+      const csvContent = [csvHeaders, ...csvRows].join('\n');
+      
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename="session-logs-${new Date().toISOString().split('T')[0]}.csv"`);
+      res.send(csvContent);
+    } catch (error) {
+      console.error("Error exporting session data:", error);
+      res.status(500).json({ message: "Failed to export session data" });
+    }
+  });
+
+  // Session tracking middleware
+  app.use((req: any, res: any, next: any) => {
+    if (req.user && req.path.startsWith('/api/')) {
+      // Track API usage for session analytics
+      storage.trackUserActivity(req.user.id, req.path, req.method, req.ip, req.get('User-Agent'));
+    }
+    next();
+  });
+
   // Document Management
   app.get('/api/admin/documents', isAuthenticated, requireAdmin, async (req: any, res) => {
     try {
