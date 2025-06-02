@@ -1860,6 +1860,7 @@ Provide actionable, data-driven insights that would help a payment processing sa
       const promptData = {
         id: crypto.randomUUID(),
         userId,
+        content: dbData.promptTemplate || "", // Use promptTemplate as content for compatibility
         ...dbData
       };
       

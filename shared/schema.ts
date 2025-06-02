@@ -386,6 +386,7 @@ export const userPrompts = pgTable("user_prompts", {
   id: varchar("id").primaryKey().notNull(),
   userId: varchar("user_id").notNull().references(() => users.id),
   name: varchar("name").notNull(), // e.g., "Email Writing", "Marketing Ideas"
+  content: text("content").notNull().default(""), // Legacy field for compatibility
   writingStyle: text("writing_style"), // User's personal writing style description
   systemRules: text("system_rules"), // Rules for how AI should respond
   promptTemplate: text("prompt_template"), // The actual prompt template
