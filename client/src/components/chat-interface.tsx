@@ -227,8 +227,31 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
     }
   };
 
-  // Filter prompts based on search term
-  const filteredPrompts = (Array.isArray(savedPrompts) ? savedPrompts : []).filter((prompt: any) =>
+  // Default prompts for testing when no saved prompts exist
+  const defaultPrompts = [
+    {
+      id: 'default-1',
+      name: 'Calculate Processing Rates',
+      promptTemplate: 'Calculate processing rates for a [BUSINESS_TYPE] with [MONTHLY_VOLUME] in monthly sales volume',
+      category: 'calculations'
+    },
+    {
+      id: 'default-2', 
+      name: 'Competitor Analysis',
+      promptTemplate: 'Compare [PROCESSOR_A] vs [PROCESSOR_B] for a [BUSINESS_TYPE] client',
+      category: 'analysis'
+    },
+    {
+      id: 'default-3',
+      name: 'Client Proposal',
+      promptTemplate: 'Create a merchant services proposal for [CLIENT_NAME] - [BUSINESS_TYPE] with [REQUIREMENTS]',
+      category: 'proposals'
+    }
+  ];
+
+  // Filter prompts based on search term, fallback to default prompts if none saved
+  const availablePrompts = Array.isArray(savedPrompts) && savedPrompts.length > 0 ? savedPrompts : defaultPrompts;
+  const filteredPrompts = availablePrompts.filter((prompt: any) =>
     prompt.name?.toLowerCase().includes(promptSearchTerm.toLowerCase()) ||
     prompt.promptTemplate?.toLowerCase().includes(promptSearchTerm.toLowerCase())
   );
@@ -433,12 +456,23 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyPress}
               placeholder="Ask JACC anything about rates, documents, or client questions..."
-              className="auto-resize border-slate-300 dark:border-slate-600 rounded-xl pr-20 min-h-[50px] max-h-[120px] resize-none focus:ring-green-500 focus:border-green-500"
+              className="auto-resize border-slate-300 dark:border-slate-600 rounded-xl pr-32 min-h-[50px] max-h-[120px] resize-none focus:ring-green-500 focus:border-green-500"
               disabled={sendMessageMutation.isPending}
             />
             
             {/* Input Actions */}
             <div className="absolute right-2 bottom-2 flex items-center space-x-1">
+              {/* AI Prompt Button - Simple test version */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowPromptDropdown(!showPromptDropdown)}
+                className="w-8 h-8 text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+                title="AI Prompts"
+              >
+                <Brain className="w-4 h-4" />
+              </Button>
+              
               <Button
                 variant="ghost"
                 size="icon"
@@ -460,65 +494,49 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
               >
                 <Mic className="w-4 h-4" />
               </Button>
-              
-              {/* AI Prompt Dropdown */}
-              <div className="relative">
-                <DropdownMenu open={showPromptDropdown} onOpenChange={setShowPromptDropdown}>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="w-8 h-8"
-                      title="AI Prompts"
-                    >
-                      <Brain className="w-4 h-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent 
-                    align="end" 
-                    className="w-80 max-h-96 overflow-hidden"
-                    side="top"
-                  >
-                    <div className="p-2 border-b">
-                      <div className="relative">
-                        <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          placeholder="Search prompts..."
-                          value={promptSearchTerm}
-                          onChange={(e) => setPromptSearchTerm(e.target.value)}
-                          className="pl-8"
-                        />
-                      </div>
-                    </div>
-                    <div className="max-h-64 overflow-y-auto">
-                      {filteredPrompts.length > 0 ? (
-                        filteredPrompts.map((prompt: any) => (
-                          <DropdownMenuItem
-                            key={prompt.id}
-                            onClick={() => handlePromptSelect(prompt)}
-                            className="flex flex-col items-start p-3 cursor-pointer"
-                          >
-                            <div className="font-medium text-sm">{prompt.name}</div>
-                            <div className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                              {prompt.promptTemplate.slice(0, 100)}...
-                            </div>
-                            <div className="flex items-center gap-1 mt-2">
-                              <Badge variant="secondary" className="text-xs">
-                                {prompt.category}
-                              </Badge>
-                            </div>
-                          </DropdownMenuItem>
-                        ))
-                      ) : (
-                        <div className="p-4 text-center text-sm text-muted-foreground">
-                          {promptSearchTerm ? "No prompts found" : "No saved prompts available"}
-                        </div>
-                      )}
-                    </div>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
             </div>
+            
+            {/* AI Prompt Dropdown - positioned outside textarea */}
+            {showPromptDropdown && (
+              <div className="absolute right-2 bottom-14 w-80 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg z-50">
+                <div className="p-2 border-b border-slate-200 dark:border-slate-700">
+                  <div className="relative">
+                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Search prompts..."
+                      value={promptSearchTerm}
+                      onChange={(e) => setPromptSearchTerm(e.target.value)}
+                      className="pl-8"
+                    />
+                  </div>
+                </div>
+                <div className="max-h-64 overflow-y-auto">
+                  {filteredPrompts.length > 0 ? (
+                    filteredPrompts.map((prompt: any) => (
+                      <div
+                        key={prompt.id}
+                        onClick={() => handlePromptSelect(prompt)}
+                        className="flex flex-col items-start p-3 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700 border-b border-slate-100 dark:border-slate-600 last:border-b-0"
+                      >
+                        <div className="font-medium text-sm text-slate-900 dark:text-white">{prompt.name}</div>
+                        <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
+                          {prompt.promptTemplate.slice(0, 100)}...
+                        </div>
+                        <div className="flex items-center gap-1 mt-2">
+                          <Badge variant="secondary" className="text-xs">
+                            {prompt.category}
+                          </Badge>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="p-4 text-center text-sm text-slate-500 dark:text-slate-400">
+                      {promptSearchTerm ? "No prompts found" : "No saved prompts available"}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
           
           {/* Send Button */}
