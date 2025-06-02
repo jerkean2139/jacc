@@ -1835,6 +1835,9 @@ Provide actionable, data-driven insights that would help a payment processing sa
       const insights = await generateMerchantInsights(merchantData);
       
       console.log('Generated insights successfully');
+      console.log('Insights type:', typeof insights);
+      console.log('Insights keys:', Object.keys(insights || {}));
+      console.log('Insights preview:', JSON.stringify(insights).substring(0, 200) + '...');
       console.log('=== END MERCHANT INSIGHTS DEBUG ===');
       
       res.json({ 

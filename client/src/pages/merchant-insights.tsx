@@ -95,10 +95,18 @@ export default function MerchantInsights() {
   const generateInsightsMutation = useMutation({
     mutationFn: (data: MerchantData) => apiRequest('POST', '/api/merchant-insights/generate', data),
     onSuccess: (response: any) => {
+      console.log('=== FRONTEND DEBUG ===');
       console.log('Full API response:', response);
+      console.log('Response type:', typeof response);
+      console.log('Response keys:', Object.keys(response || {}));
+      
       // The API returns response.insights, so we need to extract that
       const insightsData = response.insights || response;
       console.log('Extracted insights:', insightsData);
+      console.log('Insights type:', typeof insightsData);
+      console.log('Insights keys:', Object.keys(insightsData || {}));
+      console.log('=== END FRONTEND DEBUG ===');
+      
       setInsights(insightsData);
       toast({
         title: "✅ Insights Generated Successfully",
