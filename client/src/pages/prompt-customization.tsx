@@ -133,13 +133,17 @@ export default function PromptCustomization() {
   });
 
   const createPromptMutation = useMutation({
-    mutationFn: (data: any) => apiRequest("/api/user/prompts", "POST", data),
+    mutationFn: (data: any) => {
+      console.log("Creating prompt with data:", data);
+      return apiRequest("/api/user/prompts", "POST", data);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/user/prompts"] });
       resetForm();
       toast({ title: "Prompt created successfully" });
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error("Create prompt error:", error);
       toast({ title: "Failed to create prompt", variant: "destructive" });
     }
   });
