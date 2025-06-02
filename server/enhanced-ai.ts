@@ -262,7 +262,9 @@ When appropriate, suggest actions like saving payment processing information to 
       const sources = this.formatSources(searchResults);
 
       // Generate reasoning explanation
-      const reasoning = await this.generateReasoning(lastUserMessage.content, searchResults, content);
+      const reasoning = searchResults.length > 0 
+        ? `Found ${searchResults.length} relevant documents in your knowledge base`
+        : "No relevant documents found in internal database";
 
       return {
         message: content,
