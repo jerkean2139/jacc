@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Edit3, Trash2, MessageSquare, Mail, TrendingUp, Users, Home, ChevronRight } from "lucide-react";
+import { Plus, Edit3, Trash2, MessageSquare, Mail, TrendingUp, Users, Home, ChevronRight, Wand2, Cloud, Tag } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
 
@@ -21,6 +21,8 @@ interface UserPrompt {
   promptTemplate: string;
   isDefault: boolean;
   category: string;
+  tags?: string[];
+  lastSynced?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -117,8 +119,11 @@ export default function PromptCustomization() {
     systemRules: "",
     promptTemplate: "",
     category: "general",
-    isDefault: false
+    isDefault: false,
+    tags: [] as string[]
   });
+  const [showWizard, setShowWizard] = useState(false);
+  const [currentTag, setCurrentTag] = useState("");
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -169,10 +174,56 @@ export default function PromptCustomization() {
       systemRules: "",
       promptTemplate: "",
       category: "general",
-      isDefault: false
+      isDefault: false,
+      tags: []
     });
     setSelectedPrompt(null);
     setIsEditing(false);
+    setShowWizard(false);
+  };
+
+  const syncMutation = useMutation({
+    mutationFn: () => apiRequest("/api/user/prompts/sync", "POST"),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/user/prompts"] });
+      toast({ title: "Prompts synced successfully" });
+    },
+    onError: () => {
+      toast({ title: "Sync failed", variant: "destructive" });
+    }
+  });
+
+  const runWizard = () => {
+    const wizardPrompt = {
+      name: "Smart Email Assistant",
+      writingStyle: "Professional, concise, action-oriented with a friendly tone",
+      systemRules: "Always search internal documents first. Keep emails under 150 words. Include relevant document references when available.",
+      promptTemplate: "Write a professional email about {topic}. Search our internal knowledge base first for relevant information. Use my writing style: {writingStyle}. Include clear subject line and call-to-action.",
+      category: "communication",
+      isDefault: false,
+      tags: ["quick-setup", "email", "professional"]
+    };
+    setFormData(wizardPrompt);
+    setIsEditing(true);
+    setShowWizard(false);
+    toast({ title: "Wizard complete! Review and save your prompt." });
+  };
+
+  const addTag = () => {
+    if (currentTag.trim() && !formData.tags.includes(currentTag.trim())) {
+      setFormData(prev => ({
+        ...prev,
+        tags: [...prev.tags, currentTag.trim()]
+      }));
+      setCurrentTag("");
+    }
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    setFormData(prev => ({
+      ...prev,
+      tags: prev.tags.filter(tag => tag !== tagToRemove)
+    }));
   };
 
   const handleEdit = (prompt: UserPrompt) => {
@@ -183,7 +234,8 @@ export default function PromptCustomization() {
       systemRules: prompt.systemRules || "",
       promptTemplate: prompt.promptTemplate || "",
       category: prompt.category,
-      isDefault: prompt.isDefault
+      isDefault: prompt.isDefault,
+      tags: prompt.tags || []
     });
     setIsEditing(true);
   };
@@ -205,7 +257,8 @@ export default function PromptCustomization() {
       systemRules: defaultPrompt.systemRules,
       promptTemplate: defaultPrompt.promptTemplate,
       category: defaultPrompt.category,
-      isDefault: false
+      isDefault: false,
+      tags: ['template', defaultPrompt.category]
     };
     createPromptMutation.mutate(promptData);
   };
@@ -249,10 +302,25 @@ export default function PromptCustomization() {
             </p>
           </div>
         </div>
-        <Button onClick={() => setIsEditing(true)} className="gap-2">
-          <Plus className="w-4 h-4" />
-          New Prompt
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={runWizard} className="gap-2">
+            <Wand2 className="w-4 h-4" />
+            Quick Setup
+          </Button>
+          <Button 
+            variant="outline" 
+            onClick={() => syncMutation.mutate()} 
+            disabled={syncMutation.isPending}
+            className="gap-2"
+          >
+            <Cloud className="w-4 h-4" />
+            {syncMutation.isPending ? "Syncing..." : "Sync"}
+          </Button>
+          <Button onClick={() => setIsEditing(true)} className="gap-2">
+            <Plus className="w-4 h-4" />
+            New Prompt
+          </Button>
+        </div>
       </div>
 
       <div className="grid lg:grid-cols-2 gap-6">
@@ -307,6 +375,21 @@ export default function PromptCustomization() {
                       {prompt.writingStyle && (
                         <p className="text-sm text-muted-foreground mt-2">
                           Style: {prompt.writingStyle}
+                        </p>
+                      )}
+                      {prompt.tags && prompt.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {prompt.tags.map((tag, index) => (
+                            <span key={index} className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-primary/10 text-primary">
+                              <Tag className="w-3 h-3 mr-1" />
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      {prompt.lastSynced && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Last synced: {new Date(prompt.lastSynced).toLocaleDateString()}
                         </p>
                       )}
                     </CardContent>
@@ -430,6 +513,38 @@ export default function PromptCustomization() {
                     placeholder="The actual prompt template. Use {topic} for user input, {writingStyle} for your style..."
                     rows={4}
                   />
+                </div>
+
+                <div>
+                  <Label htmlFor="tags">Tags</Label>
+                  <div className="flex gap-2 mb-2">
+                    <Input
+                      id="tags"
+                      value={currentTag}
+                      onChange={(e) => setCurrentTag(e.target.value)}
+                      placeholder="Add a tag..."
+                      onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
+                    />
+                    <Button type="button" variant="outline" size="sm" onClick={addTag}>
+                      <Tag className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  {formData.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                      {formData.tags.map((tag, index) => (
+                        <span key={index} className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-primary/10 text-primary">
+                          {tag}
+                          <button
+                            type="button"
+                            onClick={() => removeTag(tag)}
+                            className="ml-1 hover:text-destructive"
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex items-center space-x-2">
