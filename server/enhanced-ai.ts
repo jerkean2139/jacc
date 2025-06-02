@@ -180,15 +180,21 @@ export class EnhancedAIService {
       // Only use web search if absolutely no relevant documents found after comprehensive search
       let webSearchReason = null;
       if (searchResults.length === 0) {
-        webSearchReason = "Comprehensive search completed: No internal documents found with original query or alternative search terms";
-        try {
-          webSearchResults = await perplexitySearchService.searchWeb(lastUserMessage.content);
-          console.log("Web search completed successfully - no internal documents found");
-          
-          // Log the web search usage
-          await this.logWebSearchUsage(lastUserMessage.content, webSearchResults.content, webSearchReason, context);
-        } catch (error) {
-          console.log("Web search failed, proceeding without web results");
+        // Validate query is business-appropriate before web search
+        if (this.isBusinessAppropriateQuery(lastUserMessage.content)) {
+          webSearchReason = "Comprehensive search completed: No internal documents found with original query or alternative search terms";
+          try {
+            webSearchResults = await perplexitySearchService.searchWeb(lastUserMessage.content);
+            console.log("Web search completed successfully - no internal documents found");
+            
+            // Log the web search usage
+            await this.logWebSearchUsage(lastUserMessage.content, webSearchResults.content, webSearchReason, context);
+          } catch (error) {
+            console.log("Web search failed, proceeding without web results");
+          }
+        } else {
+          console.log("Query blocked: Not business-appropriate for external search");
+          webSearchReason = "Query outside business scope - external search restricted";
         }
       } else {
         console.log("Using internal documents, web search not needed");
@@ -922,6 +928,56 @@ IMPORTANT: When referencing this document in your response, always include the c
     } catch (error) {
       console.error('Failed to log web search usage:', error);
     }
+  }
+
+  private isBusinessAppropriateQuery(query: string): boolean {
+    const businessKeywords = [
+      'iso', 'merchant', 'payment', 'processing', 'pos', 'point of sale', 'credit card',
+      'business', 'marketing', 'sales', 'commerce', 'transaction', 'banking', 'finance',
+      'retail', 'customer', 'service', 'industry', 'company', 'revenue', 'profit',
+      'partnership', 'contract', 'agreement', 'rate', 'fee', 'pricing', 'solution',
+      'system', 'software', 'technology', 'integration', 'api', 'platform',
+      'social media', 'content', 'advertising', 'lead', 'prospect', 'client',
+      'tsys', 'fiserv', 'first data', 'global payments', 'worldpay', 'square',
+      'stripe', 'paypal', 'visa', 'mastercard', 'american express', 'discover',
+      'ach', 'wire transfer', 'settlement', 'chargeback', 'fraud', 'security',
+      'compliance', 'pci', 'emv', 'chip', 'contactless', 'mobile payment',
+      'e-commerce', 'online', 'terminal', 'gateway', 'processor'
+    ];
+
+    const restrictedKeywords = [
+      'porn', 'adult', 'sex', 'xxx', 'naked', 'nude', 'erotic', 'escort',
+      'drug', 'illegal', 'weapon', 'gun', 'violence', 'hate', 'racist',
+      'terrorist', 'bomb', 'hack', 'crack', 'pirate', 'torrent', 'darkweb',
+      'dark web', 'silk road', 'bitcoin laundering', 'money laundering'
+    ];
+
+    const queryLower = query.toLowerCase();
+
+    // Block if contains restricted keywords
+    if (restrictedKeywords.some(keyword => queryLower.includes(keyword))) {
+      return false;
+    }
+
+    // Allow if contains business keywords or seems business-related
+    if (businessKeywords.some(keyword => queryLower.includes(keyword))) {
+      return true;
+    }
+
+    // Allow general business inquiries (questions about rates, processes, etc.)
+    const businessPatterns = [
+      /what.*rate/i, /how.*process/i, /business.*help/i, /merchant.*need/i,
+      /payment.*work/i, /cost.*fee/i, /setup.*account/i, /integration.*api/i,
+      /compare.*processor/i, /best.*solution/i, /industry.*standard/i
+    ];
+
+    if (businessPatterns.some(pattern => pattern.test(query))) {
+      return true;
+    }
+
+    // Default: allow if uncertain but log for review
+    console.log(`Query validation uncertain: "${query}" - allowing with caution`);
+    return true;
   }
 }
 
