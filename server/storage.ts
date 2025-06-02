@@ -113,16 +113,9 @@ export interface IStorage {
   getAdminSettings(): Promise<any>;
   updateAdminSettings(settings: any): Promise<any>;
 
-  // Admin analytics operations
-  getAdminAnalytics(range: string, user: string): Promise<any>;
-  getUserAnalytics(range: string): Promise<any[]>;
-  getPromptAnalytics(range: string): Promise<any[]>;
-  getSessionData(range: string): Promise<any[]>;
-  updateAdminSetting(key: string, value: string, updatedBy: string): Promise<void>;
-  trackUserActivity(userId: string, path: string, method: string, ip: string, userAgent: string): Promise<void>;
-  logPromptUsage(userId: string, sessionId: string, promptId: string, promptName: string, category: string, executionTime: number, success: boolean, errorMessage?: string): Promise<void>;
-  createUserSession(userId: string, firstMessage: string, ipAddress: string, userAgent: string): Promise<UserSession>;
-  updateUserSession(sessionId: string, updates: Partial<UserSession>): Promise<void>;
+  // Simplified admin operations for existing data
+  getAllChats(): Promise<Chat[]>;
+  getAllMessages(): Promise<Message[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -583,6 +576,15 @@ export class DatabaseStorage implements IStorage {
         target: userStats.userId,
         set: updates
       });
+  }
+
+  // Admin analytics methods
+  async getAllChats(): Promise<Chat[]> {
+    return await db.select().from(chats).orderBy(desc(chats.createdAt));
+  }
+
+  async getAllMessages(): Promise<Message[]> {
+    return await db.select().from(messages).orderBy(desc(messages.createdAt));
   }
 }
 
