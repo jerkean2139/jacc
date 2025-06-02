@@ -252,6 +252,14 @@ ACTION ITEMS AND TASK EXTRACTION:
 
 When appropriate, suggest actions like saving payment processing information to folders, downloading rate comparisons, creating merchant proposals, and tracking action items from conversations.`;
 
+      // Dynamic temperature and token limits based on context
+      const isFirstMessage = messages.filter(msg => msg.role === 'user').length === 1;
+      const hasWebResults = webSearchResults !== null;
+      const isComplexQuery = lastUserMessage.content.length > 50;
+      
+      // Use higher temperature and tokens for continuing conversations, complex queries, or web results
+      const useExpandedResponse = !isFirstMessage || hasWebResults || (isComplexQuery && searchResults.length === 0);
+      
       const response = await anthropic.messages.create({
         model: "claude-3-haiku-20240307",
         system: systemPrompt,
@@ -259,8 +267,8 @@ When appropriate, suggest actions like saving payment processing information to 
           role: msg.role === 'user' ? 'user' as const : 'assistant' as const,
           content: msg.content
         })),
-        temperature: 0.3,
-        max_tokens: 300,
+        temperature: useExpandedResponse ? 0.45 : 0.3,
+        max_tokens: useExpandedResponse ? 500 : 300,
       });
 
       let content = response.content[0].type === 'text' ? response.content[0].text : "";
