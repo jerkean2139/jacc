@@ -768,7 +768,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         aiResponse = await enhancedAIService.generateChainedResponse(
           messageData.content,
-          messages.slice(0, -1), // Exclude the just-added user message
+          messages, // Include all messages including the new user message
           userId
         );
       } catch (error) {
