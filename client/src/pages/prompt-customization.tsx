@@ -130,6 +130,7 @@ export default function PromptCustomization() {
 
   const { data: prompts = [], isLoading } = useQuery<UserPrompt[]>({
     queryKey: ["/api/user/prompts"],
+    enabled: false, // Disable for now due to auth issues
   });
 
   const createPromptMutation = useMutation({
@@ -287,42 +288,45 @@ export default function PromptCustomization() {
         <span className="text-foreground">AI Prompt Customization</span>
       </nav>
 
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      <div className="space-y-4">
+        <div className="mb-6">
           <Link href="/">
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2 bg-white dark:bg-gray-800 border-2 shadow-sm hover:shadow-md transition-all">
               <Home className="w-4 h-4" />
               Back to Home
             </Button>
           </Link>
+        </div>
+        
+        <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold">AI Prompt Customization</h1>
             <p className="text-muted-foreground">
               Create personalized prompts that match your writing style and prioritize internal knowledge
             </p>
           </div>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Button variant="outline" onClick={runWizard} className="gap-2 text-sm">
-            <Wand2 className="w-4 h-4" />
-            <span className="hidden sm:inline">Quick Setup</span>
-            <span className="sm:hidden">Setup</span>
-          </Button>
-          <Button 
-            variant="outline" 
-            onClick={() => syncMutation.mutate()} 
-            disabled={syncMutation.isPending}
-            className="gap-2 text-sm"
-          >
-            <Cloud className="w-4 h-4" />
-            <span className="hidden sm:inline">{syncMutation.isPending ? "Syncing..." : "Sync"}</span>
-            <span className="sm:hidden">{syncMutation.isPending ? "..." : "Sync"}</span>
-          </Button>
-          <Button onClick={() => setIsEditing(true)} className="gap-2 text-sm">
-            <Plus className="w-4 h-4" />
-            <span className="hidden sm:inline">New Prompt</span>
-            <span className="sm:hidden">New</span>
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" onClick={runWizard} className="gap-2 text-sm">
+              <Wand2 className="w-4 h-4" />
+              <span className="hidden sm:inline">Quick Setup</span>
+              <span className="sm:hidden">Setup</span>
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={() => syncMutation.mutate()} 
+              disabled={syncMutation.isPending}
+              className="gap-2 text-sm"
+            >
+              <Cloud className="w-4 h-4" />
+              <span className="hidden sm:inline">{syncMutation.isPending ? "Syncing..." : "Sync"}</span>
+              <span className="sm:hidden">{syncMutation.isPending ? "..." : "Sync"}</span>
+            </Button>
+            <Button onClick={() => setIsEditing(true)} className="gap-2 text-sm">
+              <Plus className="w-4 h-4" />
+              <span className="hidden sm:inline">New Prompt</span>
+              <span className="sm:hidden">New</span>
+            </Button>
+          </div>
         </div>
       </div>
 
