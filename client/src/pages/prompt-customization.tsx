@@ -27,36 +27,84 @@ interface UserPrompt {
 
 const DEFAULT_PROMPTS = [
   {
-    name: "Email Writing",
-    category: "communication",
-    icon: Mail,
-    writingStyle: "Professional yet friendly, concise and action-oriented",
-    systemRules: "Always prioritize internal database search before external resources. Focus on merchant services industry context. Keep emails under 150 words unless specifically requested otherwise.",
-    promptTemplate: "Write a professional email that sounds like me: {writingStyle}. Search our internal documents first for any relevant information about {topic}. If found, reference specific documents. Format: Clear subject line, brief greeting, main points with internal references, clear call-to-action, professional close."
+    name: "Processing Rate Calculator",
+    category: "calculations",
+    icon: TrendingUp,
+    writingStyle: "Precise, analytical, and professional",
+    systemRules: "Always search internal documents for current processing rates, fee structures, and industry benchmarks before calculating. Present calculations clearly with breakdown.",
+    promptTemplate: "Calculate processing rates for [BUSINESS_TYPE] with [MONTHLY_VOLUME] in sales. Search internal rate sheets and pricing documents first. Show: effective rate, monthly fees, per-transaction costs, and comparison to industry averages."
   },
   {
-    name: "Marketing Ideas",
+    name: "Alex Hormozi Value Stacking",
     category: "marketing",
     icon: TrendingUp,
-    writingStyle: "Creative, persuasive, and results-focused with industry expertise",
-    systemRules: "Heavily search internal knowledge base and documents for merchant services insights, competitor analysis, and industry trends before suggesting external research. All ideas should be grounded in our existing knowledge.",
-    promptTemplate: "Generate marketing ideas that match my style: {writingStyle}. First, thoroughly search our internal database for: merchant services trends, competitor information, successful campaigns, and industry insights related to {topic}. Base all suggestions on internal findings. Provide 3-5 concrete, actionable ideas with references to our internal resources."
+    writingStyle: "Direct, value-focused, and compelling",
+    systemRules: "Focus on creating irresistible offers by stacking value and addressing objections. Use Hormozi's framework for offer creation.",
+    promptTemplate: "Create an Alex Hormozi-style value stack for [TARGET_MARKET]. Include: core offer, bonuses that increase perceived value, risk reversals, urgency/scarcity, and objection handling. Make the offer feel like a no-brainer decision."
   },
   {
-    name: "Client Communication",
-    category: "communication", 
+    name: "Jeremy Miner NEPQ Sales Script",
+    category: "sales",
     icon: Users,
-    writingStyle: "Consultative, trustworthy, and solution-focused",
-    systemRules: "Always search internal documents for relevant case studies, pricing information, and solution details before crafting responses. Present information as coming from our expertise and resources.",
-    promptTemplate: "Craft client communication in my style: {writingStyle}. Search our internal knowledge base for information about {topic} including: relevant case studies, pricing details, solution comparisons, and success stories. Present findings as our expertise. Keep tone professional but approachable."
+    writingStyle: "Consultative, empathetic, and solution-focused",
+    systemRules: "Use Neuro-Emotional Persuasion Questioning to uncover pain points and create emotional investment in solutions.",
+    promptTemplate: "Create a Jeremy Miner NEPQ sales script for [PROSPECT_TYPE]. Include: problem awareness questions, consequence questions, solution awareness questions, and commitment questions. Focus on helping prospects convince themselves."
   },
   {
-    name: "Text Messages",
-    category: "communication",
+    name: "Cold Email Sequence - Niche Specific",
+    category: "outbound",
+    icon: Mail,
+    writingStyle: "Conversational, helpful, and relationship-focused",
+    systemRules: "Create human-sounding sequences that provide value before selling. Avoid robotic sales language.",
+    promptTemplate: "Write a 3-email cold outreach sequence for [NICHE] businesses. Email 1: Value-first introduction with industry insight. Email 2: Case study or success story. Email 3: Soft CTA with helpful resource. Focus on their specific pain points and avoid sounding salesy."
+  },
+  {
+    name: "SMS Cold Outreach Sequence",
+    category: "outbound",
     icon: MessageSquare,
-    writingStyle: "Casual, friendly, but still professional",
-    systemRules: "Keep messages brief (under 160 characters when possible). Search internal database for quick facts or references that support the message.",
-    promptTemplate: "Write a text message in my casual style: {writingStyle}. Search internal resources for any relevant quick facts about {topic}. Keep it brief, friendly, and include internal reference if available. Format for mobile viewing."
+    writingStyle: "Brief, friendly, and conversational",
+    systemRules: "Keep messages under 160 characters each. Focus on helping rather than selling.",
+    promptTemplate: "Create a 3-message SMS sequence for [NICHE] business owners. Message 1: Quick introduction + value. Message 2: Social proof or insight. Message 3: Low-pressure offer to connect. Keep conversational and helpful."
+  },
+  {
+    name: "LinkedIn DM Sequence",
+    category: "outbound",
+    icon: Users,
+    writingStyle: "Professional but conversational and personalized",
+    systemRules: "Build genuine relationships through personalized, value-first messaging.",
+    promptTemplate: "Write a 3-message LinkedIn DM sequence targeting [NICHE] business owners. Message 1: Personalized connection based on their business/posts. Message 2: Share relevant industry insight. Message 3: Casual invitation to discuss payment processing challenges."
+  },
+  {
+    name: "Mel Robbins 5 Second Rule for Sales",
+    category: "personal-growth",
+    icon: Users,
+    writingStyle: "Motivational, actionable, and confidence-building",
+    systemRules: "Focus on overcoming fear and hesitation through countdown strategies and immediate action.",
+    promptTemplate: "Apply Mel Robbins 5 Second Rule to overcome [SALES_CHALLENGE]. Create specific countdown strategies to push through fear, make difficult calls, and take action when motivation fails. Include daily implementation tactics."
+  },
+  {
+    name: "Good to Great Sales Strategy",
+    category: "strategy",
+    icon: TrendingUp,
+    writingStyle: "Strategic, disciplined, and results-oriented",
+    systemRules: "Apply Jim Collins principles of disciplined people, thought, and action to sales excellence.",
+    promptTemplate: "Using Jim Collins Good to Great principles, analyze my sales approach and create a plan to go from good to great. Focus on hedgehog concept for my niche and flywheel momentum strategy."
+  },
+  {
+    name: "StoryBrand Sales Framework",
+    category: "sales",
+    icon: MessageSquare,
+    writingStyle: "Story-driven, engaging, and customer-focused",
+    systemRules: "Position prospect as hero, identify their problem, present yourself as guide with clear plan and strong call to action.",
+    promptTemplate: "Using Donald Miller StoryBrand framework, craft a compelling sales story for [PROSPECT_TYPE]. Position prospect as hero, identify their problem, present yourself as guide, provide clear plan, call to action that avoids failure and achieves success."
+  },
+  {
+    name: "Duct Tape Marketing System",
+    category: "marketing",
+    icon: TrendingUp,
+    writingStyle: "Systematic, relationship-focused, and referral-driven",
+    systemRules: "Create systematic marketing approaches that turn clients into marketing assets through referrals and partnerships.",
+    promptTemplate: "Apply John Jantsch Duct Tape Marketing system to create a systematic marketing approach for [NICHE]. Include referral system design, strategic partnerships, and total customer experience that turns clients into marketing assets."
   }
 ];
 
