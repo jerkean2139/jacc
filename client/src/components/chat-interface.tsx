@@ -31,6 +31,7 @@ import {
   MessageSquare,
   Search
 } from "lucide-react";
+import { Link } from "wouter";
 import MessageBubble from "./message-bubble";
 import FileUpload from "./file-upload";
 import { ExternalSearchDialog } from "./external-search-dialog";
@@ -250,21 +251,45 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
     },
     {
       id: 'default-4',
-      name: 'Email Writing',
-      promptTemplate: 'Write a professional email about [TOPIC] to [RECIPIENT] with [KEY_POINTS]',
-      category: 'communication'
+      name: 'Niche Marketing Plan',
+      promptTemplate: 'Using Alex Hormozi value stacking methodology, create a targeted marketing plan for [NICHE] businesses. Include specific pain points, value propositions, and irresistible offers that match merchant services products to their exact needs.',
+      category: 'marketing'
     },
     {
       id: 'default-5',
-      name: 'Marketing Ideas',
-      promptTemplate: 'Generate marketing ideas for [BUSINESS_TYPE] focusing on [TARGET_AUDIENCE] and [GOALS]',
+      name: 'Social Media Content Strategy',
+      promptTemplate: 'Create Gary Vaynerchuk-style social media content for [PLATFORM] targeting [BUSINESS_TYPE] owners. Focus on providing value first, building trust, and establishing authority in payment processing. Include 5 post ideas with captions.',
       category: 'marketing'
     },
     {
       id: 'default-6',
-      name: 'Client Communication',
-      promptTemplate: 'Draft a response to client about [ISSUE] with [SOLUTION_APPROACH]',
-      category: 'communication'
+      name: 'NLP Sales Script (Jeremy Miner)',
+      promptTemplate: 'Using Jeremy Miner NEPQ method, create a sales conversation script for [PROSPECT_TYPE]. Include problem-aware questions, emotional triggers, and tone-downs to move prospects from skeptical to committed.',
+      category: 'sales'
+    },
+    {
+      id: 'default-7',
+      name: 'Mindset & Work Ethic',
+      promptTemplate: 'Channel Tony Robbins mindset coaching to help me overcome [CHALLENGE] in my sales career. Provide actionable strategies for peak performance, managing rejection, and maintaining motivation in merchant services sales.',
+      category: 'mindset'
+    },
+    {
+      id: 'default-8',
+      name: 'Dan Kennedy Direct Response',
+      promptTemplate: 'Using Dan Kennedy direct response principles, write marketing copy for [PRODUCT/SERVICE] targeting [AUDIENCE]. Include compelling headlines, urgency, social proof, and clear calls-to-action.',
+      category: 'marketing'
+    },
+    {
+      id: 'default-9',
+      name: 'Patrick Bet-David Business Strategy',
+      promptTemplate: 'Apply Patrick Bet-David strategic thinking to [BUSINESS_SITUATION]. Break down the problem, identify opportunities, create actionable steps, and develop contingency plans for success.',
+      category: 'strategy'
+    },
+    {
+      id: 'default-10',
+      name: 'Value Proposition Builder',
+      promptTemplate: 'Create an irresistible value proposition for [TARGET_MARKET] using the "So good they cannot ignore it" principle. Stack benefits, address objections, and make the offer feel like a no-brainer decision.',
+      category: 'sales'
     }
   ];
 
