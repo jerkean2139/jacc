@@ -130,7 +130,6 @@ export default function PromptCustomization() {
 
   const { data: prompts = [], isLoading } = useQuery<UserPrompt[]>({
     queryKey: ["/api/user/prompts"],
-    enabled: false, // Disable for now due to auth issues
   });
 
   const createPromptMutation = useMutation({
