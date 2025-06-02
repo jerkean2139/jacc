@@ -75,10 +75,11 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
     staleTime: 0, // Always refetch
   });
 
-  // Fetch saved prompts for the dropdown
+  // Fetch saved prompts for the dropdown (only when authenticated)
   const { data: savedPrompts = [] } = useQuery({
     queryKey: ["/api/user/prompts"],
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    retry: false, // Don't retry on auth errors
   });
 
   // Log any errors with message loading
