@@ -72,10 +72,11 @@ export class EnhancedAIService {
         
         // Generate response with document context
         return await this.generateResponseWithDocuments(
-          message,
-          documentResults,
           conversationHistory,
-          userId
+          {
+            searchResults: documentResults,
+            userRole: 'Sales Agent'
+          }
         );
       } else {
         console.log(`❌ No relevant documents found in internal database`);
@@ -134,29 +135,32 @@ export class EnhancedAIService {
     }
   ): Promise<EnhancedAIResponse> {
     try {
-      const lastMessage = messages[messages.length - 1];
-      if (!lastMessage || lastMessage.role !== 'user') {
-        throw new Error('Last message must be from user');
+      // Find the last user message in the conversation
+      const lastUserMessage = messages.slice().reverse().find(msg => msg.role === 'user');
+      if (!lastUserMessage) {
+        throw new Error('No user message found in conversation');
       }
 
-      // Search both documents and web for comprehensive results
-      let searchResults = [];
+      // Use provided search results from context or search documents
+      let searchResults = context?.searchResults || [];
       let webSearchResults = null;
       
-      // STEP 1: Primary document search with original query (using direct document search)
-      try {
-        searchResults = await this.searchDocuments(lastMessage.content);
-        console.log(`Step 1: Found ${searchResults.length} document matches for: "${lastMessage.content}"`);
-      } catch (error) {
-        console.log("Step 1: Document search failed, proceeding to step 2");
-        searchResults = [];
+      // If no search results provided, search documents
+      if (searchResults.length === 0) {
+        try {
+          searchResults = await this.searchDocuments(lastUserMessage.content);
+          console.log(`Found ${searchResults.length} document matches for: "${lastUserMessage.content}"`);
+        } catch (error) {
+          console.log("Document search failed");
+          searchResults = [];
+        }
       }
       
       // STEP 2: Double-check with alternative search strategies if no results
       if (searchResults.length === 0) {
         console.log("Step 2: No documents found, trying comprehensive alternative searches...");
         
-        const alternativeQueries = this.generateAlternativeQueries(lastMessage.content);
+        const alternativeQueries = this.generateAlternativeQueries(lastUserMessage.content);
         
         for (const altQuery of alternativeQueries) {
           try {
