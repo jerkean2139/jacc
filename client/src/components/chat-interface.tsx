@@ -472,15 +472,15 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
                 <Paperclip className="w-4 h-4" />
               </Button>
               
-              {/* AI Prompt Button with bright styling to make it visible */}
+              {/* AI PROMPTS BUTTON - PURPLE BACKGROUND FOR VISIBILITY */}
               <Button
-                variant="ghost"
+                variant="default"
                 size="icon"
                 onClick={() => setShowPromptDropdown(!showPromptDropdown)}
-                className="w-8 h-8 bg-purple-100 text-purple-700 hover:bg-purple-200 border border-purple-300"
+                className="w-8 h-8 bg-purple-600 hover:bg-purple-700 text-white shadow-md"
                 title="AI Prompts"
               >
-                <MessageSquare className="w-4 h-4" />
+                <Brain className="w-4 h-4" />
               </Button>
               
               <Button
