@@ -29,12 +29,15 @@ export function MessageContent({ content, className = '' }: MessageContentProps)
         );
       }
       
-      // Check if this is a document link
-      const isDocumentLink = linkUrl.includes('/api/documents/') && linkUrl.includes('/view');
+      // Check if this is a document link (handles both /documents/{id} and /api/documents/{id}/view formats)
+      const isDocumentLink = linkUrl.includes('/documents/') || (linkUrl.includes('/api/documents/') && linkUrl.includes('/view'));
       
       if (isDocumentLink) {
-        // Extract document ID from URL
-        const documentIdMatch = linkUrl.match(/\/api\/documents\/([^/]+)\/view/);
+        // Extract document ID from URL - handle both formats
+        let documentIdMatch = linkUrl.match(/\/documents\/([^/]+)/);
+        if (!documentIdMatch) {
+          documentIdMatch = linkUrl.match(/\/api\/documents\/([^/]+)\/view/);
+        }
         const documentId = documentIdMatch ? documentIdMatch[1] : '';
         
         if (documentId) {

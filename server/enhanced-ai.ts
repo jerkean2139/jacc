@@ -214,7 +214,7 @@ export class EnhancedAIService {
 
 **RESPONSE FORMAT - ALWAYS USE THIS STRUCTURE:**
 
-**TLDR:** [One sentence direct answer]
+[One sentence direct answer]
 
 **Key Points:**
 **• [Main point 1]**
@@ -224,7 +224,7 @@ export class EnhancedAIService {
 [One brief paragraph of explanation if needed]
 
 **CRITICAL RULES:**
-- Start every response with "TLDR:" followed by a one-sentence direct answer
+- Start every response with a direct one-sentence answer (no "TLDR:" label)
 - Use exactly 3 bullet points maximum for key information
 - Bold all bullet points with **• Text here**
 - Keep total response under 150 words
