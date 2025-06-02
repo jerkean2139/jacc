@@ -27,11 +27,14 @@ import {
   ThumbsDown,
   Brain,
   Globe,
-  Zap
+  Zap,
+  MessageSquare,
+  Search
 } from "lucide-react";
 import MessageBubble from "./message-bubble";
 import FileUpload from "./file-upload";
 import { ExternalSearchDialog } from "./external-search-dialog";
+import { Input } from "@/components/ui/input";
 import type { Message } from "@shared/schema";
 import { cn } from "@/lib/utils";
 
@@ -58,6 +61,8 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
   const [isListening, setIsListening] = useState(false);
   const [showExternalSearchDialog, setShowExternalSearchDialog] = useState(false);
   const [pendingExternalQuery, setPendingExternalQuery] = useState("");
+  const [showPromptDropdown, setShowPromptDropdown] = useState(false);
+  const [promptSearchTerm, setPromptSearchTerm] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
@@ -68,6 +73,12 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
     enabled: !!chatId,
     refetchOnMount: true,
     staleTime: 0, // Always refetch
+  });
+
+  // Fetch saved prompts for the dropdown
+  const { data: savedPrompts = [] } = useQuery({
+    queryKey: ["/api/user/prompts"],
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
 
   // Log any errors with message loading
@@ -213,6 +224,20 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
     } else {
       setInput(action);
     }
+  };
+
+  // Filter prompts based on search term
+  const filteredPrompts = (Array.isArray(savedPrompts) ? savedPrompts : []).filter((prompt: any) =>
+    prompt.name?.toLowerCase().includes(promptSearchTerm.toLowerCase()) ||
+    prompt.promptTemplate?.toLowerCase().includes(promptSearchTerm.toLowerCase())
+  );
+
+  // Handle prompt selection
+  const handlePromptSelect = (prompt: any) => {
+    setInput(prompt.promptTemplate);
+    setShowPromptDropdown(false);
+    setPromptSearchTerm("");
+    textareaRef.current?.focus();
   };
 
   if (!chatId) {
@@ -434,6 +459,64 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
               >
                 <Mic className="w-4 h-4" />
               </Button>
+              
+              {/* AI Prompt Dropdown */}
+              <div className="relative">
+                <DropdownMenu open={showPromptDropdown} onOpenChange={setShowPromptDropdown}>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="w-8 h-8"
+                      title="AI Prompts"
+                    >
+                      <Brain className="w-4 h-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent 
+                    align="end" 
+                    className="w-80 max-h-96 overflow-hidden"
+                    side="top"
+                  >
+                    <div className="p-2 border-b">
+                      <div className="relative">
+                        <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          placeholder="Search prompts..."
+                          value={promptSearchTerm}
+                          onChange={(e) => setPromptSearchTerm(e.target.value)}
+                          className="pl-8"
+                        />
+                      </div>
+                    </div>
+                    <div className="max-h-64 overflow-y-auto">
+                      {filteredPrompts.length > 0 ? (
+                        filteredPrompts.map((prompt: any) => (
+                          <DropdownMenuItem
+                            key={prompt.id}
+                            onClick={() => handlePromptSelect(prompt)}
+                            className="flex flex-col items-start p-3 cursor-pointer"
+                          >
+                            <div className="font-medium text-sm">{prompt.name}</div>
+                            <div className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                              {prompt.promptTemplate.slice(0, 100)}...
+                            </div>
+                            <div className="flex items-center gap-1 mt-2">
+                              <Badge variant="secondary" className="text-xs">
+                                {prompt.category}
+                              </Badge>
+                            </div>
+                          </DropdownMenuItem>
+                        ))
+                      ) : (
+                        <div className="p-4 text-center text-sm text-muted-foreground">
+                          {promptSearchTerm ? "No prompts found" : "No saved prompts available"}
+                        </div>
+                      )}
+                    </div>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
           </div>
           
