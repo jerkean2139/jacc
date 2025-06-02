@@ -63,6 +63,7 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
   const [pendingExternalQuery, setPendingExternalQuery] = useState("");
   const [showPromptDropdown, setShowPromptDropdown] = useState(false);
   const [promptSearchTerm, setPromptSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
@@ -246,15 +247,39 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
       name: 'Client Proposal',
       promptTemplate: 'Create a merchant services proposal for [CLIENT_NAME] - [BUSINESS_TYPE] with [REQUIREMENTS]',
       category: 'proposals'
+    },
+    {
+      id: 'default-4',
+      name: 'Email Writing',
+      promptTemplate: 'Write a professional email about [TOPIC] to [RECIPIENT] with [KEY_POINTS]',
+      category: 'communication'
+    },
+    {
+      id: 'default-5',
+      name: 'Marketing Ideas',
+      promptTemplate: 'Generate marketing ideas for [BUSINESS_TYPE] focusing on [TARGET_AUDIENCE] and [GOALS]',
+      category: 'marketing'
+    },
+    {
+      id: 'default-6',
+      name: 'Client Communication',
+      promptTemplate: 'Draft a response to client about [ISSUE] with [SOLUTION_APPROACH]',
+      category: 'communication'
     }
   ];
 
-  // Filter prompts based on search term, fallback to default prompts if none saved
+  // Filter prompts based on search term and category, fallback to default prompts if none saved
   const availablePrompts = Array.isArray(savedPrompts) && savedPrompts.length > 0 ? savedPrompts : defaultPrompts;
-  const filteredPrompts = availablePrompts.filter((prompt: any) =>
-    prompt.name?.toLowerCase().includes(promptSearchTerm.toLowerCase()) ||
-    prompt.promptTemplate?.toLowerCase().includes(promptSearchTerm.toLowerCase())
-  );
+  
+  // Get unique categories for filter buttons
+  const categories = ["all", ...Array.from(new Set(availablePrompts.map((p: any) => p.category)))];
+  
+  const filteredPrompts = availablePrompts.filter((prompt: any) => {
+    const matchesSearch = prompt.name?.toLowerCase().includes(promptSearchTerm.toLowerCase()) ||
+                         prompt.promptTemplate?.toLowerCase().includes(promptSearchTerm.toLowerCase());
+    const matchesCategory = selectedCategory === "all" || prompt.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
 
   // Handle prompt selection
   const handlePromptSelect = (prompt: any) => {
@@ -499,8 +524,18 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
             
             {/* AI Prompt Dropdown - positioned outside textarea */}
             {showPromptDropdown && (
-              <div className="absolute right-2 bottom-14 w-80 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg z-50">
-                <div className="p-2 border-b border-slate-200 dark:border-slate-700">
+              <div className="absolute right-2 bottom-14 w-96 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg z-50">
+                {/* Header with search */}
+                <div className="p-3 border-b border-slate-200 dark:border-slate-700">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Brain className="w-4 h-4 text-purple-600" />
+                    <span className="font-medium text-sm">AI Prompts</span>
+                    <Link href="/prompts">
+                      <Button variant="ghost" size="sm" className="ml-auto text-xs">
+                        Manage →
+                      </Button>
+                    </Link>
+                  </div>
                   <div className="relative">
                     <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
@@ -511,6 +546,25 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
                     />
                   </div>
                 </div>
+                
+                {/* Category filters */}
+                <div className="p-2 border-b border-slate-200 dark:border-slate-700">
+                  <div className="flex flex-wrap gap-1">
+                    {categories.map((category) => (
+                      <Button
+                        key={category}
+                        variant={selectedCategory === category ? "default" : "ghost"}
+                        size="sm"
+                        onClick={() => setSelectedCategory(category)}
+                        className="text-xs h-6 px-2 capitalize"
+                      >
+                        {category}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Prompt list */}
                 <div className="max-h-64 overflow-y-auto">
                   {filteredPrompts.length > 0 ? (
                     filteredPrompts.map((prompt: any) => (
@@ -532,7 +586,7 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
                     ))
                   ) : (
                     <div className="p-4 text-center text-sm text-slate-500 dark:text-slate-400">
-                      {promptSearchTerm ? "No prompts found" : "No saved prompts available"}
+                      {promptSearchTerm || selectedCategory !== "all" ? "No prompts found" : "No saved prompts available"}
                     </div>
                   )}
                 </div>
