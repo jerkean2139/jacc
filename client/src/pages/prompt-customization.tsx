@@ -302,28 +302,31 @@ export default function PromptCustomization() {
             </p>
           </div>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={runWizard} className="gap-2">
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={runWizard} className="gap-2 text-sm">
             <Wand2 className="w-4 h-4" />
-            Quick Setup
+            <span className="hidden sm:inline">Quick Setup</span>
+            <span className="sm:hidden">Setup</span>
           </Button>
           <Button 
             variant="outline" 
             onClick={() => syncMutation.mutate()} 
             disabled={syncMutation.isPending}
-            className="gap-2"
+            className="gap-2 text-sm"
           >
             <Cloud className="w-4 h-4" />
-            {syncMutation.isPending ? "Syncing..." : "Sync"}
+            <span className="hidden sm:inline">{syncMutation.isPending ? "Syncing..." : "Sync"}</span>
+            <span className="sm:hidden">{syncMutation.isPending ? "..." : "Sync"}</span>
           </Button>
-          <Button onClick={() => setIsEditing(true)} className="gap-2">
+          <Button onClick={() => setIsEditing(true)} className="gap-2 text-sm">
             <Plus className="w-4 h-4" />
-            New Prompt
+            <span className="hidden sm:inline">New Prompt</span>
+            <span className="sm:hidden">New</span>
           </Button>
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Existing Prompts */}
         <div className="space-y-4">
           <h2 className="text-lg font-semibold">Your Custom Prompts</h2>
