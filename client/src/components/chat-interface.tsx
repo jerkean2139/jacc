@@ -249,17 +249,25 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
               </div>
             </Button>
 
-            <Button
-              variant="outline"
-              className="p-3 h-auto text-left justify-start hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-700 dark:hover:text-green-300 hover:border-green-200 dark:hover:border-green-700 transition-colors w-full"
-              onClick={() => handleQuickAction("Search current Square pricing and fees")}
-            >
-              <Globe className="mr-3 h-4 w-4 text-green-600 flex-shrink-0" />
-              <div className="flex-1 min-w-0 overflow-hidden">
-                <div className="font-medium mb-1 text-sm truncate">Real-Time Market Intelligence</div>
-                <div className="text-xs text-slate-500 group-hover:text-green-600 dark:group-hover:text-green-400 line-clamp-2">Get current processor pricing and industry trends</div>
+            <div className="relative group w-full">
+              <Button
+                variant="outline"
+                className="p-3 h-auto text-left justify-start hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-700 dark:hover:text-green-300 hover:border-green-200 dark:hover:border-green-700 transition-colors w-full cursor-not-allowed opacity-75"
+                onClick={(e) => {
+                  e.preventDefault();
+                  // Temporarily disabled - show coming soon
+                }}
+              >
+                <Globe className="mr-3 h-4 w-4 text-green-600 flex-shrink-0" />
+                <div className="flex-1 min-w-0 overflow-hidden">
+                  <div className="font-medium mb-1 text-sm truncate">Real-Time Market Intelligence</div>
+                  <div className="text-xs text-slate-500 group-hover:text-green-600 dark:group-hover:text-green-400 line-clamp-2">Get current processor pricing and industry trends</div>
+                </div>
+              </Button>
+              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+                Coming Soon
               </div>
-            </Button>
+            </div>
             
             <Button
               variant="outline"
@@ -441,15 +449,23 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
 
         {/* Quick Actions - Simplified to avoid redundancy with bottom nav */}
         <div className="flex flex-wrap gap-2 mt-3 max-w-4xl mx-auto">
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => handleQuickAction("Help me analyze this document and provide insights")}
-            className="text-slate-700 dark:text-slate-300"
-          >
-            <FileSearch className="w-3 h-3 mr-2" />
-            Analyze Document
-          </Button>
+          <div className="relative group">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={(e) => {
+                e.preventDefault();
+                // Temporarily disabled - show coming soon
+              }}
+              className="text-slate-700 dark:text-slate-300 cursor-not-allowed opacity-75"
+            >
+              <FileSearch className="w-3 h-3 mr-2" />
+              Analyze Document
+            </Button>
+            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
+              Coming Soon
+            </div>
+          </div>
           <Button
             variant="secondary"
             size="sm"
