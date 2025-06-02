@@ -182,11 +182,11 @@ export class EnhancedAIService {
       if (searchResults.length === 0) {
         webSearchReason = "Comprehensive search completed: No internal documents found with original query or alternative search terms";
         try {
-          webSearchResults = await perplexitySearchService.searchWeb(lastMessage.content);
+          webSearchResults = await perplexitySearchService.searchWeb(lastUserMessage.content);
           console.log("Web search completed successfully - no internal documents found");
           
           // Log the web search usage
-          await this.logWebSearchUsage(lastMessage.content, webSearchResults.content, webSearchReason, context);
+          await this.logWebSearchUsage(lastUserMessage.content, webSearchResults.content, webSearchReason, context);
         } catch (error) {
           console.log("Web search failed, proceeding without web results");
         }
@@ -200,7 +200,7 @@ export class EnhancedAIService {
       
       // Create document examples for response (show top 3)
       const documentExamples = searchResults.slice(0, 3).map(doc => 
-        `📄 **${doc.metadata.documentName}** - ${doc.content.substring(0, 150)}... [View Document](/documents/${doc.documentId}) | [Download](/api/documents/${doc.documentId}/download)`
+        `📄 **${doc.metadata?.documentName || 'Document'}** - ${doc.content.substring(0, 100)}...`
       ).join('\n\n');
       
       // Enhanced system prompt with document and web context
@@ -262,7 +262,7 @@ When appropriate, suggest actions like saving payment processing information to 
       const sources = this.formatSources(searchResults);
 
       // Generate reasoning explanation
-      const reasoning = await this.generateReasoning(lastMessage.content, searchResults, content);
+      const reasoning = await this.generateReasoning(lastUserMessage.content, searchResults, content);
 
       return {
         message: content,
