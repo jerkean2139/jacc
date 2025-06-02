@@ -290,6 +290,36 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
       name: 'Value Proposition Builder',
       promptTemplate: 'Create an irresistible value proposition for [TARGET_MARKET] using the "So good they cannot ignore it" principle. Stack benefits, address objections, and make the offer feel like a no-brainer decision.',
       category: 'sales'
+    },
+    {
+      id: 'default-11',
+      name: 'Cold Email Sequence - Niche Specific',
+      promptTemplate: 'Write a 3-email cold outreach sequence for [NICHE] businesses. Make it conversational and human-sounding. Email 1: Value-first introduction with industry insight. Email 2: Case study or success story. Email 3: Soft CTA with helpful resource. Focus on their specific pain points and avoid sounding salesy.',
+      category: 'outbound'
+    },
+    {
+      id: 'default-12',
+      name: 'SMS Cold Outreach Sequence',
+      promptTemplate: 'Create a 3-message SMS sequence for [NICHE] business owners. Keep messages under 160 characters, conversational tone, and focused on helping rather than selling. Message 1: Quick introduction + value. Message 2: Social proof or insight. Message 3: Low-pressure offer to connect.',
+      category: 'outbound'
+    },
+    {
+      id: 'default-13',
+      name: 'LinkedIn DM Sequence',
+      promptTemplate: 'Write a 3-message LinkedIn DM sequence targeting [NICHE] business owners. Message 1: Personalized connection based on their business/posts. Message 2: Share relevant industry insight or resource. Message 3: Casual invitation to discuss their payment processing challenges. Keep it professional but conversational.',
+      category: 'outbound'
+    },
+    {
+      id: 'default-14',
+      name: 'Multi-Channel Outbound Campaign',
+      promptTemplate: 'Create a coordinated outbound campaign for [NICHE] using email, LinkedIn, and SMS. Design a 2-week sequence that feels natural and builds genuine relationship. Include specific timing, channel strategy, and message variations for maximum effectiveness.',
+      category: 'outbound'
+    },
+    {
+      id: 'default-15',
+      name: 'Niche Pain Point Research',
+      promptTemplate: 'Research and identify the top 5 payment processing pain points specific to [NICHE] businesses. Include why each pain point matters, how it impacts their business, and what questions to ask to uncover these issues during sales conversations.',
+      category: 'research'
     }
   ];
 
