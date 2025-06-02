@@ -456,23 +456,12 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyPress}
               placeholder="Ask JACC anything about rates, documents, or client questions..."
-              className="auto-resize border-slate-300 dark:border-slate-600 rounded-xl pr-32 min-h-[50px] max-h-[120px] resize-none focus:ring-green-500 focus:border-green-500"
+              className="auto-resize border-slate-300 dark:border-slate-600 rounded-xl pr-28 min-h-[50px] max-h-[120px] resize-none focus:ring-green-500 focus:border-green-500"
               disabled={sendMessageMutation.isPending}
             />
             
             {/* Input Actions */}
             <div className="absolute right-2 bottom-2 flex items-center space-x-1">
-              {/* AI Prompt Button - Simple test version */}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setShowPromptDropdown(!showPromptDropdown)}
-                className="w-8 h-8 text-purple-600 hover:text-purple-700 hover:bg-purple-50"
-                title="AI Prompts"
-              >
-                <Brain className="w-4 h-4" />
-              </Button>
-              
               <Button
                 variant="ghost"
                 size="icon"
@@ -482,6 +471,18 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
               >
                 <Paperclip className="w-4 h-4" />
               </Button>
+              
+              {/* AI Prompt Button with bright styling to make it visible */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowPromptDropdown(!showPromptDropdown)}
+                className="w-8 h-8 bg-purple-100 text-purple-700 hover:bg-purple-200 border border-purple-300"
+                title="AI Prompts"
+              >
+                <MessageSquare className="w-4 h-4" />
+              </Button>
+              
               <Button
                 variant="ghost"
                 size="icon"
