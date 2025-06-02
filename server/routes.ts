@@ -1852,16 +1852,24 @@ Provide actionable, data-driven insights that would help a payment processing sa
   app.post('/api/user/prompts', async (req: any, res) => {
     try {
       const userId = 'dev-user-123'; // Temporarily bypass auth for testing
+      console.log("Creating prompt with data:", req.body);
+      
+      // Remove fields that don't exist in the database schema
+      const { tags, lastSynced, ...dbData } = req.body;
+      
       const promptData = {
         id: crypto.randomUUID(),
         userId,
-        ...req.body
+        ...dbData
       };
+      
+      console.log("Final prompt data for DB:", promptData);
       const prompt = await storage.createUserPrompt(promptData);
       res.json(prompt);
     } catch (error) {
       console.error("Error creating user prompt:", error);
-      res.status(500).json({ message: "Failed to create prompt" });
+      console.error("Error details:", error.message);
+      res.status(500).json({ message: "Failed to create prompt", error: error.message });
     }
   });
 
