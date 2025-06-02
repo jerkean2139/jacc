@@ -249,7 +249,12 @@ When appropriate, suggest actions like saving payment processing information to 
         max_tokens: 1000,
       });
 
-      const content = response.content[0].type === 'text' ? response.content[0].text : "";
+      let content = response.content[0].type === 'text' ? response.content[0].text : "";
+      
+      // Always append document links if we found documents
+      if (searchResults.length > 0 && documentExamples) {
+        content += `\n\n**Available Documents:**\n${documentExamples}`;
+      }
       
       // Extract action items and follow-up tasks
       const actionItems = this.extractActionItems(content);
