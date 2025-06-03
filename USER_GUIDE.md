@@ -24,7 +24,7 @@ When you first access JACC, you'll see the main dashboard interface. The system 
 - Quick access to recent chats and documents
 - New chat button to start conversations with the AI assistant
 
-![Main Dashboard](./screenshots/dashboard-main.png)
+*Screenshot: The main dashboard shows a clean interface with the sidebar containing chat history, folders, and the main area ready for new conversations.*
 
 ### Navigation Overview
 
@@ -48,7 +48,7 @@ The dashboard provides instant access to all JACC features:
 - **Folders**: Organize your documents and conversations
 - **Search**: Find specific documents or conversations
 
-![Dashboard Overview](./screenshots/dashboard-overview.png)
+*Screenshot: Dashboard overview showing the main navigation elements and layout.*
 
 ### Starting Your First Conversation
 
@@ -69,7 +69,7 @@ The dashboard provides instant access to all JACC features:
 
 The AI assistant can help with merchant services questions using your uploaded documents and knowledge base.
 
-![Chat Interface](./screenshots/chat-interface.png)
+*Screenshot: Chat interface showing a conversation with the AI assistant, including document references and structured responses.*
 
 **Features:**
 - **Document References**: AI answers include links to relevant documents
@@ -104,7 +104,7 @@ Ask natural language questions about:
 
 JACC can process various document types including PDFs, Word documents, and spreadsheets.
 
-![Document Upload](./screenshots/document-upload.png)
+*Screenshot: Document upload interface showing drag-and-drop area and file selection options.*
 
 **To upload documents:**
 1. Click the upload button or drag files to the interface
@@ -122,7 +122,7 @@ JACC can process various document types including PDFs, Word documents, and spre
 
 Once uploaded, documents are automatically processed for AI search and analysis.
 
-![Document Preview](./screenshots/document-preview.png)
+*Screenshot: Document preview showing the document viewer with AI-generated summary and analysis tools.*
 
 **Document features:**
 - **Full-text search**: Find specific information within documents
@@ -138,7 +138,7 @@ Once uploaded, documents are automatically processed for AI search and analysis.
 
 JACC uses advanced AI to understand your questions and find the most relevant information.
 
-![Search Results](./screenshots/search-results.png)
+*Screenshot: Search results page displaying relevant documents with relevance scores and content previews.*
 
 **Search capabilities:**
 - **Natural language queries**: Ask questions in plain English
@@ -150,7 +150,7 @@ JACC uses advanced AI to understand your questions and find the most relevant in
 
 When multiple documents match your query, JACC shows the most relevant ones first with an option to see more.
 
-![Paginated Documents](./screenshots/paginated-documents.png)
+*Screenshot: Paginated document results showing the top 3 most relevant documents with a "See More" button to load additional results.*
 
 **How it works:**
 1. **Top 3 Results**: Most relevant documents shown immediately
@@ -166,7 +166,7 @@ When multiple documents match your query, JACC shows the most relevant ones firs
 
 Organize your documents and conversations using the folder system.
 
-![Folder Management](./screenshots/folder-management.png)
+*Screenshot: Folder management interface showing the ability to create, organize, and manage document folders.*
 
 **Folder features:**
 - **Create folders** for different merchant types or topics
@@ -190,7 +190,7 @@ Organize your documents and conversations using the folder system.
 
 Access user settings through the profile menu in the header.
 
-![User Settings](./screenshots/user-settings.png)
+*Screenshot: User settings page with theme selection, notifications, and profile management options.*
 
 **Available settings:**
 - **Theme selection**: Light or dark mode
@@ -214,7 +214,7 @@ Access user settings through the profile menu in the header.
 
 JACC's AI assistant offers sophisticated analysis and generation features:
 
-![AI Features](./screenshots/ai-features.png)
+*Screenshot: Advanced AI features panel showing document analysis tools and response generation options.*
 
 **Advanced capabilities:**
 - **Multi-document analysis**: Compare information across multiple sources
@@ -234,7 +234,7 @@ JACC's AI assistant offers sophisticated analysis and generation features:
 
 Track your usage and performance with built-in analytics:
 
-![Analytics Dashboard](./screenshots/analytics-dashboard.png)
+*Screenshot: Analytics dashboard showing usage metrics, document statistics, and performance tracking.*
 
 **Available metrics:**
 - **Document usage**: Most accessed documents and folders
