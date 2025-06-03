@@ -654,25 +654,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/admin/training/test', isAuthenticated, async (req, res) => {
     try {
       const { query } = req.body;
+      const userId = (req as any).user?.id || 'admin-test';
       
-      const messages = [
-        {
-          role: 'system' as const,
-          content: "You are JACC, an expert AI assistant specializing in merchant services, payment processing, POS systems, and business solutions for independent sales agents. Provide detailed, accurate, and actionable advice based on current industry knowledge. Include specific vendor recommendations, processing rates, and implementation guidance when relevant."
-        },
-        {
-          role: 'user' as const,
-          content: query
-        }
-      ];
+      console.log(`🔍 Training Test: Searching internal documents for query: "${query}"`);
+      
+      // Step 1: Search internal documents first (same as production workflow)
+      let documentResults = [];
+      try {
+        documentResults = await enhancedAIService.searchDocuments(query);
+        console.log(`📄 Training Test: Found ${documentResults.length} relevant documents`);
+      } catch (searchError) {
+        console.log(`⚠️ Training Test: Document search failed, proceeding with AI-only response`);
+      }
 
-      const aiResponse = await generateChatResponse(messages, {
-        userRole: 'Sales Agent'
-      });
+      let response;
+      let sources = [];
+      let reasoning = "";
 
-      res.json({
-        response: aiResponse.message,
-        sources: [
+      if (documentResults.length > 0) {
+        // Generate response with document context (same as production)
+        response = await enhancedAIService.generateResponseWithDocuments(
+          [{ content: query, role: 'user' }],
+          {
+            searchResults: documentResults,
+            userRole: 'Sales Agent'
+          }
+        );
+        sources = response.sources || [];
+        reasoning = `Response generated using ${documentResults.length} relevant documents from internal knowledge base plus AI analysis.`;
+      } else {
+        // Fallback to direct AI response with merchant services expertise
+        const messages = [
+          {
+            role: 'system' as const,
+            content: "You are JACC, an expert AI assistant specializing in merchant services, payment processing, POS systems, and business solutions for independent sales agents. Provide detailed, accurate, and actionable advice based on current industry knowledge. Include specific vendor recommendations, processing rates, and implementation guidance when relevant."
+          },
+          {
+            role: 'user' as const,
+            content: query
+          }
+        ];
+
+        const aiResponse = await generateChatResponse(messages, {
+          userRole: 'Sales Agent'
+        });
+
+        response = { message: aiResponse.message };
+        sources = [
           {
             name: "JACC AI Knowledge Base",
             url: "/knowledge-base",
@@ -680,8 +708,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
             snippet: "Current merchant services industry data and best practices",
             type: "ai_knowledge"
           }
-        ],
-        reasoning: "Response generated using GPT-4 with specialized merchant services expertise and current industry knowledge."
+        ];
+        reasoning = "No relevant documents found in internal database. Response generated using GPT-4 with specialized merchant services expertise.";
+      }
+
+      res.json({
+        response: response.message,
+        sources: sources,
+        reasoning: reasoning
       });
     } catch (error) {
       console.error('AI training test error:', error);
