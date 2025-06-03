@@ -3,6 +3,7 @@ import {
   achievements, 
   userAchievements, 
   userStats,
+  users,
   type Achievement,
   type UserAchievement,
   type UserStats,
@@ -212,22 +213,34 @@ export class GamificationService {
     const existingStats = await this.getUserStats(userId);
     if (existingStats) return existingStats;
 
-    const newStats: InsertUserStats = {
-      userId,
-      totalMessages: 0,
-      totalChats: 0,
-      calculationsPerformed: 0,
-      documentsAnalyzed: 0,
-      proposalsGenerated: 0,
-      currentStreak: 0,
-      longestStreak: 0,
-      lastActiveDate: new Date(),
-      totalPoints: 0,
-      level: 1
-    };
+    // Verify user exists before creating stats
+    try {
+      const [user] = await db.select().from(users).where(eq(users.id, userId));
+      if (!user) {
+        console.error(`Cannot initialize stats: User ${userId} not found in database`);
+        throw new Error(`User ${userId} not found`);
+      }
 
-    const [stats] = await db.insert(userStats).values(newStats).returning();
-    return stats;
+      const newStats: InsertUserStats = {
+        userId,
+        totalMessages: 0,
+        totalChats: 0,
+        calculationsPerformed: 0,
+        documentsAnalyzed: 0,
+        proposalsGenerated: 0,
+        currentStreak: 0,
+        longestStreak: 0,
+        lastActiveDate: new Date(),
+        totalPoints: 0,
+        level: 1
+      };
+
+      const [stats] = await db.insert(userStats).values(newStats).returning();
+      return stats;
+    } catch (error) {
+      console.error(`Failed to initialize user stats for ${userId}:`, error);
+      throw error;
+    }
   }
 
   // Get user stats

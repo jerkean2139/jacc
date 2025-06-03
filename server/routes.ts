@@ -237,6 +237,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // GET logout route for compatibility
+  app.get('/api/logout', (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        console.error('Logout error:', err);
+        return res.status(500).json({ 
+          error: 'Logout failed', 
+          message: 'Failed to destroy session' 
+        });
+      }
+      res.json({ message: 'Logout successful' });
+    });
+  });
+
   // Get current user session
   app.get('/api/user', async (req, res) => {
     try {
@@ -1807,14 +1821,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Gamification API routes
   app.get("/api/user/stats", isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user.id;
+      const userId = (req as any).user?.id;
+      if (!userId) {
+        return res.status(401).json({ error: "User ID not found in session" });
+      }
+
       const { gamificationService } = await import('./gamification');
       const stats = await gamificationService.getUserStats(userId);
       
       if (!stats) {
-        // Initialize stats for new user
-        const newStats = await gamificationService.initializeUserStats(userId);
-        return res.json(newStats);
+        try {
+          // Initialize stats for new user
+          const newStats = await gamificationService.initializeUserStats(userId);
+          return res.json(newStats);
+        } catch (initError: any) {
+          if (initError.message?.includes('not found')) {
+            // User doesn't exist in database, return empty stats
+            console.log(`User ${userId} not found, returning empty stats`);
+            return res.json({
+              userId,
+              totalMessages: 0,
+              totalChats: 0,
+              calculationsPerformed: 0,
+              documentsAnalyzed: 0,
+              proposalsGenerated: 0,
+              currentStreak: 0,
+              longestStreak: 0,
+              lastActiveDate: new Date(),
+              totalPoints: 0,
+              level: 1
+            });
+          }
+          throw initError;
+        }
       }
       
       res.json(stats);
