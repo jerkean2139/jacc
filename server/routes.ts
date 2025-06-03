@@ -18,9 +18,9 @@ import { perplexitySearchService } from "./perplexity-search";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-import { insertMessageSchema, insertChatSchema, insertFolderSchema, insertDocumentSchema, insertAdminSettingsSchema, faqKnowledgeBase } from "@shared/schema";
+import { insertMessageSchema, insertChatSchema, insertFolderSchema, insertDocumentSchema, insertAdminSettingsSchema, faqKnowledgeBase, aiTrainingFeedback } from "@shared/schema";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { setupOAuthHelper } from "./oauth-helper";
 import { zipProcessor } from "./zip-processor";
 
@@ -582,37 +582,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // AI Training & Feedback Management Routes
   app.get('/api/admin/training/feedback', isAuthenticated, async (req, res) => {
     try {
-      // Return sample training feedback data for demonstration
-      const sampleFeedback = [
-        {
-          id: 'feedback-1',
-          chatId: 'chat-sample-1',
-          userQuery: 'What are the best POS systems for restaurants?',
-          aiResponse: 'Here are some popular POS systems for restaurants...',
-          correctResponse: '',
-          feedbackType: 'needs_training',
-          adminNotes: 'Response needs more specific pricing information',
-          status: 'pending',
-          priority: 3,
-          createdAt: new Date().toISOString(),
-          sourceDocs: []
-        },
-        {
-          id: 'feedback-2',
-          chatId: 'chat-sample-2',
-          userQuery: 'How do processing rates work?',
-          aiResponse: 'Processing rates are fees charged by payment processors...',
-          correctResponse: 'Processing rates include interchange fees, assessment fees, and processor markup...',
-          feedbackType: 'incomplete',
-          adminNotes: 'Missing detailed breakdown of fee structure',
-          status: 'reviewed',
-          priority: 2,
-          createdAt: new Date().toISOString(),
-          sourceDocs: []
+      // Get training feedback from messages that need improvement
+      const feedbackMessages = await db.select({
+        id: messages.id,
+        chatId: messages.chatId,
+        content: messages.content,
+        role: messages.role,
+        createdAt: messages.createdAt
+      })
+      .from(messages)
+      .where(eq(messages.role, 'assistant'))
+      .orderBy(desc(messages.createdAt))
+      .limit(100);
+
+      // Transform messages into training feedback format
+      const trainingFeedback = [];
+      
+      for (let i = 0; i < feedbackMessages.length; i += 2) {
+        const aiMessage = feedbackMessages[i];
+        const userMessage = feedbackMessages[i + 1];
+        
+        if (userMessage && userMessage.role === 'user') {
+          // Analyze if response needs training based on length and quality indicators
+          const needsTraining = aiMessage.content.length < 100 || 
+                               aiMessage.content.includes('I don\'t know') ||
+                               aiMessage.content.includes('not sure') ||
+                               aiMessage.content.includes('unclear');
+          
+          if (needsTraining) {
+            trainingFeedback.push({
+              id: `feedback-${aiMessage.id}`,
+              chatId: aiMessage.chatId,
+              messageId: aiMessage.id,
+              userQuery: userMessage.content,
+              aiResponse: aiMessage.content,
+              correctResponse: '',
+              feedbackType: aiMessage.content.length < 100 ? 'incomplete' : 'needs_training',
+              adminNotes: 'Auto-detected response that may need improvement',
+              status: 'pending',
+              priority: aiMessage.content.includes('I don\'t know') ? 3 : 2,
+              createdAt: aiMessage.createdAt,
+              sourceDocs: []
+            });
+          }
         }
-      ];
-      res.json(sampleFeedback);
+      }
+
+      // If no training feedback detected, provide guidance
+      if (trainingFeedback.length === 0) {
+        trainingFeedback.push({
+          id: 'guidance-1',
+          chatId: null,
+          userQuery: 'No training feedback detected from recent conversations',
+          aiResponse: 'The system automatically analyzes chat conversations to identify responses that need improvement. Training feedback appears when AI responses are too short, contain uncertainty phrases, or lack specificity.',
+          correctResponse: 'Continue using the chat interface. Responses flagged for training will appear here automatically when they need improvement.',
+          feedbackType: 'needs_training',
+          adminNotes: 'System will auto-detect training opportunities from real conversations',
+          status: 'pending',
+          priority: 1,
+          createdAt: new Date().toISOString(),
+          sourceDocs: []
+        });
+      }
+
+      res.json(trainingFeedback);
     } catch (error) {
+      console.error('Error fetching training feedback:', error);
       res.status(500).json({ message: "Failed to fetch training feedback" });
     }
   });

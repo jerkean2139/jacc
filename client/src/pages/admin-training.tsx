@@ -703,6 +703,74 @@ export function AdminTrainingPage() {
                         placeholder="pos, clover, square, pricing"
                       />
                     </div>
+
+                    {/* Document Permissions */}
+                    <div className="border-t pt-4 mt-4">
+                      <h5 className="font-medium text-sm mb-3">Document Permissions</h5>
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <input 
+                            type="checkbox" 
+                            id="kb-view-all" 
+                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                            checked={documentPermissions.viewAll}
+                            onChange={(e) => handlePermissionChange('viewAll', e.target.checked)}
+                          />
+                          <Label htmlFor="kb-view-all" className="text-sm">Allow all users to view</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <input 
+                            type="checkbox" 
+                            id="kb-admin-only" 
+                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                            checked={documentPermissions.adminOnly}
+                            onChange={(e) => handlePermissionChange('adminOnly', e.target.checked)}
+                          />
+                          <Label htmlFor="kb-admin-only" className="text-sm">Admin only</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <input 
+                            type="checkbox" 
+                            id="kb-manager-access" 
+                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                            checked={documentPermissions.managerAccess}
+                            onChange={(e) => handlePermissionChange('managerAccess', e.target.checked)}
+                          />
+                          <Label htmlFor="kb-manager-access" className="text-sm">Manager access</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <input 
+                            type="checkbox" 
+                            id="kb-agent-access" 
+                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                            checked={documentPermissions.agentAccess}
+                            onChange={(e) => handlePermissionChange('agentAccess', e.target.checked)}
+                          />
+                          <Label htmlFor="kb-agent-access" className="text-sm">Agent access</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <input 
+                            type="checkbox" 
+                            id="kb-training-data" 
+                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                            checked={documentPermissions.trainingData}
+                            onChange={(e) => handlePermissionChange('trainingData', e.target.checked)}
+                          />
+                          <Label htmlFor="kb-training-data" className="text-sm">Use for AI training</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <input 
+                            type="checkbox" 
+                            id="kb-auto-vectorize" 
+                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                            checked={documentPermissions.autoVectorize}
+                            onChange={(e) => handlePermissionChange('autoVectorize', e.target.checked)}
+                          />
+                          <Label htmlFor="kb-auto-vectorize" className="text-sm">Auto-vectorize for search</Label>
+                        </div>
+                      </div>
+                    </div>
+
                     <Button 
                       onClick={() => createKBMutation.mutate(newKBEntry)}
                       disabled={!newKBEntry.title || !newKBEntry.content || createKBMutation.isPending}
