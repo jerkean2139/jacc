@@ -70,8 +70,19 @@ export default function Sidebar({
   const [showAllChats, setShowAllChats] = useState(false);
   const [showAllFolders, setShowAllFolders] = useState(false);
 
-  const handleLogout = () => {
-    window.location.href = "/api/logout";
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/logout", {
+        method: "GET",
+        credentials: "include",
+      });
+      // Redirect to home page after logout
+      window.location.href = "/";
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Still redirect even if logout request fails
+      window.location.href = "/";
+    }
   };
 
   const toggleFolder = (folderId: string) => {
