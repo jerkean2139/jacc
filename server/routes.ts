@@ -655,32 +655,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { query } = req.body;
       
-      // Direct AI call using OpenAI service for authentic merchant services responses
-      const openai = require('openai');
-      const client = new openai.OpenAI({
-        apiKey: process.env.OPENAI_API_KEY
-      });
+      const messages = [
+        {
+          role: 'system' as const,
+          content: "You are JACC, an expert AI assistant specializing in merchant services, payment processing, POS systems, and business solutions for independent sales agents. Provide detailed, accurate, and actionable advice based on current industry knowledge. Include specific vendor recommendations, processing rates, and implementation guidance when relevant."
+        },
+        {
+          role: 'user' as const,
+          content: query
+        }
+      ];
 
-      const completion = await client.chat.completions.create({
-        model: "gpt-4",
-        messages: [
-          {
-            role: "system",
-            content: "You are JACC, an expert AI assistant specializing in merchant services, payment processing, POS systems, and business solutions for independent sales agents. Provide detailed, accurate, and actionable advice based on current industry knowledge. Include specific vendor recommendations, processing rates, and implementation guidance when relevant."
-          },
-          {
-            role: "user",
-            content: query
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 1000
+      const aiResponse = await generateChatResponse(messages, {
+        userRole: 'Sales Agent'
       });
-
-      const aiResponse = completion.choices[0].message.content;
 
       res.json({
-        response: aiResponse,
+        response: aiResponse.message,
         sources: [
           {
             name: "JACC AI Knowledge Base",
