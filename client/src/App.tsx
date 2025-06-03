@@ -21,6 +21,7 @@ import AdminSettings from "@/pages/admin-settings";
 import AdminDashboard from "@/pages/admin-dashboard";
 import AdminPanel from "@/pages/admin-panel";
 import AdminTraining from "@/pages/admin-training";
+import AIConfigurationPage from "@/pages/ai-configuration";
 import SimpleAdminLogin from "@/pages/simple-admin-login";
 import ISOAmpCalculator from "@/pages/iso-amp-calculator";
 import PromptCustomization from "@/pages/prompt-customization";
@@ -71,6 +72,7 @@ function Router() {
           <Route path="/admin/dashboard" component={AdminDashboard} />
           <Route path="/admin/settings" component={AdminSettings} />
           <Route path="/admin/training" component={AdminTraining} />
+          <Route path="/admin/ai-config" component={AIConfigurationPage} />
           <Route path="/login" component={Landing} />
         </>
       )}
