@@ -441,6 +441,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Health check endpoint for monitoring
+  app.get('/health', async (req, res) => {
+    try {
+      // Test database connection
+      await storage.getUsers();
+      
+      res.status(200).json({
+        status: 'healthy',
+        timestamp: new Date().toISOString(),
+        services: {
+          database: 'connected',
+          api: 'operational'
+        },
+        version: '1.0.0'
+      });
+    } catch (error) {
+      res.status(503).json({
+        status: 'unhealthy',
+        timestamp: new Date().toISOString(),
+        services: {
+          database: 'disconnected',
+          api: 'operational'
+        },
+        error: 'Database connection failed'
+      });
+    }
+  });
+
+  // Detailed system status endpoint
+  app.get('/api/status', async (req, res) => {
+    try {
+      const dbHealthy = await storage.getUsers();
+      
+      res.json({
+        status: 'operational',
+        timestamp: new Date().toISOString(),
+        services: {
+          database: 'healthy',
+          api: 'healthy',
+          ai_services: 'configured'
+        },
+        metrics: {
+          uptime: process.uptime(),
+          memory: process.memoryUsage(),
+          node_version: process.version
+        }
+      });
+    } catch (error) {
+      res.status(500).json({
+        status: 'degraded',
+        timestamp: new Date().toISOString(),
+        error: 'Service health check failed'
+      });
+    }
+  });
+
   // API status endpoint
   app.get('/api/v1/status', authenticateApiKey, (req, res) => {
     const user = (req as any).apiUser;

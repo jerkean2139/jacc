@@ -87,7 +87,7 @@ export class EnhancedAIService {
           sources: [],
           reasoning: "No relevant documents found in internal database",
           suggestions: ["Search external sources", "Try a different search term", "Upload relevant documents"],
-          actions: [{ type: 'external_search_request', query: message }],
+          actions: [{ type: 'find_documents', label: 'Search External Sources', data: { query: message } }],
           needsExternalSearchPermission: true
         };
       }
@@ -296,7 +296,9 @@ When appropriate, suggest actions like saving payment processing information to 
 
       return {
         message: content,
-        actions: actions.length > 0 ? actions : undefined,
+        actions: actions.length > 0 ? actions.filter(action => 
+          ['save_to_folder', 'download', 'create_proposal', 'find_documents'].includes(action.type)
+        ) : undefined,
         sources: sources.length > 0 ? sources : undefined,
         reasoning,
         actionItems: actionItems.length > 0 ? actionItems : undefined,
@@ -747,6 +749,7 @@ When appropriate, suggest actions like saving payment processing information to 
               content: chunk.content.substring(0, 500) + (chunk.content.length > 500 ? '...' : ''),
               metadata: {
                 documentName: chunk.metadata?.documentName || 'Document',
+                webViewLink: `/documents/${chunk.documentId}`,
                 chunkIndex: chunk.chunkIndex,
                 mimeType: chunk.metadata?.mimeType || 'application/pdf'
               }
@@ -760,7 +763,7 @@ When appropriate, suggest actions like saving payment processing information to 
         
         // Strategy 2: Enhanced document name and metadata matching
         const termMatches = documents.filter(doc => {
-          const searchText = `${doc.name} ${doc.originalName} ${doc.description || ''}`.toLowerCase();
+          const searchText = `${doc.name} ${doc.originalName}`.toLowerCase();
           const termLower = searchTerm.toLowerCase();
           
           // Comprehensive keyword matching
