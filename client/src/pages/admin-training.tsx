@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { AlertTriangle, Brain, CheckCircle, MessageSquare, Settings, Target } from 'lucide-react';
+import { AlertTriangle, Brain, CheckCircle, MessageSquare, Settings, Target, FileText, Eye, Download, ExternalLink } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 
 interface TrainingFeedback {
@@ -42,6 +42,7 @@ export function AdminTrainingPage() {
   const [selectedFeedback, setSelectedFeedback] = useState<TrainingFeedback | null>(null);
   const [testQuery, setTestQuery] = useState('');
   const [testResponse, setTestResponse] = useState('');
+  const [testResponseData, setTestResponseData] = useState<any>(null);
   const queryClient = useQueryClient();
 
   // Fetch training feedback data
@@ -64,8 +65,40 @@ export function AdminTrainingPage() {
     },
     onSuccess: (data) => {
       setTestResponse(data.response);
+      setTestResponseData(data);
     },
   });
+
+  // Document preview handlers
+  const handleDocumentPreview = (source: any) => {
+    if (source.url) {
+      window.open(source.url, '_blank');
+    }
+  };
+
+  const handlePDFDownload = async (source: any) => {
+    try {
+      const response = await fetch(`/api/documents/${source.documentId || source.id}/download`);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = source.name || 'document.pdf';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Download failed:', error);
+    }
+  };
+
+  const handleDocumentOpen = (source: any) => {
+    if (source.documentId || source.id) {
+      const url = `/api/documents/${source.documentId || source.id}/view`;
+      window.open(url, '_blank');
+    }
+  };
 
   // Submit feedback correction
   const submitCorrectionMutation = useMutation({
