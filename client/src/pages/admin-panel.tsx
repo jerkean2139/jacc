@@ -211,9 +211,18 @@ export default function AdminPanel() {
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Admin Panel</h1>
-        <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
-          Admin Access Only
-        </Badge>
+        <div className="flex items-center gap-3">
+          <Button 
+            variant="outline" 
+            onClick={() => window.location.href = '/admin/training'}
+            className="bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100"
+          >
+            AI Training & Feedback
+          </Button>
+          <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
+            Admin Access Only
+          </Badge>
+        </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">

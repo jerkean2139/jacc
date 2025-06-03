@@ -20,6 +20,7 @@ import NotFound from "@/pages/not-found";
 import AdminSettings from "@/pages/admin-settings";
 import AdminDashboard from "@/pages/admin-dashboard";
 import AdminPanel from "@/pages/admin-panel";
+import AdminTraining from "@/pages/admin-training";
 import ISOAmpCalculator from "@/pages/iso-amp-calculator";
 import PromptCustomization from "@/pages/prompt-customization";
 import UserGuide from "@/pages/user-guide";
@@ -67,6 +68,7 @@ function Router() {
           <Route path="/admin" component={AdminPanel} />
           <Route path="/admin/dashboard" component={AdminDashboard} />
           <Route path="/admin/settings" component={AdminSettings} />
+          <Route path="/admin/training" component={AdminTraining} />
           <Route path="/login" component={Landing} />
         </>
       )}

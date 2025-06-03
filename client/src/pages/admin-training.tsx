@@ -379,3 +379,5 @@ export function AdminTrainingPage() {
     </div>
   );
 }
+
+export default AdminTrainingPage;
