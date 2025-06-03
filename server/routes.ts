@@ -18,7 +18,7 @@ import { perplexitySearchService } from "./perplexity-search";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-import { insertMessageSchema, insertChatSchema, insertFolderSchema, insertDocumentSchema, insertAdminSettingsSchema, faqKnowledgeBase, aiTrainingFeedback } from "@shared/schema";
+import { insertMessageSchema, insertChatSchema, insertFolderSchema, insertDocumentSchema, insertAdminSettingsSchema, faqKnowledgeBase, aiTrainingFeedback, messages } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc } from "drizzle-orm";
 import { setupOAuthHelper } from "./oauth-helper";
