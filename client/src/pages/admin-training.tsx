@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { AlertTriangle, Brain, CheckCircle, MessageSquare, Settings, Target, FileText, Eye, Download, ExternalLink } from 'lucide-react';
+import { AlertTriangle, Brain, CheckCircle, MessageSquare, Settings, Target, FileText, Eye, Download, ExternalLink, Plus, Edit, Trash2, Save, X, Archive, BookOpen, Database, Upload, Search } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 
 interface TrainingFeedback {
@@ -38,11 +38,65 @@ interface PromptTemplate {
   version: number;
 }
 
+interface KnowledgeBaseEntry {
+  id: string;
+  title: string;
+  content: string;
+  category: string;
+  tags: string[];
+  lastUpdated: string;
+  author: string;
+  isActive: boolean;
+  priority: number;
+}
+
+interface DocumentEntry {
+  id: string;
+  name: string;
+  type: string;
+  size: number;
+  uploadDate: string;
+  category: string;
+  tags: string[];
+  isActive: boolean;
+  vectorized: boolean;
+}
+
 export function AdminTrainingPage() {
   const [selectedFeedback, setSelectedFeedback] = useState<TrainingFeedback | null>(null);
   const [testQuery, setTestQuery] = useState('');
   const [testResponse, setTestResponse] = useState('');
   const [testResponseData, setTestResponseData] = useState<any>(null);
+  
+  // Prompt Management State
+  const [editingPrompt, setEditingPrompt] = useState<PromptTemplate | null>(null);
+  const [newPrompt, setNewPrompt] = useState<Partial<PromptTemplate>>({
+    name: '',
+    description: '',
+    category: 'merchant_services',
+    template: '',
+    temperature: 0.7,
+    maxTokens: 2000,
+    isActive: true,
+    version: 1
+  });
+  
+  // Knowledge Base State
+  const [editingKBEntry, setEditingKBEntry] = useState<KnowledgeBaseEntry | null>(null);
+  const [newKBEntry, setNewKBEntry] = useState<Partial<KnowledgeBaseEntry>>({
+    title: '',
+    content: '',
+    category: 'merchant_services',
+    tags: [],
+    isActive: true,
+    priority: 1
+  });
+  
+  // Document Management State
+  const [selectedDocuments, setSelectedDocuments] = useState<string[]>([]);
+  const [documentFilter, setDocumentFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  
   const queryClient = useQueryClient();
 
   // Fetch training feedback data
@@ -57,6 +111,18 @@ export function AdminTrainingPage() {
     staleTime: 60000,
   });
 
+  // Fetch knowledge base data
+  const { data: knowledgeBaseData } = useQuery({
+    queryKey: ['/api/admin/knowledge-base'],
+    staleTime: 60000,
+  });
+
+  // Fetch documents data
+  const { data: documentsData } = useQuery({
+    queryKey: ['/api/documents'],
+    staleTime: 60000,
+  });
+
   // Test AI response mutation
   const testAIMutation = useMutation({
     mutationFn: async (query: string) => {
@@ -66,6 +132,88 @@ export function AdminTrainingPage() {
     onSuccess: (data) => {
       setTestResponse(data.response);
       setTestResponseData(data);
+    },
+  });
+
+  // Prompt management mutations
+  const createPromptMutation = useMutation({
+    mutationFn: async (prompt: Partial<PromptTemplate>) => {
+      const response = await apiRequest('POST', '/api/admin/prompts', prompt);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/training/prompts'] });
+      setNewPrompt({
+        name: '',
+        description: '',
+        category: 'merchant_services',
+        template: '',
+        temperature: 0.7,
+        maxTokens: 2000,
+        isActive: true,
+        version: 1
+      });
+    },
+  });
+
+  const updatePromptMutation = useMutation({
+    mutationFn: async ({ id, ...prompt }: Partial<PromptTemplate> & { id: string }) => {
+      const response = await apiRequest('PUT', `/api/admin/prompts/${id}`, prompt);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/training/prompts'] });
+      setEditingPrompt(null);
+    },
+  });
+
+  const deletePromptMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await apiRequest('DELETE', `/api/admin/prompts/${id}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/training/prompts'] });
+    },
+  });
+
+  // Knowledge base mutations
+  const createKBMutation = useMutation({
+    mutationFn: async (entry: Partial<KnowledgeBaseEntry>) => {
+      const response = await apiRequest('POST', '/api/admin/knowledge-base', entry);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/knowledge-base'] });
+      setNewKBEntry({
+        title: '',
+        content: '',
+        category: 'merchant_services',
+        tags: [],
+        isActive: true,
+        priority: 1
+      });
+    },
+  });
+
+  const updateKBMutation = useMutation({
+    mutationFn: async ({ id, ...entry }: Partial<KnowledgeBaseEntry> & { id: string }) => {
+      const response = await apiRequest('PUT', `/api/admin/knowledge-base/${id}`, entry);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/knowledge-base'] });
+      setEditingKBEntry(null);
+    },
+  });
+
+  const deleteKBMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await apiRequest('DELETE', `/api/admin/knowledge-base/${id}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/knowledge-base'] });
     },
   });
 
@@ -439,32 +587,140 @@ export function AdminTrainingPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Settings className="w-5 h-5" />
-                Prompt Templates
+                Prompt Templates Management
               </CardTitle>
               <CardDescription>
-                Manage AI prompt templates and system instructions
+                Create, edit, and manage AI prompt templates for different merchant services scenarios
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {promptTemplates?.map((template: PromptTemplate) => (
-                  <Card key={template.id} className="p-4">
-                    <div className="flex items-start justify-between mb-2">
-                      <h3 className="font-medium">{template.name}</h3>
-                      <Badge variant={template.isActive ? "default" : "secondary"}>
-                        v{template.version}
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-                      {template.description}
-                    </p>
-                    <div className="text-xs text-gray-500 space-y-1">
-                      <div>Category: {template.category}</div>
-                      <div>Temperature: {template.temperature}</div>
-                      <div>Max Tokens: {template.maxTokens}</div>
-                    </div>
-                  </Card>
-                ))}
+            <CardContent className="space-y-6">
+              {/* Add New Prompt Form */}
+              <div className="border rounded-lg p-4 bg-gray-50 dark:bg-gray-900">
+                <h3 className="font-medium mb-4 flex items-center gap-2">
+                  <Plus className="w-4 h-4" />
+                  Create New Prompt Template
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <Label htmlFor="prompt-name">Template Name</Label>
+                    <Input
+                      id="prompt-name"
+                      value={newPrompt.name || ''}
+                      onChange={(e) => setNewPrompt({ ...newPrompt, name: e.target.value })}
+                      placeholder="e.g., Merchant Onboarding Assistant"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="prompt-category">Category</Label>
+                    <Select value={newPrompt.category} onValueChange={(value) => setNewPrompt({ ...newPrompt, category: value })}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="merchant_services">Merchant Services</SelectItem>
+                        <SelectItem value="payment_processing">Payment Processing</SelectItem>
+                        <SelectItem value="pos_systems">POS Systems</SelectItem>
+                        <SelectItem value="pricing_analysis">Pricing Analysis</SelectItem>
+                        <SelectItem value="customer_support">Customer Support</SelectItem>
+                        <SelectItem value="technical_support">Technical Support</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="prompt-temperature">Temperature ({newPrompt.temperature})</Label>
+                    <Input
+                      id="prompt-temperature"
+                      type="range"
+                      min="0"
+                      max="1"
+                      step="0.1"
+                      value={newPrompt.temperature || 0.7}
+                      onChange={(e) => setNewPrompt({ ...newPrompt, temperature: parseFloat(e.target.value) })}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="prompt-tokens">Max Tokens</Label>
+                    <Input
+                      id="prompt-tokens"
+                      type="number"
+                      value={newPrompt.maxTokens || 2000}
+                      onChange={(e) => setNewPrompt({ ...newPrompt, maxTokens: parseInt(e.target.value) })}
+                      placeholder="2000"
+                    />
+                  </div>
+                </div>
+                <div className="mb-4">
+                  <Label htmlFor="prompt-description">Description</Label>
+                  <Input
+                    id="prompt-description"
+                    value={newPrompt.description || ''}
+                    onChange={(e) => setNewPrompt({ ...newPrompt, description: e.target.value })}
+                    placeholder="Brief description of this prompt's purpose"
+                  />
+                </div>
+                <div className="mb-4">
+                  <Label htmlFor="prompt-template">Prompt Template</Label>
+                  <Textarea
+                    id="prompt-template"
+                    value={newPrompt.template || ''}
+                    onChange={(e) => setNewPrompt({ ...newPrompt, template: e.target.value })}
+                    placeholder="Enter the prompt template with placeholders like {query}, {context}, etc."
+                    rows={6}
+                  />
+                </div>
+                <Button 
+                  onClick={() => createPromptMutation.mutate(newPrompt)}
+                  disabled={!newPrompt.name || !newPrompt.template || createPromptMutation.isPending}
+                  className="w-full"
+                >
+                  <Save className="w-4 h-4 mr-2" />
+                  {createPromptMutation.isPending ? 'Creating...' : 'Create Template'}
+                </Button>
+              </div>
+
+              {/* Existing Prompts List */}
+              <div className="space-y-4">
+                <h3 className="font-medium">Existing Templates</h3>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  {promptTemplates?.map((template: PromptTemplate) => (
+                    <Card key={template.id} className="p-4">
+                      <div className="flex items-start justify-between mb-2">
+                        <h4 className="font-medium">{template.name}</h4>
+                        <div className="flex items-center gap-2">
+                          <Badge variant={template.isActive ? "default" : "secondary"}>
+                            v{template.version}
+                          </Badge>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => setEditingPrompt(template)}
+                          >
+                            <Edit className="w-3 h-3" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => deletePromptMutation.mutate(template.id)}
+                          >
+                            <Trash2 className="w-3 h-3 text-red-500" />
+                          </Button>
+                        </div>
+                      </div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                        {template.description}
+                      </p>
+                      <div className="text-xs text-gray-500 space-y-1 mb-3">
+                        <div>Category: <span className="font-medium">{template.category}</span></div>
+                        <div>Temperature: <span className="font-medium">{template.temperature}</span></div>
+                        <div>Max Tokens: <span className="font-medium">{template.maxTokens}</span></div>
+                      </div>
+                      <div className="text-xs bg-gray-100 dark:bg-gray-800 p-2 rounded">
+                        <div className="font-medium mb-1">Template Preview:</div>
+                        <div className="truncate">{template.template}</div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
               </div>
             </CardContent>
           </Card>
