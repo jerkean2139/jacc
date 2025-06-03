@@ -15,23 +15,15 @@ export async function comparePasswords(supplied: string, stored: string): Promis
 }
 
 export function setupAuth(app: Express) {
-  const pgStore = connectPg(session);
-  const sessionStore = new pgStore({
-    conString: process.env.DATABASE_URL,
-    createTableIfMissing: false,
-    ttl: 7 * 24 * 60 * 60 * 1000, // 1 week
-    tableName: "sessions",
-  });
-
+  // Use memory store for demo environment
   app.use(session({
-    secret: process.env.SESSION_SECRET || 'fallback-secret-key',
-    store: sessionStore,
+    secret: process.env.SESSION_SECRET || 'demo-secret-key',
     resave: false,
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
+      secure: false, // Allow HTTP for development
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
     },
   }));
 }

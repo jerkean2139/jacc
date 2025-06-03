@@ -237,6 +237,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // Get current user session
+  app.get('/api/user', async (req, res) => {
+    try {
+      const sessionUser = (req as any).session?.user;
+      if (!sessionUser) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+      res.json(sessionUser);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get user session" });
+    }
+  });
+
   // Get current user
   app.get('/api/auth/me', isAuthenticated, async (req, res) => {
     try {
