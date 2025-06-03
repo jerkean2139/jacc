@@ -74,23 +74,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Simple login for demo environment
   app.post('/api/auth/simple-login', async (req, res) => {
     try {
-      // Create demo session
-      (req as any).session.userId = 'demo-user-id';
-      (req as any).session.user = {
-        id: 'demo-user-id',
-        username: 'tracer-user',
-        email: 'demo@example.com',
-        role: 'user'
-      };
+      const { username, password } = req.body;
       
-      res.json({ 
-        message: "Login successful",
-        user: {
+      // Define demo users with roles
+      const demoUsers = {
+        'tracer-user': {
           id: 'demo-user-id',
           username: 'tracer-user',
           email: 'demo@example.com',
-          role: 'user'
+          role: 'sales-agent',
+          password: 'demo-password'
+        },
+        'admin': {
+          id: 'admin-user-id',
+          username: 'admin',
+          email: 'admin@jacc.com',
+          role: 'admin',
+          password: 'admin123'
+        },
+        'manager': {
+          id: 'manager-user-id',
+          username: 'manager',
+          email: 'manager@jacc.com',
+          role: 'manager',
+          password: 'manager123'
         }
+      };
+      
+      const user = demoUsers[username as keyof typeof demoUsers];
+      
+      if (!user || user.password !== password) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+      
+      // Create session
+      (req as any).session.userId = user.id;
+      (req as any).session.user = {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        role: user.role
+      };
+      
+      const { password: _, ...userResponse } = user;
+      res.json({ 
+        message: "Login successful",
+        user: userResponse
       });
     } catch (error) {
       res.status(500).json({ message: "Login failed" });
