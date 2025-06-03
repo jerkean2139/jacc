@@ -95,6 +95,14 @@ export function AdminTrainingPage() {
   const [selectedDocuments, setSelectedDocuments] = useState<string[]>([]);
   const [documentFilter, setDocumentFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [documentPermissions, setDocumentPermissions] = useState({
+    viewAll: true,
+    adminOnly: false,
+    managerAccess: false,
+    agentAccess: true,
+    trainingData: true,
+    autoVectorize: true
+  });
   
   const queryClient = useQueryClient();
 
@@ -239,6 +247,28 @@ export function AdminTrainingPage() {
     if (source.url) {
       window.open(source.url, '_blank');
     }
+  };
+
+  const handlePermissionChange = (permission: string, checked: boolean) => {
+    setDocumentPermissions(prev => {
+      const updated = { ...prev, [permission]: checked };
+      
+      // If "view all" is checked, enable all other permissions except admin-only
+      if (permission === 'viewAll' && checked) {
+        updated.adminOnly = false;
+        updated.managerAccess = true;
+        updated.agentAccess = true;
+      }
+      
+      // If admin-only is checked, disable view all and other permissions
+      if (permission === 'adminOnly' && checked) {
+        updated.viewAll = false;
+        updated.managerAccess = false;
+        updated.agentAccess = false;
+      }
+      
+      return updated;
+    });
   };
 
   return (
@@ -826,15 +856,84 @@ export function AdminTrainingPage() {
                 </div>
 
                 {/* Document Upload */}
-                <div className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-4 text-center">
-                  <Upload className="w-8 h-8 mx-auto text-gray-400 mb-2" />
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Drag and drop files here or click to upload
-                  </p>
-                  <Button variant="outline" className="mt-2">
-                    <Upload className="w-4 h-4 mr-2" />
-                    Upload Documents
-                  </Button>
+                <div className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-4">
+                  <div className="text-center mb-4">
+                    <Upload className="w-8 h-8 mx-auto text-gray-400 mb-2" />
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Drag and drop files here or click to upload
+                    </p>
+                    <Button variant="outline" className="mt-2">
+                      <Upload className="w-4 h-4 mr-2" />
+                      Upload Documents
+                    </Button>
+                  </div>
+                  
+                  {/* Permission Settings */}
+                  <div className="border-t pt-4">
+                    <h5 className="font-medium text-sm mb-3">Document Permissions</h5>
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <input 
+                          type="checkbox" 
+                          id="view-all" 
+                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          checked={documentPermissions.viewAll}
+                          onChange={(e) => handlePermissionChange('viewAll', e.target.checked)}
+                        />
+                        <Label htmlFor="view-all" className="text-sm">Allow all users to view</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input 
+                          type="checkbox" 
+                          id="admin-only" 
+                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          checked={documentPermissions.adminOnly}
+                          onChange={(e) => handlePermissionChange('adminOnly', e.target.checked)}
+                        />
+                        <Label htmlFor="admin-only" className="text-sm">Admin only</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input 
+                          type="checkbox" 
+                          id="manager-access" 
+                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          checked={documentPermissions.managerAccess}
+                          onChange={(e) => handlePermissionChange('managerAccess', e.target.checked)}
+                        />
+                        <Label htmlFor="manager-access" className="text-sm">Manager access</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input 
+                          type="checkbox" 
+                          id="agent-access" 
+                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          checked={documentPermissions.agentAccess}
+                          onChange={(e) => handlePermissionChange('agentAccess', e.target.checked)}
+                        />
+                        <Label htmlFor="agent-access" className="text-sm">Agent access</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input 
+                          type="checkbox" 
+                          id="training-data" 
+                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          checked={documentPermissions.trainingData}
+                          onChange={(e) => handlePermissionChange('trainingData', e.target.checked)}
+                        />
+                        <Label htmlFor="training-data" className="text-sm">Use for AI training</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input 
+                          type="checkbox" 
+                          id="auto-vectorize" 
+                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          checked={documentPermissions.autoVectorize}
+                          onChange={(e) => handlePermissionChange('autoVectorize', e.target.checked)}
+                        />
+                        <Label htmlFor="auto-vectorize" className="text-sm">Auto-vectorize for search</Label>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
