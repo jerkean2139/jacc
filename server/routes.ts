@@ -3478,6 +3478,209 @@ Document content: {content}`,
     }
   });
 
+  // AI Configuration Management API Endpoints
+  // AI Models Management
+  app.get('/api/admin/ai-models', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const { aiConfigService } = await import('./ai-config-service');
+      await aiConfigService.initializeDefaultModels();
+      const models = await aiConfigService.getAvailableModels();
+      res.json(models);
+    } catch (error) {
+      console.error("Error fetching AI models:", error);
+      res.status(500).json({ message: "Failed to fetch AI models" });
+    }
+  });
+
+  app.post('/api/admin/ai-models/:id/set-default', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const { aiConfigService } = await import('./ai-config-service');
+      await aiConfigService.setDefaultModel(req.params.id);
+      res.json({ message: "Default model updated successfully" });
+    } catch (error) {
+      console.error("Error setting default model:", error);
+      res.status(500).json({ message: "Failed to set default model" });
+    }
+  });
+
+  app.put('/api/admin/ai-models/:id', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const { db } = await import('./db');
+      const { aiModels } = await import('@shared/schema');
+      const { eq } = await import('drizzle-orm');
+      
+      await db.update(aiModels)
+        .set(req.body)
+        .where(eq(aiModels.id, req.params.id));
+        
+      res.json({ message: "Model updated successfully" });
+    } catch (error) {
+      console.error("Error updating model:", error);
+      res.status(500).json({ message: "Failed to update model" });
+    }
+  });
+
+  // Model Performance
+  app.get('/api/admin/model-performance/:filter?', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const { db } = await import('./db');
+      const { modelPerformance, aiModels } = await import('@shared/schema');
+      const { desc, gte, and, eq } = await import('drizzle-orm');
+      
+      let whereClause = eq(aiModels.isActive, true);
+      
+      if (req.params.filter === '7days') {
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        whereClause = and(whereClause, gte(modelPerformance.date, sevenDaysAgo.toISOString().split('T')[0]));
+      }
+      
+      const performance = await db.select({
+        modelId: modelPerformance.modelId,
+        totalRequests: modelPerformance.totalRequests,
+        successfulRequests: modelPerformance.successfulRequests,
+        averageResponseTime: modelPerformance.averageResponseTime,
+        averageTokensUsed: modelPerformance.averageTokensUsed,
+        totalCost: modelPerformance.totalCost,
+        userSatisfactionScore: modelPerformance.userSatisfactionScore,
+      })
+      .from(modelPerformance)
+      .leftJoin(aiModels, eq(modelPerformance.modelId, aiModels.id))
+      .where(whereClause)
+      .orderBy(desc(modelPerformance.date));
+      
+      res.json(performance);
+    } catch (error) {
+      console.error("Error fetching model performance:", error);
+      res.status(500).json({ message: "Failed to fetch performance data" });
+    }
+  });
+
+  // Retrieval Configuration
+  app.get('/api/admin/retrieval-configs', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const { db } = await import('./db');
+      const { retrievalConfigs } = await import('@shared/schema');
+      
+      let configs = await db.select().from(retrievalConfigs);
+      
+      // Initialize default config if none exist
+      if (configs.length === 0) {
+        await db.insert(retrievalConfigs).values({
+          name: 'default',
+          similarityThreshold: 0.7,
+          maxResults: 10,
+          chunkSize: 1000,
+          chunkOverlap: 200,
+          searchStrategy: 'hybrid',
+          embeddingModel: 'text-embedding-3-large',
+          isDefault: true
+        });
+        configs = await db.select().from(retrievalConfigs);
+      }
+      
+      res.json(configs);
+    } catch (error) {
+      console.error("Error fetching retrieval configs:", error);
+      res.status(500).json({ message: "Failed to fetch retrieval configurations" });
+    }
+  });
+
+  app.put('/api/admin/retrieval-configs/:id', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const { db } = await import('./db');
+      const { retrievalConfigs } = await import('@shared/schema');
+      const { eq } = await import('drizzle-orm');
+      
+      await db.update(retrievalConfigs)
+        .set(req.body)
+        .where(eq(retrievalConfigs.id, req.params.id));
+        
+      res.json({ message: "Retrieval configuration updated successfully" });
+    } catch (error) {
+      console.error("Error updating retrieval config:", error);
+      res.status(500).json({ message: "Failed to update retrieval configuration" });
+    }
+  });
+
+  // System Analytics
+  app.get('/api/admin/system-analytics', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const { db } = await import('./db');
+      const { users, chats, documents, messages } = await import('@shared/schema');
+      const { count, gte, eq } = await import('drizzle-orm');
+      
+      const today = new Date().toISOString().split('T')[0];
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      
+      // Get daily active users
+      const [{ value: dailyUsers }] = await db.select({ value: count() })
+        .from(users)
+        .where(gte(users.updatedAt, new Date(today)));
+      
+      // Get total AI requests (approximate from messages)
+      const [{ value: aiRequests }] = await db.select({ value: count() })
+        .from(messages)
+        .where(eq(messages.role, 'assistant'));
+      
+      // Get document count
+      const [{ value: documentCount }] = await db.select({ value: count() })
+        .from(documents);
+      
+      const stats = {
+        dailyUsers: dailyUsers || 0,
+        aiRequests: aiRequests || 0,
+        documentCount: documentCount || 0,
+        totalCost: 0 // Would be calculated from model performance data
+      };
+      
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching system analytics:", error);
+      res.status(500).json({ message: "Failed to fetch system analytics" });
+    }
+  });
+
+  // Model Testing
+  app.post('/api/admin/test-model', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const { aiConfigService } = await import('./ai-config-service');
+      const { db } = await import('./db');
+      const { aiModels } = await import('@shared/schema');
+      const { eq } = await import('drizzle-orm');
+      
+      const { modelId, query } = req.body;
+      
+      const [model] = await db.select()
+        .from(aiModels)
+        .where(eq(aiModels.id, modelId))
+        .limit(1);
+        
+      if (!model) {
+        return res.status(404).json({ message: "Model not found" });
+      }
+      
+      const result = await aiConfigService.generateResponse(
+        model,
+        [{ role: 'user', content: query }],
+        { temperature: 0.7, maxTokens: 500 }
+      );
+      
+      res.json({
+        response: result.content,
+        metrics: {
+          responseTime: result.responseTime,
+          tokensUsed: result.usage.totalTokens,
+          cost: result.cost
+        }
+      });
+    } catch (error) {
+      console.error("Error testing model:", error);
+      res.status(500).json({ message: "Failed to test model" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

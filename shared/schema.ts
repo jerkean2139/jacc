@@ -542,6 +542,151 @@ export const insertPromptUsageLogSchema = createInsertSchema(promptUsageLog).omi
   usedAt: true,
 });
 
+// Enhanced AI Model Configuration
+export const aiModels = pgTable("ai_models", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: varchar("name").notNull(),
+  provider: varchar("provider").notNull(), // 'openai', 'anthropic'
+  modelId: varchar("model_id").notNull(),
+  isActive: boolean("is_active").default(true),
+  maxTokens: integer("max_tokens").default(4000),
+  costPerToken: real("cost_per_token").default(0.0),
+  isDefault: boolean("is_default").default(false),
+  capabilities: jsonb("capabilities"), // {vision: true, functions: true, etc}
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Model Performance Tracking
+export const modelPerformance = pgTable("model_performance", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  modelId: uuid("model_id").references(() => aiModels.id),
+  date: varchar("date").notNull(),
+  totalRequests: integer("total_requests").default(0),
+  successfulRequests: integer("successful_requests").default(0),
+  averageResponseTime: real("average_response_time").default(0),
+  averageTokensUsed: real("average_tokens_used").default(0),
+  totalCost: real("total_cost").default(0),
+  userSatisfactionScore: real("user_satisfaction_score").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Vector Database Management
+export const vectorIndices = pgTable("vector_indices", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  dimensions: integer("dimensions").default(1536),
+  indexType: varchar("index_type").default('cosine'), // cosine, euclidean, dot_product
+  documentCount: integer("document_count").default(0),
+  lastOptimized: timestamp("last_optimized"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Document Processing Pipeline
+export const documentProcessingJobs = pgTable("document_processing_jobs", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  documentId: uuid("document_id").references(() => documents.id),
+  status: varchar("status").default('pending'), // pending, processing, completed, failed
+  jobType: varchar("job_type").notNull(), // extract, vectorize, analyze, reindex
+  priority: integer("priority").default(1),
+  attempts: integer("attempts").default(0),
+  maxAttempts: integer("max_attempts").default(3),
+  errorMessage: text("error_message"),
+  processingTime: integer("processing_time_ms"),
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Prompt Template Versioning
+export const promptVersions = pgTable("prompt_versions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  templateId: varchar("template_id").notNull(),
+  version: integer("version").notNull(),
+  content: text("content").notNull(),
+  changes: text("changes"),
+  performanceScore: real("performance_score"),
+  isActive: boolean("is_active").default(false),
+  createdBy: varchar("created_by").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// AI Response Quality Tracking
+export const responseQuality = pgTable("response_quality", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  chatId: uuid("chat_id").references(() => chats.id),
+  messageId: uuid("message_id").references(() => messages.id),
+  modelUsed: varchar("model_used").notNull(),
+  promptVersion: varchar("prompt_version"),
+  relevanceScore: real("relevance_score"),
+  accuracyScore: real("accuracy_score"),
+  helpfulnessScore: real("helpfulness_score"),
+  responseTime: integer("response_time_ms"),
+  tokenCount: integer("token_count"),
+  userFeedback: varchar("user_feedback"), // positive, negative, neutral
+  adminReview: text("admin_review"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// System Analytics
+export const systemAnalytics = pgTable("system_analytics", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  date: varchar("date").notNull(),
+  metric: varchar("metric").notNull(), // daily_users, document_uploads, ai_requests, etc
+  value: real("value").notNull(),
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Document Retrieval Configuration
+export const retrievalConfigs = pgTable("retrieval_configs", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: varchar("name").notNull(),
+  similarityThreshold: real("similarity_threshold").default(0.7),
+  maxResults: integer("max_results").default(10),
+  chunkSize: integer("chunk_size").default(1000),
+  chunkOverlap: integer("chunk_overlap").default(200),
+  searchStrategy: varchar("search_strategy").default('hybrid'),
+  embeddingModel: varchar("embedding_model").default('text-embedding-3-large'),
+  isDefault: boolean("is_default").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Content Filtering Rules
+export const contentFilters = pgTable("content_filters", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: varchar("name").notNull(),
+  filterType: varchar("filter_type").notNull(), // profanity, bias, compliance
+  pattern: text("pattern").notNull(),
+  severity: varchar("severity").default('medium'), // low, medium, high, critical
+  action: varchar("action").default('flag'), // flag, block, modify
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Type exports for new tables
+export type AIModel = typeof aiModels.$inferSelect;
+export type InsertAIModel = typeof aiModels.$inferInsert;
+export type ModelPerformance = typeof modelPerformance.$inferSelect;
+export type InsertModelPerformance = typeof modelPerformance.$inferInsert;
+export type VectorIndex = typeof vectorIndices.$inferSelect;
+export type InsertVectorIndex = typeof vectorIndices.$inferInsert;
+export type DocumentProcessingJob = typeof documentProcessingJobs.$inferSelect;
+export type InsertDocumentProcessingJob = typeof documentProcessingJobs.$inferInsert;
+export type PromptVersion = typeof promptVersions.$inferSelect;
+export type InsertPromptVersion = typeof promptVersions.$inferInsert;
+export type ResponseQuality = typeof responseQuality.$inferSelect;
+export type InsertResponseQuality = typeof responseQuality.$inferInsert;
+export type SystemAnalytics = typeof systemAnalytics.$inferSelect;
+export type InsertSystemAnalytics = typeof systemAnalytics.$inferInsert;
+export type RetrievalConfig = typeof retrievalConfigs.$inferSelect;
+export type InsertRetrievalConfig = typeof retrievalConfigs.$inferInsert;
+export type ContentFilter = typeof contentFilters.$inferSelect;
+export type InsertContentFilter = typeof contentFilters.$inferInsert;
+
 export const insertAdminSettingSchema = createInsertSchema(adminSettings).omit({
   id: true,
   updatedAt: true,
