@@ -669,33 +669,111 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/admin/training/prompts', isAuthenticated, async (req, res) => {
     try {
-      // Return sample prompt templates for demonstration
-      const samplePrompts = [
+      // Return actual working prompts from the system
+      const workingPrompts = [
         {
-          id: 'prompt-1',
-          name: 'Merchant Services Expert',
-          description: 'Primary prompt for merchant services queries',
-          category: 'Core',
-          template: 'You are a merchant services expert. Provide detailed, accurate information about payment processing, POS systems, and merchant accounts.',
+          id: 'chained-response-prompt',
+          name: 'Enhanced AI Chained Response System',
+          description: 'Multi-step reasoning chain used by enhanced AI service',
+          category: 'Enhanced AI',
+          template: `You are JACC, an expert AI assistant for merchant services sales agents with access to comprehensive documentation.
+
+RESPONSE GENERATION PROCESS:
+1. Analyze user intent and extract key requirements
+2. Search relevant documents and knowledge base
+3. Integrate external data sources when needed
+4. Synthesize comprehensive, actionable responses
+
+SPECIALIZATION AREAS:
+- Payment processing rates and fee structures
+- POS system comparisons and recommendations
+- Merchant account setup and requirements
+- Cash discounting and surcharge programs
+- Equipment specifications and pricing
+- Industry best practices and compliance
+
+RESPONSE GUIDELINES:
+- Always reference specific document sources when available
+- Provide actionable advice for sales agents
+- Include relevant calculations and comparisons
+- Suggest follow-up actions (save, download, create proposals)
+- Maintain professional tone focused on business value
+
+Context: {context}
+Documents: {documentContext}
+Query: {query}`,
           temperature: 0.7,
-          maxTokens: 1000,
+          maxTokens: 2000,
           isActive: true,
           version: 1
         },
         {
-          id: 'prompt-2',
-          name: 'Technical Support',
-          description: 'Prompt for technical troubleshooting queries',
-          category: 'Support',
-          template: 'You are a technical support specialist. Help troubleshoot POS systems, payment processing issues, and integration problems.',
-          temperature: 0.5,
-          maxTokens: 800,
+          id: 'document-analysis-vision',
+          name: 'Document Analysis & Vision Processing',
+          description: 'Specialized prompt for analyzing uploaded documents and images',
+          category: 'Document Processing',
+          template: `Analyze this merchant services document or image. Extract key information like:
+
+FOCUS AREAS:
+- Processing rates and fees
+- Equipment specifications  
+- Merchant requirements
+- Compliance information
+- Pricing structures
+- Key features and benefits
+
+ANALYSIS OUTPUT:
+- Structured summary useful for sales agents
+- Actionable insights for client discussions
+- Rate comparisons and calculations
+- Equipment recommendations
+- Next steps and follow-up actions
+
+Provide a comprehensive analysis that helps sales agents understand and present this information effectively to potential clients.
+
+Document/Image Content: {content}`,
+          temperature: 0.3,
+          maxTokens: 500,
+          isActive: true,
+          version: 1
+        },
+        {
+          id: 'vector-search-prompt',
+          name: 'Vector Search & Document Retrieval',
+          description: 'Prompt for intelligent document search and context building',
+          category: 'Search & Retrieval',
+          template: `Based on the user's query, search and analyze relevant documents to provide comprehensive merchant services guidance.
+
+SEARCH STRATEGY:
+- Semantic similarity matching
+- Keyword extraction and expansion
+- Context-aware document ranking
+- Multi-document synthesis
+
+DOCUMENT INTEGRATION:
+- Combine insights from multiple sources
+- Highlight contradictions or variations
+- Provide confidence scores for recommendations
+- Reference specific sections and page numbers
+
+OUTPUT FORMAT:
+- Direct answer to user's question
+- Supporting evidence from documents
+- Alternative options or considerations
+- Recommended next actions
+
+Query: {query}
+Retrieved Documents: {searchResults}
+User Context: {userRole}`,
+          temperature: 0.4,
+          maxTokens: 1500,
           isActive: true,
           version: 1
         }
       ];
-      res.json(samplePrompts);
+      res.json(workingPrompts);
     } catch (error) {
+      console.error("Error fetching working prompts:", error);
       res.status(500).json({ message: "Failed to fetch prompt templates" });
     }
   });
@@ -2719,38 +2797,82 @@ Provide actionable, data-driven insights that would help a payment processing sa
   // Enhanced Prompt Template Management
   app.get('/api/admin/prompt-templates', isAuthenticated, requireAdmin, async (req: any, res) => {
     try {
-      // Return mock data for demonstration - in production this would fetch from database
+      // Return actual working prompts currently used in production
       const promptTemplates = [
         {
-          id: 'template-1',
-          name: 'Merchant Onboarding Assistant',
-          description: 'Helps with merchant account setup and requirements',
-          category: 'merchant_services',
-          template: 'You are a merchant services expert helping with account setup. Context: {context}. Query: {query}',
+          id: 'main-system-prompt',
+          name: 'JACC Core System Prompt',
+          description: 'Main system prompt powering all chat interactions',
+          category: 'core_system',
+          template: `You are JACC, an AI-powered assistant for Tracer Co Card sales agents. You specialize in:
+- Credit card processing solutions and merchant services
+- Payment processing rates and fee comparisons  
+- Point-of-sale (POS) systems and payment terminals
+- Business payment solutions and savings calculations
+- Equipment recommendations (SkyTab, Clover, terminals)
+- Merchant account applications and setup
+- Cash discounting and surcharge programs
+- Document organization and client proposal generation
+
+Your responses should be:
+- Professional and knowledgeable about payment processing
+- Helpful with specific merchant services advice
+- Focused on helping businesses save money on processing fees
+- Able to discuss equipment, rates, and merchant solutions
+- Supportive of sales agents in the merchant services industry
+
+When appropriate, suggest actions like saving payment processing information to folders, downloading rate comparisons, or creating merchant proposals.
+
+User context: {userRole}
+Available documents: {documents}`,
+          temperature: 0.3,
+          maxTokens: 300,
+          isActive: true,
+          version: 1
+        },
+        {
+          id: 'enhanced-ai-prompt',
+          name: 'Enhanced AI Service Prompt',
+          description: 'Advanced prompt used by enhanced AI service with document context',
+          category: 'enhanced_ai',
+          template: `You are JACC, an expert AI assistant for merchant services sales agents. You have access to comprehensive documentation about payment processing, POS systems, and merchant services.
+
+Based on the provided context and documents, provide detailed, accurate responses about:
+- Payment processing rates and fee structures
+- POS system comparisons and recommendations
+- Merchant account setup and requirements
+- Cash discounting and surcharge programs
+- Equipment specifications and pricing
+- Industry best practices and compliance
+
+Always reference specific document sources when available and provide actionable advice for sales agents.
+
+Context: {context}
+Query: {query}`,
           temperature: 0.7,
           maxTokens: 2000,
           isActive: true,
           version: 1
         },
         {
-          id: 'template-2',
-          name: 'POS System Comparison',
-          description: 'Compares different POS systems and their features',
-          category: 'pos_systems',
-          template: 'Compare POS systems based on the following requirements: {query}. Use this context: {context}',
-          temperature: 0.5,
-          maxTokens: 1500,
-          isActive: true,
-          version: 2
-        },
-        {
-          id: 'template-3',
-          name: 'Pricing Analysis Expert',
-          description: 'Analyzes payment processing rates and fees',
-          category: 'pricing_analysis',
-          template: 'Analyze payment processing pricing for: {query}. Consider these factors: {context}',
+          id: 'document-analysis-prompt',
+          name: 'Document Analysis Engine',
+          description: 'Specialized prompt for analyzing uploaded documents and extracting insights',
+          category: 'document_analysis',
+          template: `Analyze the provided document and extract key information relevant to merchant services and payment processing. Focus on:
+
+- Processing rates and fees
+- Equipment specifications
+- Merchant requirements
+- Compliance information
+- Pricing structures
+- Key features and benefits
+
+Provide a structured summary that would be useful for sales agents when discussing these topics with potential clients.
+
+Document content: {content}`,
           temperature: 0.3,
-          maxTokens: 2500,
+          maxTokens: 1500,
           isActive: true,
           version: 1
         }
