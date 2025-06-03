@@ -26,7 +26,8 @@ import {
   FolderPlus,
   Download,
   Calculator,
-  FileSearch
+  FileSearch,
+  Brain
 } from "lucide-react";
 
 import type { User, Chat, Folder as FolderType } from "@shared/schema";
@@ -186,6 +187,14 @@ export default function Sidebar({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              {user?.role === 'admin' && (
+                <DropdownMenuItem asChild>
+                  <a href="/admin/training" className="flex items-center">
+                    <Brain className="w-4 h-4 mr-2" />
+                    AI Training
+                  </a>
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem onClick={handleLogout}>
                 <LogOut className="w-4 h-4 mr-2" />
                 Sign Out
