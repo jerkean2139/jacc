@@ -21,6 +21,7 @@ import AdminSettings from "@/pages/admin-settings";
 import AdminDashboard from "@/pages/admin-dashboard";
 import AdminPanel from "@/pages/admin-panel";
 import AdminTraining from "@/pages/admin-training";
+import SimpleAdminLogin from "@/pages/simple-admin-login";
 import ISOAmpCalculator from "@/pages/iso-amp-calculator";
 import PromptCustomization from "@/pages/prompt-customization";
 import UserGuide from "@/pages/user-guide";
@@ -44,6 +45,7 @@ function Router() {
     <Switch>
       {!user ? (
         <>
+          <Route path="/admin-login" component={SimpleAdminLogin} />
           <Route path="/login" component={LoginPage} />
           <Route path="/" component={LoginPage} />
         </>
