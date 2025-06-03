@@ -59,11 +59,8 @@ export function AdminTrainingPage() {
   // Test AI response mutation
   const testAIMutation = useMutation({
     mutationFn: async (query: string) => {
-      const response = await apiRequest('/api/admin/training/test', {
-        method: 'POST',
-        body: { query, useTestMode: true }
-      });
-      return response;
+      const response = await apiRequest('POST', '/api/admin/training/test', { query, useTestMode: true });
+      return response.json();
     },
     onSuccess: (data) => {
       setTestResponse(data.response);
@@ -73,10 +70,7 @@ export function AdminTrainingPage() {
   // Submit feedback correction
   const submitCorrectionMutation = useMutation({
     mutationFn: async (data: any) => {
-      return apiRequest('/api/admin/training/feedback', {
-        method: 'POST',
-        body: data
-      });
+      return apiRequest('POST', '/api/admin/training/feedback', data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/training/feedback'] });
