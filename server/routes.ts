@@ -497,6 +497,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Usage analytics endpoint
+  app.get('/api/analytics/usage', isAuthenticated, async (req, res) => {
+    try {
+      const analytics = {
+        totalChats: await storage.getChatCount(),
+        totalDocuments: await storage.getDocumentCount(),
+        activeUsers: await storage.getActiveUserCount(),
+        recentActivity: await storage.getRecentActivity(),
+        timestamp: new Date().toISOString()
+      };
+      
+      res.json(analytics);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch analytics" });
+    }
+  });
+
   // API status endpoint
   app.get('/api/v1/status', authenticateApiKey, (req, res) => {
     const user = (req as any).apiUser;
