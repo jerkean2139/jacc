@@ -14,6 +14,7 @@ import PWAInstallPrompt from "@/components/pwa-install-prompt";
 import BottomNav from "@/components/bottom-nav";
 
 import Landing from "@/pages/landing";
+import LoginPage from "@/pages/login";
 import HomeStable from "@/pages/home-stable";
 import NotFound from "@/pages/not-found";
 import AdminSettings from "@/pages/admin-settings";
@@ -28,15 +29,31 @@ import MerchantInsights from "@/pages/merchant-insights";
 import GamificationPage from "@/pages/gamification-page";
 
 function Router() {
-  // Temporarily bypass auth for testing - you can access the main app now
-  const showMainApp = true;
+  const { user, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   return (
     <Switch>
-      {!showMainApp ? (
-        <Route path="/" component={Landing} />
+      {!user ? (
+        <>
+          <Route path="/login" component={LoginPage} />
+          <Route path="/" component={LoginPage} />
+        </>
       ) : (
         <>
+          <Route path="/login">
+            {() => {
+              window.location.href = '/';
+              return null;
+            }}
+          </Route>
           <Route path="/" component={HomeStable} />
           <Route path="/chat/:chatId" component={HomeStable} />
           <Route path="/calculator" component={ISOAmpCalculator} />

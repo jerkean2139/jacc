@@ -71,6 +71,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // === Authentication Routes ===
   
+  // Simple login for demo environment
+  app.post('/api/auth/simple-login', async (req, res) => {
+    try {
+      // Create demo session
+      (req as any).session.userId = 'demo-user-id';
+      (req as any).session.user = {
+        id: 'demo-user-id',
+        username: 'tracer-user',
+        email: 'demo@example.com',
+        role: 'user'
+      };
+      
+      res.json({ 
+        message: "Login successful",
+        user: {
+          id: 'demo-user-id',
+          username: 'tracer-user',
+          email: 'demo@example.com',
+          role: 'user'
+        }
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Login failed" });
+    }
+  });
+  
   // User Registration
   app.post('/api/auth/register', async (req, res) => {
     try {
