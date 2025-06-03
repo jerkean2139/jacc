@@ -2681,7 +2681,187 @@ Provide actionable, data-driven insights that would help a payment processing sa
     }
   });
 
-  // Prompt Management
+  // Enhanced Prompt Template Management
+  app.get('/api/admin/prompt-templates', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      // Return mock data for demonstration - in production this would fetch from database
+      const promptTemplates = [
+        {
+          id: 'template-1',
+          name: 'Merchant Onboarding Assistant',
+          description: 'Helps with merchant account setup and requirements',
+          category: 'merchant_services',
+          template: 'You are a merchant services expert helping with account setup. Context: {context}. Query: {query}',
+          temperature: 0.7,
+          maxTokens: 2000,
+          isActive: true,
+          version: 1
+        },
+        {
+          id: 'template-2',
+          name: 'POS System Comparison',
+          description: 'Compares different POS systems and their features',
+          category: 'pos_systems',
+          template: 'Compare POS systems based on the following requirements: {query}. Use this context: {context}',
+          temperature: 0.5,
+          maxTokens: 1500,
+          isActive: true,
+          version: 2
+        },
+        {
+          id: 'template-3',
+          name: 'Pricing Analysis Expert',
+          description: 'Analyzes payment processing rates and fees',
+          category: 'pricing_analysis',
+          template: 'Analyze payment processing pricing for: {query}. Consider these factors: {context}',
+          temperature: 0.3,
+          maxTokens: 2500,
+          isActive: true,
+          version: 1
+        }
+      ];
+      res.json(promptTemplates);
+    } catch (error) {
+      console.error("Error fetching prompt templates:", error);
+      res.status(500).json({ message: "Failed to fetch prompt templates" });
+    }
+  });
+
+  app.post('/api/admin/prompt-templates', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const templateData = {
+        id: crypto.randomUUID(),
+        ...req.body,
+        version: 1,
+        isActive: true
+      };
+      // In production, save to database
+      res.json(templateData);
+    } catch (error) {
+      console.error("Error creating prompt template:", error);
+      res.status(500).json({ message: "Failed to create prompt template" });
+    }
+  });
+
+  app.put('/api/admin/prompt-templates/:id', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const templateId = req.params.id;
+      const updatedTemplate = {
+        id: templateId,
+        ...req.body,
+        version: (req.body.version || 1) + 1
+      };
+      // In production, update in database
+      res.json(updatedTemplate);
+    } catch (error) {
+      console.error("Error updating prompt template:", error);
+      res.status(500).json({ message: "Failed to update prompt template" });
+    }
+  });
+
+  app.delete('/api/admin/prompt-templates/:id', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const templateId = req.params.id;
+      // In production, delete from database
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting prompt template:", error);
+      res.status(500).json({ message: "Failed to delete prompt template" });
+    }
+  });
+
+  // Knowledge Base Management
+  app.get('/api/admin/knowledge-base', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      // Return mock data for demonstration - in production this would fetch from database
+      const knowledgeBaseEntries = [
+        {
+          id: 'kb-1',
+          title: 'Clover POS System Features',
+          content: 'Clover offers a comprehensive point-of-sale solution with inventory management, customer engagement tools, and detailed reporting. Key features include: contactless payments, online ordering integration, employee management, and extensive app marketplace.',
+          category: 'pos_systems',
+          tags: ['clover', 'pos', 'features', 'inventory'],
+          lastUpdated: new Date().toISOString(),
+          author: 'Admin',
+          isActive: true,
+          priority: 3
+        },
+        {
+          id: 'kb-2',
+          title: 'Interchange Plus Pricing Model',
+          content: 'Interchange Plus pricing is the most transparent pricing model for payment processing. It consists of the interchange fee (set by card brands) plus a fixed markup from the processor. This model provides clear visibility into actual costs.',
+          category: 'pricing_guides',
+          tags: ['pricing', 'interchange', 'transparent', 'fees'],
+          lastUpdated: new Date().toISOString(),
+          author: 'Admin',
+          isActive: true,
+          priority: 4
+        },
+        {
+          id: 'kb-3',
+          title: 'PCI Compliance Requirements',
+          content: 'Payment Card Industry (PCI) compliance is mandatory for all merchants handling credit card data. Requirements include secure network maintenance, data protection, vulnerability management, access controls, network monitoring, and security policy maintenance.',
+          category: 'compliance',
+          tags: ['pci', 'compliance', 'security', 'requirements'],
+          lastUpdated: new Date().toISOString(),
+          author: 'Admin',
+          isActive: true,
+          priority: 4
+        }
+      ];
+      res.json(knowledgeBaseEntries);
+    } catch (error) {
+      console.error("Error fetching knowledge base:", error);
+      res.status(500).json({ message: "Failed to fetch knowledge base" });
+    }
+  });
+
+  app.post('/api/admin/knowledge-base', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const kbEntry = {
+        id: crypto.randomUUID(),
+        ...req.body,
+        lastUpdated: new Date().toISOString(),
+        author: 'Admin',
+        isActive: true,
+        priority: req.body.priority || 1
+      };
+      // In production, save to database
+      res.json(kbEntry);
+    } catch (error) {
+      console.error("Error creating knowledge base entry:", error);
+      res.status(500).json({ message: "Failed to create knowledge base entry" });
+    }
+  });
+
+  app.put('/api/admin/knowledge-base/:id', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const entryId = req.params.id;
+      const updatedEntry = {
+        id: entryId,
+        ...req.body,
+        lastUpdated: new Date().toISOString()
+      };
+      // In production, update in database
+      res.json(updatedEntry);
+    } catch (error) {
+      console.error("Error updating knowledge base entry:", error);
+      res.status(500).json({ message: "Failed to update knowledge base entry" });
+    }
+  });
+
+  app.delete('/api/admin/knowledge-base/:id', isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const entryId = req.params.id;
+      // In production, delete from database
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting knowledge base entry:", error);
+      res.status(500).json({ message: "Failed to delete knowledge base entry" });
+    }
+  });
+
+  // Prompt Management (Legacy - keeping for compatibility)
   app.get('/api/admin/prompts', isAuthenticated, requireAdmin, async (req: any, res) => {
     try {
       const prompts = await storage.getAllPrompts();

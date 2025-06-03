@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -53,11 +53,10 @@ interface KnowledgeBaseEntry {
 interface DocumentEntry {
   id: string;
   name: string;
-  type: string;
+  originalName: string;
+  mimeType: string;
   size: number;
-  uploadDate: string;
-  category: string;
-  tags: string[];
+  createdAt: string;
   isActive: boolean;
   vectorized: boolean;
 }
@@ -99,35 +98,31 @@ export function AdminTrainingPage() {
   
   const queryClient = useQueryClient();
 
-  // Fetch training feedback data
-  const { data: feedbackData, isLoading } = useQuery({
+  // Data fetching
+  const { data: feedbackData = [] } = useQuery({
     queryKey: ['/api/admin/training/feedback'],
-    staleTime: 30000,
+    retry: false,
   });
 
-  // Fetch prompt templates
-  const { data: promptTemplates } = useQuery({
-    queryKey: ['/api/admin/training/prompts'],
-    staleTime: 60000,
+  const { data: promptTemplates = [] } = useQuery({
+    queryKey: ['/api/admin/prompt-templates'],
+    retry: false,
   });
 
-  // Fetch knowledge base data
-  const { data: knowledgeBaseData } = useQuery({
+  const { data: knowledgeBaseData = [] } = useQuery({
     queryKey: ['/api/admin/knowledge-base'],
-    staleTime: 60000,
+    retry: false,
   });
 
-  // Fetch documents data
-  const { data: documentsData } = useQuery({
-    queryKey: ['/api/documents'],
-    staleTime: 60000,
+  const { data: documentsData = [] } = useQuery({
+    queryKey: ['/api/admin/documents'],
+    retry: false,
   });
 
   // Test AI response mutation
   const testAIMutation = useMutation({
     mutationFn: async (query: string) => {
-      const response = await apiRequest('POST', '/api/admin/training/test', { query, useTestMode: true });
-      return response.json();
+      return apiRequest('POST', '/api/admin/training/test', { query, useTestMode: true });
     },
     onSuccess: (data) => {
       setTestResponse(data.response);
@@ -135,14 +130,13 @@ export function AdminTrainingPage() {
     },
   });
 
-  // Prompt management mutations
+  // Mutations for prompt templates
   const createPromptMutation = useMutation({
-    mutationFn: async (prompt: Partial<PromptTemplate>) => {
-      const response = await apiRequest('POST', '/api/admin/prompts', prompt);
-      return response.json();
+    mutationFn: async (data: any) => {
+      return apiRequest('POST', '/api/admin/prompt-templates', data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/training/prompts'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/prompt-templates'] });
       setNewPrompt({
         name: '',
         description: '',
@@ -157,31 +151,28 @@ export function AdminTrainingPage() {
   });
 
   const updatePromptMutation = useMutation({
-    mutationFn: async ({ id, ...prompt }: Partial<PromptTemplate> & { id: string }) => {
-      const response = await apiRequest('PUT', `/api/admin/prompts/${id}`, prompt);
-      return response.json();
+    mutationFn: async ({ id, data }: { id: string; data: any }) => {
+      return apiRequest('PUT', `/api/admin/prompt-templates/${id}`, data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/training/prompts'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/prompt-templates'] });
       setEditingPrompt(null);
     },
   });
 
   const deletePromptMutation = useMutation({
     mutationFn: async (id: string) => {
-      const response = await apiRequest('DELETE', `/api/admin/prompts/${id}`);
-      return response.json();
+      return apiRequest('DELETE', `/api/admin/prompt-templates/${id}`, {});
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/training/prompts'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/prompt-templates'] });
     },
   });
 
-  // Knowledge base mutations
+  // Mutations for knowledge base
   const createKBMutation = useMutation({
-    mutationFn: async (entry: Partial<KnowledgeBaseEntry>) => {
-      const response = await apiRequest('POST', '/api/admin/knowledge-base', entry);
-      return response.json();
+    mutationFn: async (data: any) => {
+      return apiRequest('POST', '/api/admin/knowledge-base', data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/knowledge-base'] });
@@ -197,9 +188,8 @@ export function AdminTrainingPage() {
   });
 
   const updateKBMutation = useMutation({
-    mutationFn: async ({ id, ...entry }: Partial<KnowledgeBaseEntry> & { id: string }) => {
-      const response = await apiRequest('PUT', `/api/admin/knowledge-base/${id}`, entry);
-      return response.json();
+    mutationFn: async ({ id, data }: { id: string; data: any }) => {
+      return apiRequest('PUT', `/api/admin/knowledge-base/${id}`, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/knowledge-base'] });
@@ -209,44 +199,12 @@ export function AdminTrainingPage() {
 
   const deleteKBMutation = useMutation({
     mutationFn: async (id: string) => {
-      const response = await apiRequest('DELETE', `/api/admin/knowledge-base/${id}`);
-      return response.json();
+      return apiRequest('DELETE', `/api/admin/knowledge-base/${id}`, {});
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/knowledge-base'] });
     },
   });
-
-  // Document preview handlers
-  const handleDocumentPreview = (source: any) => {
-    if (source.url) {
-      window.open(source.url, '_blank');
-    }
-  };
-
-  const handlePDFDownload = async (source: any) => {
-    try {
-      const response = await fetch(`/api/documents/${source.documentId || source.id}/download`);
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = source.name || 'document.pdf';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Download failed:', error);
-    }
-  };
-
-  const handleDocumentOpen = (source: any) => {
-    if (source.documentId || source.id) {
-      const url = `/api/documents/${source.documentId || source.id}/view`;
-      window.open(url, '_blank');
-    }
-  };
 
   // Submit feedback correction
   const submitCorrectionMutation = useMutation({
@@ -277,6 +235,12 @@ export function AdminTrainingPage() {
     }
   };
 
+  const handleDocumentPreview = (source: any) => {
+    if (source.url) {
+      window.open(source.url, '_blank');
+    }
+  };
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center gap-3 mb-6">
@@ -299,146 +263,81 @@ export function AdminTrainingPage() {
 
         {/* Response Review Tab */}
         <TabsContent value="feedback" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Feedback List */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MessageSquare className="w-5 h-5" />
-                  Pending Reviews
-                </CardTitle>
-                <CardDescription>
-                  Review AI responses that need feedback or correction
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {isLoading ? (
-                  <div>Loading feedback items...</div>
-                ) : feedbackData?.length > 0 ? (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Target className="w-5 h-5" />
+                Training Feedback Queue
+              </CardTitle>
+              <CardDescription>
+                Review AI responses that need attention and provide corrections
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {Array.isArray(feedbackData) && feedbackData.length > 0 ? (
                   feedbackData.map((item: TrainingFeedback) => (
-                    <div
-                      key={item.id}
-                      className={`p-4 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 ${
-                        selectedFeedback?.id === item.id ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : ''
-                      }`}
-                      onClick={() => setSelectedFeedback(item)}
-                    >
-                      <div className="flex items-start justify-between gap-2 mb-2">
-                        <p className="font-medium text-sm">{item.userQuery}</p>
-                        <Badge className={getPriorityColor(item.priority)}>
-                          {getPriorityLabel(item.priority)}
-                        </Badge>
+                    <div key={item.id} className="border rounded-lg p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Badge className={getPriorityColor(item.priority)}>
+                            {getPriorityLabel(item.priority)}
+                          </Badge>
+                          <Badge variant="outline">{item.feedbackType}</Badge>
+                          <Badge variant="secondary">{item.status}</Badge>
+                        </div>
+                        <span className="text-sm text-gray-500">
+                          {new Date(item.createdAt).toLocaleDateString()}
+                        </span>
                       </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
-                        {item.aiResponse}
-                      </p>
-                      <div className="flex items-center gap-2 mt-2">
-                        <Badge variant="outline">{item.feedbackType}</Badge>
-                        <Badge variant="outline">{item.status}</Badge>
+                      
+                      <div className="space-y-2">
+                        <div>
+                          <span className="font-medium text-sm">User Query:</span>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                            {item.userQuery}
+                          </p>
+                        </div>
+                        
+                        <div>
+                          <span className="font-medium text-sm">AI Response:</span>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                            {item.aiResponse}
+                          </p>
+                        </div>
+                        
+                        {item.correctResponse && (
+                          <div>
+                            <span className="font-medium text-sm">Suggested Correction:</span>
+                            <p className="text-sm text-green-600 dark:text-green-400 mt-1">
+                              {item.correctResponse}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="flex gap-2">
+                        <Button 
+                          size="sm" 
+                          onClick={() => setSelectedFeedback(item)}
+                        >
+                          Review & Train
+                        </Button>
+                        <Button size="sm" variant="outline">
+                          <Archive className="w-3 h-3 mr-1" />
+                          Archive
+                        </Button>
                       </div>
                     </div>
                   ))
                 ) : (
-                  <p className="text-gray-500">No pending feedback items</p>
+                  <p className="text-center text-gray-500 py-8">
+                    No training feedback items found.
+                  </p>
                 )}
-              </CardContent>
-            </Card>
-
-            {/* Feedback Details */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Review & Correct Response</CardTitle>
-                <CardDescription>
-                  Provide corrections and training guidance for the AI
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {selectedFeedback ? (
-                  <div className="space-y-4">
-                    <div>
-                      <Label className="text-sm font-medium">User Query</Label>
-                      <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded border">
-                        {selectedFeedback.userQuery}
-                      </div>
-                    </div>
-
-                    <div>
-                      <Label className="text-sm font-medium">AI Response</Label>
-                      <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded border">
-                        {selectedFeedback.aiResponse}
-                      </div>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="correctResponse">Correct Response</Label>
-                      <Textarea
-                        id="correctResponse"
-                        placeholder="Provide the correct response that the AI should have given..."
-                        className="min-h-32"
-                        defaultValue={selectedFeedback.correctResponse || ''}
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="adminNotes">Training Notes</Label>
-                      <Textarea
-                        id="adminNotes"
-                        placeholder="Notes on what the AI got wrong and how to improve..."
-                        defaultValue={selectedFeedback.adminNotes || ''}
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="feedbackType">Feedback Type</Label>
-                        <Select defaultValue={selectedFeedback.feedbackType}>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="incorrect">Incorrect</SelectItem>
-                            <SelectItem value="incomplete">Incomplete</SelectItem>
-                            <SelectItem value="needs_training">Needs Training</SelectItem>
-                            <SelectItem value="good">Good</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div>
-                        <Label htmlFor="priority">Priority</Label>
-                        <Select defaultValue={selectedFeedback.priority.toString()}>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="1">Low</SelectItem>
-                            <SelectItem value="2">Medium</SelectItem>
-                            <SelectItem value="3">High</SelectItem>
-                            <SelectItem value="4">Critical</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-
-                    <Button 
-                      onClick={() => submitCorrectionMutation.mutate({
-                        feedbackId: selectedFeedback.id,
-                        // Add form data here
-                      })}
-                      className="w-full"
-                      disabled={submitCorrectionMutation.isPending}
-                    >
-                      {submitCorrectionMutation.isPending ? 'Saving...' : 'Save Correction & Train AI'}
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-gray-500">
-                    Select a feedback item to review and correct
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         {/* AI Emulator Tab */}
@@ -446,25 +345,25 @@ export function AdminTrainingPage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Target className="w-5 h-5" />
-                AI Response Emulator
+                <MessageSquare className="w-5 h-5" />
+                AI Response Testing
               </CardTitle>
               <CardDescription>
-                Test queries against the AI system to see how it responds and identify training needs
+                Test AI responses with different queries and analyze the results
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="testQuery">Test Query</Label>
+              <div className="space-y-2">
+                <Label htmlFor="test-query">Test Query</Label>
                 <Textarea
-                  id="testQuery"
-                  placeholder="Enter a question to test how the AI responds..."
+                  id="test-query"
                   value={testQuery}
                   onChange={(e) => setTestQuery(e.target.value)}
-                  className="min-h-24"
+                  placeholder="Enter a question to test the AI response..."
+                  rows={3}
                 />
               </div>
-
+              
               <Button 
                 onClick={() => testAIMutation.mutate(testQuery)}
                 disabled={!testQuery.trim() || testAIMutation.isPending}
@@ -472,111 +371,93 @@ export function AdminTrainingPage() {
               >
                 {testAIMutation.isPending ? 'Testing...' : 'Test AI Response'}
               </Button>
-
-              {testResponse && (
-                <div className="space-y-4">
-                  <Separator />
+              
+              {testResponseData && (
+                <div className="border rounded-lg p-4 space-y-4 bg-gray-50 dark:bg-gray-900">
                   <div>
-                    <Label className="text-sm font-medium">AI Response</Label>
-                    <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded border space-y-4">
-                      <div className="prose prose-sm dark:prose-invert max-w-none">
-                        {testResponse.split('\n').map((paragraph, index) => (
-                          <p key={index} className="mb-2">{paragraph}</p>
-                        ))}
-                      </div>
-                      
-                      {testResponseData?.sources && testResponseData.sources.length > 0 && (
-                        <div className="border-t pt-4">
-                          <h5 className="font-medium mb-3 text-sm">Document Sources ({testResponseData.sources.length})</h5>
-                          <div className="space-y-3">
-                            {testResponseData.sources.map((source, index) => (
-                              <div key={index} className="border rounded-lg p-3 bg-white dark:bg-gray-900 hover:shadow-sm transition-shadow">
-                                <div className="flex items-start justify-between">
-                                  <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2 mb-2">
-                                      <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded flex items-center justify-center flex-shrink-0">
-                                        <FileText className="w-4 h-4 text-blue-600" />
-                                      </div>
-                                      <div className="min-w-0 flex-1">
-                                        <h6 className="font-medium text-sm truncate">{source.name}</h6>
-                                        <div className="flex items-center gap-2 text-xs text-gray-500">
-                                          <span>Relevance: {Math.round((source.relevanceScore || 0) * 100)}%</span>
-                                          <span>•</span>
-                                          <span className="capitalize">{source.type || 'document'}</span>
-                                        </div>
-                                      </div>
-                                    </div>
-                                    
-                                    {source.snippet && (
-                                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
-                                        {source.snippet}
-                                      </p>
-                                    )}
-                                    
-                                    <div className="flex gap-2">
-                                      <Button
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={() => handleDocumentPreview(source)}
-                                        className="text-xs"
-                                      >
-                                        <Eye className="w-3 h-3 mr-1" />
-                                        Preview
-                                      </Button>
-                                      
-                                      {source.type === 'pdf' && (
-                                        <Button
-                                          size="sm"
-                                          variant="outline"
-                                          onClick={() => handlePDFDownload(source)}
-                                          className="text-xs"
-                                        >
-                                          <Download className="w-3 h-3 mr-1" />
-                                          Save PDF
-                                        </Button>
-                                      )}
-                                      
-                                      <Button
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={() => handleDocumentOpen(source)}
-                                        className="text-xs"
-                                      >
-                                        <ExternalLink className="w-3 h-3 mr-1" />
-                                        Open
-                                      </Button>
+                    <h4 className="font-medium mb-2">AI Response</h4>
+                    <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+                      {testResponseData.response}
+                    </p>
+                  </div>
+                  
+                  {testResponseData.sources && testResponseData.sources.length > 0 && (
+                    <div>
+                      <h5 className="font-medium mb-3 text-sm">Document Sources ({testResponseData.sources.length})</h5>
+                      <div className="space-y-3">
+                        {testResponseData.sources.map((source: any, index: number) => (
+                          <div key={index} className="border rounded-lg p-3 bg-white dark:bg-gray-900 hover:shadow-sm transition-shadow">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded flex items-center justify-center flex-shrink-0">
+                                    <FileText className="w-4 h-4 text-blue-600" />
+                                  </div>
+                                  <div className="min-w-0 flex-1">
+                                    <h6 className="font-medium text-sm truncate">{source.name}</h6>
+                                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                                      <span>Relevance: {Math.round((source.relevanceScore || 0) * 100)}%</span>
+                                      <span>•</span>
+                                      <span className="capitalize">{source.type || 'document'}</span>
                                     </div>
                                   </div>
                                 </div>
+                                
+                                {source.snippet && (
+                                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
+                                    {source.snippet}
+                                  </p>
+                                )}
+                                
+                                <div className="flex gap-2">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => handleDocumentPreview(source)}
+                                  >
+                                    <Eye className="w-3 h-3 mr-1" />
+                                    Preview
+                                  </Button>
+                                  {source.url && (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => window.open(source.url, '_blank')}
+                                    >
+                                      <ExternalLink className="w-3 h-3 mr-1" />
+                                      Open
+                                    </Button>
+                                  )}
+                                </div>
                               </div>
-                            ))}
+                            </div>
                           </div>
-                        </div>
-                      )}
-                      
-                      {testResponseData?.reasoning && (
-                        <div className="border-t pt-4">
-                          <h5 className="font-medium mb-2 text-sm">Response Analysis</h5>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
-                            {testResponseData.reasoning}
-                          </p>
-                        </div>
-                      )}
+                        ))}
+                      </div>
                     </div>
-                  </div>
-
-                  <div className="flex gap-2">
-                    <Button variant="outline" className="flex-1">
-                      <CheckCircle className="w-4 h-4 mr-2" />
-                      Mark as Good
-                    </Button>
-                    <Button variant="outline" className="flex-1">
-                      <AlertTriangle className="w-4 h-4 mr-2" />
-                      Needs Correction
-                    </Button>
-                  </div>
+                  )}
+                  
+                  {testResponseData?.reasoning && (
+                    <div className="border-t pt-4">
+                      <h5 className="font-medium mb-2 text-sm">Response Analysis</h5>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        {testResponseData.reasoning}
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
+
+              <div className="flex gap-2">
+                <Button variant="outline" className="flex-1">
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  Mark as Good
+                </Button>
+                <Button variant="outline" className="flex-1">
+                  <AlertTriangle className="w-4 h-4 mr-2" />
+                  Needs Correction
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -682,7 +563,7 @@ export function AdminTrainingPage() {
               <div className="space-y-4">
                 <h3 className="font-medium">Existing Templates</h3>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  {promptTemplates?.map((template: PromptTemplate) => (
+                  {Array.isArray(promptTemplates) && promptTemplates.map((template: PromptTemplate) => (
                     <Card key={template.id} className="p-4">
                       <div className="flex items-start justify-between mb-2">
                         <h4 className="font-medium">{template.name}</h4>
@@ -728,17 +609,236 @@ export function AdminTrainingPage() {
 
         {/* Knowledge Base Tab */}
         <TabsContent value="knowledge" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Knowledge Base Management</CardTitle>
-              <CardDescription>
-                Review and update the AI's knowledge base content
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-500">Knowledge base management interface coming soon...</p>
-            </CardContent>
-          </Card>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Knowledge Base Entries */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BookOpen className="w-5 h-5" />
+                  Knowledge Base Entries
+                </CardTitle>
+                <CardDescription>
+                  Manage structured knowledge entries for AI training
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Add New KB Entry Form */}
+                <div className="border rounded-lg p-4 bg-gray-50 dark:bg-gray-900">
+                  <h4 className="font-medium mb-3 flex items-center gap-2">
+                    <Plus className="w-4 h-4" />
+                    Add Knowledge Entry
+                  </h4>
+                  <div className="space-y-3">
+                    <div>
+                      <Label htmlFor="kb-title">Title</Label>
+                      <Input
+                        id="kb-title"
+                        value={newKBEntry.title || ''}
+                        onChange={(e) => setNewKBEntry({ ...newKBEntry, title: e.target.value })}
+                        placeholder="e.g., POS System Comparison Guide"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="kb-category">Category</Label>
+                      <Select value={newKBEntry.category} onValueChange={(value) => setNewKBEntry({ ...newKBEntry, category: value })}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="merchant_services">Merchant Services</SelectItem>
+                          <SelectItem value="payment_processing">Payment Processing</SelectItem>
+                          <SelectItem value="pos_systems">POS Systems</SelectItem>
+                          <SelectItem value="pricing_guides">Pricing Guides</SelectItem>
+                          <SelectItem value="technical_specs">Technical Specifications</SelectItem>
+                          <SelectItem value="compliance">Compliance & Security</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="kb-content">Content</Label>
+                      <Textarea
+                        id="kb-content"
+                        value={newKBEntry.content || ''}
+                        onChange={(e) => setNewKBEntry({ ...newKBEntry, content: e.target.value })}
+                        placeholder="Enter detailed knowledge content..."
+                        rows={4}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="kb-tags">Tags (comma-separated)</Label>
+                      <Input
+                        id="kb-tags"
+                        value={newKBEntry.tags?.join(', ') || ''}
+                        onChange={(e) => setNewKBEntry({ ...newKBEntry, tags: e.target.value.split(',').map(t => t.trim()) })}
+                        placeholder="pos, clover, square, pricing"
+                      />
+                    </div>
+                    <Button 
+                      onClick={() => createKBMutation.mutate(newKBEntry)}
+                      disabled={!newKBEntry.title || !newKBEntry.content || createKBMutation.isPending}
+                      className="w-full"
+                    >
+                      <Save className="w-4 h-4 mr-2" />
+                      {createKBMutation.isPending ? 'Adding...' : 'Add Entry'}
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Existing KB Entries */}
+                <div className="space-y-3">
+                  <h4 className="font-medium">Existing Entries</h4>
+                  {Array.isArray(knowledgeBaseData) && knowledgeBaseData.length > 0 ? (
+                    <div className="space-y-2">
+                      {knowledgeBaseData.map((entry: KnowledgeBaseEntry) => (
+                        <div key={entry.id} className="border rounded-lg p-3 bg-white dark:bg-gray-900">
+                          <div className="flex items-start justify-between mb-2">
+                            <h5 className="font-medium text-sm">{entry.title}</h5>
+                            <div className="flex items-center gap-1">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => setEditingKBEntry(entry)}
+                              >
+                                <Edit className="w-3 h-3" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => deleteKBMutation.mutate(entry.id)}
+                              >
+                                <Trash2 className="w-3 h-3 text-red-500" />
+                              </Button>
+                            </div>
+                          </div>
+                          <p className="text-xs text-gray-600 dark:text-gray-400 mb-2 line-clamp-2">
+                            {entry.content}
+                          </p>
+                          <div className="flex items-center gap-2 text-xs">
+                            <Badge variant="outline">{entry.category}</Badge>
+                            <span className="text-gray-500">Priority: {entry.priority}</span>
+                          </div>
+                          {entry.tags?.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-2">
+                              {entry.tags.map((tag, idx) => (
+                                <span key={idx} className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-1 rounded">
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-500">No knowledge base entries found.</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Document Management */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Database className="w-5 h-5" />
+                  Document Library
+                </CardTitle>
+                <CardDescription>
+                  Manage uploaded documents and their vectorization status
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Document Filter and Search */}
+                <div className="flex gap-2">
+                  <div className="flex-1">
+                    <Input
+                      placeholder="Search documents..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full"
+                    />
+                  </div>
+                  <Select value={documentFilter} onValueChange={setDocumentFilter}>
+                    <SelectTrigger className="w-32">
+                      <SelectValue placeholder="Filter" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All</SelectItem>
+                      <SelectItem value="vectorized">Vectorized</SelectItem>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="active">Active</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Document List */}
+                <div className="space-y-2 max-h-96 overflow-y-auto">
+                  {Array.isArray(documentsData) && documentsData.filter((doc: DocumentEntry) => {
+                    const matchesSearch = !searchTerm || doc.name.toLowerCase().includes(searchTerm.toLowerCase());
+                    const matchesFilter = documentFilter === 'all' || 
+                      (documentFilter === 'vectorized' && doc.vectorized) ||
+                      (documentFilter === 'pending' && !doc.vectorized) ||
+                      (documentFilter === 'active' && doc.isActive);
+                    return matchesSearch && matchesFilter;
+                  }).map((doc: DocumentEntry) => (
+                    <div key={doc.id} className="border rounded-lg p-3 bg-white dark:bg-gray-900">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <FileText className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                            <h6 className="font-medium text-sm truncate">{doc.originalName || doc.name}</h6>
+                          </div>
+                          <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
+                            <span>{(doc.size / 1024).toFixed(1)} KB</span>
+                            <span>•</span>
+                            <span>{doc.mimeType}</span>
+                            <span>•</span>
+                            <span>{new Date(doc.createdAt).toLocaleDateString()}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge variant={doc.vectorized ? "default" : "secondary"}>
+                              {doc.vectorized ? "Vectorized" : "Pending"}
+                            </Badge>
+                            <Badge variant={doc.isActive ? "default" : "outline"}>
+                              {doc.isActive ? "Active" : "Inactive"}
+                            </Badge>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => window.open(`/api/documents/${doc.id}/preview`, '_blank')}
+                          >
+                            <Eye className="w-3 h-3" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => window.open(`/api/documents/${doc.id}/download`, '_blank')}
+                          >
+                            <Download className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Document Upload */}
+                <div className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-4 text-center">
+                  <Upload className="w-8 h-8 mx-auto text-gray-400 mb-2" />
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Drag and drop files here or click to upload
+                  </p>
+                  <Button variant="outline" className="mt-2">
+                    <Upload className="w-4 h-4 mr-2" />
+                    Upload Documents
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
