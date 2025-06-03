@@ -497,6 +497,82 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // AI Training & Feedback Management Routes
+  app.get('/api/admin/training/feedback', isAuthenticated, async (req, res) => {
+    try {
+      const feedbackItems = await storage.getTrainingFeedback();
+      res.json(feedbackItems);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch training feedback" });
+    }
+  });
+
+  app.post('/api/admin/training/feedback', isAuthenticated, async (req, res) => {
+    try {
+      const correction = await storage.saveTrainingCorrection(req.body);
+      res.json(correction);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to save training correction" });
+    }
+  });
+
+  app.get('/api/admin/training/prompts', isAuthenticated, async (req, res) => {
+    try {
+      const prompts = await storage.getPromptTemplates();
+      res.json(prompts);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch prompt templates" });
+    }
+  });
+
+  app.post('/api/admin/training/test', isAuthenticated, async (req, res) => {
+    try {
+      const { query } = req.body;
+      const userId = (req as any).user?.claims?.sub || 'admin-test';
+      
+      // Test AI response in training mode
+      const response = await enhancedAIService.generateChainedResponse(
+        { content: query, role: 'user' },
+        [],
+        userId,
+        true // training mode flag
+      );
+
+      res.json({
+        response: response.message,
+        sources: response.sources,
+        reasoning: response.reasoning
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to test AI response" });
+    }
+  });
+
+  // Submit feedback for AI response
+  app.post('/api/feedback/submit', isAuthenticated, async (req, res) => {
+    try {
+      const { chatId, messageId, userQuery, aiResponse, feedbackType, correctResponse, adminNotes } = req.body;
+      const userId = (req as any).user?.claims?.sub;
+
+      const feedback = await storage.createTrainingFeedback({
+        chatId,
+        messageId,
+        userQuery,
+        aiResponse,
+        correctResponse,
+        feedbackType,
+        adminNotes,
+        createdBy: userId,
+        status: 'pending',
+        priority: feedbackType === 'incorrect' ? 3 : 1
+      });
+
+      res.json(feedback);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to submit feedback" });
+    }
+  });
+
   // Usage analytics endpoint
   app.get('/api/analytics/usage', isAuthenticated, async (req, res) => {
     try {

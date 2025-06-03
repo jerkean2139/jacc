@@ -339,6 +339,77 @@ export const userChatLogs = pgTable("user_chat_logs", {
   timestamp: timestamp("timestamp").defaultNow(),
 });
 
+// AI Training & Feedback Management Tables
+export const aiTrainingFeedback = pgTable("ai_training_feedback", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  chatId: uuid("chat_id").references(() => chats.id, { onDelete: "cascade" }),
+  messageId: uuid("message_id").references(() => messages.id, { onDelete: "cascade" }),
+  userQuery: text("user_query").notNull(),
+  aiResponse: text("ai_response").notNull(),
+  correctResponse: text("correct_response"),
+  feedbackType: varchar("feedback_type").notNull(), // "incorrect", "incomplete", "good", "needs_training"
+  adminNotes: text("admin_notes"),
+  sourceDocs: jsonb("source_docs"), // Documents that were referenced
+  knowledgeGaps: text("knowledge_gaps").array(), // What information was missing
+  suggestedPromptChanges: text("suggested_prompt_changes"),
+  status: varchar("status").default("pending"), // "pending", "reviewed", "trained", "resolved"
+  reviewedBy: varchar("reviewed_by").references(() => users.id),
+  reviewedAt: timestamp("reviewed_at"),
+  priority: integer("priority").default(1), // 1=low, 2=medium, 3=high, 4=critical
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const aiPromptTemplates = pgTable("ai_prompt_templates", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  category: varchar("category").notNull(), // "system", "user", "document_analysis", "business_intelligence"
+  template: text("template").notNull(),
+  variables: jsonb("variables"), // Variables that can be substituted
+  isActive: boolean("is_active").default(true),
+  version: integer("version").default(1),
+  temperature: real("temperature").default(0.3),
+  maxTokens: integer("max_tokens").default(300),
+  createdBy: varchar("created_by").references(() => users.id),
+  lastModifiedBy: varchar("last_modified_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const aiKnowledgeCorrections = pgTable("ai_knowledge_corrections", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  feedbackId: uuid("feedback_id").references(() => aiTrainingFeedback.id, { onDelete: "cascade" }),
+  incorrectInformation: text("incorrect_information").notNull(),
+  correctInformation: text("correct_information").notNull(),
+  sourceDocuments: text("source_documents").array(),
+  category: varchar("category").notNull(), // "processor_info", "pricing", "equipment", "compliance"
+  appliedToSystem: boolean("applied_to_system").default(false),
+  adminVerified: boolean("admin_verified").default(false),
+  verifiedBy: varchar("verified_by").references(() => users.id),
+  verifiedAt: timestamp("verified_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const aiTrainingMaterials = pgTable("ai_training_materials", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  title: varchar("title").notNull(),
+  content: text("content").notNull(),
+  materialType: varchar("material_type").notNull(), // "faq", "procedure", "policy", "rate_sheet"
+  category: varchar("category").notNull(),
+  tags: text("tags").array(),
+  priority: integer("priority").default(1),
+  isVerified: boolean("is_verified").default(false),
+  verifiedBy: varchar("verified_by").references(() => users.id),
+  sourceDocument: varchar("source_document"),
+  lastReviewed: timestamp("last_reviewed"),
+  reviewNotes: text("review_notes"),
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Define relations
 export const usersRelations = relations(users, ({ one, many }) => ({
   folders: many(folders),
@@ -347,6 +418,8 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   stats: one(userStats, { fields: [users.id], references: [userStats.userId] }),
   userAchievements: many(userAchievements),
   favorites: many(favorites),
+  trainingFeedback: many(aiTrainingFeedback),
+  promptTemplates: many(aiPromptTemplates),
 }));
 
 export const foldersRelations = relations(folders, ({ one, many }) => ({
