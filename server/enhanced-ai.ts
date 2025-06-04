@@ -311,8 +311,8 @@ When appropriate, suggest actions like saving payment processing information to 
 
       let content = response.content[0].type === 'text' ? response.content[0].text : "";
       
-      // Only append documents if they weren't already included in the main response
-      if (searchResults.length > 0 && !content.includes("Available Documents:")) {
+      // Don't append documents for conversation starters - keep them clean and engaging
+      if (!isConversationStarter && searchResults.length > 0 && !content.includes("Available Documents:")) {
         content += `\n\n**Related Documents:**\n${documentExamples}`;
       }
       
