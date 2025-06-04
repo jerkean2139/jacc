@@ -4,13 +4,22 @@ import {
   userAchievements, 
   userStats,
   users,
+  chatRatings,
+  dailyUsage,
+  leaderboards,
+  chats,
   type Achievement,
   type UserAchievement,
   type UserStats,
+  type ChatRating,
+  type DailyUsage,
+  type Leaderboard,
   type InsertUserAchievement,
-  type InsertUserStats
+  type InsertUserStats,
+  type InsertChatRating,
+  type InsertDailyUsage
 } from '@shared/schema';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, desc, gte, lte, avg, count, sum } from 'drizzle-orm';
 
 // Achievement definitions with unlock criteria
 export const DEFAULT_ACHIEVEMENTS: Omit<Achievement, 'id' | 'createdAt'>[] = [
@@ -453,6 +462,373 @@ export class GamificationService {
       console.log('✅ Default achievements initialized');
     } catch (error) {
       console.error('Failed to initialize achievements:', error);
+    }
+  }
+
+  // Chat Rating System Methods
+  async submitChatRating(chatId: string, userId: string, rating: number, feedback?: string): Promise<void> {
+    try {
+      await db.insert(chatRatings).values({
+        chatId,
+        userId,
+        rating,
+        feedback,
+        messageCount: 0, // Will be updated with actual count
+        wasHelpful: rating >= 4
+      });
+
+      // Update user stats with new rating
+      await this.updateUserRatingStats(userId);
+      console.log(`📊 Chat rating submitted: ${rating}/5 stars for chat ${chatId}`);
+    } catch (error) {
+      console.error('Failed to submit chat rating:', error);
+    }
+  }
+
+  async updateUserRatingStats(userId: string): Promise<void> {
+    try {
+      const ratings = await db.select()
+        .from(chatRatings)
+        .where(eq(chatRatings.userId, userId));
+
+      if (ratings.length === 0) return;
+
+      const averageRating = ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length;
+      const totalRatings = ratings.length;
+
+      await db.update(userStats)
+        .set({ 
+          averageRating: Number(averageRating.toFixed(2)),
+          totalRatings 
+        })
+        .where(eq(userStats.userId, userId));
+    } catch (error) {
+      console.error('Failed to update user rating stats:', error);
+    }
+  }
+
+  async getLowRatedSessions(threshold: number = 3): Promise<any[]> {
+    try {
+      const lowRatedChats = await db.select({
+        chatId: chatRatings.chatId,
+        userId: chatRatings.userId,
+        rating: chatRatings.rating,
+        feedback: chatRatings.feedback,
+        sessionNotes: chatRatings.sessionNotes,
+        createdAt: chatRatings.createdAt,
+        chatTitle: chats.title
+      })
+      .from(chatRatings)
+      .innerJoin(chats, eq(chatRatings.chatId, chats.id))
+      .where(lte(chatRatings.rating, threshold))
+      .orderBy(desc(chatRatings.createdAt));
+
+      return lowRatedChats;
+    } catch (error) {
+      console.error('Failed to get low rated sessions:', error);
+      return [];
+    }
+  }
+
+  // Daily Usage Tracking
+  async trackDailyUsage(userId: string, action: string): Promise<void> {
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const existingUsage = await db.select()
+        .from(dailyUsage)
+        .where(and(
+          eq(dailyUsage.userId, userId),
+          eq(dailyUsage.date, today)
+        ));
+
+      if (existingUsage.length === 0) {
+        // Create new daily usage record
+        await db.insert(dailyUsage).values({
+          userId,
+          date: today,
+          messagesCount: action === 'message' ? 1 : 0,
+          chatsCreated: action === 'chat' ? 1 : 0,
+          featuresUsed: [action],
+          pointsEarned: this.getPointsForAction(action)
+        });
+      } else {
+        // Update existing record
+        const current = existingUsage[0];
+        const newFeaturesUsed = [...(current.featuresUsed || [])];
+        if (!newFeaturesUsed.includes(action)) {
+          newFeaturesUsed.push(action);
+        }
+
+        await db.update(dailyUsage)
+          .set({
+            messagesCount: action === 'message' ? (current.messagesCount || 0) + 1 : current.messagesCount,
+            chatsCreated: action === 'chat' ? (current.chatsCreated || 0) + 1 : current.chatsCreated,
+            featuresUsed: newFeaturesUsed,
+            pointsEarned: (current.pointsEarned || 0) + this.getPointsForAction(action)
+          })
+          .where(eq(dailyUsage.id, current.id));
+      }
+
+      // Update streak
+      await this.updateUserStreak(userId);
+    } catch (error) {
+      console.error('Failed to track daily usage:', error);
+    }
+  }
+
+  private getPointsForAction(action: string): number {
+    const pointsMap: { [key: string]: number } = {
+      'message': 1,
+      'chat': 5,
+      'calculator': 10,
+      'document': 15,
+      'proposal': 25
+    };
+    return pointsMap[action] || 1;
+  }
+
+  async updateUserStreak(userId: string): Promise<void> {
+    try {
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+      const recentUsage = await db.select()
+        .from(dailyUsage)
+        .where(and(
+          eq(dailyUsage.userId, userId),
+          gte(dailyUsage.date, sevenDaysAgo)
+        ))
+        .orderBy(desc(dailyUsage.date));
+
+      let currentStreak = 0;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      // Calculate current streak
+      for (let i = 0; i < 7; i++) {
+        const checkDate = new Date(today);
+        checkDate.setDate(checkDate.getDate() - i);
+        
+        const hasUsage = recentUsage.some(usage => 
+          usage.date && usage.date.toDateString() === checkDate.toDateString()
+        );
+
+        if (hasUsage) {
+          currentStreak++;
+        } else if (i === 0) {
+          // If no usage today, streak breaks
+          break;
+        } else {
+          // If no usage on previous day, streak continues until break
+          break;
+        }
+      }
+
+      const stats = await this.getUserStats(userId);
+      const longestStreak = Math.max(stats?.longestStreak || 0, currentStreak);
+
+      await db.update(userStats)
+        .set({ 
+          currentStreak,
+          longestStreak,
+          lastActiveDate: new Date()
+        })
+        .where(eq(userStats.userId, userId));
+    } catch (error) {
+      console.error('Failed to update user streak:', error);
+    }
+  }
+
+  // Leaderboard System
+  async updateLeaderboards(): Promise<void> {
+    try {
+      // Update weekly leaderboard
+      await this.updateLeaderboardPeriod('weekly');
+      // Update monthly leaderboard  
+      await this.updateLeaderboardPeriod('monthly');
+      // Update all-time leaderboard
+      await this.updateLeaderboardPeriod('all_time');
+    } catch (error) {
+      console.error('Failed to update leaderboards:', error);
+    }
+  }
+
+  private async updateLeaderboardPeriod(period: 'weekly' | 'monthly' | 'all_time'): Promise<void> {
+    const now = new Date();
+    let periodStart: Date;
+    let periodEnd: Date = now;
+
+    switch (period) {
+      case 'weekly':
+        periodStart = new Date(now);
+        periodStart.setDate(now.getDate() - 7);
+        break;
+      case 'monthly':
+        periodStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        break;
+      case 'all_time':
+        periodStart = new Date('2024-01-01');
+        break;
+    }
+
+    // Get top users by different metrics
+    const metrics = ['messages', 'rating', 'streak', 'points'];
+
+    for (const metric of metrics) {
+      let topUsers: any[] = [];
+
+      switch (metric) {
+        case 'messages':
+          topUsers = await db.select({
+            userId: userStats.userId,
+            score: userStats.totalMessages,
+            firstName: users.firstName,
+            lastName: users.lastName
+          })
+          .from(userStats)
+          .innerJoin(users, eq(userStats.userId, users.id))
+          .orderBy(desc(userStats.totalMessages))
+          .limit(10);
+          break;
+
+        case 'rating':
+          topUsers = await db.select({
+            userId: userStats.userId,
+            score: userStats.averageRating,
+            firstName: users.firstName,
+            lastName: users.lastName
+          })
+          .from(userStats)
+          .innerJoin(users, eq(userStats.userId, users.id))
+          .where(gte(userStats.totalRatings, 3)) // Minimum 3 ratings
+          .orderBy(desc(userStats.averageRating))
+          .limit(10);
+          break;
+
+        case 'streak':
+          topUsers = await db.select({
+            userId: userStats.userId,
+            score: userStats.longestStreak,
+            firstName: users.firstName,
+            lastName: users.lastName
+          })
+          .from(userStats)
+          .innerJoin(users, eq(userStats.userId, users.id))
+          .orderBy(desc(userStats.longestStreak))
+          .limit(10);
+          break;
+
+        case 'points':
+          topUsers = await db.select({
+            userId: userStats.userId,
+            score: userStats.totalPoints,
+            firstName: users.firstName,
+            lastName: users.lastName
+          })
+          .from(userStats)
+          .innerJoin(users, eq(userStats.userId, users.id))
+          .orderBy(desc(userStats.totalPoints))
+          .limit(10);
+          break;
+      }
+
+      // Clear existing leaderboard for this period and metric
+      await db.delete(leaderboards)
+        .where(and(
+          eq(leaderboards.period, period),
+          eq(leaderboards.metric, metric)
+        ));
+
+      // Insert new leaderboard data
+      const leaderboardData = topUsers.map((user, index) => ({
+        userId: user.userId,
+        period,
+        rank: index + 1,
+        score: user.score || 0,
+        metric,
+        periodStart,
+        periodEnd
+      }));
+
+      if (leaderboardData.length > 0) {
+        await db.insert(leaderboards).values(leaderboardData);
+      }
+    }
+  }
+
+  async getLeaderboard(period: 'weekly' | 'monthly' | 'all_time', metric: string): Promise<any[]> {
+    try {
+      return await db.select({
+        rank: leaderboards.rank,
+        userId: leaderboards.userId,
+        score: leaderboards.score,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        profileImageUrl: users.profileImageUrl
+      })
+      .from(leaderboards)
+      .innerJoin(users, eq(leaderboards.userId, users.id))
+      .where(and(
+        eq(leaderboards.period, period),
+        eq(leaderboards.metric, metric)
+      ))
+      .orderBy(leaderboards.rank)
+      .limit(10);
+    } catch (error) {
+      console.error('Failed to get leaderboard:', error);
+      return [];
+    }
+  }
+
+  // Usage Analytics
+  async getUserEngagementMetrics(userId: string): Promise<any> {
+    try {
+      const stats = await this.getUserStats(userId);
+      const recentRatings = await db.select()
+        .from(chatRatings)
+        .where(eq(chatRatings.userId, userId))
+        .orderBy(desc(chatRatings.createdAt))
+        .limit(10);
+
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+      const recentUsage = await db.select()
+        .from(dailyUsage)
+        .where(and(
+          eq(dailyUsage.userId, userId),
+          gte(dailyUsage.date, thirtyDaysAgo)
+        ));
+
+      const averageRating = recentRatings.length > 0 
+        ? recentRatings.reduce((sum, r) => sum + r.rating, 0) / recentRatings.length 
+        : 0;
+
+      const totalRecentMessages = recentUsage.reduce((sum, day) => sum + (day.messagesCount || 0), 0);
+      const activeDays = recentUsage.length;
+
+      return {
+        userId,
+        totalMessages: stats?.totalMessages || 0,
+        totalChats: stats?.totalChats || 0,
+        currentStreak: stats?.currentStreak || 0,
+        longestStreak: stats?.longestStreak || 0,
+        averageRating: Number(averageRating.toFixed(2)),
+        totalRatings: recentRatings.length,
+        recentActivity: {
+          messagesLast30Days: totalRecentMessages,
+          activeDaysLast30Days: activeDays,
+          dailyAverage: activeDays > 0 ? Math.round(totalRecentMessages / activeDays) : 0
+        },
+        level: stats?.level || 1,
+        totalPoints: stats?.totalPoints || 0,
+        lastActiveDate: stats?.lastActiveDate
+      };
+    } catch (error) {
+      console.error('Failed to get user engagement metrics:', error);
+      return null;
     }
   }
 }

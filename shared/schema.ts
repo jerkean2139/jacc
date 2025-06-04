@@ -218,7 +218,52 @@ export const userStats = pgTable("user_stats", {
   lastActiveDate: timestamp("last_active_date"),
   totalPoints: integer("total_points").notNull().default(0),
   level: integer("level").notNull().default(1),
+  averageRating: real("average_rating").default(0),
+  totalRatings: integer("total_ratings").default(0),
+  weeklyMessages: integer("weekly_messages").default(0),
+  monthlyMessages: integer("monthly_messages").default(0),
   updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Chat ratings and feedback system
+export const chatRatings = pgTable("chat_ratings", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  chatId: uuid("chat_id").notNull().references(() => chats.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  rating: integer("rating").notNull(), // 1-5 stars
+  feedback: text("feedback"), // Optional user feedback
+  sessionNotes: text("session_notes"), // Admin notes about why rating was low
+  improvementAreas: text("improvement_areas").array(), // Areas flagged for improvement
+  messageCount: integer("message_count").default(0),
+  sessionDuration: integer("session_duration_minutes"),
+  wasHelpful: boolean("was_helpful"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Daily usage tracking for streaks and engagement
+export const dailyUsage = pgTable("daily_usage", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  date: timestamp("date").notNull(),
+  messagesCount: integer("messages_count").default(0),
+  chatsCreated: integer("chats_created").default(0),
+  timeSpentMinutes: integer("time_spent_minutes").default(0),
+  featuresUsed: text("features_used").array(), // ['calculator', 'documents', 'proposals']
+  pointsEarned: integer("points_earned").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Leaderboard periods (weekly, monthly, all-time)
+export const leaderboards = pgTable("leaderboards", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  period: varchar("period").notNull(), // 'weekly', 'monthly', 'all_time'
+  rank: integer("rank").notNull(),
+  score: integer("score").notNull(),
+  metric: varchar("metric").notNull(), // 'messages', 'rating', 'streak', 'points'
+  periodStart: timestamp("period_start").notNull(),
+  periodEnd: timestamp("period_end").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 // Q&A Knowledge Base Management
@@ -740,6 +785,33 @@ export type Achievement = typeof achievements.$inferSelect;
 export type InsertAchievement = z.infer<typeof insertAchievementSchema>;
 export type UserAchievement = typeof userAchievements.$inferSelect;
 export type InsertUserAchievement = z.infer<typeof insertUserAchievementSchema>;
+
+// Chat Rating Types
+export type ChatRating = typeof chatRatings.$inferSelect;
+export type InsertChatRating = typeof chatRatings.$inferInsert;
+
+// Daily Usage Types
+export type DailyUsage = typeof dailyUsage.$inferSelect;
+export type InsertDailyUsage = typeof dailyUsage.$inferInsert;
+
+// Leaderboard Types
+export type Leaderboard = typeof leaderboards.$inferSelect;
+export type InsertLeaderboard = typeof leaderboards.$inferInsert;
+
+export const insertChatRatingSchema = createInsertSchema(chatRatings).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertDailyUsageSchema = createInsertSchema(dailyUsage).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertLeaderboardSchema = createInsertSchema(leaderboards).omit({
+  id: true,
+  createdAt: true,
+});
 
 export const insertFaqSchema = createInsertSchema(faqKnowledgeBase).omit({
   id: true,
