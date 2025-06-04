@@ -266,8 +266,8 @@ Once I have these details, I can provide competitive rate structures and process
 - No document citations needed for conversation starters
 - Focus on gathering information to provide better help
 
-User context: ${context?.userRole || 'Merchant Services Sales Agent'}` :
-        
+User context: ${context?.userRole || 'Merchant Services Sales Agent'}` 
+        :
         `You are JACC, a knowledgeable AI assistant for merchant services sales agents.
 
 **RESPONSE FORMAT - ALWAYS USE THIS STRUCTURE:**
