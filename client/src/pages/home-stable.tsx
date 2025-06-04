@@ -250,6 +250,17 @@ export default function HomeStable() {
             />
           </div>
         </div>
+
+        {/* Gamification Panel - Right sidebar */}
+        <div className="border-l border-border bg-gray-50 dark:bg-gray-900 overflow-y-auto">
+          <div className="p-4 space-y-6">
+            {/* Usage Meter */}
+            <UsageMeter />
+            
+            {/* Leaderboard */}
+            <Leaderboard />
+          </div>
+        </div>
       </div>
     </div>
   );
