@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Checkbox } from '@/components/ui/checkbox';
 import { 
   Play, 
   ArrowRight, 
@@ -41,6 +42,7 @@ export default function OnboardingWalkthrough() {
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
   const [hasSeenOnboarding, setHasSeenOnboarding] = useState(false);
+  const [dontShowAgain, setDontShowAgain] = useState(false);
 
   // Check if user has completed onboarding
   useEffect(() => {
@@ -332,7 +334,8 @@ export default function OnboardingWalkthrough() {
       setCurrentStep(prev => prev + 1);
     } else {
       // Complete onboarding
-      localStorage.setItem(`jacc-onboarding-${user?.id}`, 'completed');
+      const status = dontShowAgain ? 'never_show' : 'completed';
+      localStorage.setItem(`jacc-onboarding-${user?.id}`, status);
       setIsOpen(false);
       setHasSeenOnboarding(true);
     }
@@ -345,7 +348,8 @@ export default function OnboardingWalkthrough() {
   };
 
   const handleSkip = () => {
-    localStorage.setItem(`jacc-onboarding-${user?.id}`, 'skipped');
+    const status = dontShowAgain ? 'never_show' : 'skipped';
+    localStorage.setItem(`jacc-onboarding-${user?.id}`, status);
     setIsOpen(false);
     setHasSeenOnboarding(true);
   };
@@ -427,26 +431,43 @@ export default function OnboardingWalkthrough() {
           )}
         </div>
 
-        <div className="flex justify-between items-center pt-4 border-t">
-          <div className="flex gap-2">
-            {currentStep > 0 && (
-              <Button variant="outline" onClick={handlePrevious}>
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Previous
-              </Button>
-            )}
-            
-            {currentStepData.skipButton !== false && currentStep < steps.length - 1 && (
-              <Button variant="ghost" onClick={handleSkip} className="text-muted-foreground">
-                Skip Tutorial
-              </Button>
-            )}
+        {/* Checkbox for "Don't show again" */}
+        <div className="pt-4 border-t">
+          <div className="flex items-center space-x-2 mb-4">
+            <Checkbox 
+              id="dont-show-again"
+              checked={dontShowAgain}
+              onCheckedChange={setDontShowAgain}
+            />
+            <label 
+              htmlFor="dont-show-again"
+              className="text-sm text-muted-foreground cursor-pointer"
+            >
+              Don't show this tutorial again
+            </label>
           </div>
+          
+          <div className="flex justify-between items-center">
+            <div className="flex gap-2">
+              {currentStep > 0 && (
+                <Button variant="outline" onClick={handlePrevious}>
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Previous
+                </Button>
+              )}
+              
+              {currentStepData.skipButton !== false && currentStep < steps.length - 1 && (
+                <Button variant="ghost" onClick={handleSkip} className="text-muted-foreground">
+                  Skip Tutorial
+                </Button>
+              )}
+            </div>
 
-          <Button onClick={handleNext}>
-            {currentStepData.nextButton || 'Next'}
-            {currentStep < steps.length - 1 && <ArrowRight className="w-4 h-4 ml-2" />}
-          </Button>
+            <Button onClick={handleNext}>
+              {currentStepData.nextButton || 'Next'}
+              {currentStep < steps.length - 1 && <ArrowRight className="w-4 h-4 ml-2" />}
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
