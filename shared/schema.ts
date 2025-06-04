@@ -455,6 +455,19 @@ export const aiTrainingMaterials = pgTable("ai_training_materials", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+
+
+// Add missing columns to userStats table
+export const userStatsExtended = pgTable("user_stats_extended", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  averageRating: real("average_rating").default(0),
+  totalRatings: integer("total_ratings").default(0),
+  averageResponseTime: real("average_response_time").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Define relations
 export const usersRelations = relations(users, ({ one, many }) => ({
   folders: many(folders),

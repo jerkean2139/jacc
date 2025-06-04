@@ -1213,9 +1213,30 @@ User Context: {userRole}`,
       // Save user message
       const userMessage = await storage.createMessage(messageData);
       
-      // Log first user chat request for admin monitoring
+      // Get chat history before processing
       const chatHistory = await storage.getChatMessages(chatId);
       const isFirstMessage = chatHistory.filter(m => m.role === 'user').length === 1;
+      
+      // Add welcome message for new chats to ensure JACC avatar appears
+      if (isFirstMessage && chatHistory.length === 1) {
+        const welcomeMessage = await storage.createMessage({
+          chatId,
+          content: "Hi! I'm JACC, your merchant services expert. Let's calculate the perfect processing rates for your client.\n\nTo give you the most accurate rates, I need to know:\n\n1. What type of restaurant is this? (fast casual, fine dining, food truck, etc.)\n\n2. What's their approximate monthly credit card volume?\n\n3. Do they process mostly in-person or online transactions?\n\nOnce I have these details, I can provide competitive rates and processor recommendations tailored to their specific needs.",
+          role: 'assistant',
+          metadata: {
+            actions: [],
+            suggestions: ["What are the fees with Quantic?", "Who offers restaurant POS?", "Calculate processing rates"]
+          }
+        });
+        
+        // Return early with welcome message for new chats
+        return res.json({
+          userMessage,
+          assistantMessage: welcomeMessage,
+          actions: [],
+          suggestions: ["What are the fees with Quantic?", "Who offers restaurant POS?", "Calculate processing rates"]
+        });
+      }
       
       if (isFirstMessage) {
         try {
