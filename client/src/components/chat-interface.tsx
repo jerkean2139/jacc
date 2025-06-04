@@ -225,15 +225,7 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
   const handleQuickAction = (action: string) => {
     // Create engaging conversation starters with follow-up questions
     const engagingStarters = {
-      "Calculate processing rates for a restaurant": `Hi! I'm JACC, your merchant services expert. Let's calculate the perfect processing rates for your client.
-
-To give you the most accurate rates, I need to know:
-
-1. What type of restaurant is this? (Fast casual, fine dining, food truck, etc.)
-2. What's their approximate monthly credit card volume?
-3. Do they process mostly in-person or online transactions?
-
-Once I have these details, I can provide competitive rates and processor recommendations tailored to their specific needs.`,
+      "Calculate processing rates for a restaurant": `I need to calculate processing rates for a restaurant client. Can you help me get competitive rates and processor recommendations?`,
 
       "Analyze Stripe vs Square vs Clover for my restaurant client": `Great choice! I'll help you compare these top processors for your restaurant client.
 
