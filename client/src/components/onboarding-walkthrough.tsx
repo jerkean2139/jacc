@@ -391,12 +391,14 @@ export default function OnboardingWalkthrough() {
               </div>
             </div>
             <Button 
-              variant="ghost" 
+              variant="outline" 
               size="sm" 
               onClick={handleSkip}
-              className="text-muted-foreground"
+              className="bg-white dark:bg-slate-800 border-2 border-gray-300 dark:border-gray-600 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-700 shadow-sm"
+              title="Don't show this tutorial again"
             >
-              <X className="w-4 h-4" />
+              <X className="w-4 h-4 mr-1" />
+              <span className="text-xs">Don't show again</span>
             </Button>
           </div>
           
