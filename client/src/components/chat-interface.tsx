@@ -476,7 +476,7 @@ With these details, I'll create a customized proposal highlighting value proposi
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-4xl mb-8">
             <Button
               variant="outline"
-              className="p-3 h-auto text-left justify-start hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-300 hover:border-blue-200 dark:hover:border-blue-700 transition-colors w-full"
+              className="p-3 h-auto text-left justify-start hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-300 hover:border-blue-200 dark:hover:border-blue-700 transition-all duration-200 w-full"
               onClick={() => handleQuickAction("Calculate processing rates for a restaurant")}
             >
               <Calculator className="mr-3 h-4 w-4 text-blue-600 flex-shrink-0" />

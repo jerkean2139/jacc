@@ -512,7 +512,7 @@ export const userPrompts = pgTable("user_prompts", {
 
 export type UserPrompt = typeof userPrompts.$inferSelect;
 export type InsertUserPrompt = typeof userPrompts.$inferInsert;
-export type InsertUser = z.infer<typeof insertUserSchema>;
+// Removed duplicate InsertUser definition
 export type ApiKey = typeof apiKeys.$inferSelect;
 export type InsertApiKey = z.infer<typeof insertApiKeySchema>;
 export type InsertFolder = z.infer<typeof insertFolderSchema>;
@@ -733,7 +733,7 @@ export const insertUserStatsSchema = createInsertSchema(userStats).omit({
   updatedAt: true,
 });
 
-// Gamification Types
+// Consolidated Gamification Types (removing first set of duplicates)
 export type UserStats = typeof userStats.$inferSelect;
 export type InsertUserStats = z.infer<typeof insertUserStatsSchema>;
 export type Achievement = typeof achievements.$inferSelect;
@@ -747,13 +747,7 @@ export const insertFaqSchema = createInsertSchema(faqKnowledgeBase).omit({
   lastUpdated: true,
 });
 
-// Gamification Types
-export type Achievement = typeof achievements.$inferSelect;
-export type InsertAchievement = z.infer<typeof insertAchievementSchema>;
-export type UserAchievement = typeof userAchievements.$inferSelect;
-export type InsertUserAchievement = z.infer<typeof insertUserAchievementSchema>;
-export type UserStats = typeof userStats.$inferSelect;
-export type InsertUserStats = z.infer<typeof insertUserStatsSchema>;
+// Removed duplicate gamification types
 export type FaqEntry = typeof faqKnowledgeBase.$inferSelect;
 export type InsertFaq = z.infer<typeof insertFaqSchema>;
 
