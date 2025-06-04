@@ -10,6 +10,7 @@ import PWAStatus from "@/components/pwa-status";
 import OfflineIndicator from "@/components/offline-indicator";
 import ContextualHelp from "@/components/contextual-help";
 import InteractiveTutorial from "@/components/interactive-tutorial";
+import OnboardingWalkthrough from "@/components/onboarding-walkthrough";
 import PWAInstallPrompt from "@/components/pwa-install-prompt";
 import BottomNav from "@/components/bottom-nav";
 
@@ -94,6 +95,7 @@ function AppContent() {
           <ContextualHelp />
         </div>
         <InteractiveTutorial />
+        <OnboardingWalkthrough />
         <PWAInstallPrompt />
         <Router />
         <BottomNav />
