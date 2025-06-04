@@ -211,11 +211,11 @@ export class EnhancedAIService {
       ).join('\n\n');
       
       // Check if this is a conversation starter that needs engagement
-      const isConversationStarter = message.includes("I'm JACC, your merchant services expert") || 
-                                    message.includes("Let's calculate the perfect processing rates") ||
-                                    message.includes("Great choice! I'll help you compare") ||
-                                    message.includes("Perfect timing! The payment processing industry") ||
-                                    message.includes("Excellent! I'll help you create a compelling proposal");
+      const isConversationStarter = lastUserMessage.content.includes("I'm JACC, your merchant services expert") || 
+                                    lastUserMessage.content.includes("Let's calculate the perfect processing rates") ||
+                                    lastUserMessage.content.includes("Great choice! I'll help you compare") ||
+                                    lastUserMessage.content.includes("Perfect timing! The payment processing industry") ||
+                                    lastUserMessage.content.includes("Excellent! I'll help you create a compelling proposal");
 
       // Enhanced system prompt with document and web context
       const systemPrompt = isConversationStarter ? 

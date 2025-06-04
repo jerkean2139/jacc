@@ -47,6 +47,10 @@ export default function OnboardingWalkthrough() {
   // Check if user has completed onboarding
   useEffect(() => {
     const onboardingStatus = localStorage.getItem(`jacc-onboarding-${user?.id}`);
+    if (onboardingStatus === 'never_show') {
+      setHasSeenOnboarding(true);
+      return;
+    }
     if (!onboardingStatus && user) {
       // Show onboarding for new users after a brief delay
       setTimeout(() => setIsOpen(true), 1000);
