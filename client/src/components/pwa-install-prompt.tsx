@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Download, X, Smartphone, Zap, Wifi } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -19,6 +20,7 @@ export default function PWAInstallPrompt() {
   const [showPrompt, setShowPrompt] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
+  const [dontShowAgain, setDontShowAgain] = useState(false);
 
   useEffect(() => {
     // Check if app is already installed
@@ -36,7 +38,8 @@ export default function PWAInstallPrompt() {
       
       // Don't show if already dismissed or installed
       const dismissed = localStorage.getItem('pwa-install-dismissed');
-      if (!dismissed && !isInstalled) {
+      const neverShow = localStorage.getItem('pwa-install-never-show');
+      if (!dismissed && !neverShow && !isInstalled) {
         setTimeout(() => setShowPrompt(true), 3000); // Show after 3 seconds
       }
     };
@@ -71,7 +74,8 @@ export default function PWAInstallPrompt() {
 
   const handleDismiss = () => {
     setShowPrompt(false);
-    localStorage.setItem('pwa-install-dismissed', 'true');
+    const storageKey = dontShowAgain ? 'pwa-install-never-show' : 'pwa-install-dismissed';
+    localStorage.setItem(storageKey, 'true');
   };
 
   // Don't show if installed or no prompt available
@@ -121,6 +125,21 @@ export default function PWAInstallPrompt() {
               <Wifi className="w-3 h-3" />
               <span>Works offline</span>
             </div>
+          </div>
+
+          {/* Don't show again checkbox */}
+          <div className="flex items-center space-x-2 mb-3">
+            <Checkbox 
+              id="dont-show-pwa-again"
+              checked={dontShowAgain}
+              onCheckedChange={(checked) => setDontShowAgain(checked === true)}
+            />
+            <label 
+              htmlFor="dont-show-pwa-again"
+              className="text-xs text-gray-500 cursor-pointer"
+            >
+              Don't show this again
+            </label>
           </div>
 
           <div className="flex gap-2">
