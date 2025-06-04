@@ -2000,6 +2000,84 @@ User Context: {userRole}`,
     }
   });
 
+  // Chat Rating System API
+  app.post("/api/chats/:chatId/rating", isAuthenticated, async (req, res) => {
+    try {
+      const { chatId } = req.params;
+      const { rating, feedback } = req.body;
+      const userId = req.user.id;
+
+      if (!rating || rating < 1 || rating > 5) {
+        return res.status(400).json({ error: "Rating must be between 1 and 5" });
+      }
+
+      const { gamificationService } = await import('./gamification');
+      await gamificationService.submitChatRating(chatId, userId, rating, feedback);
+      
+      res.json({ success: true, message: "Rating submitted successfully" });
+    } catch (error) {
+      console.error("Failed to submit chat rating:", error);
+      res.status(500).json({ error: "Failed to submit chat rating" });
+    }
+  });
+
+  app.get("/api/admin/low-rated-sessions", isAuthenticated, async (req, res) => {
+    try {
+      const { threshold = 3 } = req.query;
+      const { gamificationService } = await import('./gamification');
+      const lowRatedSessions = await gamificationService.getLowRatedSessions(Number(threshold));
+      res.json(lowRatedSessions);
+    } catch (error) {
+      console.error("Failed to get low rated sessions:", error);
+      res.status(500).json({ error: "Failed to get low rated sessions" });
+    }
+  });
+
+  // Leaderboard API
+  app.get("/api/leaderboard", isAuthenticated, async (req, res) => {
+    try {
+      const { period = 'weekly', metric = 'messages' } = req.query;
+      const { gamificationService } = await import('./gamification');
+      const leaderboard = await gamificationService.getLeaderboard(
+        period as 'weekly' | 'monthly' | 'all_time', 
+        metric as string
+      );
+      res.json(leaderboard);
+    } catch (error) {
+      console.error("Failed to get leaderboard:", error);
+      res.status(500).json({ error: "Failed to get leaderboard" });
+    }
+  });
+
+  // User Engagement Metrics
+  app.get("/api/user/engagement", isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const { gamificationService } = await import('./gamification');
+      const metrics = await gamificationService.getUserEngagementMetrics(userId);
+      res.json(metrics);
+    } catch (error) {
+      console.error("Failed to get user engagement metrics:", error);
+      res.status(500).json({ error: "Failed to get user engagement metrics" });
+    }
+  });
+
+  // Track usage for gamification
+  app.post("/api/track-usage", isAuthenticated, async (req, res) => {
+    try {
+      const { action } = req.body;
+      const userId = req.user.id;
+
+      const { gamificationService } = await import('./gamification');
+      await gamificationService.trackDailyUsage(userId, action);
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Failed to track usage:", error);
+      res.status(500).json({ error: "Failed to track usage" });
+    }
+  });
+
   app.post("/api/user/track-action", isAuthenticated, async (req, res) => {
     try {
       const userId = req.user.id;

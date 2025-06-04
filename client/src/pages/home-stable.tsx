@@ -12,6 +12,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useNewChatFAB } from "@/components/bottom-nav";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { UsageMeter } from "@/components/gamification/usage-meter";
+import { Leaderboard } from "@/components/gamification/leaderboard";
 
 export default function HomeStable() {
   const { user } = useAuth();
@@ -186,7 +188,7 @@ export default function HomeStable() {
       </div>
 
       {/* Desktop Layout - CSS Grid for stability */}
-      <div className="hidden lg:grid grid-cols-[320px_1fr] h-full w-full">
+      <div className="hidden lg:grid grid-cols-[320px_1fr_300px] h-full w-full">
         {/* Sidebar - Fixed width grid column */}
         <div className="border-r border-border overflow-hidden">
           <Sidebar
