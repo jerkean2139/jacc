@@ -66,21 +66,9 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
   const [showPromptDropdown, setShowPromptDropdown] = useState(false);
   const [promptSearchTerm, setPromptSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [isWelcomeHidden, setIsWelcomeHidden] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
-
-  // Check if welcome screen should be hidden
-  useEffect(() => {
-    const welcomeHidden = localStorage.getItem('jacc-welcome-hidden');
-    setIsWelcomeHidden(welcomeHidden === 'true');
-  }, []);
-
-  const handleDismissWelcome = () => {
-    localStorage.setItem('jacc-welcome-hidden', 'true');
-    setIsWelcomeHidden(true);
-  };
 
   // Fetch messages for the active chat - with error handling
   const { data: messages = [], isLoading, error } = useQuery<MessageWithActions[]>({
@@ -423,25 +411,22 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
 
         {/* Welcome Screen */}
         <div className="flex-1 flex flex-col items-center justify-center p-6 max-w-4xl mx-auto relative">
-          
-          {!isWelcomeHidden ? (
-            <>
-              <div className="text-center mb-8">
-                <img 
-                  src="/jacc-logo.jpg" 
-                  alt="JACC" 
-                  className="w-24 h-24 rounded-full mx-auto mb-6 object-cover shadow-lg"
-                />
-                <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-3">
-                  How can I help you today?
-                </h1>
-                <p className="text-slate-600 dark:text-slate-400">
-                  Ask me about merchant services, rates, documents, or client questions
-                </p>
-              </div>
+          <div className="text-center mb-8">
+            <img 
+              src="/jacc-logo.jpg" 
+              alt="JACC" 
+              className="w-24 h-24 rounded-full mx-auto mb-6 object-cover shadow-lg"
+            />
+            <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-3">
+              How can I help you today?
+            </h1>
+            <p className="text-slate-600 dark:text-slate-400">
+              Ask me about merchant services, rates, documents, or client questions
+            </p>
+          </div>
 
-              {/* Suggested Prompts */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-4xl mb-8">
+          {/* Suggested Prompts */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-4xl mb-8">
             <Button
               variant="outline"
               className="p-3 h-auto text-left justify-start hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-300 hover:border-blue-200 dark:hover:border-blue-700 transition-colors w-full"
@@ -509,18 +494,7 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
                 <div className="text-xs text-slate-500 group-hover:text-blue-600 dark:group-hover:text-blue-400 line-clamp-2">Generate client proposals and documents</div>
               </div>
             </Button>
-              </div>
-            </>
-          ) : (
-            <div className="text-center py-8">
-              <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">
-                Welcome back!
-              </h2>
-              <p className="text-slate-600 dark:text-slate-400">
-                Start a new conversation or browse your chat history.
-              </p>
-            </div>
-          )}
+          </div>
         </div>
 
         {/* Input Box for New Chat */}
