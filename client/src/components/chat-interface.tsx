@@ -508,7 +508,7 @@ With these details, I'll create a customized proposal highlighting value proposi
             
             <Button
               variant="outline"
-              className="p-3 h-auto text-left justify-start hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-700 dark:hover:text-purple-300 hover:border-purple-200 dark:hover:border-purple-700 transition-colors w-full"
+              className="p-3 h-auto text-left justify-start hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-700 dark:hover:text-purple-300 hover:border-purple-200 dark:hover:border-purple-700 transition-all duration-200 w-full"
               onClick={() => handleQuickAction("Analyze Stripe vs Square vs Clover for my restaurant client")}
             >
               <Brain className="mr-3 h-4 w-4 text-purple-600 flex-shrink-0" />
@@ -520,7 +520,7 @@ With these details, I'll create a customized proposal highlighting value proposi
             
             <Button
               variant="outline"
-              className="p-3 h-auto text-left justify-start hover:bg-yellow-50 dark:hover:bg-yellow-900/20 hover:text-yellow-700 dark:hover:text-yellow-300 hover:border-yellow-200 dark:hover:border-yellow-700 transition-colors w-full"
+              className="p-3 h-auto text-left justify-start hover:bg-yellow-50 dark:hover:bg-yellow-900/20 hover:text-yellow-700 dark:hover:text-yellow-300 hover:border-yellow-200 dark:hover:border-yellow-700 transition-all duration-200 w-full"
               onClick={() => handleQuickAction("Get current payment processing industry trends and market analysis")}
             >
               <Zap className="mr-3 h-4 w-4 text-yellow-600 flex-shrink-0" />
@@ -532,7 +532,7 @@ With these details, I'll create a customized proposal highlighting value proposi
             
             <Button
               variant="outline"
-              className="p-3 h-auto text-left justify-start hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-300 hover:border-blue-200 dark:hover:border-blue-700 transition-colors w-full"
+              className="p-3 h-auto text-left justify-start hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-300 hover:border-blue-200 dark:hover:border-blue-700 transition-all duration-200 w-full"
               onClick={() => handleQuickAction("Help me prepare a proposal for a new client")}
             >
               <FileText className="mr-3 h-4 w-4 text-blue-600 flex-shrink-0" />

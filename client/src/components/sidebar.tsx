@@ -476,21 +476,23 @@ export default function Sidebar({
           </div>
         </div>
 
-        {/* Knowledge Base Section */}
-        <div className="mb-6">
-          <h4 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3">
-            Knowledge Base
-          </h4>
-          <div className="space-y-1">
-            <a 
-              href="/documents" 
-              className="flex items-center space-x-3 p-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg cursor-pointer transition-colors"
-            >
-              <FileSearch className="w-4 h-4 text-green-500" />
-              <span className="text-sm text-slate-700 dark:text-slate-300">Document Library</span>
-            </a>
+        {/* Knowledge Base Section - Admin Only */}
+        {user?.role === 'admin' && (
+          <div className="mb-6">
+            <h4 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3">
+              Knowledge Base
+            </h4>
+            <div className="space-y-1">
+              <a 
+                href="/documents" 
+                className="flex items-center space-x-3 p-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg cursor-pointer transition-colors"
+              >
+                <FileSearch className="w-4 h-4 text-green-500" />
+                <span className="text-sm text-slate-700 dark:text-slate-300">Document Library</span>
+              </a>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* ISO AMP Tools Section - Hidden for MVP Launch, preserved for Version 2 */}
         {false && (
