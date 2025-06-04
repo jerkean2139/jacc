@@ -423,15 +423,18 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
 
         {/* Welcome Screen */}
         <div className="flex-1 flex flex-col items-center justify-center p-6 max-w-4xl mx-auto relative">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleDismissWelcome}
-            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 z-10"
-            title="Don't show this welcome screen again"
-          >
-            <X className="w-4 h-4" />
-          </Button>
+          {!isWelcomeHidden && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleDismissWelcome}
+              className="absolute top-6 right-6 bg-white dark:bg-slate-800 border-2 border-gray-300 dark:border-gray-600 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-700 shadow-md z-20"
+              title="Don't show this welcome screen again"
+            >
+              <X className="w-4 h-4 mr-1" />
+              <span className="text-xs">Hide</span>
+            </Button>
+          )}
           
           {!isWelcomeHidden ? (
             <>
