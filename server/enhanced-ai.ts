@@ -224,6 +224,18 @@ export class EnhancedAIService {
         lastUserMessage.content.includes("Excellent! I'll help you create")
       );
 
+      // Debug conversation starter detection
+      console.log(`🔍 CONVERSATION STARTER DEBUG:`, {
+        isFirstUserMessage,
+        userMessageCount: userMessages.length,
+        messageContent: lastUserMessage.content.substring(0, 100),
+        isConversationStarter,
+        detectedPhrases: [
+          lastUserMessage.content.includes("calculate the perfect processing rates"),
+          lastUserMessage.content.includes("merchant services expert")
+        ]
+      });
+
       // Enhanced system prompt with document and web context
       const systemPrompt = isConversationStarter ? 
         `You are JACC, a knowledgeable AI assistant for merchant services sales agents.
