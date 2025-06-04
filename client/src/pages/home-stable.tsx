@@ -74,24 +74,22 @@ export default function HomeStable() {
       });
       const newChat = await response.json();
       
+      // Refresh chats immediately
+      queryClient.invalidateQueries({ queryKey: ["/api/chats"] });
+      
       // Navigate to the new chat
       navigate(`/chat/${newChat.id}`);
       
-      // Send the message after a brief delay to allow navigation
+      // Send the message using apiRequest to ensure proper conversation starter detection
       setTimeout(async () => {
-        await fetch(`/api/chats/${newChat.id}/messages`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({
-            content: message,
-            role: "user"
-          }),
+        await apiRequest("POST", `/api/chats/${newChat.id}/messages`, {
+          content: message,
+          role: "user"
         });
         
-        // Refresh the chats list
-        queryClient.invalidateQueries({ queryKey: ["/api/chats"] });
-      }, 100);
+        // Refresh messages for the new chat
+        queryClient.invalidateQueries({ queryKey: [`/api/chats/${newChat.id}/messages`] });
+      }, 200);
     } catch (error) {
       toast({
         title: "Error",
