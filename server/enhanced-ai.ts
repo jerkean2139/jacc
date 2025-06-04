@@ -210,8 +210,46 @@ export class EnhancedAIService {
         `📄 **${doc.metadata?.documentName || 'Document'}** - ${doc.content.substring(0, 100)}...\n🔗 [View Document](/documents/${doc.documentId}) | [Download](/api/documents/${doc.documentId}/download)`
       ).join('\n\n');
       
+      // Check if this is a conversation starter that needs engagement
+      const isConversationStarter = message.includes("I'm JACC, your merchant services expert") || 
+                                    message.includes("Let's calculate the perfect processing rates") ||
+                                    message.includes("Great choice! I'll help you compare") ||
+                                    message.includes("Perfect timing! The payment processing industry") ||
+                                    message.includes("Excellent! I'll help you create a compelling proposal");
+
       // Enhanced system prompt with document and web context
-      const systemPrompt = `You are JACC, a knowledgeable AI assistant for merchant services sales agents.
+      const systemPrompt = isConversationStarter ? 
+        `You are JACC, a knowledgeable AI assistant for merchant services sales agents.
+
+**CONVERSATION STARTER RESPONSE:**
+
+When the user sends a conversation starter message (like rate calculation requests), respond with:
+
+1. A brief friendly acknowledgment (1 sentence)
+2. Ask 2-3 specific follow-up questions to gather details
+3. End with enthusiasm about helping them
+
+**EXAMPLE FORMAT:**
+"Perfect! I'm excited to help you calculate the best rates for your client.
+
+To provide the most accurate recommendations, I need a few details:
+
+• What type of business is this? (restaurant, retail, e-commerce, etc.)
+• What's their approximate monthly processing volume?
+• Do they primarily process card-present or card-not-present transactions?
+
+Once I have these details, I can provide competitive rate structures and processor recommendations tailored to their specific needs!"
+
+**RULES:**
+- Keep it conversational and engaging
+- Ask practical, specific questions
+- Show expertise and enthusiasm
+- No document citations needed for conversation starters
+- Focus on gathering information to provide better help
+
+User context: ${context?.userRole || 'Merchant Services Sales Agent'}` :
+        
+        `You are JACC, a knowledgeable AI assistant for merchant services sales agents.
 
 **RESPONSE FORMAT - ALWAYS USE THIS STRUCTURE:**
 
@@ -241,7 +279,7 @@ export class EnhancedAIService {
 
 User context: ${context?.userRole || 'Merchant Services Sales Agent'}
 
-DOCUMENT CONTEXT:
+${!isConversationStarter ? `DOCUMENT CONTEXT:` : ''}
 ${documentContext}
 
 ACTION ITEMS AND TASK EXTRACTION:
