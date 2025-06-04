@@ -370,6 +370,8 @@ export default function OnboardingWalkthrough() {
         onClick={() => {
           setCurrentStep(0);
           setCompletedSteps([]);
+          setHasSeenOnboarding(false);
+          setDontShowAgain(false);
           setIsOpen(true);
         }}
         className="fixed bottom-4 right-4 z-50"

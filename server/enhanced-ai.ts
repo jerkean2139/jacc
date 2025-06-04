@@ -211,11 +211,18 @@ export class EnhancedAIService {
       ).join('\n\n');
       
       // Check if this is a conversation starter that needs engagement
-      const isConversationStarter = lastUserMessage.content.includes("I'm JACC, your merchant services expert") || 
-                                    lastUserMessage.content.includes("Let's calculate the perfect processing rates") ||
-                                    lastUserMessage.content.includes("Great choice! I'll help you compare") ||
-                                    lastUserMessage.content.includes("Perfect timing! The payment processing industry") ||
-                                    lastUserMessage.content.includes("Excellent! I'll help you create a compelling proposal");
+      const userMessages = messages.filter(msg => msg.role === 'user');
+      const isFirstUserMessage = userMessages.length === 1;
+      const isConversationStarter = isFirstUserMessage && (
+        lastUserMessage.content.includes("calculate the perfect processing rates") || 
+        lastUserMessage.content.includes("help you compare processors") ||
+        lastUserMessage.content.includes("payment processing industry") ||
+        lastUserMessage.content.includes("prepare a proposal for a new client") ||
+        lastUserMessage.content.includes("merchant services expert") ||
+        lastUserMessage.content.includes("To provide the most relevant analysis") ||
+        lastUserMessage.content.includes("Perfect timing! The payment processing") ||
+        lastUserMessage.content.includes("Excellent! I'll help you create")
+      );
 
       // Enhanced system prompt with document and web context
       const systemPrompt = isConversationStarter ? 
