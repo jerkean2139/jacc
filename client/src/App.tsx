@@ -64,8 +64,13 @@ function Router() {
           <Route path="/calculator" component={ISOAmpCalculator} />
           <Route path="/iso-amp-calculator" component={ISOAmpCalculator} />
           <Route path="/guide" component={UserGuide} />
-          <Route path="/documents" component={DocumentsPage} />
-          <Route path="/documents/:documentId" component={DocumentViewer} />
+          {/* Documents only accessible to admin users */}
+          {user?.role === 'admin' && (
+            <>
+              <Route path="/documents" component={DocumentsPage} />
+              <Route path="/documents/:documentId" component={DocumentViewer} />
+            </>
+          )}
           <Route path="/prompts" component={PromptCustomization} />
           <Route path="/merchant-insights" component={MerchantInsights} />
           <Route path="/leaderboard" component={GamificationPage} />

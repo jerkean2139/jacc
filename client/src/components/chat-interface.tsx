@@ -223,10 +223,57 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
   };
 
   const handleQuickAction = (action: string) => {
+    // Create engaging conversation starters with follow-up questions
+    const engagingStarters = {
+      "Calculate processing rates for a restaurant": `Hi! I'm JACC, your merchant services expert. Let's calculate the perfect processing rates for your client.
+
+To give you the most accurate rates, I need to know:
+
+1. What type of restaurant is this? (Fast casual, fine dining, food truck, etc.)
+2. What's their approximate monthly credit card volume?
+3. Do they process mostly in-person or online transactions?
+
+Once I have these details, I can provide competitive rates and processor recommendations tailored to their specific needs.`,
+
+      "Analyze Stripe vs Square vs Clover for my restaurant client": `Great choice! I'll help you compare these top processors for your restaurant client.
+
+To provide the most relevant analysis, tell me:
+
+1. What's the restaurant's monthly processing volume?
+2. Do they need POS hardware or just payment processing?
+3. Are they focused more on in-store, online, or delivery orders?
+
+Based on your answers, I'll break down the costs, features, and best fit for each processor with specific recommendations.`,
+
+      "Get current payment processing industry trends and market analysis": `Perfect timing! The payment processing industry is evolving rapidly. I'll share the latest insights.
+
+Are you looking for:
+
+1. Overall market trends and growth projections?
+2. New technology impacts (AI, blockchain, mobile payments)?
+3. Competitive landscape changes?
+4. Specific vertical market trends (retail, restaurants, e-commerce)?
+
+Let me know your focus area and I'll provide detailed analysis with actionable insights for your sales strategy.`,
+
+      "Help me prepare a proposal for a new client": `Excellent! I'll help you create a compelling proposal that wins the deal.
+
+To craft the perfect proposal, I need:
+
+1. What type of business is your prospect?
+2. What's their current payment processing pain point?
+3. Estimated monthly transaction volume?
+4. Any specific requirements they mentioned?
+
+With these details, I'll create a customized proposal highlighting value propositions, competitive rates, and implementation benefits that resonate with their specific needs.`
+    };
+
+    const engagingMessage = engagingStarters[action as keyof typeof engagingStarters] || action;
+    
     if (onNewChatWithMessage) {
-      onNewChatWithMessage(action);
+      onNewChatWithMessage(engagingMessage);
     } else {
-      setInput(action);
+      setInput(engagingMessage);
     }
   };
 
