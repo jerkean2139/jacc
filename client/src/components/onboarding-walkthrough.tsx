@@ -437,17 +437,18 @@ export default function OnboardingWalkthrough() {
           )}
         </div>
 
-        {/* Checkbox for "Don't show again" */}
+        {/* Checkbox for "Don't show again" - moved to header for better visibility */}
         <div className="pt-4 border-t">
           <div className="flex items-center space-x-2 mb-4">
             <Checkbox 
               id="dont-show-again"
               checked={dontShowAgain}
               onCheckedChange={(checked) => setDontShowAgain(checked === true)}
+              className="data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
             />
             <label 
               htmlFor="dont-show-again"
-              className="text-sm text-muted-foreground cursor-pointer"
+              className="text-sm font-medium cursor-pointer select-none"
             >
               Don't show this tutorial again
             </label>

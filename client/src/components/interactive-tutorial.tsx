@@ -410,24 +410,9 @@ export default function InteractiveTutorial() {
   const progress = ((currentStep + 1) / tutorialSteps.length) * 100;
   const currentStepData = tutorialSteps[currentStep];
 
-  // Show restart button for completed users
+  // Remove duplicate restart button - only show in sidebar
   if (isCompleted && !isActive) {
-    return (
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => {
-          setCurrentStep(0);
-          setCompletedSteps([]);
-          setIsActive(true);
-          setIsCompleted(false);
-        }}
-        className="fixed bottom-4 left-4 z-50 shadow-lg"
-      >
-        <Play className="w-4 h-4 mr-2" />
-        Restart Tutorial
-      </Button>
-    );
+    return null;
   }
 
   return (

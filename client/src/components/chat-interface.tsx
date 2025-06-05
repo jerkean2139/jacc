@@ -464,17 +464,17 @@ With these details, I'll create a customized proposal highlighting value proposi
             </p>
           </div>
 
-          {/* Suggested Prompts */}
+          {/* Conversation Starters - Coming Soon */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-4xl mb-8">
             <Button
               variant="outline"
-              className="p-3 h-auto text-left justify-start hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-300 hover:border-blue-200 dark:hover:border-blue-700 transition-all duration-200 w-full"
-              onClick={() => handleQuickAction("Calculate processing rates for a restaurant")}
+              className="p-3 h-auto text-left justify-start opacity-50 cursor-not-allowed w-full"
+              disabled
             >
-              <Calculator className="mr-3 h-4 w-4 text-blue-600 flex-shrink-0" />
+              <Calculator className="mr-3 h-4 w-4 text-gray-400 flex-shrink-0" />
               <div className="flex-1 min-w-0 overflow-hidden">
                 <div className="font-medium mb-1 text-sm truncate">Calculate Rates</div>
-                <div className="text-xs text-slate-500 group-hover:text-blue-600 dark:group-hover:text-blue-400 line-clamp-2">Get processing rates for different business types</div>
+                <div className="text-xs text-gray-400 line-clamp-2">Coming Soon - Calculate processing rates</div>
               </div>
             </Button>
 
@@ -500,22 +500,22 @@ With these details, I'll create a customized proposal highlighting value proposi
             
             <Button
               variant="outline"
-              className="p-3 h-auto text-left justify-start hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-700 dark:hover:text-purple-300 hover:border-purple-200 dark:hover:border-purple-700 transition-all duration-200 w-full"
-              onClick={() => handleQuickAction("Analyze Stripe vs Square vs Clover for my restaurant client")}
+              className="p-3 h-auto text-left justify-start opacity-50 cursor-not-allowed w-full"
+              disabled
             >
-              <Brain className="mr-3 h-4 w-4 text-purple-600 flex-shrink-0" />
+              <Brain className="mr-3 h-4 w-4 text-gray-400 flex-shrink-0" />
               <div className="flex-1 min-w-0 overflow-hidden">
                 <div className="font-medium mb-1 text-sm truncate">AI Competitor Analysis</div>
-                <div className="text-xs text-slate-500 group-hover:text-purple-600 dark:group-hover:text-purple-400 line-clamp-2">Compare processors with real-time intelligence</div>
+                <div className="text-xs text-gray-400 line-clamp-2">Coming Soon - Compare processors with AI</div>
               </div>
             </Button>
             
             <Button
               variant="outline"
-              className="p-3 h-auto text-left justify-start hover:bg-yellow-50 dark:hover:bg-yellow-900/20 hover:text-yellow-700 dark:hover:text-yellow-300 hover:border-yellow-200 dark:hover:border-yellow-700 transition-all duration-200 w-full"
-              onClick={() => handleQuickAction("Get current payment processing industry trends and market analysis")}
+              className="p-3 h-auto text-left justify-start opacity-50 cursor-not-allowed w-full"
+              disabled
             >
-              <Zap className="mr-3 h-4 w-4 text-yellow-600 flex-shrink-0" />
+              <Zap className="mr-3 h-4 w-4 text-gray-400 flex-shrink-0" />
               <div className="flex-1 min-w-0 overflow-hidden">
                 <div className="font-medium mb-1 text-sm truncate">Industry Intelligence</div>
                 <div className="text-xs text-slate-500 group-hover:text-yellow-600 dark:group-hover:text-yellow-400 line-clamp-2">Real-time market trends and analysis</div>
