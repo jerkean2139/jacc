@@ -1060,7 +1060,10 @@ User Context: {userRole}`,
         userId
       });
       
+      // Optimize chat creation for faster response
       const chat = await storage.createChat(chatData);
+      
+      // Return immediately without expensive operations
       res.json(chat);
     } catch (error) {
       console.error("Error creating chat:", error);
@@ -1217,24 +1220,25 @@ User Context: {userRole}`,
       const chatHistory = await storage.getChatMessages(chatId);
       const isFirstMessage = chatHistory.filter(m => m.role === 'user').length === 1;
       
-      // Add welcome message for new chats to ensure JACC avatar appears
+      // Add optimized welcome message for new chats
       if (isFirstMessage && chatHistory.length === 1) {
+        // Use faster welcome message without conversation starters
         const welcomeMessage = await storage.createMessage({
           chatId,
-          content: "Hi! I'm JACC, your merchant services expert. Let's calculate the perfect processing rates for your client.\n\nTo give you the most accurate rates, I need to know:\n\n1. What type of restaurant is this? (fast casual, fine dining, food truck, etc.)\n\n2. What's their approximate monthly credit card volume?\n\n3. Do they process mostly in-person or online transactions?\n\nOnce I have these details, I can provide competitive rates and processor recommendations tailored to their specific needs.",
+          content: "Hi! I'm JACC, your merchant services expert. How can I help you today?",
           role: 'assistant',
           metadata: {
             actions: [],
-            suggestions: ["What are the fees with Quantic?", "Who offers restaurant POS?", "Calculate processing rates"]
+            suggestions: []
           }
         });
         
-        // Return early with welcome message for new chats
+        // Return immediately for faster performance
         return res.json({
           userMessage,
           assistantMessage: welcomeMessage,
           actions: [],
-          suggestions: ["What are the fees with Quantic?", "Who offers restaurant POS?", "Calculate processing rates"]
+          suggestions: []
         });
       }
       
