@@ -1,0 +1,99 @@
+🔐 ISO Hub Server Authentication Integration Details
+
+Here are the complete authentication credentials and API details for integration:
+
+API Base URL:
+https://iso-hub-server-1.keanonbiz.replit.dev/api
+Authentication Protocol:
+Type: Laravel Sanctum (Token-based authentication)
+Token Type: Bearer tokens
+Header Format: Authorization: Bearer {token}
+User Authentication Endpoints:
+1. User Login:
+
+POST https://iso-hub-server-1.keanonbiz.replit.dev/api/login
+Content-Type: application/json
+{
+  "email": "user@example.com",
+  "password": "password123"
+}
+Response:
+
+{
+  "message": "Login successful",
+  "user": {
+    "id": 1,
+    "first_name": "John",
+    "last_name": "Doe",
+    "email": "user@example.com",
+    "role_id": 1
+  },
+  "roles": ["admin", "user"],
+  "permissions": ["user.view", "user.add"],
+  "token": "1|abcdefghijklmnopqrstuvwxyz"
+}
+2. User Registration:
+
+POST https://iso-hub-server-1.keanonbiz.replit.dev/api/register
+Content-Type: application/json
+{
+  "name": "John Doe",
+  "email": "user@example.com",
+  "password": "password123",
+  "password_confirmation": "password123"
+}
+3. Token Verification:
+
+GET https://iso-hub-server-1.keanonbiz.replit.dev/api/user
+Authorization: Bearer {token}
+4. User Permissions Check:
+
+GET https://iso-hub-server-1.keanonbiz.replit.dev/api/users/permissions/{user_id}
+Authorization: Bearer {token}
+Database Structure:
+The User model includes:
+
+id, first_name, last_name, email, role_id
+Role-based permissions using Spatie Package
+Token authentication via Laravel Sanctum
+For Cross-Platform Integration:
+Step 1: When user logs into ISO Hub frontend, store the token
+Step 2: Pass this token to JACC via one of these methods:
+
+Option A - URL Parameter:
+
+https://jacc-tracer.replit.app?auth_token={iso_hub_token}
+Option B - PostMessage API:
+
+window.postMessage({
+  type: 'ISO_HUB_AUTH',
+  token: 'user_token_here',
+  user: {user_object}
+}, '*');
+Option C - Shared Cookie Domain (if possible):
+Set cookie with token that both platforms can read
+
+JACC Integration Steps:
+Receive the token from ISO Hub
+Verify token by calling:
+GET https://iso-hub-server-1.keanonbiz.replit.dev/api/user
+Authorization: Bearer {received_token}
+If valid, extract user data and log them into JACC automatically
+Store token for subsequent API calls to ISO Hub server
+Error Handling:
+401 Unauthorized: Token expired or invalid
+422 Validation Error: Missing required fields
+403 Forbidden: Insufficient permissions
+Test Credentials:
+Create a test user first:
+
+POST /api/register
+{
+  "name": "Test User",
+  "email": "test@example.com",
+  "password": "password123",
+  "password_confirmation": "password123"
+}
+The Laravel server is currently running and accessible at the provided URLs. You can now implement the shared authentication system using these credentials and endpoints.
+
+Would you like me to create any additional API endpoints on the Laravel backend to facilitate this integration?

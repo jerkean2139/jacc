@@ -27,6 +27,7 @@ import { db } from "./db";
 import { eq, desc } from "drizzle-orm";
 import { setupOAuthHelper } from "./oauth-helper";
 import { zipProcessor } from "./zip-processor";
+import { isoHubAuthMiddleware, handleISOHubSSO, isoHubAuthService } from "./iso-hub-auth";
 
 // Configure multer for file uploads
 const uploadDir = path.join(process.cwd(), "uploads");

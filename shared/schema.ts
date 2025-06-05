@@ -38,6 +38,9 @@ export const users = pgTable("users", {
   profileImageUrl: varchar("profile_image_url"),
   role: varchar("role").default("sales-agent"), // sales-agent, client-admin, dev-admin
   isActive: boolean("is_active").default(true),
+  // ISO Hub integration fields
+  isoHubId: varchar("iso_hub_id"),
+  isoHubToken: text("iso_hub_token"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
