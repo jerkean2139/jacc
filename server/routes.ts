@@ -3846,6 +3846,99 @@ Document content: {content}`,
     }
   });
 
+  // ISO Hub Authentication Integration Routes
+  app.post('/api/auth/iso-hub/sso', handleISOHubSSO);
+  
+  app.post('/api/auth/iso-hub/login', async (req: any, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      if (!email || !password) {
+        return res.status(400).json({ 
+          message: 'Email and password required',
+          error: 'MISSING_CREDENTIALS'
+        });
+      }
+
+      const authResult = await isoHubAuthService.loginWithISOHubCredentials(email, password);
+      
+      if (!authResult) {
+        return res.status(401).json({ 
+          message: 'Invalid credentials',
+          error: 'INVALID_CREDENTIALS'
+        });
+      }
+
+      const jaccUser = await isoHubAuthService.syncUserToJACC(authResult.user, authResult.token);
+      
+      // Create JACC session
+      if (req.session) {
+        req.session.userId = jaccUser.id;
+        req.session.isoHubToken = authResult.token;
+      }
+
+      res.json({
+        message: 'Login successful',
+        user: {
+          id: jaccUser.id,
+          email: jaccUser.email,
+          firstName: jaccUser.firstName,
+          lastName: jaccUser.lastName,
+          role: jaccUser.role
+        },
+        token: authResult.token
+      });
+    } catch (error) {
+      console.error('ISO Hub login error:', error);
+      res.status(500).json({ 
+        message: 'Login failed',
+        error: 'LOGIN_ERROR'
+      });
+    }
+  });
+
+  app.get('/api/auth/iso-hub/verify', async (req: any, res) => {
+    try {
+      const token = req.headers.authorization?.replace('Bearer ', '') || req.query.token;
+      
+      if (!token) {
+        return res.status(400).json({ 
+          message: 'Token required',
+          error: 'MISSING_TOKEN'
+        });
+      }
+
+      const isoHubUser = await isoHubAuthService.verifyISOHubToken(token);
+      
+      if (!isoHubUser) {
+        return res.status(401).json({ 
+          message: 'Invalid token',
+          error: 'INVALID_TOKEN'
+        });
+      }
+
+      const jaccUser = await isoHubAuthService.syncUserToJACC(isoHubUser, token);
+      
+      res.json({
+        valid: true,
+        user: {
+          id: jaccUser.id,
+          email: jaccUser.email,
+          firstName: jaccUser.firstName,
+          lastName: jaccUser.lastName,
+          role: jaccUser.role,
+          isoHubId: jaccUser.isoHubId
+        }
+      });
+    } catch (error) {
+      console.error('ISO Hub token verification error:', error);
+      res.status(500).json({ 
+        message: 'Token verification failed',
+        error: 'VERIFICATION_ERROR'
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
