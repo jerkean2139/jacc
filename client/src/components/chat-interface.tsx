@@ -518,19 +518,19 @@ With these details, I'll create a customized proposal highlighting value proposi
               <Zap className="mr-3 h-4 w-4 text-gray-400 flex-shrink-0" />
               <div className="flex-1 min-w-0 overflow-hidden">
                 <div className="font-medium mb-1 text-sm truncate">Industry Intelligence</div>
-                <div className="text-xs text-slate-500 group-hover:text-yellow-600 dark:group-hover:text-yellow-400 line-clamp-2">Real-time market trends and analysis</div>
+                <div className="text-xs text-gray-400 line-clamp-2">Coming Soon - Real-time market trends</div>
               </div>
             </Button>
             
             <Button
               variant="outline"
-              className="p-3 h-auto text-left justify-start hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-300 hover:border-blue-200 dark:hover:border-blue-700 transition-all duration-200 w-full"
-              onClick={() => handleQuickAction("Help me prepare a proposal for a new client")}
+              className="p-3 h-auto text-left justify-start opacity-50 cursor-not-allowed w-full"
+              disabled
             >
-              <FileText className="mr-3 h-4 w-4 text-blue-600 flex-shrink-0" />
+              <FileText className="mr-3 h-4 w-4 text-gray-400 flex-shrink-0" />
               <div className="flex-1 min-w-0 overflow-hidden">
                 <div className="font-medium mb-1 text-sm truncate">Create Proposal</div>
-                <div className="text-xs text-slate-500 group-hover:text-blue-600 dark:group-hover:text-blue-400 line-clamp-2">Generate client proposals and documents</div>
+                <div className="text-xs text-gray-400 line-clamp-2">Coming Soon - Generate client proposals</div>
               </div>
             </Button>
           </div>
