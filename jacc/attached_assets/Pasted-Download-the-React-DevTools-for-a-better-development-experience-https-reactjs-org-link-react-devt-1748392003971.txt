@@ -1,0 +1,90 @@
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+chunk-WERSD76P.js?v=394604fe:521 Warning: Received `true` for a non-boolean attribute `jsx`.
+
+If you want to write it to the DOM, pass a string instead: jsx="true" or jsx={value.toString()}.
+    at style
+    at ContextualHelp (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/components/contextual-help.tsx:25:42)
+    at div
+    at GamificationProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/hooks/useGamification.tsx:22:40)
+    at AppContent (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/App.tsx?v=re1Gv_oOgxUVZgOH4Ubat:102:20)
+    at Provider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-PLT6GTVM.js?v=394604fe:38:15)
+    at TooltipProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=394604fe:64:5)
+    at QueryClientProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=394604fe:2805:3)
+    at App
+printWarning @ chunk-WERSD76P.js?v=394604fe:521
+error @ chunk-WERSD76P.js?v=394604fe:505
+validateProperty$1 @ chunk-WERSD76P.js?v=394604fe:3433
+warnUnknownProperties @ chunk-WERSD76P.js?v=394604fe:3459
+validateProperties$2 @ chunk-WERSD76P.js?v=394604fe:3478
+validatePropertiesInDevelopment @ chunk-WERSD76P.js?v=394604fe:7346
+setInitialProperties @ chunk-WERSD76P.js?v=394604fe:7535
+finalizeInitialChildren @ chunk-WERSD76P.js?v=394604fe:8345
+completeWork @ chunk-WERSD76P.js?v=394604fe:16293
+completeUnitOfWork @ chunk-WERSD76P.js?v=394604fe:19224
+performUnitOfWork @ chunk-WERSD76P.js?v=394604fe:19206
+workLoopSync @ chunk-WERSD76P.js?v=394604fe:19137
+renderRootSync @ chunk-WERSD76P.js?v=394604fe:19116
+performConcurrentWorkOnRoot @ chunk-WERSD76P.js?v=394604fe:18678
+workLoop @ chunk-WERSD76P.js?v=394604fe:197
+flushWork @ chunk-WERSD76P.js?v=394604fe:176
+performWorkUntilDeadline @ chunk-WERSD76P.js?v=394604fe:384Understand this error
+chunk-WERSD76P.js?v=394604fe:521 Warning: Received `true` for a non-boolean attribute `global`.
+
+If you want to write it to the DOM, pass a string instead: global="true" or global={value.toString()}.
+    at style
+    at ContextualHelp (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/components/contextual-help.tsx:25:42)
+    at div
+    at GamificationProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/hooks/useGamification.tsx:22:40)
+    at AppContent (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/App.tsx?v=re1Gv_oOgxUVZgOH4Ubat:102:20)
+    at Provider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-PLT6GTVM.js?v=394604fe:38:15)
+    at TooltipProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=394604fe:64:5)
+    at QueryClientProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=394604fe:2805:3)
+    at App
+printWarning @ chunk-WERSD76P.js?v=394604fe:521
+error @ chunk-WERSD76P.js?v=394604fe:505
+validateProperty$1 @ chunk-WERSD76P.js?v=394604fe:3433
+warnUnknownProperties @ chunk-WERSD76P.js?v=394604fe:3459
+validateProperties$2 @ chunk-WERSD76P.js?v=394604fe:3478
+validatePropertiesInDevelopment @ chunk-WERSD76P.js?v=394604fe:7346
+setInitialProperties @ chunk-WERSD76P.js?v=394604fe:7535
+finalizeInitialChildren @ chunk-WERSD76P.js?v=394604fe:8345
+completeWork @ chunk-WERSD76P.js?v=394604fe:16293
+completeUnitOfWork @ chunk-WERSD76P.js?v=394604fe:19224
+performUnitOfWork @ chunk-WERSD76P.js?v=394604fe:19206
+workLoopSync @ chunk-WERSD76P.js?v=394604fe:19137
+renderRootSync @ chunk-WERSD76P.js?v=394604fe:19116
+performConcurrentWorkOnRoot @ chunk-WERSD76P.js?v=394604fe:18678
+workLoop @ chunk-WERSD76P.js?v=394604fe:197
+flushWork @ chunk-WERSD76P.js?v=394604fe:176
+performWorkUntilDeadline @ chunk-WERSD76P.js?v=394604fe:384Understand this error
+queryClient.ts:32 
+            
+            
+           GET https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/api/documents 401 (Unauthorized)
+(anonymous) @ queryClient.ts:32
+fetchFn @ @tanstack_react-query.js?v=394604fe:840
+run @ @tanstack_react-query.js?v=394604fe:494
+start @ @tanstack_react-query.js?v=394604fe:536
+fetch @ @tanstack_react-query.js?v=394604fe:926
+executeFetch_fn @ @tanstack_react-query.js?v=394604fe:2211
+onSubscribe @ @tanstack_react-query.js?v=394604fe:1898
+subscribe @ @tanstack_react-query.js?v=394604fe:24
+(anonymous) @ @tanstack_react-query.js?v=394604fe:3022
+subscribeToStore @ chunk-WERSD76P.js?v=394604fe:11984
+commitHookEffectListMount @ chunk-WERSD76P.js?v=394604fe:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=394604fe:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=394604fe:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=394604fe:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=394604fe:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=394604fe:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=394604fe:19447
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=394604fe:18868
+flushSyncCallbacks @ chunk-WERSD76P.js?v=394604fe:9119
+commitRootImpl @ chunk-WERSD76P.js?v=394604fe:19432
+commitRoot @ chunk-WERSD76P.js?v=394604fe:19277
+finishConcurrentRender @ chunk-WERSD76P.js?v=394604fe:18805
+performConcurrentWorkOnRoot @ chunk-WERSD76P.js?v=394604fe:18718
+workLoop @ chunk-WERSD76P.js?v=394604fe:197
+flushWork @ chunk-WERSD76P.js?v=394604fe:176
+performWorkUntilDeadline @ chunk-WERSD76P.js?v=394604fe:384Understand this error
+manifest.json:1 Manifest: Line: 1, column: 1, Syntax error.Understand this error

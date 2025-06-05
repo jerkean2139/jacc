@@ -1,0 +1,68 @@
+# Project Overview
+Develop "JACC" — an AI-powered assistant for independent sales agents that centralizes documents, answers repetitive questions, compares pricing data, and includes conversational voice features. JACC runs as both a standalone PWA and a modular React-Node component that integrates into your ISO Hub platform.
+
+# Core Functionality
+- Agent login with personalized sessions (user-specific data & folders)
+- Left panel: collapsible folder system for projects and stored documents
+- Right panel: live AI chat interface (ChatGPT-style), with voice support
+- Persistent chat history per agent, grouped by project or client
+- Upload + parse PDF/image files for AI assistance
+- AI responds to user-driven prompts with:
+  - Document links (from Google Drive)
+  - File previews (PDF/image)
+  - Summaries
+  - “Save to folder” action when prompted
+- Reads a dynamic Google Sheet (top 50+ Q&A, continuously updated)
+- Executes rate comparisons & savings projections from spreadsheet data
+- Admin feedback sheet to fine-tune bad answers (Question → Response → Fix)
+- Agents can tag files or chats as “Favorites” for quick reuse
+- Editable PDF flyer library (pre-branded, fillable)
+
+# Visual Design Requirements
+- Layout modeled after ChatGPT:
+  - Left: folders/projects
+  - Right: chat window
+- Aesthetic: Modern minimalist meets bold tech
+- Colors: Navy blue (primary), neon olive green (accent)
+- Elements: Rounded buttons, light hover effects, intuitive toggles
+- Design simplicity for non-technical users
+
+# Voice Conversation Features
+- Enable Web Speech API (frontend) or Whisper (backend)
+  - Voice-to-text for prompts
+  - Optional text-to-speech for replies
+- (Future) “Snarkiness dial” to personalize tone/responses
+
+# Data & Integration Points
+- Google Drive: Source for all public and agent-accessible docs
+- Google Sheets:
+  - Q&A database
+  - Buy rate data
+  - Admin-updated inputs
+- File Uploads:
+  - Images and PDFs for chat reference
+  - Auto-sorted into user-specific folders
+- Optional ISOAmp API (v2): Statement scanning + enhanced rate calc
+
+# Technical Stack
+- Frontend: React + Tailwind (PWA-ready)
+- Backend: Node.js + Express
+- Authentication: Firebase or Supabase (auth + user-specific data)
+- Database: Firestore or MongoDB
+- File Handling: Multer (Express middleware)
+- Voice API: Web Speech API or Whisper
+- PWA features: Installable with service worker + manifest.json
+
+# Additional Features
+- Editable PDF assets with placeholders ({LOGO}, {NAME}, {PHONE})
+- Agent document “Favorites” and “Recents”
+- Admin dashboard for doc updates, chat training, and QA fixes
+- Demo account support for training/sales (non-live agents)
+- Prebuilt folders for each processor/product (template structure)
+
+# Success Metrics
+- JACC replaces redundant sales manager tasks
+- Agents retrieve info & docs instantly without outside help
+- Spreadsheet-based calculations are accurate and understandable
+- Fully functional as standalone PWA or embedded ISO Hub module
+- Intuitive UX, even for non-technical agents

@@ -1,0 +1,21 @@
+Warning: Received &#x60;true&#x60; for a non-boolean attribute &#x60;global&#x60;.
+
+If you want to write it to the DOM, pass a string instead: global=&quot;true&quot; or global={value.toString()}.
+    at style
+    at ContextualHelp (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/components/contextual-help.tsx:25:42)
+    at Provider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-PLT6GTVM.js?v=7cbd0cec:38:15)
+    at TooltipProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=7cbd0cec:64:5)
+    at QueryClientProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=7cbd0cec:2805:3)
+    at App
+
+If you want to write it to the DOM, pass a string instead: global=&amp;quot;true&amp;quot; or global={value.toString()}.
+at style
+at ContextualHelp (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/components/contextual-help.tsx:25:42)
+at Provider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-PLT6GTVM.js?v=7cbd0cec:38:15)
+at TooltipProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=7cbd0cec:64:5)
+at QueryClientProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=7cbd0cec:2805:3)
+at App
+at t.value (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:17465)
+at new t (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:12630)
+at t.value (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:32766)
+at https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.pica

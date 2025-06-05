@@ -1,0 +1,522 @@
+import { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { 
+  BookOpen, 
+  Play, 
+  CheckCircle, 
+  ArrowRight, 
+  Users, 
+  Settings, 
+  Calculator,
+  MessageSquare,
+  FileText,
+  Mic,
+  Download,
+  Shield,
+  Zap,
+  Target,
+  TrendingUp
+} from 'lucide-react';
+
+export default function UserGuide() {
+  const [activeRole, setActiveRole] = useState('sales-agent');
+
+  const roles = {
+    'sales-agent': {
+      name: 'Sales Agent',
+      icon: Target,
+      color: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
+      description: 'Front-line sales representatives using JACC for merchant services'
+    },
+    'client-admin': {
+      name: 'Client Admin',
+      icon: Settings,
+      color: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
+      description: 'Business administrators managing team access and configurations'
+    },
+    'dev-admin': {
+      name: 'System Admin',
+      icon: Shield,
+      color: 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300',
+      description: 'Technical administrators with full system access'
+    }
+  };
+
+  return (
+    <div className="space-y-6 max-w-6xl mx-auto p-6">
+      <div className="text-center space-y-4">
+        <div className="flex items-center justify-center gap-3">
+          <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
+            <BookOpen className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+          </div>
+          <h1 className="text-3xl font-bold">Tracer User Guide</h1>
+        </div>
+        <p className="text-lg text-muted-foreground">
+          Complete onboarding and training guide for Tracer Co Card's AI-powered merchant services assistant
+        </p>
+      </div>
+
+      {/* Role Selection */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="w-5 h-5" />
+            Select Your Role
+          </CardTitle>
+          <CardDescription>
+            Choose your role to see relevant onboarding steps and features
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid md:grid-cols-3 gap-4">
+            {Object.entries(roles).map(([key, role]) => {
+              const IconComponent = role.icon;
+              return (
+                <Card 
+                  key={key}
+                  className={`cursor-pointer transition-all ${
+                    activeRole === key ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-950' : 'hover:shadow-md'
+                  }`}
+                  onClick={() => setActiveRole(key)}
+                >
+                  <CardContent className="p-4 text-center">
+                    <div className="flex items-center justify-center mb-3">
+                      <div className={`p-2 rounded-lg ${role.color}`}>
+                        <IconComponent className="w-6 h-6" />
+                      </div>
+                    </div>
+                    <h3 className="font-semibold mb-2">{role.name}</h3>
+                    <p className="text-sm text-muted-foreground">{role.description}</p>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Role-Specific Content */}
+      <Tabs defaultValue="getting-started" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="getting-started">Getting Started</TabsTrigger>
+          <TabsTrigger value="onboarding">Onboarding</TabsTrigger>
+          <TabsTrigger value="features">Features</TabsTrigger>
+          <TabsTrigger value="workflows">Workflows</TabsTrigger>
+          <TabsTrigger value="tips">Tips & Tricks</TabsTrigger>
+        </TabsList>
+
+        {/* Getting Started */}
+        <TabsContent value="getting-started">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Play className="w-5 h-5 text-green-600" />
+                Getting Started with JACC
+              </CardTitle>
+              <CardDescription>
+                Your first steps to becoming productive with the AI-powered merchant services assistant
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <Alert>
+                <Zap className="h-4 w-4" />
+                <AlertDescription>
+                  <strong>Welcome to JACC!</strong> Your AI-powered assistant for merchant services, rate calculations, and sales support.
+                </AlertDescription>
+              </Alert>
+
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">What is Tracer?</h3>
+                <p className="text-muted-foreground">
+                  Tracer is Tracer Co Card's comprehensive AI-powered platform that combines:
+                </p>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <MessageSquare className="w-4 h-4 text-blue-600" />
+                      <span>AI-powered chat assistant</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Calculator className="w-4 h-4 text-green-600" />
+                      <span>Real-time rate calculations</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <FileText className="w-4 h-4 text-purple-600" />
+                      <span>Document management</span>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Mic className="w-4 h-4 text-orange-600" />
+                      <span>Voice conversations</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="w-4 h-4 text-red-600" />
+                      <span>Savings projections</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Download className="w-4 h-4 text-indigo-600" />
+                      <span>Proposal generation</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <Separator />
+
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">System Requirements</h3>
+                <div className="grid md:grid-cols-3 gap-4">
+                  <Card>
+                    <CardContent className="p-4">
+                      <h4 className="font-semibold mb-2">Desktop</h4>
+                      <ul className="text-sm space-y-1 text-muted-foreground">
+                        <li>Chrome 90+</li>
+                        <li>Firefox 88+</li>
+                        <li>Safari 14+</li>
+                        <li>Edge 90+</li>
+                      </ul>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-4">
+                      <h4 className="font-semibold mb-2">Mobile</h4>
+                      <ul className="text-sm space-y-1 text-muted-foreground">
+                        <li>iOS 14+ (Safari)</li>
+                        <li>Android 8+ (Chrome)</li>
+                        <li>PWA support</li>
+                        <li>Offline capable</li>
+                      </ul>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-4">
+                      <h4 className="font-semibold mb-2">Features</h4>
+                      <ul className="text-sm space-y-1 text-muted-foreground">
+                        <li>Microphone access</li>
+                        <li>Stable internet</li>
+                        <li>Notification support</li>
+                        <li>File upload capable</li>
+                      </ul>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Onboarding */}
+        <TabsContent value="onboarding">
+          {activeRole === 'sales-agent' && <SalesAgentOnboarding />}
+          {activeRole === 'client-admin' && <ClientAdminOnboarding />}
+          {activeRole === 'dev-admin' && <DevAdminOnboarding />}
+        </TabsContent>
+
+        {/* Features */}
+        <TabsContent value="features">
+          {activeRole === 'sales-agent' && <SalesAgentFeatures />}
+          {activeRole === 'client-admin' && <ClientAdminFeatures />}
+          {activeRole === 'dev-admin' && <DevAdminFeatures />}
+        </TabsContent>
+
+        {/* Workflows */}
+        <TabsContent value="workflows">
+          {activeRole === 'sales-agent' && <SalesAgentWorkflows />}
+          {activeRole === 'client-admin' && <ClientAdminWorkflows />}
+          {activeRole === 'dev-admin' && <DevAdminWorkflows />}
+        </TabsContent>
+
+        {/* Tips & Tricks */}
+        <TabsContent value="tips">
+          <Card>
+            <CardHeader>
+              <CardTitle>Tips & Tricks for {roles[activeRole].name}</CardTitle>
+              <CardDescription>
+                Pro tips to maximize your productivity with JACC
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {activeRole === 'sales-agent' && (
+                <div className="space-y-4">
+                  <div className="p-4 bg-green-50 dark:bg-green-950 rounded-lg">
+                    <h4 className="font-semibold text-green-700 dark:text-green-300 mb-2">Rate Calculator Pro Tips</h4>
+                    <ul className="space-y-1 text-sm">
+                      <li>• Use voice input for faster data entry during calls</li>
+                      <li>• Save common business profiles for quick calculations</li>
+                      <li>• Generate proposals directly from rate comparisons</li>
+                    </ul>
+                  </div>
+                  <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
+                    <h4 className="font-semibold text-blue-700 dark:text-blue-300 mb-2">Chat Assistant Tips</h4>
+                    <ul className="space-y-1 text-sm">
+                      <li>• Ask specific questions about rates, equipment, or compliance</li>
+                      <li>• Use voice commands for hands-free operation</li>
+                      <li>• Reference documents by name for instant information</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              {activeRole === 'client-admin' && (
+                <div className="space-y-4">
+                  <div className="p-4 bg-purple-50 dark:bg-purple-950 rounded-lg">
+                    <h4 className="font-semibold text-purple-700 dark:text-purple-300 mb-2">Team Management</h4>
+                    <ul className="space-y-1 text-sm">
+                      <li>• Monitor agent activity through the dashboard</li>
+                      <li>• Set up automated training reminders</li>
+                      <li>• Customize system prompts for your business needs</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              {activeRole === 'dev-admin' && (
+                <div className="space-y-4">
+                  <div className="p-4 bg-red-50 dark:bg-red-950 rounded-lg">
+                    <h4 className="font-semibold text-red-700 dark:text-red-300 mb-2">System Optimization</h4>
+                    <ul className="space-y-1 text-sm">
+                      <li>• Monitor API usage and performance metrics</li>
+                      <li>• Regular backup of Q&A knowledge base</li>
+                      <li>• Test new features in development mode first</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
+
+// Sales Agent Onboarding Component
+function SalesAgentOnboarding() {
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Target className="w-5 h-5 text-green-600" />
+            Sales Agent Onboarding
+          </CardTitle>
+          <CardDescription>
+            Complete these steps to get started with Tracer as a sales agent
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="space-y-4">
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-8 h-8 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+                <span className="text-sm font-semibold text-green-600 dark:text-green-400">1</span>
+              </div>
+              <div>
+                <h3 className="font-semibold">Account Access</h3>
+                <p className="text-muted-foreground text-sm">Log in with your Tracer Co Card credentials. Contact your administrator if you need access.</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-8 h-8 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+                <span className="text-sm font-semibold text-green-600 dark:text-green-400">2</span>
+              </div>
+              <div>
+                <h3 className="font-semibold">Explore the Interface</h3>
+                <p className="text-muted-foreground text-sm">Familiarize yourself with the chat interface, sidebar navigation, and rate calculator.</p>
+                <div className="mt-2 flex gap-2">
+                  <Badge variant="outline">Chat Interface</Badge>
+                  <Badge variant="outline">Calculator</Badge>
+                  <Badge variant="outline">Voice Features</Badge>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-8 h-8 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+                <span className="text-sm font-semibold text-green-600 dark:text-green-400">3</span>
+              </div>
+              <div>
+                <h3 className="font-semibold">Practice Rate Calculations</h3>
+                <p className="text-muted-foreground text-sm">Run through sample merchant scenarios using the rate calculator.</p>
+                <Button size="sm" className="mt-2">
+                  Try Calculator <ArrowRight className="w-4 h-4 ml-1" />
+                </Button>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-8 h-8 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+                <span className="text-sm font-semibold text-green-600 dark:text-green-400">4</span>
+              </div>
+              <div>
+                <h3 className="font-semibold">Voice Setup</h3>
+                <p className="text-muted-foreground text-sm">Test microphone access and voice commands for hands-free operation.</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-8 h-8 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+                <span className="text-sm font-semibold text-green-600 dark:text-green-400">5</span>
+              </div>
+              <div>
+                <h3 className="font-semibold">Start Selling</h3>
+                <p className="text-muted-foreground text-sm">Begin using JACC with real prospects. Ask questions and generate proposals.</p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Quick Start Checklist</CardTitle>
+          <CardDescription>Essential tasks for your first day with JACC</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <CheckCircle className="w-5 h-5 text-green-600" />
+              <span>Log in successfully and access main dashboard</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <CheckCircle className="w-5 h-5 text-green-600" />
+              <span>Test voice features and microphone permissions</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <CheckCircle className="w-5 h-5 text-green-600" />
+              <span>Run one practice rate calculation</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <CheckCircle className="w-5 h-5 text-green-600" />
+              <span>Ask the AI assistant a merchant services question</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <CheckCircle className="w-5 h-5 text-green-600" />
+              <span>Generate one sample proposal</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+// Client Admin Onboarding Component
+function ClientAdminOnboarding() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Settings className="w-5 h-5 text-blue-600" />
+          Client Admin Onboarding
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <p>Client Admin onboarding steps coming soon...</p>
+      </CardContent>
+    </Card>
+  );
+}
+
+// Dev Admin Onboarding Component
+function DevAdminOnboarding() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Shield className="w-5 h-5 text-purple-600" />
+          System Admin Onboarding
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <p>System Admin onboarding steps coming soon...</p>
+      </CardContent>
+    </Card>
+  );
+}
+
+// Feature Components (simplified for brevity)
+function SalesAgentFeatures() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Sales Agent Features</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p>Sales Agent features documentation coming soon...</p>
+      </CardContent>
+    </Card>
+  );
+}
+
+function ClientAdminFeatures() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Client Admin Features</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p>Client Admin features documentation coming soon...</p>
+      </CardContent>
+    </Card>
+  );
+}
+
+function DevAdminFeatures() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>System Admin Features</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p>System Admin features documentation coming soon...</p>
+      </CardContent>
+    </Card>
+  );
+}
+
+// Workflow Components (simplified for brevity)
+function SalesAgentWorkflows() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Sales Agent Workflows</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p>Sales Agent workflow documentation coming soon...</p>
+      </CardContent>
+    </Card>
+  );
+}
+
+function ClientAdminWorkflows() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Client Admin Workflows</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p>Client Admin workflow documentation coming soon...</p>
+      </CardContent>
+    </Card>
+  );
+}
+
+function DevAdminWorkflows() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>System Admin Workflows</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p>System Admin workflow documentation coming soon...</p>
+      </CardContent>
+    </Card>
+  );
+}

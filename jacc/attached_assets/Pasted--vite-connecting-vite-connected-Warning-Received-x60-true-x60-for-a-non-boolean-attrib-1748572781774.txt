@@ -1,0 +1,26 @@
+[vite] connecting...
+[vite] connected.
+Warning: Received &#x60;true&#x60; for a non-boolean attribute &#x60;jsx&#x60;.
+
+If you want to write it to the DOM, pass a string instead: jsx=&quot;true&quot; or jsx={value.toString()}.
+    at style
+    at ContextualHelp (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/components/contextual-help.tsx:25:42)
+    at div
+    at GamificationProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/hooks/useGamification.tsx:22:40)
+    at AppContent (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/App.tsx?v=KsWjYjfkUydr_McCBU9io:112:20)
+    at Provider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-PLT6GTVM.js?v=197ae52f:38:15)
+    at TooltipProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=197ae52f:64:5)
+    at QueryClientProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=197ae52f:2805:3)
+    at App
+Warning: Received &#x60;true&#x60; for a non-boolean attribute &#x60;global&#x60;.
+
+If you want to write it to the DOM, pass a string instead: global=&quot;true&quot; or global={value.toString()}.
+    at style
+    at ContextualHelp (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/components/contextual-help.tsx:25:42)
+    at div
+    at GamificationProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/hooks/useGamification.tsx:22:40)
+    at AppContent (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/App.tsx?v=KsWjYjfkUydr_McCBU9io:112:20)
+    at Provider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-PLT6GTVM.js?v=197ae52f:38:15)
+    at TooltipProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=197ae52f:64:5)
+    at QueryClientProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=197ae52f:2805:3)
+    at App

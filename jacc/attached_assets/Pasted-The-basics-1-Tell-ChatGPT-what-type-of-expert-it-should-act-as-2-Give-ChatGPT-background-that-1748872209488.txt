@@ -1,0 +1,37 @@
+The basics:
+1 - Tell ChatGPT what type of expert it should act as
+2 - Give ChatGPT background that is relevant to the task to be completed
+3 - Ask your question
+4 - please ask me any clarifying questions or for additional information that you may need in order to provide me with the best possible response. Request clarifying questions to provide you with the best possible response)
+
+The professional version
+Here are the 17 essential elements, identified in R.O.M.A.N.T.I.C. P.L.E.A.S.U.R.E.S., that are common to all frameworks:
+R - Role: Define the specific function or persona the AI should assume.
+O - Objective: Clearly state the goal or desired outcome of the interaction.
+M - Methodology: Describe the approach or techniques to be used to achieve the objective.
+A - Audience: Identify who the intended recipients or viewers of the output are.
+N - Notes: Include any additional observations or reminders that might assist in the task.
+T - Tone: Dictate the manner or style of communication, matching the persona or context.
+I - Interactivity: Encourage active engagement, specifying the level of interaction expected.
+C - Context: Set the scene or background information relevant to the task.
+-
+P - Parameters: Outline the boundaries and specific conditions within which the task should operate.
+L - Layout: Define the structure or format in which the results should be presented.
+E - Evaluation: Determine how the results will be measured or assessed.
+A - Adaptation: Specify how to modify strategies in response to changing conditions or feedback.
+S - Syntax: Focus on the linguistic and structural composition of the content, including delimiters.
+U - Urgency: Specify the priority or time sensitivity of the task.
+R - Resources: List the tools, information, or materials needed to complete the task.
+E - Examples: Provide instances or models to emulate or avoid.
+S - Synopsis: Summarize the main points or intent, providing a clear overview of the task.
+
+
+using the ***perfect prompting framework
+1 - Tell ChatGPT what type of expert it should act as
+2 - Give ChatGPT background that is relevant to the task to be completed
+3 - Ask your question
+4 - please ask me any clarifying questions or for additional information that you may need in order to provide me with the best possible response. Request clarifying questions to provide you with the best possible response)
+
+please create a prompt with variables i can use encorporating the characteristics above that will allow chat gpt to create a viral social media post for me. 
+
+

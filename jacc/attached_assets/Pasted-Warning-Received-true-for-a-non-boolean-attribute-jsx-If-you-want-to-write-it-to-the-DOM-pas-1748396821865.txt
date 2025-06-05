@@ -1,0 +1,60 @@
+Warning: Received `true` for a non-boolean attribute `jsx`.
+
+If you want to write it to the DOM, pass a string instead: jsx="true" or jsx={value.toString()}.
+    at style
+    at ContextualHelp (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/components/contextual-help.tsx:25:42)
+    at div
+    at GamificationProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/hooks/useGamification.tsx:22:40)
+    at AppContent (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/App.tsx?t=1748395615870&v=LtAyrFr-AK89jl88nEyT4:102:20)
+    at Provider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-PLT6GTVM.js?v=394604fe:38:15)
+    at TooltipProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=394604fe:64:5)
+    at QueryClientProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=394604fe:2805:3)
+    at App
+printWarning @ chunk-WERSD76P.js?v=394604fe:521Understand this error
+chunk-WERSD76P.js?v=394604fe:521 Warning: Received `true` for a non-boolean attribute `global`.
+
+If you want to write it to the DOM, pass a string instead: global="true" or global={value.toString()}.
+    at style
+    at ContextualHelp (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/components/contextual-help.tsx:25:42)
+    at div
+    at GamificationProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/hooks/useGamification.tsx:22:40)
+    at AppContent (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/App.tsx?t=1748395615870&v=LtAyrFr-AK89jl88nEyT4:102:20)
+    at Provider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-PLT6GTVM.js?v=394604fe:38:15)
+    at TooltipProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=394604fe:64:5)
+    at QueryClientProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=394604fe:2805:3)
+    at App
+printWarning @ chunk-WERSD76P.js?v=394604fe:521Understand this error
+chat-interface.tsx:70 Messages Query Status: Object
+chat-interface.tsx:80 Chat Interface Debug: Object
+chat-interface.tsx:70 Messages Query Status: Object
+chat-interface.tsx:80 Chat Interface Debug: Object
+chat-interface.tsx:70 Messages Query Status: Object
+chat-interface.tsx:80 Chat Interface Debug: Object
+chat-interface.tsx:70 Messages Query Status: Object
+chat-interface.tsx:80 Chat Interface Debug: Object
+chat-interface.tsx:70 Messages Query Status: Object
+chat-interface.tsx:80 Chat Interface Debug: Object
+chat-interface.tsx:70 Messages Query Status: Object
+chat-interface.tsx:80 Chat Interface Debug: Object
+manifest.json:1 Manifest: Line: 1, column: 1, Syntax error.Understand this error
+chat-interface.tsx:70 Messages Query Status: Object
+chat-interface.tsx:80 Chat Interface Debug: Object
+chat-interface.tsx:70 Messages Query Status: Object
+chat-interface.tsx:80 Chat Interface Debug: Object
+chat-interface.tsx:70 Messages Query Status: Object
+chat-interface.tsx:80 Chat Interface Debug: Object
+chat-interface.tsx:70 Messages Query Status: Object
+chat-interface.tsx:80 Chat Interface Debug: Object
+home-stable.tsx:36 Setting active chat ID to: 05c2287d-a415-4de4-b9b4-1bc4628a337a
+chat-interface.tsx:70 Messages Query Status: Object
+chat-interface.tsx:80 Chat Interface Debug: Object
+chat-interface.tsx:70 Messages Query Status: Object
+chat-interface.tsx:80 Chat Interface Debug: Object
+chat-interface.tsx:70 Messages Query Status: Object
+chat-interface.tsx:80 Chat Interface Debug: Object
+chat-interface.tsx:70 Messages Query Status: Object
+chat-interface.tsx:80 Chat Interface Debug: Object
+chat-interface.tsx:70 Messages Query Status: Object
+chat-interface.tsx:80 Chat Interface Debug: Object
+chat-interface.tsx:70 Messages Query Status: Object
+chat-interface.tsx:80 Chat Interface Debug: Object

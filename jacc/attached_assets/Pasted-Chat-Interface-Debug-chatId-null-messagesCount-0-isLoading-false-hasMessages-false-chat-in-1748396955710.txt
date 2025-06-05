@@ -1,0 +1,17 @@
+Chat Interface Debug: {chatId: null, messagesCount: 0, isLoading: false, hasMessages: false}
+chat-interface.tsx:70 Messages Query Status: {chatId: null, queryKey: Array(1), enabled: false, isLoading: false, hasError: false, …}
+chat-interface.tsx:80 Chat Interface Debug: {chatId: null, messagesCount: 0, isLoading: false, hasMessages: false}
+chat-interface.tsx:70 Messages Query Status: {chatId: null, queryKey: Array(1), enabled: false, isLoading: false, hasError: false, …}
+chat-interface.tsx:80 Chat Interface Debug: {chatId: null, messagesCount: 0, isLoading: false, hasMessages: false}
+chat-interface.tsx:70 Messages Query Status: {chatId: null, queryKey: Array(1), enabled: false, isLoading: false, hasError: false, …}
+chat-interface.tsx:80 Chat Interface Debug: {chatId: null, messagesCount: 0, isLoading: false, hasMessages: false}
+home-stable.tsx:36 Setting active chat ID to: 05c2287d-a415-4de4-b9b4-1bc4628a337a
+manifest.json:1 Manifest: Line: 1, column: 1, Syntax error.Understand this error
+chat-interface.tsx:70 Messages Query Status: {chatId: '05c2287d-a415-4de4-b9b4-1bc4628a337a', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:80 Chat Interface Debug: {chatId: '05c2287d-a415-4de4-b9b4-1bc4628a337a', messagesCount: 0, isLoading: true, hasMessages: false}
+chat-interface.tsx:70 Messages Query Status: {chatId: '05c2287d-a415-4de4-b9b4-1bc4628a337a', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:80 Chat Interface Debug: {chatId: '05c2287d-a415-4de4-b9b4-1bc4628a337a', messagesCount: 0, isLoading: true, hasMessages: false}
+chat-interface.tsx:70 Messages Query Status: {chatId: '05c2287d-a415-4de4-b9b4-1bc4628a337a', queryKey: Array(1), enabled: true, isLoading: false, hasError: false, …}
+chat-interface.tsx:80 Chat Interface Debug: {chatId: '05c2287d-a415-4de4-b9b4-1bc4628a337a', messagesCount: 33, isLoading: false, hasMessages: true}
+chat-interface.tsx:70 Messages Query Status: {chatId: '05c2287d-a415-4de4-b9b4-1bc4628a337a', queryKey: Array(1), enabled: true, isLoading: false, hasError: false, …}
+chat-interface.tsx:80 Chat Interface Debug: {chatId: '05c2287d-a415-4de4-b9b4-1bc4628a337a', messagesCount: 33, isLoading: false, hasMessages: true}
