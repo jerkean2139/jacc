@@ -561,6 +561,61 @@ export default function UnifiedDocumentManager({ folderId, onUploadComplete }: U
           </Card>
         </TabsContent>
 
+        <TabsContent value="cloud" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Cloud className="h-5 w-5" />
+                Cloud Drive Integration
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="text-center p-8">
+                <Cloud className="h-16 w-16 mx-auto mb-4 text-blue-600" />
+                <h3 className="text-lg font-semibold mb-2">3-Step Import Wizard</h3>
+                <p className="text-gray-600 mb-6">
+                  Import documents from Google Drive, Dropbox, or OneDrive with full permission control
+                </p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                  <div className="p-4 border rounded-lg">
+                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                      <span className="text-blue-600 font-semibold">1</span>
+                    </div>
+                    <h4 className="font-medium mb-1">Choose Source</h4>
+                    <p className="text-sm text-gray-600">Select files, folders, or cloud drives</p>
+                  </div>
+                  
+                  <div className="p-4 border rounded-lg">
+                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                      <span className="text-blue-600 font-semibold">2</span>
+                    </div>
+                    <h4 className="font-medium mb-1">Select Content</h4>
+                    <p className="text-sm text-gray-600">Choose files and folders to import</p>
+                  </div>
+                  
+                  <div className="p-4 border rounded-lg">
+                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                      <span className="text-blue-600 font-semibold">3</span>
+                    </div>
+                    <h4 className="font-medium mb-1">Set Permissions</h4>
+                    <p className="text-sm text-gray-600">Configure access and destination</p>
+                  </div>
+                </div>
+
+                <Button 
+                  onClick={() => setShowCloudWizard(true)} 
+                  size="lg" 
+                  className="px-8"
+                >
+                  <Cloud className="h-5 w-5 mr-2" />
+                  Start Cloud Import Wizard
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         <TabsContent value="permissions" className="space-y-6">
           <Card>
             <CardHeader>
@@ -630,6 +685,80 @@ export default function UnifiedDocumentManager({ folderId, onUploadComplete }: U
                     </div>
                   </div>
                 </div>
+              </div>
+
+              <Separator />
+
+              {/* Granular Document-Level Permissions */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium text-sm">Document-Level Permission Overrides</h4>
+                  <Badge variant="secondary" className="text-xs">
+                    Advanced Feature
+                  </Badge>
+                </div>
+                <p className="text-sm text-gray-600">
+                  Set custom permissions for individual documents that override folder defaults. 
+                  Useful when a folder is public but contains sensitive documents that need restricted access.
+                </p>
+
+                {documents.length > 0 ? (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">
+                        Available Documents ({documents.length})
+                      </span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedDocuments(documents);
+                          setShowPermissionsEditor(true);
+                        }}
+                      >
+                        <Settings className="h-4 w-4 mr-2" />
+                        Manage All Permissions
+                      </Button>
+                    </div>
+
+                    <ScrollArea className="h-32 border rounded-md p-2">
+                      <div className="space-y-1">
+                        {documents.slice(0, 5).map((doc) => (
+                          <div key={doc.id} className="flex items-center justify-between p-2 hover:bg-gray-50 rounded text-sm">
+                            <div className="flex items-center gap-2">
+                              <FileText className="h-4 w-4 text-blue-600" />
+                              <span className="truncate max-w-48">{doc.originalName || doc.name}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {doc.isPublic && <Badge variant="secondary" className="text-xs"><Eye className="h-3 w-3" /></Badge>}
+                              {doc.adminOnly && <Badge variant="destructive" className="text-xs"><Lock className="h-3 w-3" /></Badge>}
+                              {doc.managerOnly && <Badge variant="outline" className="text-xs"><ShieldCheck className="h-3 w-3" /></Badge>}
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedDocuments([doc]);
+                                  setShowPermissionsEditor(true);
+                                }}
+                              >
+                                <Settings className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                        {documents.length > 5 && (
+                          <div className="text-center p-2 text-sm text-gray-500">
+                            +{documents.length - 5} more documents
+                          </div>
+                        )}
+                      </div>
+                    </ScrollArea>
+                  </div>
+                ) : (
+                  <div className="text-center p-4 text-gray-500 text-sm border rounded-lg bg-gray-50">
+                    No documents available. Upload documents to manage individual permissions.
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
