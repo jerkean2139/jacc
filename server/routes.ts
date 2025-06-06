@@ -1666,6 +1666,11 @@ User Context: {userRole}`,
         return res.status(400).json({ message: "No files uploaded" });
       }
 
+      // Parse permissions and upload mode from request
+      const permissions = req.body.permissions ? JSON.parse(req.body.permissions) : {};
+      const uploadMode = req.body.uploadMode || 'files';
+      const folderId = req.body.folderId || null;
+
       const results = [];
       const errors = [];
 
@@ -1831,6 +1836,58 @@ User Context: {userRole}`,
     } catch (error) {
       console.error("Error uploading documents:", error);
       res.status(500).json({ message: "Failed to upload documents" });
+    }
+  });
+
+  // Document permissions update endpoint
+  app.patch('/api/documents/:id/permissions', async (req: any, res) => {
+    try {
+      const userId = 'simple-user-001'; // Temporary for testing
+      const { id } = req.params;
+      const permissions = req.body;
+      
+      // Verify document belongs to user
+      const document = await storage.getDocument(id);
+      if (!document || document.userId !== userId) {
+        return res.status(404).json({ message: "Document not found" });
+      }
+      
+      // Update document permissions
+      const updatedDocument = await storage.updateDocument(id, permissions);
+      res.json(updatedDocument);
+    } catch (error) {
+      console.error("Error updating document permissions:", error);
+      res.status(500).json({ message: "Failed to update document permissions" });
+    }
+  });
+
+  // Delete document endpoint
+  app.delete('/api/documents/:id', async (req: any, res) => {
+    try {
+      const userId = 'simple-user-001'; // Temporary for testing
+      const { id } = req.params;
+      
+      // Verify document belongs to user
+      const document = await storage.getDocument(id);
+      if (!document || document.userId !== userId) {
+        return res.status(404).json({ message: "Document not found" });
+      }
+      
+      // Delete physical file
+      const fs = await import('fs');
+      const path = await import('path');
+      const filePath = path.join(process.cwd(), 'uploads', document.path);
+      
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+      
+      // Delete document record
+      await storage.deleteDocument(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting document:", error);
+      res.status(500).json({ message: "Failed to delete document" });
     }
   });
 
