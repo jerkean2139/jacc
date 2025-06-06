@@ -155,16 +155,45 @@ export default function ContextualHelp({ enabled = true }: ContextualHelpProps) 
 
   return (
     <>
-      {/* Help Toggle Button */}
-      <Button
-        variant="outline"
-        size="sm"
-        className="fixed bottom-4 left-4 z-50 bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900"
-        onClick={helpMode ? endHelpTour : startHelpTour}
-      >
-        <HelpCircle className="w-4 h-4 mr-2" />
-        {helpMode ? 'End Help' : 'Show Help'}
-      </Button>
+      {/* Collapsible Help Tab */}
+      <div className="fixed bottom-4 left-4 z-50">
+        <div className={`transition-all duration-300 ease-in-out ${
+          helpMode ? 'translate-x-0' : '-translate-x-16'
+        }`}>
+          {/* Expanded Help Panel */}
+          <div className={`bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg shadow-lg transition-all duration-300 ${
+            helpMode ? 'opacity-100 scale-100 w-auto' : 'opacity-0 scale-95 w-0 overflow-hidden'
+          }`}>
+            <div className="flex items-center p-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={endHelpTour}
+                className="hover:bg-blue-100 dark:hover:bg-blue-900"
+              >
+                <HelpCircle className="w-4 h-4 mr-2" />
+                End Help
+              </Button>
+            </div>
+          </div>
+        </div>
+        
+        {/* Tab Handle */}
+        <Button
+          variant="outline"
+          size="sm"
+          className={`absolute right-0 top-1/2 -translate-y-1/2 bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900 transition-all duration-300 ${
+            helpMode ? 'translate-x-full rounded-l-none border-l-0' : 'translate-x-0 rounded-lg'
+          }`}
+          onClick={helpMode ? endHelpTour : startHelpTour}
+        >
+          {helpMode ? (
+            <ChevronLeft className="w-4 h-4" />
+          ) : (
+            <HelpCircle className="w-4 h-4" />
+          )}
+        </Button>
+      </div>
 
       {/* Help Bubble */}
       {activeBubble && (
@@ -206,22 +235,24 @@ export default function ContextualHelp({ enabled = true }: ContextualHelpProps) 
                   <Badge variant="outline" className="text-xs">
                     {currentHelpIndex + 1} of {helpBubbles.length}
                   </Badge>
-                  <div className="flex gap-2">
+                  <div className="flex gap-1">
                     <Button
-                      variant="outline"
+                      variant="ghost"
                       size="sm"
                       onClick={previousHelpBubble}
                       disabled={currentHelpIndex === 0}
+                      className="h-7 w-7 p-0"
                     >
-                      <ChevronLeft className="w-4 h-4" />
+                      <ChevronLeft className="w-3 h-3" />
                     </Button>
                     <Button
-                      variant="outline"
+                      variant="ghost"
                       size="sm"
                       onClick={nextHelpBubble}
                       disabled={currentHelpIndex === helpBubbles.length - 1}
+                      className="h-7 w-7 p-0"
                     >
-                      <ChevronRight className="w-4 h-4" />
+                      <ChevronRight className="w-3 h-3" />
                     </Button>
                   </div>
                 </div>
