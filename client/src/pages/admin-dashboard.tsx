@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,9 @@ import {
   Clock,
   Eye,
   Filter,
-  RefreshCw
+  RefreshCw,
+  Wifi,
+  WifiOff
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -66,7 +68,22 @@ interface SessionData {
 export default function AdminDashboard() {
   const [dateRange, setDateRange] = useState("7d");
   const [selectedUser, setSelectedUser] = useState<string>("all");
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
   const { toast } = useToast();
+
+  // Monitor online/offline status for admin dashboard
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   // Fetch admin analytics data
   const { data: analytics, isLoading, refetch } = useQuery({
@@ -162,7 +179,16 @@ export default function AdminDashboard() {
             Monitor user activity, prompt usage, and system performance
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-3">
+          {/* System Status Indicator */}
+          <Badge 
+            variant={isOnline ? "default" : "destructive"}
+            className="flex items-center space-x-1"
+          >
+            {isOnline ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
+            <span>{isOnline ? 'System Online' : 'System Offline'}</span>
+          </Badge>
+          
           <Select value={dateRange} onValueChange={setDateRange}>
             <SelectTrigger className="w-32">
               <SelectValue />

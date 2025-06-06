@@ -67,16 +67,6 @@ export default function PWAStatus() {
 
   return (
     <div className="fixed top-4 right-4 z-50 space-y-2 hidden md:block">
-      {/* Online/Offline Status - Hidden on Mobile */}
-      <div className="flex items-center space-x-2">
-        <Badge 
-          variant={isOnline ? "default" : "destructive"}
-          className="flex items-center space-x-1"
-        >
-          {isOnline ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
-          <span>{isOnline ? 'Online' : 'Offline'}</span>
-        </Badge>
-      </div>
 
       {/* Install App Prompt */}
       {installAvailable && showInstallPrompt && (
