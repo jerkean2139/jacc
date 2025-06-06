@@ -3939,6 +3939,40 @@ Document content: {content}`,
     }
   });
 
+  // Health monitoring endpoints
+  const { healthCheck, readinessCheck } = await import('./health');
+  app.get('/health', healthCheck);
+  app.get('/ready', readinessCheck);
+
+  // CORS configuration for ISO Hub integration
+  app.use((req, res, next) => {
+    const allowedOrigins = [
+      'https://iso-hub-server-1.keanonbiz.replit.dev',
+      'http://localhost:3000',
+      'https://*.replit.app',
+      'https://*.replit.dev'
+    ];
+    
+    const origin = req.headers.origin;
+    if (allowedOrigins.some(allowed => 
+      allowed.includes('*') ? 
+        origin?.includes(allowed.replace('https://*.', '')) : 
+        origin === allowed
+    )) {
+      res.header('Access-Control-Allow-Origin', origin);
+    }
+    
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    
+    if (req.method === 'OPTIONS') {
+      res.sendStatus(200);
+    } else {
+      next();
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
