@@ -241,6 +241,7 @@ export default function AdminDashboard() {
         <TabsList>
           <TabsTrigger value="users">User Analytics</TabsTrigger>
           <TabsTrigger value="prompts">Prompt Usage</TabsTrigger>
+          <TabsTrigger value="monitoring">Chat Monitoring</TabsTrigger>
           <TabsTrigger value="sessions">Session Logs</TabsTrigger>
           <TabsTrigger value="settings">System Settings</TabsTrigger>
         </TabsList>
@@ -374,6 +375,89 @@ export default function AdminDashboard() {
                   ))}
                 </TableBody>
               </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Chat Monitoring Tab */}
+        <TabsContent value="monitoring" className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-medium">First Query & Response Monitoring</h3>
+            <Button onClick={() => downloadReport("monitoring")} variant="outline" size="sm">
+              <Download className="h-4 w-4 mr-2" />
+              Export Monitoring CSV
+            </Button>
+          </div>
+
+          {/* Chat Monitoring Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total First Interactions</CardTitle>
+                <MessageSquare className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">0</div>
+                <p className="text-xs text-muted-foreground">New chats monitored</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Accuracy Rate</CardTitle>
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">--</div>
+                <p className="text-xs text-muted-foreground">Admin reviewed responses</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Avg Response Time</CardTitle>
+                <Clock className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">--ms</div>
+                <p className="text-xs text-muted-foreground">AI response speed</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Pending Review</CardTitle>
+                <RefreshCw className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">0</div>
+                <p className="text-xs text-muted-foreground">Awaiting admin review</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent First Interactions</CardTitle>
+              <CardDescription>
+                Track first user queries and AI responses for each new chat
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-8 text-muted-foreground">
+                <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <h3 className="text-lg font-medium mb-2">No monitoring data yet</h3>
+                <p className="text-sm">
+                  Start a new chat conversation to see first queries and AI responses appear here for accuracy review.
+                </p>
+                <Button 
+                  variant="outline" 
+                  className="mt-4"
+                  onClick={() => window.location.href = '/'}
+                >
+                  Go to Chat Interface
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
