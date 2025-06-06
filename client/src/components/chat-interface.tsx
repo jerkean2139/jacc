@@ -466,17 +466,25 @@ With these details, I'll create a customized proposal highlighting value proposi
 
           {/* Conversation Starters - Coming Soon */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-4xl mb-8">
-            <Button
-              variant="outline"
-              className="p-3 h-auto text-left justify-start opacity-50 cursor-not-allowed w-full"
-              disabled
-            >
-              <Calculator className="mr-3 h-4 w-4 text-gray-400 flex-shrink-0" />
-              <div className="flex-1 min-w-0 overflow-hidden">
-                <div className="font-medium mb-1 text-sm truncate">Calculate Rates</div>
-                <div className="text-xs text-gray-400 line-clamp-2">Coming Soon - Calculate processing rates</div>
+            <div className="relative group w-full">
+              <Button
+                variant="outline"
+                className="p-3 h-auto text-left justify-start hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-300 hover:border-blue-200 dark:hover:border-blue-700 transition-colors w-full cursor-not-allowed opacity-75"
+                onClick={(e) => {
+                  e.preventDefault();
+                  // Temporarily disabled - show coming soon
+                }}
+              >
+                <Calculator className="mr-3 h-4 w-4 text-blue-600 flex-shrink-0" />
+                <div className="flex-1 min-w-0 overflow-hidden">
+                  <div className="font-medium mb-1 text-sm truncate">Calculate Rates</div>
+                  <div className="text-xs text-slate-500 group-hover:text-blue-600 dark:group-hover:text-blue-400 line-clamp-2">Calculate processing rates and fees</div>
+                </div>
+              </Button>
+              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+                Coming Soon
               </div>
-            </Button>
+            </div>
 
             <div className="relative group w-full">
               <Button
@@ -498,41 +506,65 @@ With these details, I'll create a customized proposal highlighting value proposi
               </div>
             </div>
             
-            <Button
-              variant="outline"
-              className="p-3 h-auto text-left justify-start opacity-50 cursor-not-allowed w-full"
-              disabled
-            >
-              <Brain className="mr-3 h-4 w-4 text-gray-400 flex-shrink-0" />
-              <div className="flex-1 min-w-0 overflow-hidden">
-                <div className="font-medium mb-1 text-sm truncate">AI Competitor Analysis</div>
-                <div className="text-xs text-gray-400 line-clamp-2">Coming Soon - Compare processors with AI</div>
+            <div className="relative group w-full">
+              <Button
+                variant="outline"
+                className="p-3 h-auto text-left justify-start hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-700 dark:hover:text-purple-300 hover:border-purple-200 dark:hover:border-purple-700 transition-colors w-full cursor-not-allowed opacity-75"
+                onClick={(e) => {
+                  e.preventDefault();
+                  // Temporarily disabled - show coming soon
+                }}
+              >
+                <Brain className="mr-3 h-4 w-4 text-purple-600 flex-shrink-0" />
+                <div className="flex-1 min-w-0 overflow-hidden">
+                  <div className="font-medium mb-1 text-sm truncate">AI Competitor Analysis</div>
+                  <div className="text-xs text-slate-500 group-hover:text-purple-600 dark:group-hover:text-purple-400 line-clamp-2">Compare processors with AI insights</div>
+                </div>
+              </Button>
+              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+                Coming Soon
               </div>
-            </Button>
+            </div>
             
-            <Button
-              variant="outline"
-              className="p-3 h-auto text-left justify-start opacity-50 cursor-not-allowed w-full"
-              disabled
-            >
-              <Zap className="mr-3 h-4 w-4 text-gray-400 flex-shrink-0" />
-              <div className="flex-1 min-w-0 overflow-hidden">
-                <div className="font-medium mb-1 text-sm truncate">Industry Intelligence</div>
-                <div className="text-xs text-gray-400 line-clamp-2">Coming Soon - Real-time market trends</div>
+            <div className="relative group w-full">
+              <Button
+                variant="outline"
+                className="p-3 h-auto text-left justify-start hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-700 dark:hover:text-orange-300 hover:border-orange-200 dark:hover:border-orange-700 transition-colors w-full cursor-not-allowed opacity-75"
+                onClick={(e) => {
+                  e.preventDefault();
+                  // Temporarily disabled - show coming soon
+                }}
+              >
+                <Zap className="mr-3 h-4 w-4 text-orange-600 flex-shrink-0" />
+                <div className="flex-1 min-w-0 overflow-hidden">
+                  <div className="font-medium mb-1 text-sm truncate">Industry Intelligence</div>
+                  <div className="text-xs text-slate-500 group-hover:text-orange-600 dark:group-hover:text-orange-400 line-clamp-2">Real-time market trends and insights</div>
+                </div>
+              </Button>
+              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+                Coming Soon
               </div>
-            </Button>
+            </div>
             
-            <Button
-              variant="outline"
-              className="p-3 h-auto text-left justify-start opacity-50 cursor-not-allowed w-full"
-              disabled
-            >
-              <FileText className="mr-3 h-4 w-4 text-gray-400 flex-shrink-0" />
-              <div className="flex-1 min-w-0 overflow-hidden">
-                <div className="font-medium mb-1 text-sm truncate">Create Proposal</div>
-                <div className="text-xs text-gray-400 line-clamp-2">Coming Soon - Generate client proposals</div>
+            <div className="relative group w-full">
+              <Button
+                variant="outline"
+                className="p-3 h-auto text-left justify-start hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:text-indigo-700 dark:hover:text-indigo-300 hover:border-indigo-200 dark:hover:border-indigo-700 transition-colors w-full cursor-not-allowed opacity-75"
+                onClick={(e) => {
+                  e.preventDefault();
+                  // Temporarily disabled - show coming soon
+                }}
+              >
+                <FileText className="mr-3 h-4 w-4 text-indigo-600 flex-shrink-0" />
+                <div className="flex-1 min-w-0 overflow-hidden">
+                  <div className="font-medium mb-1 text-sm truncate">Create Proposal</div>
+                  <div className="text-xs text-slate-500 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 line-clamp-2">Generate client proposals and documents</div>
+                </div>
+              </Button>
+              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+                Coming Soon
               </div>
-            </Button>
+            </div>
           </div>
         </div>
 
@@ -769,24 +801,32 @@ With these details, I'll create a customized proposal highlighting value proposi
                 e.preventDefault();
                 // Temporarily disabled - show coming soon
               }}
-              className="text-slate-700 dark:text-slate-300 cursor-not-allowed opacity-75"
+              className="text-blue-700 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 cursor-not-allowed opacity-75"
             >
-              <FileSearch className="w-3 h-3 mr-2" />
+              <FileSearch className="w-3 h-3 mr-2 text-blue-600" />
               Analyze Document
             </Button>
             <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
               Coming Soon
             </div>
           </div>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => handleQuickAction("Generate a client proposal based on this information")}
-            className="text-slate-700 dark:text-slate-300"
-          >
-            <FileText className="w-3 h-3 mr-2" />
-            Create Proposal
-          </Button>
+          <div className="relative group">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={(e) => {
+                e.preventDefault();
+                // Temporarily disabled - show coming soon
+              }}
+              className="text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 cursor-not-allowed opacity-75"
+            >
+              <FileText className="w-3 h-3 mr-2 text-indigo-600" />
+              Create Proposal
+            </Button>
+            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
+              Coming Soon
+            </div>
+          </div>
         </div>
       </div>
     </div>
