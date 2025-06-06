@@ -1235,6 +1235,24 @@ User Context: {userRole}`,
           }
         });
         
+        // Capture first interaction for admin monitoring
+        try {
+          await chatMonitoringService.captureFirstInteraction(
+            chatId,
+            userId,
+            messageData.content,
+            welcomeMessage.content,
+            {
+              responseTime: 50, // Fast welcome message
+              tokensUsed: 15,
+              model: 'welcome-template',
+              confidence: 1.0
+            }
+          );
+        } catch (monitorError) {
+          console.error('Failed to capture welcome interaction:', monitorError);
+        }
+        
         // Return immediately for faster performance
         return res.json({
           userMessage,
@@ -1369,6 +1387,26 @@ User Context: {userRole}`,
           suggestions: aiResponse.suggestions
         }
       });
+
+      // Capture first interaction for admin monitoring
+      if (isFirstMessage && messages.length <= 2) {
+        try {
+          await chatMonitoringService.captureFirstInteraction(
+            chatId,
+            userId,
+            messageData.content,
+            aiResponse.message,
+            {
+              responseTime: Date.now() - (userMessage.createdAt?.getTime() || Date.now()),
+              tokensUsed: aiResponse.message.length / 4, // Estimate
+              model: orchestratedResult?.model || 'enhanced-ai',
+              confidence: orchestratedResult?.confidence || 0.8
+            }
+          );
+        } catch (monitorError) {
+          console.error('Failed to capture AI interaction:', monitorError);
+        }
+      }
 
       // Update chat title if this is the first user message
       if (messages.length <= 1) {
@@ -2016,6 +2054,52 @@ User Context: {userRole}`,
     } catch (error) {
       console.error("Error searching documents:", error);
       res.status(500).json({ message: "Failed to search documents" });
+    }
+  });
+
+  // Admin Chat Monitoring endpoints
+  app.get('/api/admin/chat-monitoring', async (req: any, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 50;
+      const monitoringData = await chatMonitoringService.getMonitoringData(limit);
+      res.json(monitoringData);
+    } catch (error) {
+      console.error('Failed to get monitoring data:', error);
+      res.status(500).json({ message: 'Failed to retrieve monitoring data' });
+    }
+  });
+
+  app.get('/api/admin/chat-monitoring/stats', async (req: any, res) => {
+    try {
+      const stats = await chatMonitoringService.getAccuracyStats();
+      res.json(stats);
+    } catch (error) {
+      console.error('Failed to get accuracy stats:', error);
+      res.status(500).json({ message: 'Failed to retrieve accuracy statistics' });
+    }
+  });
+
+  app.post('/api/admin/chat-monitoring/:id/rate', async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const { isAccurate, adminNotes } = req.body;
+      
+      await chatMonitoringService.updateAccuracyRating(id, isAccurate, adminNotes);
+      res.json({ success: true, message: 'Rating updated successfully' });
+    } catch (error) {
+      console.error('Failed to update rating:', error);
+      res.status(500).json({ message: 'Failed to update accuracy rating' });
+    }
+  });
+
+  app.get('/api/admin/chat-monitoring/user/:userId', async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      const userChats = await chatMonitoringService.getChatsByUser(userId);
+      res.json(userChats);
+    } catch (error) {
+      console.error('Failed to get user chats:', error);
+      res.status(500).json({ message: 'Failed to retrieve user chats' });
     }
   });
 
