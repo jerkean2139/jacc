@@ -556,6 +556,24 @@ export const insertApiKeySchema = createInsertSchema(apiKeys).omit({
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
 
+// Chat monitoring table for admin oversight
+export const chatMonitoring = pgTable("chat_monitoring", {
+  id: varchar("id").primaryKey().notNull(),
+  chatId: varchar("chat_id").notNull().references(() => chats.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  firstUserQuery: text("first_user_query").notNull(),
+  aiResponse: text("ai_response").notNull(),
+  responseTime: integer("response_time").notNull(), // milliseconds
+  tokensUsed: integer("tokens_used").notNull(),
+  model: varchar("model").notNull(),
+  confidence: real("confidence").notNull(), // 0-1 scale
+  timestamp: timestamp("timestamp").defaultNow(),
+  isAccurate: boolean("is_accurate"), // null = pending review
+  adminNotes: text("admin_notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // User prompt customization table
 export const userPrompts = pgTable("user_prompts", {
   id: varchar("id").primaryKey().notNull(),
