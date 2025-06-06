@@ -1891,6 +1891,216 @@ User Context: {userRole}`,
     }
   });
 
+  // Cloud drive integration endpoints
+  app.post('/api/cloud-drives/:provider/connect', async (req: any, res) => {
+    try {
+      const { provider } = req.params;
+      const userId = 'simple-user-001'; // Temporary for testing
+      
+      if (!['google', 'dropbox', 'onedrive'].includes(provider)) {
+        return res.status(400).json({ message: "Unsupported cloud provider" });
+      }
+
+      // Generate OAuth URL based on provider
+      let authUrl = '';
+      switch (provider) {
+        case 'google':
+          authUrl = `https://accounts.google.com/oauth/authorize?client_id=${process.env.GOOGLE_CLIENT_ID}&redirect_uri=${process.env.GOOGLE_REDIRECT_URI}&scope=https://www.googleapis.com/auth/drive.readonly&response_type=code&access_type=offline`;
+          break;
+        case 'dropbox':
+          authUrl = `https://www.dropbox.com/oauth2/authorize?client_id=${process.env.DROPBOX_CLIENT_ID}&redirect_uri=${process.env.DROPBOX_REDIRECT_URI}&response_type=code`;
+          break;
+        case 'onedrive':
+          authUrl = `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=${process.env.ONEDRIVE_CLIENT_ID}&redirect_uri=${process.env.ONEDRIVE_REDIRECT_URI}&scope=Files.Read.All&response_type=code`;
+          break;
+      }
+
+      res.json({ authUrl, provider });
+    } catch (error) {
+      console.error("Error connecting to cloud drive:", error);
+      res.status(500).json({ message: "Failed to connect to cloud drive" });
+    }
+  });
+
+  app.get('/api/cloud-drives/:provider/files', async (req: any, res) => {
+    try {
+      const { provider } = req.params;
+      const userId = 'simple-user-001'; // Temporary for testing
+      
+      // This would typically fetch files from the connected cloud drive
+      // For now, return mock structure to show the UI flow
+      const mockFiles = [
+        {
+          id: '1',
+          name: 'Sales Training Materials',
+          type: 'folder',
+          modifiedTime: new Date().toISOString(),
+          children: [
+            {
+              id: '1-1',
+              name: 'Payment Processing Guide.pdf',
+              type: 'file',
+              size: 2048000,
+              mimeType: 'application/pdf'
+            },
+            {
+              id: '1-2',
+              name: 'Merchant Onboarding Checklist.docx',
+              type: 'file',
+              size: 512000,
+              mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            }
+          ]
+        },
+        {
+          id: '2',
+          name: 'Company Policies.pdf',
+          type: 'file',
+          size: 1024000,
+          mimeType: 'application/pdf'
+        },
+        {
+          id: '3',
+          name: 'Rate Sheets',
+          type: 'folder',
+          modifiedTime: new Date().toISOString(),
+          children: [
+            {
+              id: '3-1',
+              name: 'Standard Rates 2024.xlsx',
+              type: 'file',
+              size: 256000,
+              mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            }
+          ]
+        }
+      ];
+
+      res.json(mockFiles);
+    } catch (error) {
+      console.error("Error fetching cloud files:", error);
+      res.status(500).json({ message: "Failed to fetch cloud files" });
+    }
+  });
+
+  app.post('/api/documents/import-wizard', async (req: any, res) => {
+    try {
+      const userId = 'simple-user-001'; // Temporary for testing
+      const { sourceType, cloudProvider, selectedFiles, targetFolderId, permissions, createNewFolder } = req.body;
+      
+      const results = [];
+      const errors = [];
+
+      // Create new folder if specified
+      let folderId = targetFolderId;
+      if (createNewFolder && req.body.newFolderName) {
+        const folder = await storage.createFolder({
+          id: crypto.randomUUID(),
+          userId,
+          name: req.body.newFolderName,
+          description: `Created via wizard for ${sourceType} import`
+        });
+        folderId = folder.id;
+      }
+
+      // Process each selected file
+      for (const file of selectedFiles) {
+        try {
+          if (file.type === 'folder') {
+            // Create folder structure
+            const newFolder = await storage.createFolder({
+              id: crypto.randomUUID(),
+              userId,
+              name: file.name,
+              description: `Imported from ${cloudProvider || 'local'}`,
+              parentId: folderId
+            });
+
+            // Process children if any
+            if (file.children && file.children.length > 0) {
+              for (const child of file.children) {
+                if (child.type === 'file') {
+                  const document = await storage.createDocument({
+                    id: crypto.randomUUID(),
+                    userId,
+                    name: child.name.replace(/\.[^/.]+$/, ""),
+                    originalName: child.name,
+                    mimeType: child.mimeType || 'application/octet-stream',
+                    size: child.size || 0,
+                    path: `cloud-import/${child.id}`,
+                    folderId: newFolder.id,
+                    isPublic: permissions.viewAll || false,
+                    adminOnly: permissions.adminOnly || false,
+                    managerOnly: permissions.managerAccess || false,
+                    agentOnly: permissions.agentAccess || false,
+                    trainingData: permissions.trainingData || false,
+                    autoVectorize: permissions.autoVectorize || true,
+                    cloudFileId: child.id,
+                    cloudProvider: cloudProvider
+                  });
+
+                  results.push({
+                    type: 'document',
+                    document,
+                    source: 'cloud'
+                  });
+                }
+              }
+            }
+
+            results.push({
+              type: 'folder',
+              folder: newFolder,
+              source: 'cloud'
+            });
+          } else {
+            // Create document
+            const document = await storage.createDocument({
+              id: crypto.randomUUID(),
+              userId,
+              name: file.name.replace(/\.[^/.]+$/, ""),
+              originalName: file.name,
+              mimeType: file.mimeType || 'application/octet-stream',
+              size: file.size || 0,
+              path: `cloud-import/${file.id}`,
+              folderId: folderId,
+              isPublic: permissions.viewAll || false,
+              adminOnly: permissions.adminOnly || false,
+              managerOnly: permissions.managerAccess || false,
+              agentOnly: permissions.agentAccess || false,
+              trainingData: permissions.trainingData || false,
+              autoVectorize: permissions.autoVectorize || true,
+              cloudFileId: file.id,
+              cloudProvider: cloudProvider
+            });
+
+            results.push({
+              type: 'document',
+              document,
+              source: 'cloud'
+            });
+          }
+        } catch (error) {
+          errors.push({
+            file: file.name,
+            error: error instanceof Error ? error.message : 'Unknown error'
+          });
+        }
+      }
+
+      res.json({
+        success: true,
+        results,
+        errors,
+        totalProcessed: results.length,
+        folderId
+      });
+    } catch (error) {
+      console.error("Error importing documents:", error);
+      res.status(500).json({ message: "Failed to import documents" });
+    }
+  });
+
   // Duplicate detection routes
   app.post('/api/documents/check-duplicates', async (req: any, res) => {
     try {

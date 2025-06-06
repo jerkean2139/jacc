@@ -30,11 +30,15 @@ import {
   Lock,
   Trash2,
   Plus,
-  Folder
+  Folder,
+  Cloud,
+  HardDrive
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import type { Document } from "@shared/schema";
 import { cn } from "@/lib/utils";
+import CloudDriveWizard from "./cloud-drive-wizard";
+import DocumentPermissionsEditor from "./document-permissions-editor";
 
 interface UnifiedDocumentManagerProps {
   folderId?: string;
@@ -62,6 +66,10 @@ export default function UnifiedDocumentManager({ folderId, onUploadComplete }: U
     autoVectorize: true,
   });
   const [uploadMode, setUploadMode] = useState<'files' | 'folder' | 'zip'>('files');
+  const [activeTab, setActiveTab] = useState<'local' | 'cloud'>('local');
+  const [showCloudWizard, setShowCloudWizard] = useState(false);
+  const [showPermissionsEditor, setShowPermissionsEditor] = useState(false);
+  const [selectedDocuments, setSelectedDocuments] = useState<Document[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const folderInputRef = useRef<HTMLInputElement>(null);
   const zipInputRef = useRef<HTMLInputElement>(null);
@@ -252,15 +260,55 @@ export default function UnifiedDocumentManager({ folderId, onUploadComplete }: U
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
+  // Show cloud drive wizard when requested
+  if (showCloudWizard) {
+    return (
+      <div className="space-y-6">
+        <CloudDriveWizard />
+        <div className="flex justify-end">
+          <Button variant="outline" onClick={() => setShowCloudWizard(false)}>
+            Back to Local Upload
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Show document permissions editor when requested
+  if (showPermissionsEditor && selectedDocuments.length > 0) {
+    return (
+      <div className="space-y-6">
+        <DocumentPermissionsEditor
+          documents={selectedDocuments}
+          folderPermissions={documentPermissions}
+          onClose={() => {
+            setShowPermissionsEditor(false);
+            setSelectedDocuments([]);
+          }}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      <Tabs defaultValue="upload" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="upload">Upload & Manage</TabsTrigger>
-          <TabsTrigger value="permissions">Default Permissions</TabsTrigger>
+      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'local' | 'cloud')} className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="local" className="flex items-center gap-2">
+            <HardDrive className="h-4 w-4" />
+            Local Upload
+          </TabsTrigger>
+          <TabsTrigger value="cloud" className="flex items-center gap-2">
+            <Cloud className="h-4 w-4" />
+            Cloud Drives
+          </TabsTrigger>
+          <TabsTrigger value="permissions" className="flex items-center gap-2">
+            <Settings className="h-4 w-4" />
+            Permissions
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="upload" className="space-y-6">
+        <TabsContent value="local" className="space-y-6">
           {/* Upload Controls */}
           <Card>
             <CardHeader>
