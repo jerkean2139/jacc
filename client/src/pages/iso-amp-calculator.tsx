@@ -1065,18 +1065,50 @@ export default function ISOAmpCalculator() {
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="proposed-processor-name">Processor Name</Label>
-                  <Input
-                    id="proposed-processor-name"
+                  <Label htmlFor="proposed-processor-select">Proposed Processor</Label>
+                  <Select
                     value={businessData.proposedProcessor.name}
-                    onChange={(e) => {
-                      setBusinessData(prev => ({
-                        ...prev,
-                        proposedProcessor: { ...prev.proposedProcessor, name: e.target.value }
-                      }));
+                    onValueChange={(value) => {
+                      if (value === "custom") {
+                        setBusinessData(prev => ({
+                          ...prev,
+                          proposedProcessor: { ...prev.proposedProcessor, name: "" }
+                        }));
+                      } else {
+                        handleProcessorSelection(value, false);
+                      }
                     }}
-                  />
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select proposed processor" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="TracerPay">TracerPay (Recommended)</SelectItem>
+                      {processors.filter((p: any) => p.name !== "TracerPay").map((processor: any) => (
+                        <SelectItem key={processor.name} value={processor.name}>
+                          {processor.name}
+                        </SelectItem>
+                      ))}
+                      <SelectItem value="custom">Custom/Other</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
+                {businessData.proposedProcessor.name && !processors.find((p: any) => p.name === businessData.proposedProcessor.name) && (
+                  <div>
+                    <Label htmlFor="custom-proposed-name">Custom Processor Name</Label>
+                    <Input
+                      id="custom-proposed-name"
+                      placeholder="Enter processor name"
+                      value={businessData.proposedProcessor.name}
+                      onChange={(e) => {
+                        setBusinessData(prev => ({
+                          ...prev,
+                          proposedProcessor: { ...prev.proposedProcessor, name: e.target.value }
+                        }));
+                      }}
+                    />
+                  </div>
+                )}
               </div>
 
               <Separator />
