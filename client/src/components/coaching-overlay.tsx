@@ -150,14 +150,14 @@ export default function CoachingOverlay() {
 
   if (isMinimized) {
     return (
-      <div className="fixed bottom-20 right-4 z-50 md:bottom-4">
+      <div className="fixed bottom-16 right-2 z-50 md:bottom-4 md:right-4">
         <Button
           onClick={() => setIsMinimized(false)}
-          className="rounded-full h-12 w-12 shadow-lg bg-blue-600 hover:bg-blue-700 relative"
+          className="rounded-full h-10 w-10 md:h-12 md:w-12 shadow-lg bg-blue-600 hover:bg-blue-700 relative"
         >
-          <Brain className="h-6 w-6" />
+          <Brain className="h-4 w-4 md:h-6 md:w-6" />
           {filteredTips.length > 0 && (
-            <Badge className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 flex items-center justify-center bg-red-500 text-white text-xs">
+            <Badge className="absolute -top-1 -right-1 md:-top-2 md:-right-2 h-4 w-4 md:h-6 md:w-6 rounded-full p-0 flex items-center justify-center bg-red-500 text-white text-xs">
               {filteredTips.length}
             </Badge>
           )}

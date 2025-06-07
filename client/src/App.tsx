@@ -31,6 +31,7 @@ import DocumentsPage from "@/pages/documents-page";
 import DocumentViewer from "@/pages/document-viewer";
 import MerchantInsights from "@/pages/merchant-insights";
 import GamificationPage from "@/pages/gamification-page";
+import HelpPage from "@/pages/help";
 
 function Router() {
   const { user, isLoading } = useAuth();
@@ -74,6 +75,7 @@ function Router() {
           <Route path="/prompts" component={PromptCustomization} />
           <Route path="/merchant-insights" component={MerchantInsights} />
           <Route path="/leaderboard" component={GamificationPage} />
+          <Route path="/help" component={HelpPage} />
           <Route path="/admin" component={AdminPanel} />
           <Route path="/admin/dashboard" component={AdminDashboard} />
           <Route path="/admin/settings" component={AdminSettings} />
