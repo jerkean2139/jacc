@@ -809,11 +809,173 @@ export default function ISOAmpCalculator() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <PDFGenerationSection 
-                      results={results}
-                      businessData={businessData}
-                      toast={toast}
-                    />
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="agentName">Agent Name</Label>
+                          <Input
+                            id="agentName"
+                            placeholder="Enter your name"
+                            defaultValue="JACC Agent"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="agentEmail">Agent Email</Label>
+                          <Input
+                            id="agentEmail"
+                            type="email"
+                            placeholder="your.email@company.com"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <Label htmlFor="recipientEmail">Send Report To</Label>
+                        <Input
+                          id="recipientEmail"
+                          type="email"
+                          placeholder="client@business.com"
+                        />
+                      </div>
+
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={async () => {
+                            try {
+                              const agentName = (document.getElementById('agentName') as HTMLInputElement)?.value || 'JACC Agent';
+                              const agentEmail = (document.getElementById('agentEmail') as HTMLInputElement)?.value || '';
+                              const recipientEmail = (document.getElementById('recipientEmail') as HTMLInputElement)?.value || '';
+
+                              if (!agentEmail || !recipientEmail) {
+                                toast({
+                                  title: 'Missing Information',
+                                  description: 'Please provide both agent and recipient email addresses',
+                                  variant: 'destructive'
+                                });
+                                return;
+                              }
+
+                              const reportData = {
+                                merchantProfile: {
+                                  businessName: businessData.businessName || 'Unknown Business',
+                                  industry: businessData.industry,
+                                  monthlyVolume: businessData.monthlyVolume,
+                                  averageTicket: businessData.averageTicket,
+                                  transactionCount: businessData.transactionCount
+                                },
+                                currentProcessor: businessData.currentProcessor,
+                                proposedProcessor: businessData.proposedProcessor,
+                                costs: results.data,
+                                analysisDate: new Date().toLocaleDateString(),
+                                agentName,
+                                agentEmail
+                              };
+
+                              const response = await fetch('/api/reports/generate-pdf', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                  reportType: results.type,
+                                  reportData
+                                })
+                              });
+
+                              if (response.ok) {
+                                const blob = await response.blob();
+                                const url = window.URL.createObjectURL(blob);
+                                const a = document.createElement('a');
+                                a.href = url;
+                                a.download = `${results.type}-report-${businessData.businessName?.replace(/\s+/g, '-') || 'merchant'}.pdf`;
+                                document.body.appendChild(a);
+                                a.click();
+                                window.URL.revokeObjectURL(url);
+                                document.body.removeChild(a);
+
+                                toast({
+                                  title: 'PDF Generated',
+                                  description: 'Report downloaded successfully'
+                                });
+                              }
+                            } catch (error) {
+                              toast({
+                                title: 'Error',
+                                description: 'Failed to generate PDF report',
+                                variant: 'destructive'
+                              });
+                            }
+                          }}
+                          className="flex-1"
+                        >
+                          <Download className="w-4 h-4 mr-2" />
+                          Download PDF
+                        </Button>
+
+                        <Button
+                          onClick={async () => {
+                            try {
+                              const agentName = (document.getElementById('agentName') as HTMLInputElement)?.value || 'JACC Agent';
+                              const agentEmail = (document.getElementById('agentEmail') as HTMLInputElement)?.value || '';
+                              const recipientEmail = (document.getElementById('recipientEmail') as HTMLInputElement)?.value || '';
+
+                              if (!agentEmail || !recipientEmail) {
+                                toast({
+                                  title: 'Missing Information',
+                                  description: 'Please provide both agent and recipient email addresses',
+                                  variant: 'destructive'
+                                });
+                                return;
+                              }
+
+                              const reportData = {
+                                merchantProfile: {
+                                  businessName: businessData.businessName || 'Unknown Business',
+                                  industry: businessData.industry,
+                                  monthlyVolume: businessData.monthlyVolume,
+                                  averageTicket: businessData.averageTicket,
+                                  transactionCount: businessData.transactionCount
+                                },
+                                currentProcessor: businessData.currentProcessor,
+                                proposedProcessor: businessData.proposedProcessor,
+                                costs: results.data,
+                                analysisDate: new Date().toLocaleDateString(),
+                                agentName,
+                                agentEmail
+                              };
+
+                              const response = await apiRequest('POST', '/api/reports/email-pdf', {
+                                reportType: results.type,
+                                reportData,
+                                recipientEmail,
+                                generatedBy: agentName
+                              });
+
+                              if (response.success) {
+                                toast({
+                                  title: 'Email Sent',
+                                  description: `Report sent successfully to ${recipientEmail}`
+                                });
+                              }
+                            } catch (error) {
+                              toast({
+                                title: 'Error',
+                                description: 'Failed to send email report',
+                                variant: 'destructive'
+                              });
+                            }
+                          }}
+                          variant="outline"
+                          className="flex-1"
+                        >
+                          <Mail className="w-4 h-4 mr-2" />
+                          Email Report
+                        </Button>
+                      </div>
+
+                      <div className="text-sm text-gray-600 dark:text-gray-400">
+                        Reports include branded headers, detailed analysis, and professional formatting.
+                        Email integration uses ISO Hub SMTP configuration.
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
               )}

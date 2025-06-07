@@ -521,6 +521,13 @@ export default function Sidebar({
               <Calculator className="w-4 h-4 text-blue-500" />
               <span className="text-sm text-slate-700 dark:text-slate-300">Rate Calculator</span>
             </a>
+            <a 
+              href="/pricing-management" 
+              className="flex items-center space-x-3 p-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg cursor-pointer transition-colors"
+            >
+              <Settings className="w-4 h-4 text-green-500" />
+              <span className="text-sm text-slate-700 dark:text-slate-300">Pricing Management</span>
+            </a>
           </div>
         </div>
       </ScrollArea>
