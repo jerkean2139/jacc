@@ -361,25 +361,9 @@ export default function OnboardingWalkthrough() {
   const progress = ((currentStep + 1) / steps.length) * 100;
   const currentStepData = steps[currentStep];
 
-  // Restart onboarding button for completed users
+  // Restart onboarding is now handled in sidebar navigation
   if (hasSeenOnboarding) {
-    return (
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => {
-          setCurrentStep(0);
-          setCompletedSteps([]);
-          setHasSeenOnboarding(false);
-          setDontShowAgain(false);
-          setIsOpen(true);
-        }}
-        className="fixed bottom-4 right-4 z-50"
-      >
-        <Play className="w-4 h-4 mr-2" />
-        Restart Tutorial
-      </Button>
-    );
+    return null;
   }
 
   return (
