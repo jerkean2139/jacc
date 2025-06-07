@@ -364,7 +364,7 @@ export default function ISOAmpCalculator() {
         cardPresentPercentage: data.transactionBreakdown.cardPresentPercentage
       };
       
-      return apiRequest('POST', '/api/iso-amp/advanced-savings', {
+      return apiRequest('POST', '/api/iso-hub/analyze', {
         merchantProfile,
         currentProcessor: data.currentProcessor,
         proposedProcessor: data.proposedProcessor
@@ -387,7 +387,7 @@ export default function ISOAmpCalculator() {
 
   // Equipment costs mutation
   const equipmentCostsMutation = useMutation({
-    mutationFn: (requirements: any) => apiRequest('POST', '/api/iso-amp/equipment-costs', requirements),
+    mutationFn: (requirements: any) => apiRequest('POST', '/api/iso-hub/hardware', requirements),
     onSuccess: (data) => {
       setEquipmentResults(data);
       toast({ title: 'Success', description: 'Equipment recommendations generated' });
