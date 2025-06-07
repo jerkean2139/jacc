@@ -29,43 +29,158 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 
+interface TransactionBreakdown {
+  creditCardVolume: number;
+  debitCardVolume: number;
+  keyedVolume: number;
+  ecommerceVolume: number;
+  cardPresentPercentage: number;
+  qualifiedPercentage: number;
+  midQualifiedPercentage: number;
+  nonQualifiedPercentage: number;
+}
+
+interface ProcessorRates {
+  name: string;
+  qualifiedRate: number;
+  midQualifiedRate: number;
+  nonQualifiedRate: number;
+  debitRate: number;
+  authFee: number;
+  monthlyFee: number;
+  statementFee: number;
+  batchFee: number;
+  keyedUpcharge: number;
+  ecommerceUpcharge: number;
+  equipmentLease: number;
+  gatewayFee: number;
+  pciFee: number;
+  regulatoryFee: number;
+}
+
 interface BusinessData {
   monthlyVolume: number;
   averageTicket: number;
   transactionCount: number;
   businessType: string;
   industry: string;
-  currentRates?: {
-    qualifiedRate: number;
-    midQualifiedRate: number;
-    nonQualifiedRate: number;
-    authFee: number;
-    monthlyFee: number;
-    statementFee: number;
-    batchFee: number;
-    equipmentLease?: number;
+  transactionBreakdown: TransactionBreakdown;
+  currentProcessor: ProcessorRates;
+  proposedProcessor: ProcessorRates;
+  additionalCosts: {
+    hardwareCosts: number;
+    softwareFees: number;
+    supportFees: number;
+    installationFees: number;
   };
 }
 
+// Helper function to calculate monthly costs
+const calculateMonthlyCosts = (data: BusinessData, processor: ProcessorRates) => {
+  const { transactionBreakdown } = data;
+  
+  // Calculate volume-based fees
+  const qualifiedVolume = data.monthlyVolume * (transactionBreakdown.qualifiedPercentage / 100);
+  const midQualifiedVolume = data.monthlyVolume * (transactionBreakdown.midQualifiedPercentage / 100);
+  const nonQualifiedVolume = data.monthlyVolume * (transactionBreakdown.nonQualifiedPercentage / 100);
+  
+  const qualifiedFees = qualifiedVolume * (processor.qualifiedRate / 100);
+  const midQualifiedFees = midQualifiedVolume * (processor.midQualifiedRate / 100);
+  const nonQualifiedFees = nonQualifiedVolume * (processor.nonQualifiedRate / 100);
+  
+  // Calculate debit fees
+  const debitFees = transactionBreakdown.debitCardVolume * (processor.debitRate / 100);
+  
+  // Calculate transaction-based fees
+  const authFees = data.transactionCount * processor.authFee;
+  const batchFees = 30 * processor.batchFee; // Assuming daily batches
+  
+  // Calculate keyed and ecommerce upcharges
+  const keyedUpcharge = transactionBreakdown.keyedVolume * (processor.keyedUpcharge / 100);
+  const ecommerceUpcharge = transactionBreakdown.ecommerceVolume * (processor.ecommerceUpcharge / 100);
+  
+  // Monthly fixed fees
+  const monthlyFees = processor.monthlyFee + processor.statementFee + processor.gatewayFee + 
+                     processor.pciFee + processor.regulatoryFee + processor.equipmentLease;
+  
+  const totalProcessingFees = qualifiedFees + midQualifiedFees + nonQualifiedFees + debitFees + 
+                             authFees + batchFees + keyedUpcharge + ecommerceUpcharge;
+  
+  return {
+    processingFees: totalProcessingFees,
+    monthlyFees: monthlyFees,
+    total: totalProcessingFees + monthlyFees,
+    breakdown: {
+      qualifiedFees,
+      midQualifiedFees,
+      nonQualifiedFees,
+      debitFees,
+      authFees,
+      batchFees,
+      keyedUpcharge,
+      ecommerceUpcharge,
+      monthlyFees
+    }
+  };
+};
+
 export default function ISOAmpCalculator() {
-  const [activeTab, setActiveTab] = useState('analysis');
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [analysisResults, setAnalysisResults] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState('volume');
   const [businessData, setBusinessData] = useState<BusinessData>({
     monthlyVolume: 50000,
     averageTicket: 85,
     transactionCount: 588,
     businessType: 'retail',
     industry: 'general_retail',
-    currentRates: {
+    transactionBreakdown: {
+      creditCardVolume: 40000,
+      debitCardVolume: 10000,
+      keyedVolume: 5000,
+      ecommerceVolume: 0,
+      cardPresentPercentage: 90,
+      qualifiedPercentage: 70,
+      midQualifiedPercentage: 20,
+      nonQualifiedPercentage: 10
+    },
+    currentProcessor: {
+      name: 'Current Processor',
       qualifiedRate: 2.89,
       midQualifiedRate: 3.25,
       nonQualifiedRate: 3.89,
+      debitRate: 1.19,
       authFee: 0.15,
       monthlyFee: 25,
       statementFee: 10,
       batchFee: 0.25,
+      keyedUpcharge: 0.30,
+      ecommerceUpcharge: 0.15,
       equipmentLease: 89,
+      gatewayFee: 15,
+      pciFee: 8.95,
+      regulatoryFee: 2.95
+    },
+    proposedProcessor: {
+      name: 'TracerPay',
+      qualifiedRate: 2.49,
+      midQualifiedRate: 2.89,
+      nonQualifiedRate: 3.29,
+      debitRate: 0.95,
+      authFee: 0.10,
+      monthlyFee: 15,
+      statementFee: 0,
+      batchFee: 0.10,
+      keyedUpcharge: 0.20,
+      ecommerceUpcharge: 0.10,
+      equipmentLease: 69,
+      gatewayFee: 10,
+      pciFee: 0,
+      regulatoryFee: 1.95
+    },
+    additionalCosts: {
+      hardwareCosts: 0,
+      softwareFees: 0,
+      supportFees: 0,
+      installationFees: 0
     }
   });
 
@@ -189,55 +304,64 @@ export default function ISOAmpCalculator() {
           <Zap className="w-5 h-5 md:w-6 md:h-6 text-blue-600 dark:text-blue-400" />
         </div>
         <div className="min-w-0 flex-1">
-          <h2 className="text-lg md:text-2xl font-bold leading-tight">ISOAmp Integration Calculator</h2>
+          <h2 className="text-lg md:text-2xl font-bold leading-tight">Merchant Services Calculator</h2>
           <p className="text-sm md:text-base text-muted-foreground mt-1">
-            Advanced merchant services calculations with real-time rate analysis
+            Professional cost comparison and savings analysis for payment processing
           </p>
         </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3 md:grid-cols-5 gap-1">
-          <TabsTrigger value="analysis" className="text-xs md:text-sm">Statement</TabsTrigger>
-          <TabsTrigger value="setup" className="text-xs md:text-sm">Setup</TabsTrigger>
-          <TabsTrigger value="rates" className="text-xs md:text-sm">Rates</TabsTrigger>
-          <TabsTrigger value="savings" className="text-xs md:text-sm">Savings</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-4 md:grid-cols-6 gap-1">
+          <TabsTrigger value="volume" className="text-xs md:text-sm">Volume</TabsTrigger>
+          <TabsTrigger value="current" className="text-xs md:text-sm">Current</TabsTrigger>
+          <TabsTrigger value="proposed" className="text-xs md:text-sm">Proposed</TabsTrigger>
+          <TabsTrigger value="comparison" className="text-xs md:text-sm">Compare</TabsTrigger>
           <TabsTrigger value="equipment" className="text-xs md:text-sm">Equipment</TabsTrigger>
+          <TabsTrigger value="summary" className="text-xs md:text-sm">Summary</TabsTrigger>
         </TabsList>
 
-        {/* Bank Statement Analysis Tab */}
-        <TabsContent value="analysis" className="space-y-6">
+        {/* Volume & Transaction Breakdown Tab */}
+        <TabsContent value="volume" className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <FileBarChart className="w-5 h-5" />
-                Bank Statement Analysis
+                <DollarSign className="w-5 h-5" />
+                Monthly Volume & Transaction Breakdown
               </CardTitle>
               <CardDescription>
-                Upload processing statements or bank statements for automated data extraction
+                Enter detailed processing volume and transaction type information
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Manual Input Option */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              {/* Basic Volume Information */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <Label htmlFor="quick-volume">Monthly Volume ($)</Label>
+                  <Label htmlFor="monthly-volume">Total Monthly Volume ($)</Label>
                   <Input
-                    id="quick-volume"
+                    id="monthly-volume"
                     type="number"
-                    placeholder="e.g. 50000"
+                    value={businessData.monthlyVolume}
                     onChange={(e) => {
                       const volume = parseFloat(e.target.value) || 0;
-                      setBusinessData(prev => ({ ...prev, monthlyVolume: volume }));
+                      setBusinessData(prev => ({ 
+                        ...prev, 
+                        monthlyVolume: volume,
+                        transactionBreakdown: {
+                          ...prev.transactionBreakdown,
+                          creditCardVolume: volume * 0.8,
+                          debitCardVolume: volume * 0.2
+                        }
+                      }));
                     }}
                   />
                 </div>
                 <div>
-                  <Label htmlFor="quick-transactions">Transaction Count</Label>
+                  <Label htmlFor="transaction-count">Monthly Transaction Count</Label>
                   <Input
-                    id="quick-transactions"
+                    id="transaction-count"
                     type="number"
-                    placeholder="e.g. 588"
+                    value={businessData.transactionCount}
                     onChange={(e) => {
                       const count = parseInt(e.target.value) || 0;
                       setBusinessData(prev => ({ ...prev, transactionCount: count }));
@@ -245,16 +369,139 @@ export default function ISOAmpCalculator() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="quick-ticket">Average Ticket ($)</Label>
+                  <Label htmlFor="average-ticket">Average Ticket ($)</Label>
                   <Input
-                    id="quick-ticket"
+                    id="average-ticket"
                     type="number"
-                    placeholder="e.g. 85"
+                    value={businessData.averageTicket}
                     onChange={(e) => {
                       const ticket = parseFloat(e.target.value) || 0;
                       setBusinessData(prev => ({ ...prev, averageTicket: ticket }));
                     }}
                   />
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Transaction Type Breakdown */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Transaction Type Breakdown</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="credit-volume">Credit Card Volume ($)</Label>
+                    <Input
+                      id="credit-volume"
+                      type="number"
+                      value={businessData.transactionBreakdown.creditCardVolume}
+                      onChange={(e) => {
+                        const volume = parseFloat(e.target.value) || 0;
+                        setBusinessData(prev => ({ 
+                          ...prev, 
+                          transactionBreakdown: { ...prev.transactionBreakdown, creditCardVolume: volume }
+                        }));
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="debit-volume">Debit Card Volume ($)</Label>
+                    <Input
+                      id="debit-volume"
+                      type="number"
+                      value={businessData.transactionBreakdown.debitCardVolume}
+                      onChange={(e) => {
+                        const volume = parseFloat(e.target.value) || 0;
+                        setBusinessData(prev => ({ 
+                          ...prev, 
+                          transactionBreakdown: { ...prev.transactionBreakdown, debitCardVolume: volume }
+                        }));
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="keyed-volume">Keyed/Manual Entry Volume ($)</Label>
+                    <Input
+                      id="keyed-volume"
+                      type="number"
+                      value={businessData.transactionBreakdown.keyedVolume}
+                      onChange={(e) => {
+                        const volume = parseFloat(e.target.value) || 0;
+                        setBusinessData(prev => ({ 
+                          ...prev, 
+                          transactionBreakdown: { ...prev.transactionBreakdown, keyedVolume: volume }
+                        }));
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="ecommerce-volume">E-commerce Volume ($)</Label>
+                    <Input
+                      id="ecommerce-volume"
+                      type="number"
+                      value={businessData.transactionBreakdown.ecommerceVolume}
+                      onChange={(e) => {
+                        const volume = parseFloat(e.target.value) || 0;
+                        setBusinessData(prev => ({ 
+                          ...prev, 
+                          transactionBreakdown: { ...prev.transactionBreakdown, ecommerceVolume: volume }
+                        }));
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Qualification Percentages */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Rate Qualification Breakdown</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="qualified-pct">Qualified Rate Percentage (%)</Label>
+                    <Input
+                      id="qualified-pct"
+                      type="number"
+                      value={businessData.transactionBreakdown.qualifiedPercentage}
+                      onChange={(e) => {
+                        const pct = parseFloat(e.target.value) || 0;
+                        setBusinessData(prev => ({ 
+                          ...prev, 
+                          transactionBreakdown: { ...prev.transactionBreakdown, qualifiedPercentage: pct }
+                        }));
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="mid-qualified-pct">Mid-Qualified Percentage (%)</Label>
+                    <Input
+                      id="mid-qualified-pct"
+                      type="number"
+                      value={businessData.transactionBreakdown.midQualifiedPercentage}
+                      onChange={(e) => {
+                        const pct = parseFloat(e.target.value) || 0;
+                        setBusinessData(prev => ({ 
+                          ...prev, 
+                          transactionBreakdown: { ...prev.transactionBreakdown, midQualifiedPercentage: pct }
+                        }));
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="non-qualified-pct">Non-Qualified Percentage (%)</Label>
+                    <Input
+                      id="non-qualified-pct"
+                      type="number"
+                      value={businessData.transactionBreakdown.nonQualifiedPercentage}
+                      onChange={(e) => {
+                        const pct = parseFloat(e.target.value) || 0;
+                        setBusinessData(prev => ({ 
+                          ...prev, 
+                          transactionBreakdown: { ...prev.transactionBreakdown, nonQualifiedPercentage: pct }
+                        }));
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -383,21 +630,726 @@ export default function ISOAmpCalculator() {
           </Card>
         </TabsContent>
 
-        {/* Business Setup Tab */}
-        <TabsContent value="setup" className="space-y-6">
+        {/* Current Processor Rates Tab */}
+        <TabsContent value="current" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CreditCard className="w-5 h-5" />
+                Current Processor Rates
+              </CardTitle>
+              <CardDescription>
+                Enter your current processor's rates and fees for comparison
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="current-processor-name">Processor Name</Label>
+                  <Input
+                    id="current-processor-name"
+                    value={businessData.currentProcessor.name}
+                    onChange={(e) => {
+                      setBusinessData(prev => ({
+                        ...prev,
+                        currentProcessor: { ...prev.currentProcessor, name: e.target.value }
+                      }));
+                    }}
+                  />
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Processing Rates */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Processing Rates (%)</h3>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div>
+                    <Label htmlFor="current-qualified-rate">Qualified Rate</Label>
+                    <Input
+                      id="current-qualified-rate"
+                      type="number"
+                      step="0.01"
+                      value={businessData.currentProcessor.qualifiedRate}
+                      onChange={(e) => {
+                        const rate = parseFloat(e.target.value) || 0;
+                        setBusinessData(prev => ({
+                          ...prev,
+                          currentProcessor: { ...prev.currentProcessor, qualifiedRate: rate }
+                        }));
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="current-mid-qualified-rate">Mid-Qualified Rate</Label>
+                    <Input
+                      id="current-mid-qualified-rate"
+                      type="number"
+                      step="0.01"
+                      value={businessData.currentProcessor.midQualifiedRate}
+                      onChange={(e) => {
+                        const rate = parseFloat(e.target.value) || 0;
+                        setBusinessData(prev => ({
+                          ...prev,
+                          currentProcessor: { ...prev.currentProcessor, midQualifiedRate: rate }
+                        }));
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="current-non-qualified-rate">Non-Qualified Rate</Label>
+                    <Input
+                      id="current-non-qualified-rate"
+                      type="number"
+                      step="0.01"
+                      value={businessData.currentProcessor.nonQualifiedRate}
+                      onChange={(e) => {
+                        const rate = parseFloat(e.target.value) || 0;
+                        setBusinessData(prev => ({
+                          ...prev,
+                          currentProcessor: { ...prev.currentProcessor, nonQualifiedRate: rate }
+                        }));
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="current-debit-rate">Debit Card Rate</Label>
+                    <Input
+                      id="current-debit-rate"
+                      type="number"
+                      step="0.01"
+                      value={businessData.currentProcessor.debitRate}
+                      onChange={(e) => {
+                        const rate = parseFloat(e.target.value) || 0;
+                        setBusinessData(prev => ({
+                          ...prev,
+                          currentProcessor: { ...prev.currentProcessor, debitRate: rate }
+                        }));
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Transaction Fees */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Transaction Fees ($)</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="current-auth-fee">Authorization Fee</Label>
+                    <Input
+                      id="current-auth-fee"
+                      type="number"
+                      step="0.01"
+                      value={businessData.currentProcessor.authFee}
+                      onChange={(e) => {
+                        const fee = parseFloat(e.target.value) || 0;
+                        setBusinessData(prev => ({
+                          ...prev,
+                          currentProcessor: { ...prev.currentProcessor, authFee: fee }
+                        }));
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="current-batch-fee">Batch Fee</Label>
+                    <Input
+                      id="current-batch-fee"
+                      type="number"
+                      step="0.01"
+                      value={businessData.currentProcessor.batchFee}
+                      onChange={(e) => {
+                        const fee = parseFloat(e.target.value) || 0;
+                        setBusinessData(prev => ({
+                          ...prev,
+                          currentProcessor: { ...prev.currentProcessor, batchFee: fee }
+                        }));
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="current-keyed-upcharge">Keyed Entry Upcharge (%)</Label>
+                    <Input
+                      id="current-keyed-upcharge"
+                      type="number"
+                      step="0.01"
+                      value={businessData.currentProcessor.keyedUpcharge}
+                      onChange={(e) => {
+                        const upcharge = parseFloat(e.target.value) || 0;
+                        setBusinessData(prev => ({
+                          ...prev,
+                          currentProcessor: { ...prev.currentProcessor, keyedUpcharge: upcharge }
+                        }));
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Monthly Fees */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Monthly Fees ($)</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="current-monthly-fee">Monthly Service Fee</Label>
+                    <Input
+                      id="current-monthly-fee"
+                      type="number"
+                      step="0.01"
+                      value={businessData.currentProcessor.monthlyFee}
+                      onChange={(e) => {
+                        const fee = parseFloat(e.target.value) || 0;
+                        setBusinessData(prev => ({
+                          ...prev,
+                          currentProcessor: { ...prev.currentProcessor, monthlyFee: fee }
+                        }));
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="current-statement-fee">Statement Fee</Label>
+                    <Input
+                      id="current-statement-fee"
+                      type="number"
+                      step="0.01"
+                      value={businessData.currentProcessor.statementFee}
+                      onChange={(e) => {
+                        const fee = parseFloat(e.target.value) || 0;
+                        setBusinessData(prev => ({
+                          ...prev,
+                          currentProcessor: { ...prev.currentProcessor, statementFee: fee }
+                        }));
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="current-equipment-lease">Equipment Lease</Label>
+                    <Input
+                      id="current-equipment-lease"
+                      type="number"
+                      step="0.01"
+                      value={businessData.currentProcessor.equipmentLease}
+                      onChange={(e) => {
+                        const lease = parseFloat(e.target.value) || 0;
+                        setBusinessData(prev => ({
+                          ...prev,
+                          currentProcessor: { ...prev.currentProcessor, equipmentLease: lease }
+                        }));
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="current-gateway-fee">Gateway Fee</Label>
+                    <Input
+                      id="current-gateway-fee"
+                      type="number"
+                      step="0.01"
+                      value={businessData.currentProcessor.gatewayFee}
+                      onChange={(e) => {
+                        const fee = parseFloat(e.target.value) || 0;
+                        setBusinessData(prev => ({
+                          ...prev,
+                          currentProcessor: { ...prev.currentProcessor, gatewayFee: fee }
+                        }));
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="current-pci-fee">PCI Compliance Fee</Label>
+                    <Input
+                      id="current-pci-fee"
+                      type="number"
+                      step="0.01"
+                      value={businessData.currentProcessor.pciFee}
+                      onChange={(e) => {
+                        const fee = parseFloat(e.target.value) || 0;
+                        setBusinessData(prev => ({
+                          ...prev,
+                          currentProcessor: { ...prev.currentProcessor, pciFee: fee }
+                        }));
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="current-regulatory-fee">Regulatory Fee</Label>
+                    <Input
+                      id="current-regulatory-fee"
+                      type="number"
+                      step="0.01"
+                      value={businessData.currentProcessor.regulatoryFee}
+                      onChange={(e) => {
+                        const fee = parseFloat(e.target.value) || 0;
+                        setBusinessData(prev => ({
+                          ...prev,
+                          currentProcessor: { ...prev.currentProcessor, regulatoryFee: fee }
+                        }));
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end">
+                <Button onClick={() => setActiveTab('proposed')} className="gap-2">
+                  Continue to Proposed Rates
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Proposed Processor Rates Tab */}
+        <TabsContent value="proposed" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Target className="w-5 h-5" />
+                Proposed TracerPay Rates
+              </CardTitle>
+              <CardDescription>
+                Enter TracerPay's competitive rates and fees
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="proposed-processor-name">Processor Name</Label>
+                  <Input
+                    id="proposed-processor-name"
+                    value={businessData.proposedProcessor.name}
+                    onChange={(e) => {
+                      setBusinessData(prev => ({
+                        ...prev,
+                        proposedProcessor: { ...prev.proposedProcessor, name: e.target.value }
+                      }));
+                    }}
+                  />
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Processing Rates */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Processing Rates (%)</h3>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div>
+                    <Label htmlFor="proposed-qualified-rate">Qualified Rate</Label>
+                    <Input
+                      id="proposed-qualified-rate"
+                      type="number"
+                      step="0.01"
+                      value={businessData.proposedProcessor.qualifiedRate}
+                      onChange={(e) => {
+                        const rate = parseFloat(e.target.value) || 0;
+                        setBusinessData(prev => ({
+                          ...prev,
+                          proposedProcessor: { ...prev.proposedProcessor, qualifiedRate: rate }
+                        }));
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="proposed-mid-qualified-rate">Mid-Qualified Rate</Label>
+                    <Input
+                      id="proposed-mid-qualified-rate"
+                      type="number"
+                      step="0.01"
+                      value={businessData.proposedProcessor.midQualifiedRate}
+                      onChange={(e) => {
+                        const rate = parseFloat(e.target.value) || 0;
+                        setBusinessData(prev => ({
+                          ...prev,
+                          proposedProcessor: { ...prev.proposedProcessor, midQualifiedRate: rate }
+                        }));
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="proposed-non-qualified-rate">Non-Qualified Rate</Label>
+                    <Input
+                      id="proposed-non-qualified-rate"
+                      type="number"
+                      step="0.01"
+                      value={businessData.proposedProcessor.nonQualifiedRate}
+                      onChange={(e) => {
+                        const rate = parseFloat(e.target.value) || 0;
+                        setBusinessData(prev => ({
+                          ...prev,
+                          proposedProcessor: { ...prev.proposedProcessor, nonQualifiedRate: rate }
+                        }));
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="proposed-debit-rate">Debit Card Rate</Label>
+                    <Input
+                      id="proposed-debit-rate"
+                      type="number"
+                      step="0.01"
+                      value={businessData.proposedProcessor.debitRate}
+                      onChange={(e) => {
+                        const rate = parseFloat(e.target.value) || 0;
+                        setBusinessData(prev => ({
+                          ...prev,
+                          proposedProcessor: { ...prev.proposedProcessor, debitRate: rate }
+                        }));
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end">
+                <Button onClick={() => setActiveTab('comparison')} className="gap-2">
+                  View Comparison
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Side-by-Side Comparison Tab */}
+        <TabsContent value="comparison" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="w-5 h-5" />
+                Side-by-Side Cost Comparison
+              </CardTitle>
+              <CardDescription>
+                Monthly and yearly cost analysis with savings calculations
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {(() => {
+                const currentCosts = calculateMonthlyCosts(businessData, businessData.currentProcessor);
+                const proposedCosts = calculateMonthlyCosts(businessData, businessData.proposedProcessor);
+                const monthlySavings = currentCosts.total - proposedCosts.total;
+                const yearlySavings = monthlySavings * 12;
+
+                return (
+                  <div className="space-y-6">
+                    {/* Monthly Comparison */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <Card className="border-gray-300">
+                        <CardHeader className="text-center">
+                          <CardTitle className="text-lg">{businessData.currentProcessor.name}</CardTitle>
+                          <CardDescription>Current Processor</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                          <div className="text-center">
+                            <p className="text-2xl font-bold text-red-600">${currentCosts.total.toFixed(2)}</p>
+                            <p className="text-sm text-gray-500">Monthly Total</p>
+                          </div>
+                          <Separator />
+                          <div className="space-y-1 text-sm">
+                            <div className="flex justify-between">
+                              <span>Processing Fees:</span>
+                              <span>${currentCosts.processingFees.toFixed(2)}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>Monthly Fees:</span>
+                              <span>${currentCosts.monthlyFees.toFixed(2)}</span>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="border-green-300 bg-green-50 dark:bg-green-900/10">
+                        <CardHeader className="text-center">
+                          <CardTitle className="text-lg">{businessData.proposedProcessor.name}</CardTitle>
+                          <CardDescription>Proposed Processor</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                          <div className="text-center">
+                            <p className="text-2xl font-bold text-green-600">${proposedCosts.total.toFixed(2)}</p>
+                            <p className="text-sm text-gray-500">Monthly Total</p>
+                          </div>
+                          <Separator />
+                          <div className="space-y-1 text-sm">
+                            <div className="flex justify-between">
+                              <span>Processing Fees:</span>
+                              <span>${proposedCosts.processingFees.toFixed(2)}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>Monthly Fees:</span>
+                              <span>${proposedCosts.monthlyFees.toFixed(2)}</span>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="border-blue-300 bg-blue-50 dark:bg-blue-900/10">
+                        <CardHeader className="text-center">
+                          <CardTitle className="text-lg">Savings</CardTitle>
+                          <CardDescription>Cost Reduction</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                          <div className="text-center">
+                            <p className="text-2xl font-bold text-blue-600">${monthlySavings.toFixed(2)}</p>
+                            <p className="text-sm text-gray-500">Monthly Savings</p>
+                          </div>
+                          <Separator />
+                          <div className="text-center">
+                            <p className="text-xl font-semibold text-blue-600">${yearlySavings.toFixed(2)}</p>
+                            <p className="text-sm text-gray-500">Annual Savings</p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+
+                    {/* Detailed Breakdown */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Detailed Cost Breakdown</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-sm">
+                            <thead>
+                              <tr className="border-b">
+                                <th className="text-left py-2">Fee Type</th>
+                                <th className="text-right py-2">{businessData.currentProcessor.name}</th>
+                                <th className="text-right py-2">{businessData.proposedProcessor.name}</th>
+                                <th className="text-right py-2">Difference</th>
+                              </tr>
+                            </thead>
+                            <tbody className="space-y-1">
+                              <tr className="border-b">
+                                <td className="py-2">Qualified Fees</td>
+                                <td className="text-right">${currentCosts.breakdown.qualifiedFees.toFixed(2)}</td>
+                                <td className="text-right">${proposedCosts.breakdown.qualifiedFees.toFixed(2)}</td>
+                                <td className="text-right text-green-600">${(currentCosts.breakdown.qualifiedFees - proposedCosts.breakdown.qualifiedFees).toFixed(2)}</td>
+                              </tr>
+                              <tr className="border-b">
+                                <td className="py-2">Mid-Qualified Fees</td>
+                                <td className="text-right">${currentCosts.breakdown.midQualifiedFees.toFixed(2)}</td>
+                                <td className="text-right">${proposedCosts.breakdown.midQualifiedFees.toFixed(2)}</td>
+                                <td className="text-right text-green-600">${(currentCosts.breakdown.midQualifiedFees - proposedCosts.breakdown.midQualifiedFees).toFixed(2)}</td>
+                              </tr>
+                              <tr className="border-b">
+                                <td className="py-2">Non-Qualified Fees</td>
+                                <td className="text-right">${currentCosts.breakdown.nonQualifiedFees.toFixed(2)}</td>
+                                <td className="text-right">${proposedCosts.breakdown.nonQualifiedFees.toFixed(2)}</td>
+                                <td className="text-right text-green-600">${(currentCosts.breakdown.nonQualifiedFees - proposedCosts.breakdown.nonQualifiedFees).toFixed(2)}</td>
+                              </tr>
+                              <tr className="border-b">
+                                <td className="py-2">Debit Card Fees</td>
+                                <td className="text-right">${currentCosts.breakdown.debitFees.toFixed(2)}</td>
+                                <td className="text-right">${proposedCosts.breakdown.debitFees.toFixed(2)}</td>
+                                <td className="text-right text-green-600">${(currentCosts.breakdown.debitFees - proposedCosts.breakdown.debitFees).toFixed(2)}</td>
+                              </tr>
+                              <tr className="border-b">
+                                <td className="py-2">Authorization Fees</td>
+                                <td className="text-right">${currentCosts.breakdown.authFees.toFixed(2)}</td>
+                                <td className="text-right">${proposedCosts.breakdown.authFees.toFixed(2)}</td>
+                                <td className="text-right text-green-600">${(currentCosts.breakdown.authFees - proposedCosts.breakdown.authFees).toFixed(2)}</td>
+                              </tr>
+                              <tr className="border-b">
+                                <td className="py-2">Monthly Fixed Fees</td>
+                                <td className="text-right">${currentCosts.breakdown.monthlyFees.toFixed(2)}</td>
+                                <td className="text-right">${proposedCosts.breakdown.monthlyFees.toFixed(2)}</td>
+                                <td className="text-right text-green-600">${(currentCosts.breakdown.monthlyFees - proposedCosts.breakdown.monthlyFees).toFixed(2)}</td>
+                              </tr>
+                              <tr className="border-t-2 font-semibold">
+                                <td className="py-2">Total Monthly</td>
+                                <td className="text-right">${currentCosts.total.toFixed(2)}</td>
+                                <td className="text-right">${proposedCosts.total.toFixed(2)}</td>
+                                <td className="text-right text-green-600 font-bold">${monthlySavings.toFixed(2)}</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Savings Highlights */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <Alert className="border-green-200 bg-green-50 dark:bg-green-900/20">
+                        <TrendingUp className="h-4 w-4 text-green-600" />
+                        <AlertDescription>
+                          <div className="space-y-2">
+                            <p className="font-semibold">Monthly Savings: ${monthlySavings.toFixed(2)}</p>
+                            <p>That's {((monthlySavings / currentCosts.total) * 100).toFixed(1)}% reduction in processing costs</p>
+                          </div>
+                        </AlertDescription>
+                      </Alert>
+                      <Alert className="border-blue-200 bg-blue-50 dark:bg-blue-900/20">
+                        <Award className="h-4 w-4 text-blue-600" />
+                        <AlertDescription>
+                          <div className="space-y-2">
+                            <p className="font-semibold">Annual Savings: ${yearlySavings.toFixed(2)}</p>
+                            <p>Reinvest these savings back into your business growth</p>
+                          </div>
+                        </AlertDescription>
+                      </Alert>
+                    </div>
+                  </div>
+                );
+              })()}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Equipment & Additional Costs Tab */}
+        <TabsContent value="equipment" className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Settings className="w-5 h-5" />
-                Business Information
+                Equipment & Additional Costs
               </CardTitle>
               <CardDescription>
-                Configure your business details for accurate rate calculations
+                Factor in hardware, software, and setup costs
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid md:grid-cols-2 gap-4">
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
+                  <Label htmlFor="hardware-costs">Hardware/Terminal Costs ($)</Label>
+                  <Input
+                    id="hardware-costs"
+                    type="number"
+                    value={businessData.additionalCosts.hardwareCosts}
+                    onChange={(e) => {
+                      const cost = parseFloat(e.target.value) || 0;
+                      setBusinessData(prev => ({
+                        ...prev,
+                        additionalCosts: { ...prev.additionalCosts, hardwareCosts: cost }
+                      }));
+                    }}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="software-fees">Software/POS Integration ($)</Label>
+                  <Input
+                    id="software-fees"
+                    type="number"
+                    value={businessData.additionalCosts.softwareFees}
+                    onChange={(e) => {
+                      const cost = parseFloat(e.target.value) || 0;
+                      setBusinessData(prev => ({
+                        ...prev,
+                        additionalCosts: { ...prev.additionalCosts, softwareFees: cost }
+                      }));
+                    }}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="support-fees">Support/Training Fees ($)</Label>
+                  <Input
+                    id="support-fees"
+                    type="number"
+                    value={businessData.additionalCosts.supportFees}
+                    onChange={(e) => {
+                      const cost = parseFloat(e.target.value) || 0;
+                      setBusinessData(prev => ({
+                        ...prev,
+                        additionalCosts: { ...prev.additionalCosts, supportFees: cost }
+                      }));
+                    }}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="installation-fees">Installation/Setup Fees ($)</Label>
+                  <Input
+                    id="installation-fees"
+                    type="number"
+                    value={businessData.additionalCosts.installationFees}
+                    onChange={(e) => {
+                      const cost = parseFloat(e.target.value) || 0;
+                      setBusinessData(prev => ({
+                        ...prev,
+                        additionalCosts: { ...prev.additionalCosts, installationFees: cost }
+                      }));
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end">
+                <Button onClick={() => setActiveTab('summary')} className="gap-2">
+                  View Final Summary
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Final Summary Tab */}
+        <TabsContent value="summary" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Calculator className="w-5 h-5" />
+                Complete Cost Analysis Summary
+              </CardTitle>
+              <CardDescription>
+                Total cost of ownership including all fees and equipment
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {(() => {
+                const currentCosts = calculateMonthlyCosts(businessData, businessData.currentProcessor);
+                const proposedCosts = calculateMonthlyCosts(businessData, businessData.proposedProcessor);
+                const monthlySavings = currentCosts.total - proposedCosts.total;
+                const yearlySavings = monthlySavings * 12;
+                
+                const totalAdditionalCosts = Object.values(businessData.additionalCosts).reduce((sum, cost) => sum + cost, 0);
+                const paybackPeriod = totalAdditionalCosts > 0 ? (totalAdditionalCosts / monthlySavings) : 0;
+
+                return (
+                  <div className="space-y-6">
+                    {/* Executive Summary */}
+                    <div className="bg-gradient-to-r from-blue-50 to-green-50 dark:from-blue-900/20 dark:to-green-900/20 p-6 rounded-lg">
+                      <h3 className="text-xl font-bold mb-4">Executive Summary</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-center">
+                        <div>
+                          <p className="text-2xl font-bold text-green-600">${monthlySavings.toFixed(2)}</p>
+                          <p className="text-sm">Monthly Savings</p>
+                        </div>
+                        <div>
+                          <p className="text-2xl font-bold text-green-600">${yearlySavings.toFixed(2)}</p>
+                          <p className="text-sm">Annual Savings</p>
+                        </div>
+                        <div>
+                          <p className="text-2xl font-bold text-blue-600">${totalAdditionalCosts.toFixed(2)}</p>
+                          <p className="text-sm">Setup Costs</p>
+                        </div>
+                        <div>
+                          <p className="text-2xl font-bold text-purple-600">{paybackPeriod > 0 ? paybackPeriod.toFixed(1) : '0'}</p>
+                          <p className="text-sm">Payback (Months)</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* ROI Analysis */}
+                    <Alert className="border-green-200 bg-green-50 dark:bg-green-900/20">
+                      <TrendingUp className="h-4 w-4 text-green-600" />
+                      <AlertDescription>
+                        <div className="space-y-2">
+                          <p className="font-semibold">Return on Investment Analysis</p>
+                          <p>• Monthly savings: ${monthlySavings.toFixed(2)} ({((monthlySavings / currentCosts.total) * 100).toFixed(1)}% reduction)</p>
+                          <p>• Break-even point: {paybackPeriod > 0 ? `${paybackPeriod.toFixed(1)} months` : 'Immediate'}</p>
+                          <p>• 3-year savings: ${(yearlySavings * 3 - totalAdditionalCosts).toFixed(2)}</p>
+                        </div>
+                      </AlertDescription>
+                    </Alert>
+                  </div>
+                );
+              })()}
+            </CardContent>
+          </Card>
+        </TabsContent>
                   <Label htmlFor="monthlyVolume">Monthly Processing Volume ($)</Label>
                   <Input
                     id="monthlyVolume"
