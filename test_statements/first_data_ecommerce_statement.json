@@ -1,0 +1,51 @@
+{
+  "processor": "First Data (Fiserv)",
+  "merchantData": {
+    "businessName": "Digital Marketplace Co",
+    "businessType": "ecommerce",
+    "merchantId": "FD-567890123",
+    "statementPeriod": "November 2024",
+    "monthlyVolume": 342750.88,
+    "transactionCount": 2156,
+    "averageTicket": 158.98,
+    "cardMix": {
+      "visa": 46.3,
+      "mastercard": 39.8,
+      "amex": 11.2,
+      "discover": 2.7
+    },
+    "transactionTypes": {
+      "cardPresent": 15.2,
+      "cardNotPresent": 84.8,
+      "keyed": 72.5,
+      "ecommerce": 84.8
+    }
+  },
+  "feeStructure": {
+    "qualifiedRate": 2.95,
+    "midQualifiedRate": 3.25,
+    "nonQualifiedRate": 3.75,
+    "debitRate": 1.60,
+    "transactionFee": 0.10,
+    "monthlyFee": 15.00,
+    "statementFee": 10.00,
+    "batchFee": 0.25,
+    "pciFee": 9.95,
+    "gatewayFee": 10.00,
+    "chargebackFee": 25.00
+  },
+  "monthlyBreakdown": {
+    "qualifiedTransactions": 325,
+    "qualifiedVolume": 51640.14,
+    "qualifiedFees": 1523.38,
+    "midQualifiedTransactions": 864,
+    "midQualifiedVolume": 137237.35,
+    "midQualifiedFees": 4460.21,
+    "nonQualifiedTransactions": 967,
+    "nonQualifiedVolume": 153873.39,
+    "nonQualifiedFees": 5770.25,
+    "totalProcessingFees": 11753.84,
+    "totalMonthlyFees": 59.90
+  },
+  "effectiveRate": 3.45
+}

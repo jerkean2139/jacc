@@ -1,0 +1,50 @@
+{
+  "processor": "TSYS (Global Payments)",
+  "merchantData": {
+    "businessName": "Mountain View Restaurant",
+    "businessType": "restaurant",
+    "merchantId": "TSY-789012345",
+    "statementPeriod": "November 2024",
+    "monthlyVolume": 125680.45,
+    "transactionCount": 892,
+    "averageTicket": 140.87,
+    "cardMix": {
+      "visa": 45.2,
+      "mastercard": 38.6,
+      "amex": 12.4,
+      "discover": 3.8
+    },
+    "transactionTypes": {
+      "cardPresent": 78.5,
+      "cardNotPresent": 21.5,
+      "keyed": 8.2,
+      "contactless": 35.8
+    }
+  },
+  "feeStructure": {
+    "qualifiedRate": 2.65,
+    "midQualifiedRate": 2.95,
+    "nonQualifiedRate": 3.45,
+    "debitRate": 1.55,
+    "transactionFee": 0.10,
+    "monthlyFee": 15.95,
+    "statementFee": 9.95,
+    "batchFee": 0.25,
+    "pciFee": 8.95,
+    "regulatoryFee": 0.58
+  },
+  "monthlyBreakdown": {
+    "qualifiedTransactions": 445,
+    "qualifiedVolume": 62890.25,
+    "qualifiedFees": 1666.59,
+    "midQualifiedTransactions": 298,
+    "midQualifiedVolume": 41950.15,
+    "midQualifiedFees": 1237.53,
+    "nonQualifiedTransactions": 149,
+    "nonQualifiedVolume": 20840.05,
+    "nonQualifiedFees": 718.98,
+    "totalProcessingFees": 3623.10,
+    "totalMonthlyFees": 34.88
+  },
+  "effectiveRate": 2.91
+}

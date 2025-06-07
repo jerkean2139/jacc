@@ -1,0 +1,44 @@
+{
+  "processor": "Shift4 Payments",
+  "merchantData": {
+    "businessName": "Grand Plaza Hotel",
+    "businessType": "hospitality",
+    "merchantId": "S4P-234567890",
+    "statementPeriod": "November 2024",
+    "monthlyVolume": 245850.75,
+    "transactionCount": 1245,
+    "averageTicket": 197.47,
+    "cardMix": {
+      "visa": 48.5,
+      "mastercard": 36.2,
+      "amex": 12.8,
+      "discover": 2.5
+    },
+    "transactionTypes": {
+      "cardPresent": 72.3,
+      "cardNotPresent": 27.7,
+      "keyed": 15.8,
+      "contactless": 31.2
+    }
+  },
+  "feeStructure": {
+    "interchangePlus": true,
+    "creditMarkup": 0.28,
+    "debitMarkup": 0.18,
+    "transactionFee": 0.07,
+    "monthlyFee": 9.95,
+    "statementFee": 6.95,
+    "batchFee": 0.15,
+    "pciFee": 6.95,
+    "gatewayFee": 15.00,
+    "terminalLease": 25.00
+  },
+  "monthlyBreakdown": {
+    "interchangeCost": 4918.52,
+    "processorMarkup": 688.38,
+    "authorizationFees": 87.15,
+    "monthlyFees": 63.85,
+    "totalProcessingFees": 5757.90
+  },
+  "effectiveRate": 2.34
+}

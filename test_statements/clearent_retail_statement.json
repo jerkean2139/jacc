@@ -1,0 +1,44 @@
+{
+  "processor": "Clearent",
+  "merchantData": {
+    "businessName": "Tech Gadgets Plus",
+    "businessType": "retail",
+    "merchantId": "CLR-456789012",
+    "statementPeriod": "November 2024",
+    "monthlyVolume": 89450.20,
+    "transactionCount": 567,
+    "averageTicket": 157.76,
+    "cardMix": {
+      "visa": 42.8,
+      "mastercard": 41.2,
+      "amex": 13.5,
+      "discover": 2.5
+    },
+    "transactionTypes": {
+      "cardPresent": 85.2,
+      "cardNotPresent": 14.8,
+      "keyed": 6.3,
+      "contactless": 28.9
+    }
+  },
+  "feeStructure": {
+    "interchangePlus": true,
+    "interchangePassThrough": "Visa/MC Interchange + 0.35%",
+    "creditMarkup": 0.35,
+    "debitMarkup": 0.22,
+    "transactionFee": 0.08,
+    "monthlyFee": 12.95,
+    "statementFee": 8.95,
+    "batchFee": 0.20,
+    "pciFee": 8.95,
+    "gatewayFee": 0.00
+  },
+  "monthlyBreakdown": {
+    "interchangeCost": 1788.45,
+    "processorMarkup": 313.08,
+    "authorizationFees": 45.36,
+    "monthlyFees": 30.85,
+    "totalProcessingFees": 2177.74
+  },
+  "effectiveRate": 2.43
+}
