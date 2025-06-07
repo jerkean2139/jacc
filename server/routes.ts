@@ -4725,6 +4725,56 @@ Document content: {content}`,
     }
   });
 
+  // TracerPay Documentation Routes
+  app.get('/api/tracerpay/documents', async (req: any, res) => {
+    try {
+      const { db } = await import('./db');
+      const { folders, documents } = await import('@shared/schema');
+      const { eq } = await import('drizzle-orm');
+
+      // Get TracerPay folder
+      const tracerPayFolder = await db
+        .select()
+        .from(folders)
+        .where(eq(folders.name, 'TracerPay'))
+        .limit(1);
+
+      if (tracerPayFolder.length === 0) {
+        return res.json({ folder: null, documents: [] });
+      }
+
+      // Get TracerPay documents
+      const tracerPayDocs = await db
+        .select()
+        .from(documents)
+        .where(eq(documents.folderId, tracerPayFolder[0].id))
+        .orderBy(documents.createdAt);
+
+      res.json({
+        folder: tracerPayFolder[0],
+        documents: tracerPayDocs.map(doc => ({
+          ...doc,
+          createdAt: doc.createdAt.toISOString(),
+          updatedAt: doc.updatedAt.toISOString()
+        }))
+      });
+    } catch (error) {
+      console.error("Error getting TracerPay documents:", error);
+      res.json({ folder: null, documents: [] });
+    }
+  });
+
+  app.post('/api/tracerpay/reinitialize', async (req: any, res) => {
+    try {
+      const { tracerPayProcessor } = await import('./tracerpay-processor');
+      await tracerPayProcessor.processTracerPayUploads();
+      res.json({ success: true, message: "TracerPay documentation reinitialized" });
+    } catch (error) {
+      console.error("Error reinitializing TracerPay:", error);
+      res.status(500).json({ error: "Failed to reinitialize TracerPay documentation" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

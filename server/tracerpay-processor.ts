@@ -326,7 +326,7 @@ Support Services:
 
   private async processPowerPointFile(folderId: string): Promise<void> {
     try {
-      const docId = `doc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const docId = crypto.randomUUID();
       await db.insert(documents).values({
         id: docId,
         userId: 'system',
