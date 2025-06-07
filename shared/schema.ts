@@ -98,6 +98,28 @@ export const apiKeys = pgTable("api_keys", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Vendors table for payment processors and POS systems
+export const vendors = pgTable("vendors", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: varchar("name", { length: 255 }).notNull(),
+  type: varchar("type", { length: 50 }).notNull(), // 'processor', 'gateway', 'pos', 'hardware'
+  category: varchar("category", { length: 100 }), // 'restaurant', 'retail', 'high-risk', etc.
+  description: text("description"),
+  strengths: text("strengths").array().default([]),
+  weaknesses: text("weaknesses").array().default([]),
+  industries: text("industries").array().default([]),
+  contactInfo: text("contact_info"),
+  supportNumber: varchar("support_number", { length: 50 }),
+  website: varchar("website", { length: 255 }),
+  integrations: text("integrations").array().default([]),
+  features: jsonb("features"),
+  pricing: jsonb("pricing"),
+  isActive: boolean("is_active").default(true),
+  priority: integer("priority").default(50),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Folders for organizing documents and chats with vector namespaces
 export const folders = pgTable("folders", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -882,29 +904,7 @@ export const insertUserChatLogSchema = createInsertSchema(userChatLogs).omit({
 export type InsertUserChatLog = z.infer<typeof insertUserChatLogSchema>;
 export type UserChatLog = typeof userChatLogs.$inferSelect;
 
-// Vendor Intelligence Tables
-export const vendors = pgTable("vendors", {
-  id: varchar("id").primaryKey().notNull(),
-  name: varchar("name").notNull(),
-  companyType: varchar("company_type").notNull(), // 'processor', 'gateway', 'pos'
-  baseUrl: varchar("base_url").notNull(),
-  documentPortalUrl: varchar("document_portal_url"), // Specific URL for document downloads
-  supportUrl: varchar("support_url"), // Technical support documentation
-  active: boolean("active").default(true),
-  crawlFrequency: varchar("crawl_frequency").notNull(), // 'weekly', 'monthly'
-  priority: integer("priority").default(1), // 1=high, 2=medium, 3=low
-  selectors: jsonb("selectors"), // CSS selectors for document discovery
-  documentPaths: jsonb("document_paths"), // Array of paths to check
-  documentTypes: jsonb("document_types"), // Types to track: pdf, sales_flyer, product_announcement, blog_post, news
-  apiEndpoints: jsonb("api_endpoints"), // API documentation URLs
-  contactInfo: jsonb("contact_info"), // Sales/tech contact information
-  lastScan: timestamp("last_scan"),
-  lastSuccessfulScan: timestamp("last_successful_scan"),
-  scanStatus: varchar("scan_status").default('pending'), // 'pending', 'scanning', 'completed', 'failed'
-  errorCount: integer("error_count").default(0),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
+// Vendor Intelligence Tables - Note: vendors table defined above
 
 export const vendorDocuments = pgTable("vendor_documents", {
   id: varchar("id").primaryKey().notNull(),

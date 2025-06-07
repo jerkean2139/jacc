@@ -150,19 +150,24 @@ export default function CoachingOverlay() {
 
   if (isMinimized) {
     return (
-      <div className="fixed bottom-4 right-4 z-50">
+      <div className="fixed bottom-20 right-4 z-50 md:bottom-4">
         <Button
           onClick={() => setIsMinimized(false)}
-          className="rounded-full h-12 w-12 shadow-lg bg-blue-600 hover:bg-blue-700"
+          className="rounded-full h-12 w-12 shadow-lg bg-blue-600 hover:bg-blue-700 relative"
         >
           <Brain className="h-6 w-6" />
+          {filteredTips.length > 0 && (
+            <Badge className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 flex items-center justify-center bg-red-500 text-white text-xs">
+              {filteredTips.length}
+            </Badge>
+          )}
         </Button>
       </div>
     );
   }
 
   return (
-    <div className="fixed top-4 right-4 w-96 max-h-[calc(100vh-2rem)] z-50 bg-white dark:bg-gray-900 rounded-lg shadow-2xl border">
+    <div className="fixed top-4 right-4 w-80 md:w-96 max-h-[calc(100vh-8rem)] md:max-h-[calc(100vh-2rem)] z-50 bg-white dark:bg-gray-900 rounded-lg shadow-2xl border">
       <div className="flex items-center justify-between p-3 border-b">
         <div className="flex items-center gap-2">
           <Brain className="h-5 w-5 text-blue-600" />
