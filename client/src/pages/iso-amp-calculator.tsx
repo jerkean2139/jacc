@@ -300,7 +300,7 @@ export default function ISOAmpCalculator() {
   };
 
   return (
-    <div className="space-y-6 pb-20 px-4 md:px-0">
+    <div className="space-y-6 pb-20 px-4 pt-4 md:px-0 md:pt-0">
       <div className="flex items-start gap-3 md:items-center md:gap-4">
         <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg flex-shrink-0">
           <Zap className="w-5 h-5 md:w-6 md:h-6 text-blue-600 dark:text-blue-400" />
@@ -336,6 +336,89 @@ export default function ISOAmpCalculator() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
+              {/* Bank Statement Upload Section */}
+              <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center">
+                <Upload className="w-8 h-8 mx-auto mb-3 text-gray-400" />
+                <h3 className="text-lg font-medium mb-2">Upload Bank Statement for Auto-Analysis</h3>
+                <p className="text-sm text-gray-500 mb-4">
+                  Upload a PDF merchant processing statement to automatically extract volume and pricing data
+                </p>
+                <input
+                  type="file"
+                  accept=".pdf"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                  id="statement-upload"
+                />
+                <label htmlFor="statement-upload" className="cursor-pointer">
+                  <Button variant="outline" className="gap-2">
+                    <FileText className="w-4 h-4" />
+                    Choose PDF Statement
+                  </Button>
+                </label>
+              </div>
+
+              {/* Uploaded File Display */}
+              {uploadedFile && (
+                <div className="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <FileText className="w-5 h-5 text-blue-600" />
+                    <div>
+                      <p className="text-sm font-medium">{uploadedFile.name}</p>
+                      <p className="text-xs text-gray-500">
+                        {Math.round(uploadedFile.size / 1024)} KB
+                      </p>
+                    </div>
+                  </div>
+                  <Button 
+                    onClick={handleAnalyzeStatement}
+                    disabled={statementAnalysisMutation.isPending}
+                    className="gap-2"
+                  >
+                    {statementAnalysisMutation.isPending ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        Analyzing...
+                      </>
+                    ) : (
+                      <>
+                        <FileBarChart className="w-4 h-4" />
+                        Analyze Statement
+                      </>
+                    )}
+                  </Button>
+                </div>
+              )}
+
+              {/* Analysis Results Display */}
+              {analysisResults && (
+                <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg space-y-3">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-5 h-5 text-green-600" />
+                    <h4 className="font-medium">Statement Analysis Complete</h4>
+                    <span className="text-sm bg-green-100 dark:bg-green-800 px-2 py-1 rounded">
+                      {Math.round(analysisResults.confidence * 100)}% confidence
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                    Current Processor: <span className="font-medium">{analysisResults.processorName}</span>
+                  </p>
+                  {analysisResults.insights && analysisResults.insights.length > 0 && (
+                    <div className="mt-2">
+                      <p className="text-sm font-medium mb-2">Key Insights:</p>
+                      <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1">
+                        {analysisResults.insights.map((insight: string, index: number) => (
+                          <li key={index} className="flex items-start gap-2">
+                            <span className="text-blue-600">•</span>
+                            {insight}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Basic Volume Information */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>

@@ -2920,23 +2920,25 @@ User Context: {userRole}`,
       const filePath = req.file.path;
       const mimeType = req.file.mimetype;
 
-      // Extract text content from the uploaded statement
-      const { DocumentProcessor } = await import('./document-processor');
-      const processor = new DocumentProcessor();
-      const content = await processor.extractTextContent(filePath, mimeType);
+      // Use the comprehensive PDF analyzer for better extraction
+      const fs = require('fs');
+      const fileBuffer = fs.readFileSync(filePath);
       
-      // Analyze content for financial data
-      const extractedData = await analyzeStatementContent(content);
+      const { pdfStatementAnalyzer } = await import('./pdf-statement-analyzer');
+      const extractedData = await pdfStatementAnalyzer.analyzeStatement(fileBuffer);
+      
+      // Generate insights about the statement
+      const insights = await pdfStatementAnalyzer.generateStatementInsights(extractedData);
 
       res.json({
         success: true,
         extractedData,
+        insights,
         fileName: req.file.originalname,
         fileSize: req.file.size,
-        timestamp: new Date().toISOString(),
-        // Include raw text for debugging (first 1000 chars)
-        rawTextSample: content.substring(0, 1000),
-        contentLength: content.length
+        confidence: extractedData.confidence,
+        processorName: extractedData.currentProcessor.name,
+        timestamp: new Date().toISOString()
       });
 
       // Clean up uploaded file
