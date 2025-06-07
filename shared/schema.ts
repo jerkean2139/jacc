@@ -184,6 +184,22 @@ export const messages = pgTable("messages", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Chat monitoring for analytics and debugging
+export const chatMonitoring = pgTable("chat_monitoring", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  chatId: uuid("chat_id").notNull().references(() => chats.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  firstMessage: text("first_message"),
+  messageCount: integer("message_count").default(0),
+  sessionDuration: integer("session_duration").default(0),
+  aiResponseTime: integer("ai_response_time").default(0),
+  documentsReferenced: integer("documents_referenced").default(0),
+  calculatorUsed: boolean("calculator_used").default(false),
+  errorCount: integer("error_count").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Uploaded documents and files
 export const documents = pgTable("documents", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -715,24 +731,6 @@ export type HardwareOption = typeof hardwareOptions.$inferSelect;
 export type InsertHardwareOption = typeof hardwareOptions.$inferInsert;
 export type PdfReport = typeof pdfReports.$inferSelect;
 export type InsertPdfReport = typeof pdfReports.$inferInsert;
-
-// Chat monitoring table for admin oversight
-export const chatMonitoring = pgTable("chat_monitoring", {
-  id: varchar("id").primaryKey().notNull(),
-  chatId: varchar("chat_id").notNull().references(() => chats.id),
-  userId: varchar("user_id").notNull().references(() => users.id),
-  firstUserQuery: text("first_user_query").notNull(),
-  aiResponse: text("ai_response").notNull(),
-  responseTime: integer("response_time").notNull(), // milliseconds
-  tokensUsed: integer("tokens_used").notNull(),
-  model: varchar("model").notNull(),
-  confidence: real("confidence").notNull(), // 0-1 scale
-  timestamp: timestamp("timestamp").defaultNow(),
-  isAccurate: boolean("is_accurate"), // null = pending review
-  adminNotes: text("admin_notes"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
 
 // User prompt customization table
 export const userPrompts = pgTable("user_prompts", {
