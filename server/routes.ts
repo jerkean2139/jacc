@@ -5040,6 +5040,40 @@ Document content: {content}`,
     }
   });
 
+  // Agent Support System - Core functionality to reduce management interruptions
+  app.post('/api/agent-support/ask', async (req: any, res) => {
+    try {
+      const { question, category = 'general', urgency = 'medium', context } = req.body;
+      const { agentSupport } = await import('./agent-support-engine');
+      
+      const query = {
+        question,
+        context,
+        urgency,
+        category
+      };
+      
+      const answer = await agentSupport.answerCommonQuestion(query);
+      res.json(answer);
+    } catch (error) {
+      console.error("Error answering agent question:", error);
+      res.status(500).json({ error: "Failed to answer question" });
+    }
+  });
+
+  app.get('/api/agent-support/quick-reference', async (req: any, res) => {
+    try {
+      const { agentSupport } = await import('./agent-support-engine');
+      const quickRef = agentSupport.getQuickReference();
+      const categories = agentSupport.getQuestionCategories();
+      
+      res.json({ quickReference: quickRef, categories });
+    } catch (error) {
+      console.error("Error getting quick reference:", error);
+      res.status(500).json({ error: "Failed to get quick reference" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
