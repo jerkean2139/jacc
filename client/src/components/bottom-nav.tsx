@@ -27,7 +27,7 @@ const navItems: NavItem[] = [
     label: "Home"
   },
   {
-    href: "/iso-amp-calculator",
+    href: "/calculator",
     icon: Calculator,
     label: "Calculator"
   },
