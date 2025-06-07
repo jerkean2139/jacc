@@ -3,6 +3,7 @@ import { vendors, vendorDocuments, documentChanges } from "@shared/schema";
 import * as cheerio from "cheerio";
 import crypto from "crypto";
 import { eq, desc, and } from "drizzle-orm";
+import { contentSafetyFilter } from './content-safety-filter';
 
 interface VendorSite {
   id: string;

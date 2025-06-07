@@ -400,7 +400,8 @@ const realVendorData = [
     documentPortalUrl: 'https://developers.lightspeedhq.com',
     supportUrl: 'https://www.lightspeedhq.com/support',
     active: true,
-    crawlFrequency: 'daily',
+    crawlFrequency: 'weekly',
+    scanDay: 'thursday',
     priority: 2,
     selectors: {
       documentLinks: '.developer-link a, a[href*="/docs/"], .api-doc-link',
@@ -431,7 +432,8 @@ const realVendorData = [
     documentPortalUrl: 'https://revelsystems.com/resources',
     supportUrl: 'https://revelsystems.com/support',
     active: true,
-    crawlFrequency: 'daily',
+    crawlFrequency: 'weekly',
+    scanDay: 'friday',
     priority: 3,
     selectors: {
       documentLinks: 'a[href*=".pdf"], .resource-item a, .documentation-link',

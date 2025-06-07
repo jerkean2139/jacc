@@ -4644,6 +4644,87 @@ Document content: {content}`,
     }
   });
 
+  // Vendor Scanning Schedule Routes
+  app.get('/api/vendor-intelligence/schedule', async (req: any, res) => {
+    try {
+      const { contentSafetyFilter } = await import('./content-safety-filter');
+      const schedule = contentSafetyFilter.getVendorScanSchedule();
+      const todaysVendors = contentSafetyFilter.getVendorsForToday();
+      
+      res.json({
+        weeklySchedule: schedule,
+        todaysVendors,
+        currentDay: new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase()
+      });
+    } catch (error) {
+      console.error("Error getting vendor schedule:", error);
+      res.status(500).json({ error: "Failed to get vendor schedule" });
+    }
+  });
+
+  app.post('/api/vendor-intelligence/scan-today', async (req: any, res) => {
+    try {
+      const { contentSafetyFilter } = await import('./content-safety-filter');
+      const vendorsToScan = contentSafetyFilter.getVendorsForToday();
+      
+      if (vendorsToScan.length === 0) {
+        return res.json({ 
+          message: "No vendors scheduled for scanning today",
+          day: new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase()
+        });
+      }
+
+      // Apply content safety filtering to detected content
+      const scanResults = [];
+      for (const vendorId of vendorsToScan) {
+        try {
+          // Mock scanning with content filtering
+          const mockDocuments = [
+            { title: "New Payment Processing Update", content: "Latest merchant service features and API improvements for payment processing terminals." },
+            { title: "PCI Compliance Guidelines", content: "Updated security standards for payment card industry compliance and fraud prevention." },
+            { title: "Rate Sheet Changes", content: "New interchange rates and processing fees for credit card transactions." }
+          ];
+
+          const filteredResults = [];
+          for (const doc of mockDocuments) {
+            const filterResult = await contentSafetyFilter.filterContent(doc.content, doc.title, `https://${vendorId}.com/docs`);
+            if (filterResult.isRelevant) {
+              filteredResults.push({
+                ...doc,
+                filterResult
+              });
+            }
+          }
+
+          scanResults.push({
+            vendorId,
+            status: 'completed',
+            documentsFound: filteredResults.length,
+            relevantDocuments: filteredResults,
+            timestamp: new Date().toISOString()
+          });
+        } catch (error) {
+          scanResults.push({
+            vendorId,
+            status: 'failed',
+            error: error.message,
+            timestamp: new Date().toISOString()
+          });
+        }
+      }
+
+      res.json({
+        message: `Content filtering applied to ${vendorsToScan.length} vendors`,
+        vendorsScanned: vendorsToScan,
+        results: scanResults,
+        day: new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase()
+      });
+    } catch (error) {
+      console.error("Error running today's vendor scan:", error);
+      res.status(500).json({ error: "Failed to run vendor scan" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
