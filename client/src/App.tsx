@@ -78,6 +78,7 @@ function Router() {
           <Route path="/leaderboard" component={GamificationPage} />
           <Route path="/help" component={HelpPage} />
           <Route path="/vendor-intelligence" component={VendorIntelligenceDashboard} />
+          <Route path="/competitive-intelligence" component={lazy(() => import("@/pages/competitive-intelligence-dashboard"))} />
           <Route path="/admin" component={AdminPanel} />
           <Route path="/admin/dashboard" component={AdminDashboard} />
           <Route path="/admin/settings" component={AdminSettings} />

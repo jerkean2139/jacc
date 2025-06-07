@@ -1,4 +1,4 @@
-import { monitoringService } from './monitoring-observability';
+// Memory optimizer for production deployment
 
 export class MemoryOptimizer {
   private static instance: MemoryOptimizer;
@@ -33,9 +33,13 @@ export class MemoryOptimizer {
       }
 
       // Log memory stats every 5 minutes
-      monitoringService.logMetric('memory_heap_used_mb', heapUsedMB);
-      monitoringService.logMetric('memory_heap_total_mb', heapTotalMB);
-      monitoringService.logMetric('memory_usage_percent', usagePercent * 100);
+      console.log(`Memory usage: ${heapUsedMB.toFixed(1)}MB / ${heapTotalMB.toFixed(1)}MB (${(usagePercent * 100).toFixed(1)}%)`);
+      
+      // Store metrics in global object for monitoring
+      if (!global.memoryMetrics) global.memoryMetrics = {};
+      global.memoryMetrics.heapUsed = heapUsedMB;
+      global.memoryMetrics.heapTotal = heapTotalMB;
+      global.memoryMetrics.usagePercent = usagePercent * 100;
     }, 30000); // Check every 30 seconds
   }
 

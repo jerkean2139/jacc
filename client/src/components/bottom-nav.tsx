@@ -10,7 +10,8 @@ import {
   HelpCircle,
   MessageSquare,
   Trophy,
-  TrendingUp
+  TrendingUp,
+  BarChart3
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -46,6 +47,11 @@ const navItems: NavItem[] = [
     href: "/vendor-intelligence",
     icon: TrendingUp,
     label: "Intelligence"
+  },
+  {
+    href: "/competitive-intelligence",
+    icon: BarChart3,
+    label: "Analytics"
   },
   {
     href: "/admin",
