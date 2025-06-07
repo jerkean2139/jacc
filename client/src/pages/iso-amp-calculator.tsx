@@ -331,7 +331,7 @@ export default function ISOAmpCalculator() {
         cardPresentPercentage: data.transactionBreakdown.cardPresentPercentage
       };
       
-      return apiRequest('POST', '/api/iso-amp/rate-comparison', {
+      return apiRequest('POST', '/api/iso-hub/calculate', {
         merchantProfile,
         currentProcessor: data.currentProcessor
       });
