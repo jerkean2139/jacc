@@ -796,6 +796,28 @@ export default function ISOAmpCalculator() {
                 </Card>
               )}
 
+              {/* PDF Generation and Email Section */}
+              {(results?.type === 'comparison' || results?.type === 'savings') && (
+                <Card className="mt-6">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <FileText className="w-5 h-5" />
+                      Generate Report
+                    </CardTitle>
+                    <CardDescription>
+                      Create branded PDF reports and send via email
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <PDFGenerationSection 
+                      results={results}
+                      businessData={businessData}
+                      toast={toast}
+                    />
+                  </CardContent>
+                </Card>
+              )}
+
               {/* Advanced Savings Analysis */}
               {results?.type === 'savings' && (
                 <Card className="mt-6">

@@ -9,7 +9,8 @@ import {
   integer,
   boolean,
   uuid,
-  real
+  real,
+  decimal
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -618,6 +619,71 @@ export const insertApiKeySchema = createInsertSchema(apiKeys).omit({
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
+
+// Processor pricing management
+export const processorPricing = pgTable("processor_pricing", {
+  id: varchar("id").primaryKey().notNull().$defaultFn(() => crypto.randomUUID()),
+  processorName: varchar("processor_name").notNull().unique(),
+  pricingType: varchar("pricing_type").notNull(), // interchange_plus, tiered, flat_rate, subscription
+  qualifiedRate: decimal("qualified_rate", { precision: 6, scale: 4 }).notNull(),
+  midQualifiedRate: decimal("mid_qualified_rate", { precision: 6, scale: 4 }),
+  nonQualifiedRate: decimal("non_qualified_rate", { precision: 6, scale: 4 }),
+  interchangePlus: decimal("interchange_plus", { precision: 6, scale: 4 }),
+  authFee: decimal("auth_fee", { precision: 6, scale: 4 }).notNull(),
+  monthlyFee: decimal("monthly_fee", { precision: 8, scale: 2 }).notNull(),
+  statementFee: decimal("statement_fee", { precision: 6, scale: 2 }).notNull(),
+  batchFee: decimal("batch_fee", { precision: 6, scale: 4 }).notNull(),
+  gatewayFee: decimal("gateway_fee", { precision: 6, scale: 2 }),
+  pciFee: decimal("pci_fee", { precision: 6, scale: 2 }),
+  setupFee: decimal("setup_fee", { precision: 8, scale: 2 }),
+  earlyTerminationFee: decimal("early_termination_fee", { precision: 8, scale: 2 }),
+  contractLength: integer("contract_length").notNull().default(12),
+  features: jsonb("features").$type<string[]>().default([]),
+  compatibleHardware: jsonb("compatible_hardware").$type<string[]>().default([]),
+  isActive: boolean("is_active").notNull().default(true),
+  lastUpdated: timestamp("last_updated").defaultNow(),
+  updatedBy: varchar("updated_by").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Hardware options management
+export const hardwareOptions = pgTable("hardware_options", {
+  id: varchar("id").primaryKey().notNull().$defaultFn(() => crypto.randomUUID()),
+  name: varchar("name").notNull(),
+  category: varchar("category").notNull(), // terminal, mobile, virtual, gateway, pos_system
+  manufacturer: varchar("manufacturer").notNull(),
+  model: varchar("model").notNull(),
+  purchasePrice: decimal("purchase_price", { precision: 8, scale: 2 }).notNull(),
+  monthlyLease: decimal("monthly_lease", { precision: 6, scale: 2 }),
+  setupFee: decimal("setup_fee", { precision: 6, scale: 2 }),
+  features: jsonb("features").$type<string[]>().default([]),
+  compatibleProcessors: jsonb("compatible_processors").$type<string[]>().default([]),
+  specifications: jsonb("specifications").$type<Record<string, any>>().default({}),
+  isActive: boolean("is_active").notNull().default(true),
+  lastUpdated: timestamp("last_updated").defaultNow(),
+  updatedBy: varchar("updated_by").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// PDF reports tracking
+export const pdfReports = pgTable("pdf_reports", {
+  id: varchar("id").primaryKey().notNull().$defaultFn(() => crypto.randomUUID()),
+  reportType: varchar("report_type").notNull(), // comparison, savings, proposal
+  merchantName: varchar("merchant_name").notNull(),
+  processorName: varchar("processor_name"),
+  generatedBy: varchar("generated_by").notNull(),
+  emailSent: boolean("email_sent").default(false),
+  emailRecipient: varchar("email_recipient"),
+  reportData: jsonb("report_data").$type<Record<string, any>>(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export type ProcessorPricing = typeof processorPricing.$inferSelect;
+export type InsertProcessorPricing = typeof processorPricing.$inferInsert;
+export type HardwareOption = typeof hardwareOptions.$inferSelect;
+export type InsertHardwareOption = typeof hardwareOptions.$inferInsert;
+export type PdfReport = typeof pdfReports.$inferSelect;
+export type InsertPdfReport = typeof pdfReports.$inferInsert;
 
 // Chat monitoring table for admin oversight
 export const chatMonitoring = pgTable("chat_monitoring", {

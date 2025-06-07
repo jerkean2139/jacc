@@ -4040,6 +4040,184 @@ User Context: {userRole}`,
     }
   });
 
+  // Pricing Management Routes
+  app.get('/api/pricing/processors', async (req, res) => {
+    try {
+      const { pricingManager } = await import('./pricing-manager');
+      const processors = await pricingManager.getAllProcessorPricing();
+      res.json({ processors, timestamp: new Date().toISOString() });
+    } catch (error) {
+      console.error('Error fetching processor pricing:', error);
+      res.status(500).json({ error: 'Failed to fetch processor pricing' });
+    }
+  });
+
+  app.post('/api/pricing/processors', async (req, res) => {
+    try {
+      const { pricingManager } = await import('./pricing-manager');
+      const processorData = { ...req.body, updatedBy: 'system' }; // TODO: Get from authenticated user
+      const result = await pricingManager.upsertProcessorPricing(processorData);
+      res.json({ processor: result, timestamp: new Date().toISOString() });
+    } catch (error) {
+      console.error('Error saving processor pricing:', error);
+      res.status(500).json({ error: 'Failed to save processor pricing' });
+    }
+  });
+
+  app.get('/api/pricing/hardware', async (req, res) => {
+    try {
+      const { pricingManager } = await import('./pricing-manager');
+      const { category } = req.query;
+      
+      const hardware = category ? 
+        await pricingManager.getHardwareByCategory(category as string) :
+        await pricingManager.getAllHardwareOptions();
+        
+      res.json({ hardware, timestamp: new Date().toISOString() });
+    } catch (error) {
+      console.error('Error fetching hardware options:', error);
+      res.status(500).json({ error: 'Failed to fetch hardware options' });
+    }
+  });
+
+  app.post('/api/pricing/hardware', async (req, res) => {
+    try {
+      const { pricingManager } = await import('./pricing-manager');
+      const hardwareData = { ...req.body, updatedBy: 'system' }; // TODO: Get from authenticated user
+      const result = await pricingManager.upsertHardwareOption(hardwareData);
+      res.json({ hardware: result, timestamp: new Date().toISOString() });
+    } catch (error) {
+      console.error('Error saving hardware option:', error);
+      res.status(500).json({ error: 'Failed to save hardware option' });
+    }
+  });
+
+  // PDF Report Generation Routes
+  app.post('/api/reports/generate-pdf', async (req, res) => {
+    try {
+      const { pdfReportGenerator } = await import('./pdf-report-generator');
+      const { reportType, reportData } = req.body;
+      
+      let pdfBuffer: Buffer;
+      
+      switch (reportType) {
+        case 'comparison':
+          pdfBuffer = await pdfReportGenerator.generateComparisonReport(reportData);
+          break;
+        case 'savings':
+          pdfBuffer = await pdfReportGenerator.generateSavingsReport(reportData);
+          break;
+        case 'proposal':
+          pdfBuffer = await pdfReportGenerator.generateProposalReport(reportData);
+          break;
+        default:
+          return res.status(400).json({ error: 'Invalid report type' });
+      }
+
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="${reportType}-report.pdf"`);
+      res.send(pdfBuffer);
+    } catch (error) {
+      console.error('Error generating PDF report:', error);
+      res.status(500).json({ error: 'Failed to generate PDF report' });
+    }
+  });
+
+  app.post('/api/reports/email-pdf', async (req, res) => {
+    try {
+      const { pdfReportGenerator } = await import('./pdf-report-generator');
+      const { reportType, reportData, recipientEmail, generatedBy } = req.body;
+      
+      const result = await pdfReportGenerator.saveAndEmailReport(
+        reportData,
+        reportType,
+        recipientEmail,
+        generatedBy
+      );
+
+      if (result.success) {
+        res.json({ 
+          success: true, 
+          reportId: result.reportId,
+          message: 'Report generated and emailed successfully',
+          timestamp: new Date().toISOString() 
+        });
+      } else {
+        res.status(500).json({ 
+          success: false, 
+          error: result.error || 'Failed to send report email' 
+        });
+      }
+    } catch (error) {
+      console.error('Error emailing PDF report:', error);
+      res.status(500).json({ error: 'Failed to email PDF report' });
+    }
+  });
+
+  // Enhanced statement analysis with up to 100 pages support
+  app.post('/api/iso-amp/analyze-statement-enhanced', upload.single('statement'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: 'No file uploaded' });
+      }
+
+      const filePath = req.file.path;
+      const mimeType = req.file.mimetype;
+
+      // Check file size (100 pages ≈ 50MB limit)
+      const maxSizeBytes = 50 * 1024 * 1024; // 50MB
+      if (req.file.size > maxSizeBytes) {
+        return res.status(400).json({ 
+          error: 'File too large. Maximum size is 50MB (approximately 100 pages)' 
+        });
+      }
+
+      const { enhancedPDFAnalyzer } = await import('./enhanced-pdf-analyzer');
+      
+      const analysisResult = await enhancedPDFAnalyzer.analyzeStatement(filePath, mimeType, {
+        maxPages: 100,
+        enhancedOCR: true,
+        qualityValidation: true,
+        processorDetection: true
+      });
+
+      // Clean up uploaded file
+      try {
+        await fs.unlink(filePath);
+      } catch (unlinkError) {
+        console.warn('Failed to delete uploaded file:', unlinkError);
+      }
+
+      res.json({
+        analysis: analysisResult,
+        processingInfo: {
+          fileName: req.file.originalname,
+          fileSize: req.file.size,
+          pageCount: analysisResult.pageCount || 'Unknown',
+          processingTime: analysisResult.processingTime || 'Unknown'
+        },
+        timestamp: new Date().toISOString()
+      });
+
+    } catch (error) {
+      console.error('Enhanced statement analysis error:', error);
+      
+      // Clean up uploaded file on error
+      if (req.file?.path) {
+        try {
+          await fs.unlink(req.file.path);
+        } catch (unlinkError) {
+          console.warn('Failed to delete uploaded file on error:', unlinkError);
+        }
+      }
+      
+      res.status(500).json({ 
+        error: 'Failed to analyze statement',
+        details: error.message
+      });
+    }
+  });
+
   // Test enhanced OCR with sample Genesis statement
   app.post('/api/iso-amp/test-ocr-accuracy', async (req, res) => {
     try {
