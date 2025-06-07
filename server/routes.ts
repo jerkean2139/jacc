@@ -560,44 +560,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get processor rates from document center
   app.get('/api/processors', isAuthenticated, async (req, res) => {
     try {
-      // Processor data from market research and public pricing
+      // Core competitive processors for comparison analysis
       const processors = [
         {
-          name: "Square",
-          qualifiedRate: 2.60,
-          midQualifiedRate: 3.50,
-          nonQualifiedRate: 3.95,
-          debitRate: 2.60,
-          authFee: 0.10,
-          monthlyFee: 0.00,
-          statementFee: 0.00,
-          batchFee: 0.00,
-          keyedUpcharge: 0.30,
-          ecommerceUpcharge: 0.30,
-          equipmentLease: 0.00,
-          gatewayFee: 0.00,
-          pciFee: 0.00,
-          regulatoryFee: 0.00
-        },
-        {
-          name: "Stripe",
-          qualifiedRate: 2.90,
-          midQualifiedRate: 3.40,
-          nonQualifiedRate: 3.90,
-          debitRate: 2.90,
-          authFee: 0.30,
-          monthlyFee: 0.00,
-          statementFee: 0.00,
-          batchFee: 0.00,
-          keyedUpcharge: 0.30,
-          ecommerceUpcharge: 0.30,
-          equipmentLease: 0.00,
-          gatewayFee: 0.00,
-          pciFee: 0.00,
-          regulatoryFee: 0.00
-        },
-        {
-          name: "First Data",
+          name: "First Data (Fiserv)",
           qualifiedRate: 2.95,
           midQualifiedRate: 3.25,
           nonQualifiedRate: 3.75,
