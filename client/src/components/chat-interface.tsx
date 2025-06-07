@@ -36,6 +36,8 @@ import { Link } from "wouter";
 import MessageBubble from "./message-bubble";
 import FileUpload from "./file-upload";
 import { ExternalSearchDialog } from "./external-search-dialog";
+import CoachingOverlay from "./coaching-overlay";
+import { useCoaching } from "@/hooks/useCoaching";
 import { Input } from "@/components/ui/input";
 import type { Message } from "@shared/schema";
 import { cn } from "@/lib/utils";
@@ -69,6 +71,9 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
+
+  // Initialize coaching hook
+  const coaching = useCoaching();
 
   // Fetch messages for the active chat - with error handling
   const { data: messages = [], isLoading, error } = useQuery<MessageWithActions[]>({
@@ -132,7 +137,10 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
 
       return response.json();
     },
-    onSuccess: async () => {
+    onSuccess: async (data, variables) => {
+      // Process message for coaching analysis
+      coaching.processMessage(variables, true); // true = agent message
+      
       // Input will be cleared by form reset
       
       // Force immediate refresh of messages with correct query key format
@@ -829,6 +837,9 @@ With these details, I'll create a customized proposal highlighting value proposi
           </div>
         </div>
       </div>
+
+      {/* Sales Coaching Overlay */}
+      {coaching.isCoachingEnabled && <CoachingOverlay />}
     </div>
   );
 }

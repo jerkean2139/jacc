@@ -4775,6 +4775,83 @@ Document content: {content}`,
     }
   });
 
+  // Sales Coaching API Routes
+  app.post('/api/coaching/analyze-conversation', async (req: any, res) => {
+    try {
+      const { conversationText } = req.body;
+      const { coachingEngine } = await import('./coaching-engine');
+      
+      const analysis = await coachingEngine.analyzeConversation(conversationText);
+      const coachingTips = await coachingEngine.generateCoachingTips(analysis, conversationText);
+      const productRecommendations = await coachingEngine.getProductRecommendations(analysis);
+      const metrics = coachingEngine.getMetrics();
+
+      res.json({
+        analysis,
+        coachingTips,
+        productRecommendations,
+        metrics
+      });
+    } catch (error) {
+      console.error("Error analyzing conversation:", error);
+      res.status(500).json({ error: "Failed to analyze conversation" });
+    }
+  });
+
+  app.post('/api/coaching/real-time-message', async (req: any, res) => {
+    try {
+      const { message, speaker } = req.body;
+      const { coachingEngine } = await import('./coaching-engine');
+      
+      const result = await coachingEngine.analyzeRealTimeMessage(message, speaker);
+      
+      if (Object.keys(result.metricsUpdate).length > 0) {
+        coachingEngine.updateMetrics(result.metricsUpdate);
+      }
+
+      res.json({
+        urgentTips: result.urgentTips,
+        metricsUpdate: result.metricsUpdate,
+        stageChange: result.stageChange,
+        currentMetrics: coachingEngine.getMetrics()
+      });
+    } catch (error) {
+      console.error("Error analyzing real-time message:", error);
+      res.status(500).json({ error: "Failed to analyze message" });
+    }
+  });
+
+  app.get('/api/coaching/metrics', async (req: any, res) => {
+    try {
+      const { coachingEngine } = await import('./coaching-engine');
+      const metrics = coachingEngine.getMetrics();
+      res.json(metrics);
+    } catch (error) {
+      console.error("Error getting coaching metrics:", error);
+      res.status(500).json({ error: "Failed to get metrics" });
+    }
+  });
+
+  app.post('/api/coaching/reset-session', async (req: any, res) => {
+    try {
+      const { coachingEngine } = await import('./coaching-engine');
+      coachingEngine.updateMetrics({
+        callDuration: 0,
+        questionsAsked: 0,
+        objections: 0,
+        nextSteps: 0,
+        engagementScore: 0,
+        closingSignals: 0,
+        talkToListenRatio: 0,
+        discoveryCompleteness: 0
+      });
+      res.json({ success: true, message: "Coaching session reset" });
+    } catch (error) {
+      console.error("Error resetting coaching session:", error);
+      res.status(500).json({ error: "Failed to reset session" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
