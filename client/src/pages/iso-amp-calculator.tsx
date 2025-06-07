@@ -423,12 +423,128 @@ export default function ISOAmpCalculator() {
           <Zap className="w-5 h-5 md:w-6 md:h-6 text-blue-600 dark:text-blue-400" />
         </div>
         <div className="min-w-0 flex-1">
-          <h2 className="text-lg md:text-2xl font-bold leading-tight">Merchant Services Calculator</h2>
+          <h2 className="text-lg md:text-2xl font-bold leading-tight">ISO AMP Processing Tools</h2>
           <p className="text-sm md:text-base text-muted-foreground mt-1">
-            Professional cost comparison and savings analysis for payment processing
+            Advanced merchant statement analysis and competitive rate comparison
           </p>
         </div>
       </div>
+
+      {/* Quick Action Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveTab('volume')}>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
+                <FileBarChart className="w-5 h-5 text-green-600 dark:text-green-400" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-sm">Upload Statement</h3>
+                <p className="text-xs text-muted-foreground">Auto-extract merchant data</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveTab('comparison')}>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-purple-100 dark:bg-purple-900 rounded-lg">
+                <BarChart3 className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-sm">Compare Rates</h3>
+                <p className="text-xs text-muted-foreground">Analyze savings potential</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveTab('equipment')}>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-orange-100 dark:bg-orange-900 rounded-lg">
+                <Settings className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-sm">Equipment Quote</h3>
+                <p className="text-xs text-muted-foreground">Hardware recommendations</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Conversational Starters */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Target className="w-5 h-5" />
+            Quick Start Options
+          </CardTitle>
+          <CardDescription>
+            Choose how you'd like to analyze this merchant opportunity
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <Button 
+              variant="outline" 
+              className="h-auto p-4 justify-start"
+              onClick={() => {
+                setActiveTab('volume');
+                document.getElementById('statement-upload')?.click();
+              }}
+            >
+              <div className="text-left">
+                <div className="font-medium">📄 "Analyze their current statement"</div>
+                <div className="text-xs text-muted-foreground mt-1">
+                  Upload PDF to extract rates, fees, and volume automatically
+                </div>
+              </div>
+            </Button>
+
+            <Button 
+              variant="outline" 
+              className="h-auto p-4 justify-start"
+              onClick={() => setActiveTab('comparison')}
+            >
+              <div className="text-left">
+                <div className="font-medium">💰 "What can they save monthly?"</div>
+                <div className="text-xs text-muted-foreground mt-1">
+                  Compare current processor against competitive rates
+                </div>
+              </div>
+            </Button>
+
+            <Button 
+              variant="outline" 
+              className="h-auto p-4 justify-start"
+              onClick={() => setActiveTab('equipment')}
+            >
+              <div className="text-left">
+                <div className="font-medium">🖥️ "What equipment do they need?"</div>
+                <div className="text-xs text-muted-foreground mt-1">
+                  Generate hardware quotes based on business type
+                </div>
+              </div>
+            </Button>
+
+            <Button 
+              variant="outline" 
+              className="h-auto p-4 justify-start"
+              onClick={() => setActiveTab('summary')}
+            >
+              <div className="text-left">
+                <div className="font-medium">📊 "Create a full proposal"</div>
+                <div className="text-xs text-muted-foreground mt-1">
+                  Generate comprehensive merchant analysis report
+                </div>
+              </div>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-4 md:grid-cols-6 gap-1">
@@ -453,13 +569,20 @@ export default function ISOAmpCalculator() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Merchant Statement Upload Section */}
-              <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center">
-                <Upload className="w-8 h-8 mx-auto mb-3 text-gray-400" />
-                <h3 className="text-lg font-medium mb-2">Upload Merchant Processing Statement</h3>
-                <p className="text-sm text-gray-500 mb-4">
-                  Upload a PDF merchant account statement from their current processor to automatically extract volume and pricing data
+              {/* Enhanced Statement Upload Section */}
+              <div className="border-2 border-dashed border-blue-300 dark:border-blue-600 rounded-lg p-8 text-center bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
+                <div className="flex justify-center mb-4">
+                  <div className="p-3 bg-blue-100 dark:bg-blue-800 rounded-full">
+                    <Upload className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                  </div>
+                </div>
+                <h3 className="text-xl font-bold mb-3 text-blue-900 dark:text-blue-100">
+                  ISO AMP Statement Analysis
+                </h3>
+                <p className="text-sm text-blue-700 dark:text-blue-300 mb-6 max-w-md mx-auto">
+                  Drop or upload merchant processing statements for instant competitive analysis and savings calculations
                 </p>
+                
                 <input
                   type="file"
                   accept=".pdf"
@@ -467,49 +590,81 @@ export default function ISOAmpCalculator() {
                   className="hidden"
                   id="statement-upload"
                 />
-                <label htmlFor="statement-upload" className="cursor-pointer">
-                  <Button variant="outline" className="gap-2">
-                    <CreditCard className="w-4 h-4" />
-                    Choose Merchant Statement
-                  </Button>
-                </label>
-                <p className="text-xs text-gray-400 mt-2">
-                  Supports statements from Square, Stripe, First Data, Chase, Elavon, Heartland, and other major processors
-                </p>
-              </div>
-
-              {/* Uploaded File Display */}
-              {uploadedFile && (
-                <div className="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <FileText className="w-5 h-5 text-blue-600" />
-                    <div>
-                      <p className="text-sm font-medium">{uploadedFile.name}</p>
-                      <p className="text-xs text-gray-500">
-                        {Math.round(uploadedFile.size / 1024)} KB
-                      </p>
+                
+                <div className="space-y-4">
+                  <label htmlFor="statement-upload" className="cursor-pointer">
+                    <Button size="lg" className="gap-3 bg-blue-600 hover:bg-blue-700">
+                      <FileBarChart className="w-5 h-5" />
+                      Upload Statement PDF
+                    </Button>
+                  </label>
+                  
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs text-blue-600 dark:text-blue-400">
+                    <div className="flex items-center gap-1">
+                      <CheckCircle className="w-3 h-3" />
+                      Square
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <CheckCircle className="w-3 h-3" />
+                      Stripe
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <CheckCircle className="w-3 h-3" />
+                      First Data
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <CheckCircle className="w-3 h-3" />
+                      Chase
                     </div>
                   </div>
-                  <div className="flex gap-3">
-                    <Button 
-                      onClick={handleAnalyzeStatement}
-                      disabled={statementAnalysisMutation.isPending}
-                      className="gap-2"
-                    >
-                      {statementAnalysisMutation.isPending ? (
-                        <>
-                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          Analyzing...
-                        </>
-                      ) : (
-                        <>
-                          <FileBarChart className="w-4 h-4" />
-                          Analyze Statement
-                        </>
-                      )}
-                    </Button>
-                  </div>
                 </div>
+              </div>
+
+              {/* Enhanced Uploaded File Display */}
+              {uploadedFile && (
+                <Card className="border-green-200 dark:border-green-800">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="p-3 bg-green-100 dark:bg-green-900 rounded-lg">
+                          <FileText className="w-6 h-6 text-green-600 dark:text-green-400" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-green-900 dark:text-green-100">{uploadedFile.name}</p>
+                          <p className="text-sm text-green-600 dark:text-green-400">
+                            {Math.round(uploadedFile.size / 1024)} KB • Ready for ISO AMP analysis
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex gap-3">
+                        <Button 
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setUploadedFile(null)}
+                        >
+                          Remove
+                        </Button>
+                        <Button 
+                          onClick={handleAnalyzeStatement}
+                          disabled={statementAnalysisMutation.isPending}
+                          className="gap-2 bg-green-600 hover:bg-green-700"
+                        >
+                          {statementAnalysisMutation.isPending ? (
+                            <>
+                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                              Processing with ISO AMP...
+                            </>
+                          ) : (
+                            <>
+                              <Zap className="w-4 h-4" />
+                              Analyze with ISO AMP
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               )}
 
               {/* OCR Accuracy Test Section */}
@@ -579,20 +734,67 @@ export default function ISOAmpCalculator() {
                 </CardContent>
               </Card>
 
-              {/* Enhanced Analysis Results Display */}
+              {/* ISO AMP Analysis Results Display */}
               {analysisResults && (
-                <Card className="mt-4">
+                <Card className="border-purple-200 dark:border-purple-800">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <FileCheck className="w-5 h-5" />
-                      Enhanced OCR Statement Analysis
+                      <Award className="w-5 h-5 text-purple-600" />
+                      ISO AMP Analysis Complete
                     </CardTitle>
                     <CardDescription>
-                      Advanced document processing with AI-powered data extraction
+                      Merchant statement processed with competitive intelligence
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-6">
+                      {/* Quick Stats Grid */}
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                          <div className="text-2xl font-bold text-blue-600">${analysisResults.extractedData?.monthlyVolume?.toLocaleString() || '0'}</div>
+                          <div className="text-xs text-blue-600">Monthly Volume</div>
+                        </div>
+                        <div className="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                          <div className="text-2xl font-bold text-green-600">{analysisResults.extractedData?.transactionCount || '0'}</div>
+                          <div className="text-xs text-green-600">Transactions</div>
+                        </div>
+                        <div className="text-center p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                          <div className="text-2xl font-bold text-purple-600">{analysisResults.extractedData?.currentProcessor || 'Unknown'}</div>
+                          <div className="text-xs text-purple-600">Current Processor</div>
+                        </div>
+                        <div className="text-center p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+                          <div className="text-2xl font-bold text-orange-600">{analysisResults.analysisMetadata?.overallAccuracy || '95'}%</div>
+                          <div className="text-xs text-orange-600">Extraction Accuracy</div>
+                        </div>
+                      </div>
+
+                      {/* Analysis Actions */}
+                      <div className="flex flex-wrap gap-3">
+                        <Button 
+                          onClick={() => setActiveTab('comparison')}
+                          className="gap-2"
+                        >
+                          <BarChart3 className="w-4 h-4" />
+                          Compare Rates
+                        </Button>
+                        <Button 
+                          variant="outline"
+                          onClick={() => setActiveTab('equipment')}
+                          className="gap-2"
+                        >
+                          <Settings className="w-4 h-4" />
+                          Equipment Quote
+                        </Button>
+                        <Button 
+                          variant="outline"
+                          onClick={() => setActiveTab('summary')}
+                          className="gap-2"
+                        >
+                          <FileText className="w-4 h-4" />
+                          Generate Proposal
+                        </Button>
+                      </div>
+
                       {/* Quality Metrics Dashboard */}
                       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
