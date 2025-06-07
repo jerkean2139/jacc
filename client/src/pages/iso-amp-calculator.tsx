@@ -24,8 +24,11 @@ import {
   ChevronRight,
   ChevronLeft,
   Upload,
-  FileBarChart
+  FileBarChart,
+  BarChart3,
+  PieChart
 } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart as RechartsPieChart, Cell } from 'recharts';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 

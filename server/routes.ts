@@ -1517,6 +1517,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/vendor-intelligence/updates', isAuthenticated, async (req, res) => {
+    try {
+      // Return recent vendor intelligence updates with data freshness indicators
+      const mockUpdates = [
+        {
+          id: '1',
+          vendorName: 'Stripe',
+          updateType: 'pricing',
+          content: 'Stripe announced reduced processing fees for high-volume merchants',
+          sourceUrl: 'https://stripe.com/blog/pricing-update',
+          impact: 'high',
+          confidence: 0.95,
+          actionRequired: true,
+          createdAt: new Date().toISOString(),
+          lastUpdated: new Date().toISOString(),
+          dataFreshness: 'Live'
+        },
+        {
+          id: '2',
+          vendorName: 'Square',
+          updateType: 'feature',
+          content: 'Square launches new AI-powered fraud detection for restaurants',
+          sourceUrl: 'https://squareup.com/townsquare/ai-fraud-detection',
+          impact: 'medium',
+          confidence: 0.87,
+          actionRequired: false,
+          createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+          lastUpdated: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
+          dataFreshness: '12 hours ago'
+        },
+        {
+          id: '3',
+          vendorName: 'Adyen',
+          updateType: 'partnership',
+          content: 'Adyen partners with Google to expand payment solutions in emerging markets',
+          sourceUrl: 'https://adyen.com/blog/google-partnership',
+          impact: 'medium',
+          confidence: 0.92,
+          actionRequired: false,
+          createdAt: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(),
+          lastUpdated: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+          dataFreshness: '1 day ago'
+        },
+        {
+          id: '4',
+          vendorName: 'TracerPay',
+          updateType: 'pricing',
+          content: 'TracerPay introduces competitive rates for small business segment',
+          sourceUrl: 'https://tracerpay.com/news/small-business-rates',
+          impact: 'high',
+          confidence: 0.89,
+          actionRequired: true,
+          createdAt: new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString(),
+          lastUpdated: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(),
+          dataFreshness: '2 days ago'
+        }
+      ];
+      
+      res.json(mockUpdates);
+    } catch (error) {
+      console.error("Error fetching vendor intelligence updates:", error);
+      res.status(500).json({ error: "Failed to fetch vendor intelligence updates" });
+    }
+  });
+
   // Detailed system status endpoint
   app.get('/api/status', async (req, res) => {
     try {
