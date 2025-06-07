@@ -11,6 +11,18 @@ const openZip = promisify(yauzl.open);
 export class TracerPayProcessor {
   async createTracerPayFolder(): Promise<string> {
     try {
+      // Check if Accept Blue folder exists (TracerPay is white-label version)
+      const acceptBlueFolder = await db
+        .select()
+        .from(folders)
+        .where(eq(folders.name, 'Accept Blue'))
+        .limit(1);
+
+      if (acceptBlueFolder.length > 0) {
+        console.log('✅ Found existing Accept Blue folder - TracerPay will be merged');
+        return acceptBlueFolder[0].id;
+      }
+
       // Check if TracerPay folder already exists
       const existingFolder = await db
         .select()
@@ -26,9 +38,10 @@ export class TracerPayProcessor {
       const folderId = crypto.randomUUID();
       await db.insert(folders).values({
         id: folderId,
-        name: 'TracerPay',
-        description: 'TracerPay payment gateway sales documentation and resources',
+        name: 'TracerPay (Accept Blue White-Label)',
+        description: 'TracerPay payment gateway sales documentation - white-label version of Accept Blue',
         userId: 'system',
+        vectorNamespace: 'tracerpay_docs',
         permissions: 'public', // All users can access
         isShared: true,
         createdAt: new Date(),
@@ -170,51 +183,64 @@ Phone: 1-800-TRACER-PAY`,
       },
       {
         title: 'TracerPay Sales Documentation Package',
-        content: `TracerPay Sales Documentation Overview
+        content: `TracerPay Sales Documentation Overview (Accept Blue White-Label)
+
+IMPORTANT FOR SALES AGENTS: TracerPay is our white-label version of Accept Blue. Always present it as "TracerPay" to merchants and prospects. Do not mention Accept Blue unless specifically asked about the underlying platform.
 
 This package contains comprehensive sales materials for TracerPay payment gateway solutions:
 
 1. Product Overview
-   - Payment processing capabilities
-   - Security features and compliance
+   - TracerPay branded payment processing capabilities
+   - Security features and PCI compliance (same infrastructure as Accept Blue)
    - Integration options and technical specifications
+   - White-label customization options
 
-2. Sales Collateral
-   - Competitive analysis
-   - Pricing sheets and rate structures
-   - Case studies and success stories
-   - ROI calculators and business benefits
+2. Sales Positioning
+   - Present TracerPay as our flagship payment solution
+   - Emphasize TracerPay branding in all materials
+   - Use TracerPay logos, documentation, and terminology
+   - Focus on TracerPay's advanced features and reliability
 
-3. Technical Documentation
-   - API documentation and integration guides
+3. Sales Collateral
+   - TracerPay competitive analysis
+   - Custom pricing sheets with TracerPay branding
+   - TracerPay case studies and success stories
+   - ROI calculators highlighting TracerPay benefits
+
+4. Technical Documentation
+   - TracerPay API documentation and integration guides
    - System requirements and compatibility
    - Security protocols and compliance information
+   - TracerPay SDK and development resources
 
-4. Marketing Materials
-   - Product brochures and fact sheets
-   - Sales presentation templates
-   - Demo scripts and talking points
+5. Marketing Materials
+   - TracerPay product brochures and fact sheets
+   - TracerPay sales presentation templates
+   - Demo scripts with TracerPay positioning
+   - TracerPay branded collateral
 
-5. Onboarding Resources
-   - Merchant application forms
-   - Setup procedures and timelines
-   - Training materials for new clients
+Sales Process for TracerPay:
+• Initial consultation emphasizing TracerPay capabilities
+• Custom TracerPay proposal preparation
+• Technical integration planning with TracerPay APIs
+• Contract negotiation under TracerPay terms
+• Implementation and go-live support with TracerPay branding
 
-Sales Process:
-• Initial consultation and needs assessment
-• Custom proposal preparation
-• Technical integration planning
-• Contract negotiation and signing
-• Implementation and go-live support
+Key TracerPay Differentiators:
+• Advanced fraud detection with TracerPay intelligence
+• Seamless omnichannel processing under TracerPay brand
+• Real-time analytics and TracerPay dashboard
+• Industry-leading uptime (99.9%) with TracerPay reliability
+• Dedicated TracerPay account management
 
-Key Differentiators:
-• Advanced fraud detection algorithms
-• Seamless omnichannel processing
-• Real-time analytics and reporting
-• Industry-leading uptime (99.9%)
-• Dedicated account management
+White-Label Guidelines:
+- Always refer to the platform as "TracerPay"
+- Use TracerPay documentation and materials exclusively
+- Position TracerPay as your company's payment solution
+- Emphasize TracerPay's advanced capabilities and support
+- Direct all technical questions to TracerPay resources
 
-For detailed information on any specific topic, please contact the TracerPay sales team or refer to the individual documents in this package.`,
+For detailed information, contact the TracerPay sales team or refer to TracerPay-branded documents in this package.`,
         type: 'documentation'
       },
       {
@@ -318,9 +344,142 @@ Support Services:
       // Process the PowerPoint file
       await this.processPowerPointFile(folderId);
       
+      // Create TracerFlex and TracerAuto folders for coming soon products
+      await this.createComingSoonProducts();
+      
       console.log('✅ TracerPay documentation processing completed');
     } catch (error) {
       console.error('Error processing TracerPay uploads:', error);
+    }
+  }
+
+  async createComingSoonProducts(): Promise<void> {
+    try {
+      // Create TracerFlex folder
+      const tracerFlexId = crypto.randomUUID();
+      await db.insert(folders).values({
+        id: tracerFlexId,
+        name: 'TracerFlex',
+        description: 'TracerFlex flexible payment solutions - Coming Soon',
+        userId: 'system',
+        vectorNamespace: 'tracerflex_docs',
+        permissions: 'public',
+        isShared: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
+
+      // Add TracerFlex coming soon document
+      const flexDocId = crypto.randomUUID();
+      await db.insert(documents).values({
+        id: flexDocId,
+        userId: 'system',
+        folderId: tracerFlexId,
+        title: 'TracerFlex - Coming Soon',
+        content: `TracerFlex - Flexible Payment Solutions (Coming Soon)
+
+TracerFlex represents the next evolution in flexible payment processing solutions, designed to meet the diverse needs of modern businesses.
+
+Key Features (In Development):
+• Adaptive payment routing with intelligent optimization
+• Multi-processor redundancy for maximum uptime
+• Flexible pricing models including subscription and usage-based
+• Advanced analytics and business intelligence
+• Customizable payment flows and user experiences
+• Enhanced mobile and omnichannel capabilities
+• Real-time decisioning and risk management
+• API-first architecture for seamless integrations
+
+Target Markets:
+• Enterprise merchants requiring high availability
+• Businesses with complex payment workflows
+• Companies needing custom integration solutions
+• High-volume transaction processors
+• Multi-location retail chains
+
+Sales Talking Points:
+"TracerFlex is our upcoming flexible payment platform that will offer unprecedented customization and reliability. While we can't provide specific launch dates yet, we're excited about the advanced capabilities it will bring to our merchant partners."
+
+Status: In Development
+Expected Release: Coming Soon
+Contact: For more information about TracerFlex and early access opportunities, please contact our sales team.
+
+Note for Sales Agents: When asked about TracerFlex, emphasize that it's a new product in development that will expand our payment processing capabilities with greater flexibility and customization options.`,
+        type: 'product_announcement',
+        size: 0,
+        permissions: 'public',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
+
+      // Create TracerAuto folder
+      const tracerAutoId = crypto.randomUUID();
+      await db.insert(folders).values({
+        id: tracerAutoId,
+        name: 'TracerAuto',
+        description: 'TracerAuto automated payment solutions - Coming Soon',
+        userId: 'system',
+        vectorNamespace: 'tracerauto_docs',
+        permissions: 'public',
+        isShared: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
+
+      // Add TracerAuto coming soon document
+      const autoDocId = crypto.randomUUID();
+      await db.insert(documents).values({
+        id: autoDocId,
+        userId: 'system',
+        folderId: tracerAutoId,
+        title: 'TracerAuto - Coming Soon',
+        content: `TracerAuto - Automated Payment Solutions (Coming Soon)
+
+TracerAuto is our upcoming automated payment processing platform designed to streamline operations and reduce manual intervention for businesses of all sizes.
+
+Key Features (In Development):
+• Intelligent payment automation and workflow optimization
+• Automated recurring billing and subscription management
+• Smart fraud detection with machine learning algorithms
+• Automated reconciliation and reporting
+• Self-service merchant onboarding and management
+• Automated compliance monitoring and updates
+• Dynamic routing optimization based on real-time data
+• Predictive analytics for business insights
+
+Target Markets:
+• Subscription-based businesses
+• SaaS companies requiring automated billing
+• E-commerce platforms with high transaction volumes
+• Service providers with recurring revenue models
+• Businesses seeking to reduce operational overhead
+
+Sales Talking Points:
+"TracerAuto will revolutionize how businesses handle payment processing by automating complex workflows and providing intelligent insights. This upcoming platform will significantly reduce manual tasks while improving payment success rates and operational efficiency."
+
+Automation Capabilities:
+• Automatic retry logic for failed transactions
+• Intelligent payment method selection
+• Automated dispute and chargeback management
+• Dynamic pricing and fee optimization
+• Automated reporting and business intelligence
+• Self-healing system monitoring and alerts
+
+Status: In Development
+Expected Release: Coming Soon
+Contact: For early access information and beta participation opportunities, please reach out to our product development team.
+
+Note for Sales Agents: When discussing TracerAuto, highlight the automation benefits and how it will help businesses reduce operational costs while improving payment processing efficiency. Emphasize that it's coming soon and we're accepting early interest inquiries.`,
+        type: 'product_announcement',
+        size: 0,
+        permissions: 'public',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
+
+      console.log('✅ Created TracerFlex and TracerAuto folders for coming soon products');
+    } catch (error) {
+      console.error('Error creating coming soon product folders:', error);
     }
   }
 
