@@ -26,6 +26,7 @@ import {
   WifiOff
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import VendorIntelligenceDashboard from "@/components/vendor-intelligence-dashboard";
 
 interface UserAnalytics {
   id: string;
@@ -270,6 +271,10 @@ export default function AdminDashboard() {
           <TabsTrigger value="monitoring">Chat Monitoring</TabsTrigger>
           <TabsTrigger value="sessions">Session Logs</TabsTrigger>
           <TabsTrigger value="settings">System Settings</TabsTrigger>
+          {/* Development Only - Hidden in Production */}
+          {process.env.NODE_ENV === 'development' && (
+            <TabsTrigger value="vendor-intelligence">Real-Time Intelligence</TabsTrigger>
+          )}
         </TabsList>
 
         {/* User Analytics Tab */}

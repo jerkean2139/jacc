@@ -881,3 +881,83 @@ export const insertUserChatLogSchema = createInsertSchema(userChatLogs).omit({
 
 export type InsertUserChatLog = z.infer<typeof insertUserChatLogSchema>;
 export type UserChatLog = typeof userChatLogs.$inferSelect;
+
+// Vendor Intelligence Tables
+export const vendors = pgTable("vendors", {
+  id: varchar("id").primaryKey().notNull(),
+  name: varchar("name").notNull(),
+  baseUrl: varchar("base_url").notNull(),
+  active: boolean("active").default(true),
+  crawlFrequency: varchar("crawl_frequency").notNull(), // 'hourly', 'daily', 'weekly'
+  selectors: jsonb("selectors"), // CSS selectors for document discovery
+  documentPaths: jsonb("document_paths"), // Array of paths to check
+  lastScan: timestamp("last_scan"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const vendorDocuments = pgTable("vendor_documents", {
+  id: varchar("id").primaryKey().notNull(),
+  vendorId: varchar("vendor_id").notNull().references(() => vendors.id),
+  url: varchar("url").notNull(),
+  title: varchar("title").notNull(),
+  contentHash: varchar("content_hash").notNull(),
+  content: text("content"),
+  discoveredAt: timestamp("discovered_at").defaultNow(),
+  lastChecked: timestamp("last_checked").defaultNow(),
+  lastModified: timestamp("last_modified"),
+  isActive: boolean("is_active").default(true),
+});
+
+export const documentChanges = pgTable("document_changes", {
+  id: varchar("id").primaryKey().notNull(),
+  documentId: varchar("document_id").notNull().references(() => vendorDocuments.id),
+  changeType: varchar("change_type").notNull(), // 'new', 'updated', 'removed'
+  changeDetails: jsonb("change_details"), // Detailed diff information
+  detectedAt: timestamp("detected_at").defaultNow(),
+  notified: boolean("notified").default(false),
+});
+
+export const vendorRelations = relations(vendors, ({ many }) => ({
+  documents: many(vendorDocuments),
+}));
+
+export const vendorDocumentRelations = relations(vendorDocuments, ({ one, many }) => ({
+  vendor: one(vendors, {
+    fields: [vendorDocuments.vendorId],
+    references: [vendors.id],
+  }),
+  changes: many(documentChanges),
+}));
+
+export const documentChangeRelations = relations(documentChanges, ({ one }) => ({
+  document: one(vendorDocuments, {
+    fields: [documentChanges.documentId],
+    references: [vendorDocuments.id],
+  }),
+}));
+
+// Vendor Intelligence Schema Types
+export const insertVendorSchema = createInsertSchema(vendors).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertVendorDocumentSchema = createInsertSchema(vendorDocuments).omit({
+  id: true,
+  discoveredAt: true,
+  lastChecked: true,
+});
+
+export const insertDocumentChangeSchema = createInsertSchema(documentChanges).omit({
+  id: true,
+  detectedAt: true,
+});
+
+export type Vendor = typeof vendors.$inferSelect;
+export type InsertVendor = z.infer<typeof insertVendorSchema>;
+export type VendorDocument = typeof vendorDocuments.$inferSelect;
+export type InsertVendorDocument = z.infer<typeof insertVendorDocumentSchema>;
+export type DocumentChange = typeof documentChanges.$inferSelect;
+export type InsertDocumentChange = z.infer<typeof insertDocumentChangeSchema>;

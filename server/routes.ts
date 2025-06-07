@@ -2101,6 +2101,192 @@ User Context: {userRole}`,
     }
   });
 
+  // Vendor Intelligence Routes (Development Only)
+  app.get('/api/vendor-intelligence/stats', async (req: any, res) => {
+    try {
+      const { vendorIntelligenceService } = await import('./vendor-intelligence');
+      const stats = await vendorIntelligenceService.getVendorStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Error getting vendor stats:", error);
+      res.status(500).json({ error: "Failed to get vendor stats" });
+    }
+  });
+
+  app.get('/api/vendor-intelligence/vendors', async (req: any, res) => {
+    try {
+      // Mock vendor data for development
+      const vendors = [
+        {
+          id: 'first-data',
+          name: 'First Data (Fiserv)',
+          baseUrl: 'https://www.fiserv.com',
+          active: true,
+          crawlFrequency: 'daily',
+          lastScan: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
+          documentsFound: 47,
+          status: 'active'
+        },
+        {
+          id: 'chase-paymentech',
+          name: 'Chase Paymentech',
+          baseUrl: 'https://www.chasepaymentech.com',
+          active: true,
+          crawlFrequency: 'daily',
+          lastScan: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(), // 1 hour ago
+          documentsFound: 32,
+          status: 'active'
+        },
+        {
+          id: 'worldpay',
+          name: 'Worldpay',
+          baseUrl: 'https://www.worldpay.com',
+          active: false,
+          crawlFrequency: 'daily',
+          lastScan: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
+          documentsFound: 28,
+          status: 'inactive'
+        },
+        {
+          id: 'tsys',
+          name: 'TSYS (Global Payments)',
+          baseUrl: 'https://www.tsys.com',
+          active: true,
+          crawlFrequency: 'daily',
+          lastScan: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(), // 3 hours ago
+          documentsFound: 41,
+          status: 'active'
+        },
+        {
+          id: 'elavon',
+          name: 'Elavon',
+          baseUrl: 'https://www.elavon.com',
+          active: true,
+          crawlFrequency: 'daily',
+          lastScan: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(), // 4 hours ago
+          documentsFound: 35,
+          status: 'error'
+        }
+      ];
+      res.json(vendors);
+    } catch (error) {
+      console.error("Error getting vendors:", error);
+      res.status(500).json({ error: "Failed to get vendors" });
+    }
+  });
+
+  app.get('/api/vendor-intelligence/changes', async (req: any, res) => {
+    try {
+      // Mock recent changes for development
+      const changes = [
+        {
+          id: '1',
+          documentTitle: 'Merchant Processing Rate Sheet Q1 2024',
+          vendorName: 'First Data (Fiserv)',
+          changeType: 'updated',
+          detectedAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(), // 30 minutes ago
+          url: 'https://www.fiserv.com/resources/rate-sheet-q1-2024.pdf',
+          changes: {
+            added: ['New interchange rates for premium cards', 'Updated international processing fees'],
+            removed: ['Deprecated legacy pricing structure'],
+            modified: ['Modified settlement timeframes']
+          }
+        },
+        {
+          id: '2',
+          documentTitle: 'PCI Compliance Guidelines 2024',
+          vendorName: 'Chase Paymentech',
+          changeType: 'new',
+          detectedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
+          url: 'https://www.chasepaymentech.com/resources/pci-compliance-2024.pdf',
+          changes: {
+            added: ['New document discovered'],
+            removed: [],
+            modified: []
+          }
+        },
+        {
+          id: '3',
+          documentTitle: 'Terminal Programming Guide v3.2',
+          vendorName: 'TSYS (Global Payments)',
+          changeType: 'updated',
+          detectedAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(), // 5 hours ago
+          url: 'https://www.tsys.com/support/terminal-guide-v32.pdf',
+          changes: {
+            added: ['New EMV chip configuration steps', 'Contactless payment setup'],
+            removed: [],
+            modified: ['Updated troubleshooting section']
+          }
+        },
+        {
+          id: '4',
+          documentTitle: 'API Integration Documentation',
+          vendorName: 'Worldpay',
+          changeType: 'removed',
+          detectedAt: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(), // 8 hours ago
+          url: 'https://www.worldpay.com/docs/api-v2.1.pdf',
+          changes: {
+            added: [],
+            removed: ['Document no longer available'],
+            modified: []
+          }
+        }
+      ];
+      res.json(changes);
+    } catch (error) {
+      console.error("Error getting changes:", error);
+      res.status(500).json({ error: "Failed to get changes" });
+    }
+  });
+
+  app.post('/api/vendor-intelligence/start', async (req: any, res) => {
+    try {
+      const { vendorIntelligenceService } = await import('./vendor-intelligence');
+      await vendorIntelligenceService.startMonitoring();
+      res.json({ success: true, message: "Vendor intelligence monitoring started" });
+    } catch (error) {
+      console.error("Error starting monitoring:", error);
+      res.status(500).json({ error: "Failed to start monitoring" });
+    }
+  });
+
+  app.post('/api/vendor-intelligence/stop', async (req: any, res) => {
+    try {
+      const { vendorIntelligenceService } = await import('./vendor-intelligence');
+      await vendorIntelligenceService.stopMonitoring();
+      res.json({ success: true, message: "Vendor intelligence monitoring stopped" });
+    } catch (error) {
+      console.error("Error stopping monitoring:", error);
+      res.status(500).json({ error: "Failed to stop monitoring" });
+    }
+  });
+
+  app.post('/api/vendor-intelligence/scan', async (req: any, res) => {
+    try {
+      const { vendorIntelligenceService } = await import('./vendor-intelligence');
+      const changes = await vendorIntelligenceService.performFullScan();
+      res.json({ success: true, changes: changes.length });
+    } catch (error) {
+      console.error("Error performing scan:", error);
+      res.status(500).json({ error: "Failed to perform scan" });
+    }
+  });
+
+  app.patch('/api/vendor-intelligence/vendors/:vendorId', async (req: any, res) => {
+    try {
+      const { vendorId } = req.params;
+      const { active } = req.body;
+      
+      // In production, this would update the database
+      console.log(`Vendor ${vendorId} set to ${active ? 'active' : 'inactive'}`);
+      
+      res.json({ success: true, vendorId, active });
+    } catch (error) {
+      console.error("Error updating vendor:", error);
+      res.status(500).json({ error: "Failed to update vendor" });
+    }
+  });
+
   // Duplicate detection routes
   app.post('/api/documents/check-duplicates', async (req: any, res) => {
     try {
