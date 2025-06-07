@@ -184,6 +184,8 @@ export default function ISOAmpCalculator() {
     }
   });
 
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [analysisResults, setAnalysisResults] = useState<any>(null);
   const [results, setResults] = useState<any>(null);
   const [equipmentResults, setEquipmentResults] = useState<any>(null);
   const { toast } = useToast();

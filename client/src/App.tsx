@@ -50,8 +50,6 @@ function Router() {
         <>
           <Route path="/admin-login" component={SimpleAdminLogin} />
           <Route path="/login" component={LoginPage} />
-          <Route path="/calculator" component={ISOAmpCalculator} />
-          <Route path="/iso-amp-calculator" component={ISOAmpCalculator} />
           <Route path="/" component={LoginPage} />
         </>
       ) : (
