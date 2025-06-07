@@ -50,7 +50,7 @@ export const users = pgTable("users", {
 
 export const vendorIntelligence = pgTable("vendor_intelligence", {
   id: uuid("id").primaryKey().defaultRandom(),
-  vendorId: integer("vendor_id").references(() => vendors.id),
+  vendorId: uuid("vendor_id").references(() => vendors.id),
   contentType: varchar("content_type").notNull(), // pricing, feature, press_release, blog_post
   title: varchar("title"),
   content: text("content").notNull(),
@@ -67,7 +67,7 @@ export const vendorIntelligence = pgTable("vendor_intelligence", {
 export const vendorComparisons = pgTable("vendor_comparisons", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: varchar("user_id").references(() => users.id),
-  vendorIds: integer("vendor_ids").array(),
+  vendorIds: uuid("vendor_ids").array(),
   criteria: jsonb("criteria"), // Comparison parameters
   results: jsonb("results"), // Comparison outcomes
   createdAt: timestamp("created_at").defaultNow(),
@@ -1064,13 +1064,7 @@ export const documentChangeRelations = relations(documentChanges, ({ one }) => (
   }),
 }));
 
-// Vendor Intelligence Schema Types
-export const insertVendorSchema = createInsertSchema(vendors).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
+// Additional vendor document schema types (insertVendorSchema already defined above)
 export const insertVendorDocumentSchema = createInsertSchema(vendorDocuments).omit({
   id: true,
   discoveredAt: true,
@@ -1082,8 +1076,6 @@ export const insertDocumentChangeSchema = createInsertSchema(documentChanges).om
   detectedAt: true,
 });
 
-export type Vendor = typeof vendors.$inferSelect;
-export type InsertVendor = z.infer<typeof insertVendorSchema>;
 export type VendorDocument = typeof vendorDocuments.$inferSelect;
 export type InsertVendorDocument = z.infer<typeof insertVendorDocumentSchema>;
 export type DocumentChange = typeof documentChanges.$inferSelect;

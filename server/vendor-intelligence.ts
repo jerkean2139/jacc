@@ -214,10 +214,6 @@ export class VendorIntelligenceEngine {
       blogUrl: 'https://squareup.com/townsquare',
       newsSelectors: { title: 'h2.article-title', content: '.article-excerpt', date: '.article-date', link: 'a.article-link' }
     },
-    { name: 'Accept Blue', website: 'https://acceptblue.com', blogUrl: 'https://acceptblue.com/news' },
-    { name: 'Authorize.net', website: 'https://authorize.net', blogUrl: 'https://authorize.net/about-us/newsroom' },
-    { name: 'NMI', website: 'https://nmi.com', blogUrl: 'https://nmi.com/blog' },
-    { name: 'PayPal', website: 'https://paypal.com', blogUrl: 'https://newsroom.paypal-corp.com' },
     { name: 'Square', website: 'https://squareup.com', blogUrl: 'https://squareup.com/us/en/press' },
 
     // Hardware
@@ -272,19 +268,32 @@ export class VendorIntelligenceEngine {
     const updates: VendorUpdate[] = [];
 
     try {
-      // Crawl main website for pricing changes
-      const websiteContent = await this.fetchWebContent(vendor.website);
-      const pricingUpdates = await this.analyzePricingChanges(vendor.name, websiteContent);
+      // Use Puppeteer for dynamic content crawling
+      const browser = await puppeteer.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+      });
+
+      const page = await browser.newPage();
+      await page.setUserAgent('Mozilla/5.0 (compatible; JACC-Intelligence/1.0)');
+      
+      // Crawl main website
+      await page.goto(vendor.website, { waitUntil: 'networkidle2', timeout: 30000 });
+      const websiteContent = await page.content();
+      const pricingUpdates = await this.analyzePricingChanges(vendor.name, websiteContent, vendor.website);
       updates.push(...pricingUpdates);
 
-      // Crawl blog for feature announcements
+      // Crawl blog if available
       if (vendor.blogUrl) {
-        const blogContent = await this.fetchWebContent(vendor.blogUrl);
-        const featureUpdates = await this.analyzeFeatureAnnouncements(vendor.name, blogContent);
+        await page.goto(vendor.blogUrl, { waitUntil: 'networkidle2', timeout: 30000 });
+        const blogContent = await page.content();
+        const featureUpdates = await this.analyzeFeatureAnnouncements(vendor.name, blogContent, vendor.blogUrl);
         updates.push(...featureUpdates);
       }
 
-      // Check for press releases
+      await browser.close();
+
+      // Check for press releases via news API
       const pressUpdates = await this.analyzePressReleases(vendor.name);
       updates.push(...pressUpdates);
 
