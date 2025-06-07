@@ -1,7 +1,11 @@
 import OpenAI from 'openai';
+import puppeteer from 'puppeteer';
+import * as cheerio from 'cheerio';
+import axios from 'axios';
+import robotsParser from 'robots-parser';
 import { db } from './db';
-import { documents, vendors } from '@shared/schema';
-import { eq } from 'drizzle-orm';
+import { documents, vendors, vendorIntelligence, type InsertVendorIntelligence } from '@shared/schema';
+import { eq, desc } from 'drizzle-orm';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -30,28 +34,186 @@ interface VendorIntelligence {
 }
 
 export class VendorIntelligenceEngine {
-  private vendors = [
-    // Processors
-    { name: 'Clearent', website: 'https://clearent.com', blogUrl: 'https://clearent.com/blog' },
-    { name: 'First Data (Fiserv)', website: 'https://fiserv.com', blogUrl: 'https://fiserv.com/insights' },
-    { name: 'TSYS', website: 'https://tsys.com', blogUrl: 'https://tsys.com/news-events' },
-    { name: 'Worldpay', website: 'https://worldpay.com', blogUrl: 'https://worldpay.com/us/insights' },
-    { name: 'Heartland', website: 'https://heartlandpaymentsystems.com', blogUrl: 'https://heartlandpaymentsystems.com/blog' },
-    { name: 'Maverick', website: 'https://maverickpayments.com', blogUrl: 'https://maverickpayments.com/news' },
-    { name: 'Chase Paymentech', website: 'https://chase.com/business/payments', blogUrl: 'https://chase.com/business/insights' },
-    { name: 'North American Bancard', website: 'https://nabancard.com', blogUrl: 'https://nabancard.com/news' },
-    { name: 'MiCamp', website: 'https://micamp.com', blogUrl: 'https://micamp.com/blog' },
-    { name: 'Priority Payments', website: 'https://prioritypayments.com', blogUrl: 'https://prioritypayments.com/news' },
-    { name: 'TRX', website: 'https://trxpayments.com', blogUrl: 'https://trxpayments.com/blog' },
-    { name: 'Total Merchant Services', website: 'https://totalmerchantservices.com', blogUrl: 'https://totalmerchantservices.com/blog' },
-    { name: 'PayBright', website: 'https://paybright.com', blogUrl: 'https://paybright.com/news' },
+  private crawlConfig = [
+    // Processors with real crawling configurations
+    { 
+      name: 'Clearent', 
+      type: 'processor',
+      website: 'https://clearent.com', 
+      blogUrl: 'https://clearent.com/blog',
+      pricingUrl: 'https://clearent.com/pricing',
+      newsSelectors: { title: 'h2.post-title', content: '.post-content', date: '.post-date', link: 'a.post-link' }
+    },
+    { 
+      name: 'First Data (Fiserv)', 
+      type: 'processor',
+      website: 'https://fiserv.com', 
+      blogUrl: 'https://fiserv.com/insights',
+      newsSelectors: { title: 'h3.card-title', content: '.card-description', date: '.publish-date', link: 'a.card-link' }
+    },
+    { 
+      name: 'TSYS', 
+      type: 'processor',
+      website: 'https://tsys.com', 
+      blogUrl: 'https://tsys.com/news-events',
+      newsSelectors: { title: '.news-title', content: '.news-excerpt', date: '.news-date', link: '.news-link' }
+    },
+    { 
+      name: 'Worldpay', 
+      type: 'processor',
+      website: 'https://worldpay.com', 
+      blogUrl: 'https://worldpay.com/us/insights',
+      newsSelectors: { title: 'h3.insight-title', content: '.insight-summary', date: '.publish-date', link: 'a.insight-link' }
+    },
+    { 
+      name: 'Heartland', 
+      type: 'processor',
+      website: 'https://heartlandpaymentsystems.com', 
+      blogUrl: 'https://heartlandpaymentsystems.com/blog',
+      newsSelectors: { title: '.blog-title', content: '.blog-excerpt', date: '.blog-date', link: '.blog-link' }
+    },
+    { 
+      name: 'Maverick', 
+      type: 'processor',
+      website: 'https://maverickpayments.com', 
+      blogUrl: 'https://maverickpayments.com/news',
+      newsSelectors: { title: '.news-headline', content: '.news-content', date: '.news-timestamp', link: '.news-url' }
+    },
+    { 
+      name: 'Chase Paymentech', 
+      type: 'processor',
+      website: 'https://chase.com/business/payments', 
+      blogUrl: 'https://chase.com/business/insights',
+      newsSelectors: { title: 'h3.article-title', content: '.article-summary', date: '.article-date', link: 'a.article-link' }
+    },
+    { 
+      name: 'North American Bancard', 
+      type: 'processor',
+      website: 'https://nabancard.com', 
+      blogUrl: 'https://nabancard.com/news',
+      newsSelectors: { title: '.press-title', content: '.press-summary', date: '.press-date', link: '.press-link' }
+    },
+    { 
+      name: 'MiCamp', 
+      type: 'processor',
+      website: 'https://micamp.com', 
+      blogUrl: 'https://micamp.com/blog',
+      newsSelectors: { title: 'h2.entry-title', content: '.entry-summary', date: '.entry-date', link: 'a.entry-link' }
+    },
+    { 
+      name: 'Priority Payments', 
+      type: 'processor',
+      website: 'https://prioritypayments.com', 
+      blogUrl: 'https://prioritypayments.com/news',
+      newsSelectors: { title: '.update-title', content: '.update-content', date: '.update-date', link: '.update-link' }
+    },
+    { 
+      name: 'TRX', 
+      type: 'processor',
+      website: 'https://trxpayments.com', 
+      blogUrl: 'https://trxpayments.com/blog',
+      newsSelectors: { title: 'h3.post-title', content: '.post-excerpt', date: '.post-meta', link: 'a.post-permalink' }
+    },
+    { 
+      name: 'Total Merchant Services', 
+      type: 'processor',
+      website: 'https://totalmerchantservices.com', 
+      blogUrl: 'https://totalmerchantservices.com/blog',
+      newsSelectors: { title: '.blog-post-title', content: '.blog-post-excerpt', date: '.blog-post-date', link: 'a.blog-post-link' }
+    },
+    { 
+      name: 'PayBright', 
+      type: 'processor',
+      website: 'https://paybright.com', 
+      blogUrl: 'https://paybright.com/news',
+      newsSelectors: { title: '.announcement-title', content: '.announcement-body', date: '.announcement-date', link: '.announcement-link' }
+    },
 
-    // Gateways
-    { name: 'Stripe', website: 'https://stripe.com', blogUrl: 'https://stripe.com/blog' },
-    { name: 'ACI Worldwide', website: 'https://aciworldwide.com', blogUrl: 'https://aciworldwide.com/insights' },
-    { name: 'Adyen', website: 'https://adyen.com', blogUrl: 'https://adyen.com/blog' },
-    { name: 'Payline Data', website: 'https://paylinedata.com', blogUrl: 'https://paylinedata.com/blog' },
-    { name: 'CSG Forte', website: 'https://forte.net', blogUrl: 'https://forte.net/blog' },
+    // Gateways with enhanced configurations
+    { 
+      name: 'Stripe', 
+      type: 'gateway',
+      website: 'https://stripe.com', 
+      blogUrl: 'https://stripe.com/blog',
+      newsSelectors: { title: 'h3.BlogPostCard__title', content: '.BlogPostCard__excerpt', date: '.BlogPostCard__date', link: 'a.BlogPostCard__link' }
+    },
+    { 
+      name: 'ACI Worldwide', 
+      type: 'gateway',
+      website: 'https://aciworldwide.com', 
+      blogUrl: 'https://aciworldwide.com/insights',
+      newsSelectors: { title: '.insight-title', content: '.insight-excerpt', date: '.insight-date', link: 'a.insight-link' }
+    },
+    { 
+      name: 'TracerPay', 
+      type: 'gateway',
+      website: 'https://tracerpay.com', 
+      blogUrl: 'https://tracerpay.com/news',
+      newsSelectors: { title: '.news-title', content: '.news-summary', date: '.news-date', link: 'a.news-link' }
+    },
+    { 
+      name: 'TracerFlex', 
+      type: 'gateway',
+      website: 'https://tracerflex.com', 
+      blogUrl: 'https://tracerflex.com/updates',
+      newsSelectors: { title: '.update-headline', content: '.update-content', date: '.update-timestamp', link: 'a.update-link' }
+    },
+    { 
+      name: 'Adyen', 
+      type: 'gateway',
+      website: 'https://adyen.com', 
+      blogUrl: 'https://adyen.com/blog',
+      newsSelectors: { title: 'h3.blog-title', content: '.blog-excerpt', date: '.blog-date', link: 'a.blog-link' }
+    },
+    { 
+      name: 'Payline Data', 
+      type: 'gateway',
+      website: 'https://paylinedata.com', 
+      blogUrl: 'https://paylinedata.com/blog',
+      newsSelectors: { title: '.post-title', content: '.post-excerpt', date: '.post-date', link: 'a.post-link' }
+    },
+    { 
+      name: 'CSG Forte', 
+      type: 'gateway',
+      website: 'https://forte.net', 
+      blogUrl: 'https://forte.net/blog',
+      newsSelectors: { title: 'h2.blog-title', content: '.blog-summary', date: '.blog-published', link: 'a.blog-permalink' }
+    },
+    { 
+      name: 'Accept Blue', 
+      type: 'gateway',
+      website: 'https://acceptblue.com', 
+      blogUrl: 'https://acceptblue.com/news',
+      newsSelectors: { title: '.announcement-title', content: '.announcement-text', date: '.announcement-date', link: 'a.announcement-link' }
+    },
+    { 
+      name: 'Authorize.net', 
+      type: 'gateway',
+      website: 'https://authorize.net', 
+      blogUrl: 'https://authorize.net/blog',
+      newsSelectors: { title: 'h3.entry-title', content: '.entry-content', date: '.entry-date', link: 'a.entry-link' }
+    },
+    { 
+      name: 'NMI', 
+      type: 'gateway',
+      website: 'https://nmi.com', 
+      blogUrl: 'https://nmi.com/blog',
+      newsSelectors: { title: '.blog-post-title', content: '.blog-post-content', date: '.blog-post-date', link: 'a.blog-post-link' }
+    },
+    { 
+      name: 'PayPal', 
+      type: 'gateway',
+      website: 'https://paypal.com', 
+      blogUrl: 'https://newsroom.paypal-corp.com',
+      newsSelectors: { title: '.press-title', content: '.press-summary', date: '.press-date', link: 'a.press-link' }
+    },
+    { 
+      name: 'Square', 
+      type: 'gateway',
+      website: 'https://squareup.com', 
+      blogUrl: 'https://squareup.com/townsquare',
+      newsSelectors: { title: 'h2.article-title', content: '.article-excerpt', date: '.article-date', link: 'a.article-link' }
+    },
     { name: 'Accept Blue', website: 'https://acceptblue.com', blogUrl: 'https://acceptblue.com/news' },
     { name: 'Authorize.net', website: 'https://authorize.net', blogUrl: 'https://authorize.net/about-us/newsroom' },
     { name: 'NMI', website: 'https://nmi.com', blogUrl: 'https://nmi.com/blog' },

@@ -45,6 +45,34 @@ export const users = pgTable("users", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Enhanced vendor intelligence fields for existing vendors table
+// Note: This extends the existing vendors table defined above
+
+export const vendorIntelligence = pgTable("vendor_intelligence", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  vendorId: integer("vendor_id").references(() => vendors.id),
+  contentType: varchar("content_type").notNull(), // pricing, feature, press_release, blog_post
+  title: varchar("title"),
+  content: text("content").notNull(),
+  sourceUrl: varchar("source_url"),
+  publishedAt: timestamp("published_at"),
+  impact: varchar("impact").default("medium"), // low, medium, high
+  confidence: real("confidence").default(0.5),
+  actionRequired: boolean("action_required").default(false),
+  tags: text("tags").array(),
+  aiAnalysis: jsonb("ai_analysis"), // AI-generated insights
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const vendorComparisons = pgTable("vendor_comparisons", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: varchar("user_id").references(() => users.id),
+  vendorIds: integer("vendor_ids").array(),
+  criteria: jsonb("criteria"), // Comparison parameters
+  results: jsonb("results"), // Comparison outcomes
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // User session tracking for admin analytics
 export const userSessions = pgTable("user_sessions", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -494,6 +522,18 @@ export const userStatsExtended = pgTable("user_stats_extended", {
 });
 
 // Define relations
+export const vendorsRelations = relations(vendors, ({ many }) => ({
+  intelligence: many(vendorIntelligence),
+}));
+
+export const vendorIntelligenceRelations = relations(vendorIntelligence, ({ one }) => ({
+  vendor: one(vendors, { fields: [vendorIntelligence.vendorId], references: [vendors.id] }),
+}));
+
+export const vendorComparisonsRelations = relations(vendorComparisons, ({ one }) => ({
+  user: one(users, { fields: [vendorComparisons.userId], references: [users.id] }),
+}));
+
 export const usersRelations = relations(users, ({ one, many }) => ({
   folders: many(folders),
   chats: many(chats),
@@ -503,6 +543,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   favorites: many(favorites),
   trainingFeedback: many(aiTrainingFeedback),
   promptTemplates: many(aiPromptTemplates),
+  vendorComparisons: many(vendorComparisons),
 }));
 
 export const foldersRelations = relations(folders, ({ one, many }) => ({
@@ -609,6 +650,30 @@ export const userPrompts = pgTable("user_prompts", {
   category: varchar("category").default("general"), // "writing", "marketing", "communication", etc.
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Vendor intelligence types
+export type Vendor = typeof vendors.$inferSelect;
+export type InsertVendor = typeof vendors.$inferInsert;
+export type VendorIntelligence = typeof vendorIntelligence.$inferSelect;
+export type InsertVendorIntelligence = typeof vendorIntelligence.$inferInsert;
+export type VendorComparison = typeof vendorComparisons.$inferSelect;
+export type InsertVendorComparison = typeof vendorComparisons.$inferInsert;
+
+export const insertVendorSchema = createInsertSchema(vendors).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertVendorIntelligenceSchema = createInsertSchema(vendorIntelligence).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertVendorComparisonSchema = createInsertSchema(vendorComparisons).omit({
+  id: true,
+  createdAt: true,
 });
 
 export type UserPrompt = typeof userPrompts.$inferSelect;
