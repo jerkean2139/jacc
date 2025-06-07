@@ -886,12 +886,21 @@ export type UserChatLog = typeof userChatLogs.$inferSelect;
 export const vendors = pgTable("vendors", {
   id: varchar("id").primaryKey().notNull(),
   name: varchar("name").notNull(),
+  companyType: varchar("company_type").notNull(), // 'processor', 'gateway', 'iso', 'bank'
   baseUrl: varchar("base_url").notNull(),
+  documentPortalUrl: varchar("document_portal_url"), // Specific URL for document downloads
+  supportUrl: varchar("support_url"), // Technical support documentation
   active: boolean("active").default(true),
   crawlFrequency: varchar("crawl_frequency").notNull(), // 'hourly', 'daily', 'weekly'
+  priority: integer("priority").default(1), // 1=high, 2=medium, 3=low
   selectors: jsonb("selectors"), // CSS selectors for document discovery
   documentPaths: jsonb("document_paths"), // Array of paths to check
+  apiEndpoints: jsonb("api_endpoints"), // API documentation URLs
+  contactInfo: jsonb("contact_info"), // Sales/tech contact information
   lastScan: timestamp("last_scan"),
+  lastSuccessfulScan: timestamp("last_successful_scan"),
+  scanStatus: varchar("scan_status").default('pending'), // 'pending', 'scanning', 'completed', 'failed'
+  errorCount: integer("error_count").default(0),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -900,9 +909,18 @@ export const vendorDocuments = pgTable("vendor_documents", {
   id: varchar("id").primaryKey().notNull(),
   vendorId: varchar("vendor_id").notNull().references(() => vendors.id),
   url: varchar("url").notNull(),
+  directDownloadUrl: varchar("direct_download_url"), // Direct PDF/file link
   title: varchar("title").notNull(),
   contentHash: varchar("content_hash").notNull(),
   content: text("content"),
+  documentType: varchar("document_type"), // 'rate_sheet', 'api_doc', 'compliance', 'guide', 'terminal_guide', 'integration_manual'
+  category: varchar("category"), // 'pricing', 'technical', 'compliance', 'marketing', 'support'
+  publicationDate: timestamp("publication_date"), // Actual publication date from vendor
+  effectiveDate: timestamp("effective_date"), // When changes take effect
+  version: varchar("version"), // Document version number
+  fileSize: integer("file_size"), // File size in bytes
+  fileFormat: varchar("file_format"), // 'pdf', 'doc', 'html', 'xml'
+  downloadCount: integer("download_count").default(0),
   discoveredAt: timestamp("discovered_at").defaultNow(),
   lastChecked: timestamp("last_checked").defaultNow(),
   lastModified: timestamp("last_modified"),
