@@ -11,6 +11,7 @@ const realVendorData = [
     supportUrl: 'https://www.fiserv.com/en/support.html',
     active: true,
     crawlFrequency: 'weekly',
+    scanDay: 'monday',
     priority: 1,
     selectors: {
       documentLinks: 'a[href*=".pdf"], a[href*="download"], .resource-link, .blog-post, .news-item, .announcement',
@@ -27,6 +28,11 @@ const realVendorData = [
       '/press-releases'
     ],
     documentTypes: ['pdf', 'sales_flyer', 'product_announcement', 'blog_post', 'news', 'promotion'],
+    contentFilters: {
+      requiredKeywords: ['payment', 'merchant', 'processing', 'pos', 'terminal', 'transaction', 'gateway', 'acquiring', 'commerce', 'fintech', 'card', 'credit', 'debit', 'interchange', 'settlement'],
+      excludedKeywords: ['adult', 'porn', 'xxx', 'politics', 'political', 'religion', 'religious', 'casino', 'gambling', 'drugs', 'illegal'],
+      businessRelevantTerms: ['rate sheet', 'pricing', 'compliance', 'pci', 'api', 'integration', 'sdk', 'developer', 'documentation', 'security', 'fraud', 'chargeback', 'iso', 'reseller', 'partner']
+    },
     apiEndpoints: [
       'https://developer.fiserv.com/product/CommerceHub',
       'https://developer.fiserv.com/product/Clover'
@@ -45,7 +51,8 @@ const realVendorData = [
     documentPortalUrl: 'https://www.chasepaymentech.com/resources',
     supportUrl: 'https://www.chasepaymentech.com/support',
     active: true,
-    crawlFrequency: 'daily',
+    crawlFrequency: 'weekly',
+    scanDay: 'tuesday',
     priority: 1,
     selectors: {
       documentLinks: 'a[href*=".pdf"], .download-link, .resource-item a',
@@ -75,7 +82,8 @@ const realVendorData = [
     documentPortalUrl: 'https://worldpay.com/us/developer',
     supportUrl: 'https://worldpay.com/us/support',
     active: true,
-    crawlFrequency: 'daily',
+    crawlFrequency: 'weekly',
+    scanDay: 'wednesday',
     priority: 1,
     selectors: {
       documentLinks: 'a[href*=".pdf"], .developer-resource a, .guide-link',
@@ -106,7 +114,8 @@ const realVendorData = [
     documentPortalUrl: 'https://www.tsys.com/resources',
     supportUrl: 'https://www.tsys.com/support',
     active: true,
-    crawlFrequency: 'daily',
+    crawlFrequency: 'weekly',
+    scanDay: 'thursday',
     priority: 1,
     selectors: {
       documentLinks: 'a[href*=".pdf"], .resource-download, .documentation-link',
@@ -137,7 +146,8 @@ const realVendorData = [
     documentPortalUrl: 'https://www.elavon.com/resources',
     supportUrl: 'https://www.elavon.com/support',
     active: true,
-    crawlFrequency: 'daily',
+    crawlFrequency: 'weekly',
+    scanDay: 'friday',
     priority: 2,
     selectors: {
       documentLinks: 'a[href*=".pdf"], .resource-item a, .guide-download',
