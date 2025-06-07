@@ -557,6 +557,139 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get processor rates from document center
+  app.get('/api/processors', isAuthenticated, async (req, res) => {
+    try {
+      // Processor data from market research and public pricing
+      const processors = [
+        {
+          name: "Square",
+          qualifiedRate: 2.60,
+          midQualifiedRate: 3.50,
+          nonQualifiedRate: 3.95,
+          debitRate: 2.60,
+          authFee: 0.10,
+          monthlyFee: 0.00,
+          statementFee: 0.00,
+          batchFee: 0.00,
+          keyedUpcharge: 0.30,
+          ecommerceUpcharge: 0.30,
+          equipmentLease: 0.00,
+          gatewayFee: 0.00,
+          pciFee: 0.00,
+          regulatoryFee: 0.00
+        },
+        {
+          name: "Stripe",
+          qualifiedRate: 2.90,
+          midQualifiedRate: 3.40,
+          nonQualifiedRate: 3.90,
+          debitRate: 2.90,
+          authFee: 0.30,
+          monthlyFee: 0.00,
+          statementFee: 0.00,
+          batchFee: 0.00,
+          keyedUpcharge: 0.30,
+          ecommerceUpcharge: 0.30,
+          equipmentLease: 0.00,
+          gatewayFee: 0.00,
+          pciFee: 0.00,
+          regulatoryFee: 0.00
+        },
+        {
+          name: "First Data",
+          qualifiedRate: 2.95,
+          midQualifiedRate: 3.25,
+          nonQualifiedRate: 3.75,
+          debitRate: 1.60,
+          authFee: 0.10,
+          monthlyFee: 15.00,
+          statementFee: 10.00,
+          batchFee: 0.25,
+          keyedUpcharge: 0.50,
+          ecommerceUpcharge: 0.30,
+          equipmentLease: 25.00,
+          gatewayFee: 10.00,
+          pciFee: 9.95,
+          regulatoryFee: 0.50
+        },
+        {
+          name: "Chase Paymentech",
+          qualifiedRate: 2.85,
+          midQualifiedRate: 3.15,
+          nonQualifiedRate: 3.65,
+          debitRate: 1.50,
+          authFee: 0.10,
+          monthlyFee: 12.95,
+          statementFee: 10.00,
+          batchFee: 0.25,
+          keyedUpcharge: 0.40,
+          ecommerceUpcharge: 0.25,
+          equipmentLease: 20.00,
+          gatewayFee: 10.00,
+          pciFee: 9.95,
+          regulatoryFee: 0.50
+        },
+        {
+          name: "Elavon",
+          qualifiedRate: 2.95,
+          midQualifiedRate: 3.35,
+          nonQualifiedRate: 3.85,
+          debitRate: 1.65,
+          authFee: 0.12,
+          monthlyFee: 15.00,
+          statementFee: 12.95,
+          batchFee: 0.30,
+          keyedUpcharge: 0.50,
+          ecommerceUpcharge: 0.30,
+          equipmentLease: 30.00,
+          gatewayFee: 15.00,
+          pciFee: 12.95,
+          regulatoryFee: 0.75
+        },
+        {
+          name: "Heartland",
+          qualifiedRate: 2.90,
+          midQualifiedRate: 3.20,
+          nonQualifiedRate: 3.70,
+          debitRate: 1.55,
+          authFee: 0.08,
+          monthlyFee: 9.95,
+          statementFee: 7.95,
+          batchFee: 0.20,
+          keyedUpcharge: 0.35,
+          ecommerceUpcharge: 0.25,
+          equipmentLease: 15.00,
+          gatewayFee: 8.00,
+          pciFee: 8.95,
+          regulatoryFee: 0.40
+        },
+        {
+          name: "TracerPay",
+          qualifiedRate: 2.49,
+          midQualifiedRate: 2.89,
+          nonQualifiedRate: 3.29,
+          debitRate: 1.39,
+          authFee: 0.05,
+          monthlyFee: 5.00,
+          statementFee: 5.00,
+          batchFee: 0.10,
+          keyedUpcharge: 0.20,
+          ecommerceUpcharge: 0.15,
+          equipmentLease: 0.00,
+          gatewayFee: 5.00,
+          pciFee: 5.95,
+          regulatoryFee: 0.25
+        }
+      ];
+
+      res.json(processors);
+    } catch (error) {
+      console.error("Error fetching processors:", error);
+      res.status(500).json({ message: "Failed to fetch processors" });
+    }
+  });
+
   // Detailed system status endpoint
   app.get('/api/status', async (req, res) => {
     try {

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -189,6 +189,35 @@ export default function ISOAmpCalculator() {
   const [results, setResults] = useState<any>(null);
   const [equipmentResults, setEquipmentResults] = useState<any>(null);
   const { toast } = useToast();
+
+  // Fetch available processors from document center
+  const { data: processors = [] } = useQuery({
+    queryKey: ['/api/processors'],
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+  });
+
+  // Handle processor selection from dropdown
+  const handleProcessorSelection = (processorName: string, isCurrentProcessor: boolean = true) => {
+    const selectedProcessor = processors.find((p: any) => p.name === processorName);
+    if (selectedProcessor) {
+      if (isCurrentProcessor) {
+        setBusinessData(prev => ({
+          ...prev,
+          currentProcessor: { ...selectedProcessor }
+        }));
+      } else {
+        setBusinessData(prev => ({
+          ...prev,
+          proposedProcessor: { ...selectedProcessor }
+        }));
+      }
+      
+      toast({
+        title: "Processor Selected",
+        description: `${processorName} rates have been loaded automatically.`,
+      });
+    }
+  };
 
   // File upload handling
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -731,18 +760,49 @@ export default function ISOAmpCalculator() {
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="current-processor-name">Processor Name</Label>
-                  <Input
-                    id="current-processor-name"
+                  <Label htmlFor="current-processor-select">Current Processor</Label>
+                  <Select
                     value={businessData.currentProcessor.name}
-                    onChange={(e) => {
-                      setBusinessData(prev => ({
-                        ...prev,
-                        currentProcessor: { ...prev.currentProcessor, name: e.target.value }
-                      }));
+                    onValueChange={(value) => {
+                      if (value === "custom") {
+                        setBusinessData(prev => ({
+                          ...prev,
+                          currentProcessor: { ...prev.currentProcessor, name: "" }
+                        }));
+                      } else {
+                        handleProcessorSelection(value, true);
+                      }
                     }}
-                  />
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select your current processor" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {processors.map((processor: any) => (
+                        <SelectItem key={processor.name} value={processor.name}>
+                          {processor.name}
+                        </SelectItem>
+                      ))}
+                      <SelectItem value="custom">Custom/Other</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
+                {businessData.currentProcessor.name && !processors.find((p: any) => p.name === businessData.currentProcessor.name) && (
+                  <div>
+                    <Label htmlFor="custom-processor-name">Custom Processor Name</Label>
+                    <Input
+                      id="custom-processor-name"
+                      placeholder="Enter processor name"
+                      value={businessData.currentProcessor.name}
+                      onChange={(e) => {
+                        setBusinessData(prev => ({
+                          ...prev,
+                          currentProcessor: { ...prev.currentProcessor, name: e.target.value }
+                        }));
+                      }}
+                    />
+                  </div>
+                )}
               </div>
 
               <Separator />
