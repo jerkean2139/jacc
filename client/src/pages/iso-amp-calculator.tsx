@@ -1257,27 +1257,7 @@ export default function ISOAmpCalculator() {
                       </CardContent>
                     </Card>
 
-                    {/* Savings Highlights */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <Alert className="border-green-200 bg-green-50 dark:bg-green-900/20">
-                        <TrendingUp className="h-4 w-4 text-green-600" />
-                        <AlertDescription>
-                          <div className="space-y-2">
-                            <p className="font-semibold">Monthly Savings: ${monthlySavings.toFixed(2)}</p>
-                            <p>That's {((monthlySavings / currentCosts.total) * 100).toFixed(1)}% reduction in processing costs</p>
-                          </div>
-                        </AlertDescription>
-                      </Alert>
-                      <Alert className="border-blue-200 bg-blue-50 dark:bg-blue-900/20">
-                        <Award className="h-4 w-4 text-blue-600" />
-                        <AlertDescription>
-                          <div className="space-y-2">
-                            <p className="font-semibold">Annual Savings: ${yearlySavings.toFixed(2)}</p>
-                            <p>Reinvest these savings back into your business growth</p>
-                          </div>
-                        </AlertDescription>
-                      </Alert>
-                    </div>
+
                   </div>
                 );
               })()}
