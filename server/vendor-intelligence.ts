@@ -305,10 +305,33 @@ export class VendorIntelligenceEngine {
   }
 
   private async fetchWebContent(url: string): Promise<string> {
-    // Implement web scraping logic here
-    // This would use a service like Puppeteer or cheerio
-    // For now, return placeholder that indicates we need to implement actual scraping
-    return `Content from ${url} - Implementation needed for actual scraping`;
+    try {
+      // First try HTTP request with axios
+      const response = await axios.get(url, {
+        timeout: 10000,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (compatible; JACC-Intelligence/1.0; +info@jacc.ai)',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error(`HTTP fetch failed for ${url}, falling back to Puppeteer:`, error);
+      
+      // Fallback to Puppeteer for dynamic content
+      const browser = await puppeteer.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+      });
+      
+      const page = await browser.newPage();
+      await page.setUserAgent('Mozilla/5.0 (compatible; JACC-Intelligence/1.0)');
+      await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
+      const content = await page.content();
+      await browser.close();
+      
+      return content;
+    }
   }
 
   private async analyzePricingChanges(vendorName: string, content: string): Promise<VendorUpdate[]> {

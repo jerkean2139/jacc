@@ -9,7 +9,8 @@ import {
   Home,
   HelpCircle,
   MessageSquare,
-  Trophy
+  Trophy,
+  TrendingUp
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -40,6 +41,11 @@ const navItems: NavItem[] = [
     href: "/help",
     icon: HelpCircle,
     label: "Help"
+  },
+  {
+    href: "/vendor-intelligence",
+    icon: TrendingUp,
+    label: "Intelligence"
   },
   {
     href: "/admin",
