@@ -886,15 +886,16 @@ export type UserChatLog = typeof userChatLogs.$inferSelect;
 export const vendors = pgTable("vendors", {
   id: varchar("id").primaryKey().notNull(),
   name: varchar("name").notNull(),
-  companyType: varchar("company_type").notNull(), // 'processor', 'gateway', 'iso', 'bank'
+  companyType: varchar("company_type").notNull(), // 'processor', 'gateway', 'pos'
   baseUrl: varchar("base_url").notNull(),
   documentPortalUrl: varchar("document_portal_url"), // Specific URL for document downloads
   supportUrl: varchar("support_url"), // Technical support documentation
   active: boolean("active").default(true),
-  crawlFrequency: varchar("crawl_frequency").notNull(), // 'hourly', 'daily', 'weekly'
+  crawlFrequency: varchar("crawl_frequency").notNull(), // 'weekly', 'monthly'
   priority: integer("priority").default(1), // 1=high, 2=medium, 3=low
   selectors: jsonb("selectors"), // CSS selectors for document discovery
   documentPaths: jsonb("document_paths"), // Array of paths to check
+  documentTypes: jsonb("document_types"), // Types to track: pdf, sales_flyer, product_announcement, blog_post, news
   apiEndpoints: jsonb("api_endpoints"), // API documentation URLs
   contactInfo: jsonb("contact_info"), // Sales/tech contact information
   lastScan: timestamp("last_scan"),

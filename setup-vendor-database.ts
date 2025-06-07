@@ -10,19 +10,23 @@ const realVendorData = [
     documentPortalUrl: 'https://www.fiserv.com/en/merchant-acquiring/resources.html',
     supportUrl: 'https://www.fiserv.com/en/support.html',
     active: true,
-    crawlFrequency: 'daily',
+    crawlFrequency: 'weekly',
     priority: 1,
     selectors: {
-      documentLinks: 'a[href*=".pdf"], a[href*="download"], .resource-link',
-      title: 'h1, .document-title, .resource-title',
-      lastModified: '.date, .last-updated, time'
+      documentLinks: 'a[href*=".pdf"], a[href*="download"], .resource-link, .blog-post, .news-item, .announcement',
+      title: 'h1, .document-title, .resource-title, .blog-title, .news-headline',
+      lastModified: '.date, .last-updated, time, .publish-date'
     },
     documentPaths: [
       '/en/merchant-acquiring/resources.html',
       '/en/developer/apis.html',
       '/en/support/documentation.html',
-      '/en/compliance/pci-resources.html'
+      '/en/compliance/pci-resources.html',
+      '/blog',
+      '/news',
+      '/press-releases'
     ],
+    documentTypes: ['pdf', 'sales_flyer', 'product_announcement', 'blog_post', 'news', 'promotion'],
     apiEndpoints: [
       'https://developer.fiserv.com/product/CommerceHub',
       'https://developer.fiserv.com/product/Clover'
@@ -156,37 +160,6 @@ const realVendorData = [
     }
   },
   {
-    id: 'square',
-    name: 'Square',
-    companyType: 'processor',
-    baseUrl: 'https://squareup.com',
-    documentPortalUrl: 'https://developer.squareup.com/docs',
-    supportUrl: 'https://squareup.com/help',
-    active: true,
-    crawlFrequency: 'daily',
-    priority: 2,
-    selectors: {
-      documentLinks: '.doc-link, a[href*="/docs/"], .guide-item a',
-      title: 'h1, .doc-title, .guide-heading',
-      lastModified: '.last-updated, .version-info'
-    },
-    documentPaths: [
-      '/developer/docs/api',
-      '/developer/docs/webhooks',
-      '/developer/docs/terminal',
-      '/help/us/en/merchant-pricing'
-    ],
-    apiEndpoints: [
-      'https://developer.squareup.com/reference/square',
-      'https://developer.squareup.com/docs/terminal-api'
-    ],
-    contactInfo: {
-      sales: '1-855-700-6000',
-      support: '1-855-700-6000',
-      integration: 'developer@squareup.com'
-    }
-  },
-  {
     id: 'shift4-skytab',
     name: 'Shift4 (SkyTab)',
     companyType: 'pos',
@@ -278,69 +251,7 @@ const realVendorData = [
       integration: 'api@quanticpos.com'
     }
   },
-  {
-    id: 'stripe',
-    name: 'Stripe',
-    companyType: 'processor',
-    baseUrl: 'https://stripe.com',
-    documentPortalUrl: 'https://stripe.com/docs',
-    supportUrl: 'https://support.stripe.com',
-    active: true,
-    crawlFrequency: 'daily',
-    priority: 2,
-    selectors: {
-      documentLinks: '.docs-link, a[href*="/docs/"], .api-reference a',
-      title: 'h1, .docs-title, .page-heading',
-      lastModified: '.last-updated, .version-date'
-    },
-    documentPaths: [
-      '/docs/api',
-      '/docs/payments',
-      '/docs/terminal',
-      '/docs/connect',
-      '/pricing'
-    ],
-    apiEndpoints: [
-      'https://stripe.com/docs/api',
-      'https://stripe.com/docs/terminal/sdk'
-    ],
-    contactInfo: {
-      sales: 'sales@stripe.com',
-      support: 'support@stripe.com',
-      integration: 'developer@stripe.com'
-    }
-  },
-  {
-    id: 'paypal-braintree',
-    name: 'PayPal (Braintree)',
-    companyType: 'processor',
-    baseUrl: 'https://www.braintreepayments.com',
-    documentPortalUrl: 'https://developer.paypal.com/braintree/docs',
-    supportUrl: 'https://developer.paypal.com/braintree/help',
-    active: true,
-    crawlFrequency: 'daily',
-    priority: 2,
-    selectors: {
-      documentLinks: '.docs-link, a[href*="/docs/"], .guide-link',
-      title: 'h1, .doc-heading, .guide-title',
-      lastModified: '.updated, .version-info'
-    },
-    documentPaths: [
-      '/braintree/docs/guides',
-      '/braintree/docs/reference',
-      '/braintree/articles',
-      '/us/business/merchant-fees'
-    ],
-    apiEndpoints: [
-      'https://developer.paypal.com/braintree/docs/reference/overview',
-      'https://developer.paypal.com/braintree/docs/guides/webhooks'
-    ],
-    contactInfo: {
-      sales: '1-877-434-2894',
-      support: '1-877-434-2894',
-      integration: 'bt_developer@paypal.com'
-    }
-  },
+
   {
     id: 'authorize-net',
     name: 'Authorize.Net (Visa)',
@@ -372,37 +283,7 @@ const realVendorData = [
       integration: 'developer@authorize.net'
     }
   },
-  {
-    id: 'adyen',
-    name: 'Adyen',
-    companyType: 'processor',
-    baseUrl: 'https://www.adyen.com',
-    documentPortalUrl: 'https://docs.adyen.com',
-    supportUrl: 'https://www.adyen.com/support',
-    active: true,
-    crawlFrequency: 'daily',
-    priority: 2,
-    selectors: {
-      documentLinks: '.docs-link, a[href*="/docs/"], .api-reference a',
-      title: 'h1, .docs-title, .api-heading',
-      lastModified: '.last-updated, .version-date'
-    },
-    documentPaths: [
-      '/docs/api-explorer',
-      '/docs/development-resources',
-      '/docs/point-of-sale',
-      '/pricing'
-    ],
-    apiEndpoints: [
-      'https://docs.adyen.com/api-explorer',
-      'https://docs.adyen.com/point-of-sale/design-and-deployment'
-    ],
-    contactInfo: {
-      sales: 'sales@adyen.com',
-      support: 'support@adyen.com',
-      integration: 'developer@adyen.com'
-    }
-  },
+
   {
     id: 'cybersource-visa',
     name: 'CyberSource (Visa)',
@@ -494,37 +375,7 @@ const realVendorData = [
       integration: 'developer@windcave.com'
     }
   },
-  {
-    id: 'toast-pos',
-    name: 'Toast POS',
-    companyType: 'pos',
-    baseUrl: 'https://pos.toasttab.com',
-    documentPortalUrl: 'https://doc.toasttab.com',
-    supportUrl: 'https://pos.toasttab.com/support',
-    active: true,
-    crawlFrequency: 'daily',
-    priority: 2,
-    selectors: {
-      documentLinks: '.docs-link, a[href*="/docs/"], .api-reference a',
-      title: 'h1, .docs-title, .api-heading',
-      lastModified: '.last-updated, .version-info'
-    },
-    documentPaths: [
-      '/docs/devguide',
-      '/docs/api',
-      '/docs/integrations',
-      '/pricing'
-    ],
-    apiEndpoints: [
-      'https://doc.toasttab.com/doc/devguide',
-      'https://doc.toasttab.com/doc/api'
-    ],
-    contactInfo: {
-      sales: '1-617-682-5393',
-      support: '1-617-682-5393',
-      integration: 'developer@toasttab.com'
-    }
-  },
+
   {
     id: 'lightspeed-pos',
     name: 'Lightspeed POS',
@@ -586,36 +437,7 @@ const realVendorData = [
       integration: 'api@revelsystems.com'
     }
   },
-  {
-    id: 'aloha-pos',
-    name: 'Aloha POS (NCR)',
-    companyType: 'pos',
-    baseUrl: 'https://www.ncr.com',
-    documentPortalUrl: 'https://www.ncr.com/restaurants/aloha-pos',
-    supportUrl: 'https://www.ncr.com/support',
-    active: true,
-    crawlFrequency: 'daily',
-    priority: 2,
-    selectors: {
-      documentLinks: 'a[href*=".pdf"], .resource-download, .documentation-link',
-      title: 'h1, .product-title, .resource-heading',
-      lastModified: '.updated-date, .version-info'
-    },
-    documentPaths: [
-      '/restaurants/aloha-pos/resources',
-      '/restaurants/aloha-pos/documentation',
-      '/support/aloha-guides',
-      '/developers/aloha-api'
-    ],
-    apiEndpoints: [
-      'https://developer.ncr.com/portals/dev-portal'
-    ],
-    contactInfo: {
-      sales: '1-800-CALL-NCR',
-      support: '1-800-CALL-NCR',
-      integration: 'developer@ncr.com'
-    }
-  }
+
 ];
 
 async function seedVendorDatabase() {
