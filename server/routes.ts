@@ -4040,111 +4040,111 @@ User Context: {userRole}`,
     }
   });
 
-  // ISO Hub API Integration Routes
-  app.post('/api/iso-hub/analyze', async (req, res) => {
+  // ISO AMP API Integration Routes (External merchant processing tools)
+  app.post('/api/iso-amp/analyze', async (req, res) => {
     try {
       const { merchantData } = req.body;
       
-      // Call ISO Hub API for processor comparison
-      const response = await fetch(`${process.env.ISO_HUB_API_URL}/analyze`, {
+      // Call ISO AMP API for merchant analysis
+      const response = await fetch(`${process.env.ISO_AMP_API_URL}/v1/analyze`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.ISO_HUB_API_KEY}`
+          'Authorization': `Bearer ${process.env.ISO_AMP_API_KEY}`
         },
         body: JSON.stringify(merchantData)
       });
 
       if (!response.ok) {
-        throw new Error(`ISO Hub API error: ${response.status}`);
+        throw new Error(`ISO AMP API error: ${response.status}`);
       }
 
       const analysisData = await response.json();
       res.json({ 
         analysis: analysisData,
-        source: 'ISO Hub API',
+        source: 'ISO AMP API',
         timestamp: new Date().toISOString() 
       });
     } catch (error) {
-      console.error('Error calling ISO Hub API:', error);
+      console.error('Error calling ISO AMP API:', error);
       res.status(500).json({ error: 'Failed to analyze merchant data' });
     }
   });
 
-  app.get('/api/iso-hub/processors', async (req, res) => {
+  app.get('/api/iso-amp/processors', async (req, res) => {
     try {
-      const response = await fetch(`${process.env.ISO_HUB_API_URL}/processors`, {
+      const response = await fetch(`${process.env.ISO_AMP_API_URL}/v1/processors`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${process.env.ISO_HUB_API_KEY}`
+          'Authorization': `Bearer ${process.env.ISO_AMP_API_KEY}`
         }
       });
 
       if (!response.ok) {
-        throw new Error(`ISO Hub API error: ${response.status}`);
+        throw new Error(`ISO AMP API error: ${response.status}`);
       }
 
       const processors = await response.json();
       res.json({ 
         processors,
-        source: 'ISO Hub API',
+        source: 'ISO AMP API',
         timestamp: new Date().toISOString() 
       });
     } catch (error) {
-      console.error('Error fetching processors from ISO Hub API:', error);
+      console.error('Error fetching processors from ISO AMP API:', error);
       res.status(500).json({ error: 'Failed to fetch processor data' });
     }
   });
 
-  // ISO Hub API additional endpoints
-  app.post('/api/iso-hub/calculate', async (req, res) => {
+  // ISO AMP API additional endpoints
+  app.post('/api/iso-amp/calculate', async (req, res) => {
     try {
-      const response = await fetch(`${process.env.ISO_HUB_API_URL}/calculate`, {
+      const response = await fetch(`${process.env.ISO_AMP_API_URL}/v1/calculate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.ISO_HUB_API_KEY}`
+          'Authorization': `Bearer ${process.env.ISO_AMP_API_KEY}`
         },
         body: JSON.stringify(req.body)
       });
 
       if (!response.ok) {
-        throw new Error(`ISO Hub API error: ${response.status}`);
+        throw new Error(`ISO AMP API error: ${response.status}`);
       }
 
       const calculation = await response.json();
       res.json({ 
         calculation,
-        source: 'ISO Hub API',
+        source: 'ISO AMP API',
         timestamp: new Date().toISOString() 
       });
     } catch (error) {
-      console.error('Error calculating with ISO Hub API:', error);
+      console.error('Error calculating with ISO AMP API:', error);
       res.status(500).json({ error: 'Failed to calculate pricing' });
     }
   });
 
-  app.get('/api/iso-hub/hardware', async (req, res) => {
+  app.get('/api/iso-amp/hardware', async (req, res) => {
     try {
-      const response = await fetch(`${process.env.ISO_HUB_API_URL}/hardware`, {
+      const response = await fetch(`${process.env.ISO_AMP_API_URL}/v1/hardware`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${process.env.ISO_HUB_API_KEY}`
+          'Authorization': `Bearer ${process.env.ISO_AMP_API_KEY}`
         }
       });
 
       if (!response.ok) {
-        throw new Error(`ISO Hub API error: ${response.status}`);
+        throw new Error(`ISO AMP API error: ${response.status}`);
       }
 
       const hardware = await response.json();
       res.json({ 
         hardware,
-        source: 'ISO Hub API',
+        source: 'ISO AMP API',
         timestamp: new Date().toISOString() 
       });
     } catch (error) {
-      console.error('Error fetching hardware from ISO Hub API:', error);
+      console.error('Error fetching hardware from ISO AMP API:', error);
       res.status(500).json({ error: 'Failed to fetch hardware data' });
     }
   });
