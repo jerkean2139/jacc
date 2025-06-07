@@ -29,6 +29,8 @@ import { setupOAuthHelper } from "./oauth-helper";
 import { zipProcessor } from "./zip-processor";
 import { isoHubAuthMiddleware, handleISOHubSSO, isoHubAuthService } from "./iso-hub-auth";
 import { chatMonitoringService } from "./chat-monitoring";
+import { vendorIntelligence } from "./vendor-intelligence";
+import { schedulerService } from "./scheduler";
 
 // Configure multer for file uploads
 const uploadDir = path.join(process.cwd(), "uploads");
@@ -1458,6 +1460,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error generating vendor comparison:", error);
       res.status(500).json({ error: "Failed to generate comparison" });
+    }
+  });
+
+  // Vendor Intelligence Endpoints
+  app.post('/api/vendor-intelligence/crawl', isAuthenticated, async (req, res) => {
+    try {
+      const updates = await vendorIntelligence.performWeeklyCrawl();
+      res.json({
+        success: true,
+        updatesFound: updates.length,
+        updates: updates.filter(u => u.impact === 'high' || u.actionRequired)
+      });
+    } catch (error) {
+      console.error("Error performing vendor crawl:", error);
+      res.status(500).json({ error: "Failed to perform vendor intelligence crawl" });
+    }
+  });
+
+  app.get('/api/vendor-intelligence/:vendorName', isAuthenticated, async (req, res) => {
+    try {
+      const { vendorName } = req.params;
+      const intelligence = await vendorIntelligence.gatherVendorIntelligence(vendorName);
+      res.json(intelligence);
+    } catch (error) {
+      console.error(`Error gathering intelligence for ${req.params.vendorName}:`, error);
+      res.status(500).json({ error: "Failed to gather vendor intelligence" });
+    }
+  });
+
+  app.post('/api/vendor-intelligence/manual-crawl', isAuthenticated, async (req, res) => {
+    try {
+      const updates = await schedulerService.triggerImmediateCrawl();
+      res.json({
+        success: true,
+        message: 'Manual vendor intelligence crawl completed',
+        updatesFound: updates.length,
+        highPriorityUpdates: updates.filter(u => u.impact === 'high' || u.actionRequired),
+        nextScheduledRun: schedulerService.getNextScheduledRun()
+      });
+    } catch (error) {
+      console.error("Error in manual vendor crawl:", error);
+      res.status(500).json({ error: "Failed to perform manual vendor crawl" });
+    }
+  });
+
+  app.get('/api/vendor-intelligence/schedule', isAuthenticated, async (req, res) => {
+    try {
+      res.json({
+        nextScheduledRun: schedulerService.getNextScheduledRun(),
+        runFrequency: 'Weekly (Sundays at 2 AM UTC)',
+        status: 'Active'
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to get scheduler status" });
     }
   });
 

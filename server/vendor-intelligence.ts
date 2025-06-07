@@ -1,470 +1,469 @@
-import { db } from "./db";
-import { vendors, vendorDocuments, documentChanges } from "@shared/schema";
-import * as cheerio from "cheerio";
-import crypto from "crypto";
-import { eq, desc, and } from "drizzle-orm";
-import { contentSafetyFilter } from './content-safety-filter';
+import OpenAI from 'openai';
+import { db } from './db';
+import { documents, vendors } from '@shared/schema';
+import { eq } from 'drizzle-orm';
 
-interface VendorSite {
-  id: string;
-  name: string;
-  baseUrl: string;
-  documentPaths: string[];
-  selectors: {
-    documentLinks: string;
-    title: string;
-    lastModified?: string;
-  };
-  crawlFrequency: 'hourly' | 'daily' | 'weekly';
-  active: boolean;
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+interface VendorUpdate {
+  vendorName: string;
+  updateType: 'pricing' | 'feature' | 'news' | 'partnership' | 'acquisition';
+  content: string;
+  sourceUrl: string;
+  confidence: number;
+  impact: 'high' | 'medium' | 'low';
+  actionRequired: boolean;
 }
 
-interface DocumentChangeDetection {
-  url: string;
-  title: string;
-  contentHash: string;
-  lastModified?: string;
-  changeType: 'new' | 'updated' | 'removed';
-  changes: {
-    added: string[];
-    removed: string[];
-    modified: string[];
+interface VendorIntelligence {
+  vendorName: string;
+  website: string;
+  blogUrl?: string;
+  pressUrl?: string;
+  lastCrawled: Date;
+  updates: VendorUpdate[];
+  competitiveMetrics: {
+    marketShare: number;
+    growthRate: number;
+    customerSentiment: number;
   };
 }
 
-// Major payment processors and vendors to monitor
-const VENDOR_SITES: VendorSite[] = [
-  {
-    id: 'first-data',
-    name: 'First Data (Fiserv)',
-    baseUrl: 'https://www.fiserv.com',
-    documentPaths: ['/merchant-services', '/resources', '/documentation'],
-    selectors: {
-      documentLinks: 'a[href*=".pdf"], a[href*="document"], a[href*="resource"]',
-      title: 'title, h1, .document-title',
-      lastModified: '.last-modified, .date-updated'
-    },
-    crawlFrequency: 'daily',
-    active: true
-  },
-  {
-    id: 'chase-paymentech',
-    name: 'Chase Paymentech',
-    baseUrl: 'https://www.chasepaymentech.com',
-    documentPaths: ['/resources', '/support', '/documentation'],
-    selectors: {
-      documentLinks: 'a[href*=".pdf"], a[href*="download"]',
-      title: 'title, h1, .resource-title',
-      lastModified: '.published-date'
-    },
-    crawlFrequency: 'daily',
-    active: true
-  },
-  {
-    id: 'worldpay',
-    name: 'Worldpay',
-    baseUrl: 'https://www.worldpay.com',
-    documentPaths: ['/us/support', '/us/resources'],
-    selectors: {
-      documentLinks: 'a[href*=".pdf"], a[href*="guide"]',
-      title: 'title, h1, .guide-title'
-    },
-    crawlFrequency: 'daily',
-    active: true
-  },
-  {
-    id: 'tsys',
-    name: 'TSYS (Global Payments)',
-    baseUrl: 'https://www.tsys.com',
-    documentPaths: ['/merchant-solutions', '/resources'],
-    selectors: {
-      documentLinks: 'a[href*=".pdf"], a[href*="resource"]',
-      title: 'title, h1'
-    },
-    crawlFrequency: 'daily',
-    active: true
-  },
-  {
-    id: 'elavon',
-    name: 'Elavon',
-    baseUrl: 'https://www.elavon.com',
-    documentPaths: ['/resources', '/support'],
-    selectors: {
-      documentLinks: 'a[href*=".pdf"], a[href*="download"]',
-      title: 'title, h1'
-    },
-    crawlFrequency: 'daily',
-    active: true
-  }
-];
+export class VendorIntelligenceEngine {
+  private vendors = [
+    // Processors
+    { name: 'Clearent', website: 'https://clearent.com', blogUrl: 'https://clearent.com/blog' },
+    { name: 'First Data (Fiserv)', website: 'https://fiserv.com', blogUrl: 'https://fiserv.com/insights' },
+    { name: 'TSYS', website: 'https://tsys.com', blogUrl: 'https://tsys.com/news-events' },
+    { name: 'Worldpay', website: 'https://worldpay.com', blogUrl: 'https://worldpay.com/us/insights' },
+    { name: 'Heartland', website: 'https://heartlandpaymentsystems.com', blogUrl: 'https://heartlandpaymentsystems.com/blog' },
+    { name: 'Maverick', website: 'https://maverickpayments.com', blogUrl: 'https://maverickpayments.com/news' },
+    { name: 'Chase Paymentech', website: 'https://chase.com/business/payments', blogUrl: 'https://chase.com/business/insights' },
+    { name: 'North American Bancard', website: 'https://nabancard.com', blogUrl: 'https://nabancard.com/news' },
+    { name: 'MiCamp', website: 'https://micamp.com', blogUrl: 'https://micamp.com/blog' },
+    { name: 'Priority Payments', website: 'https://prioritypayments.com', blogUrl: 'https://prioritypayments.com/news' },
+    { name: 'TRX', website: 'https://trxpayments.com', blogUrl: 'https://trxpayments.com/blog' },
+    { name: 'Total Merchant Services', website: 'https://totalmerchantservices.com', blogUrl: 'https://totalmerchantservices.com/blog' },
+    { name: 'PayBright', website: 'https://paybright.com', blogUrl: 'https://paybright.com/news' },
 
-export class VendorIntelligenceService {
-  private isRunning = false;
+    // Gateways
+    { name: 'Stripe', website: 'https://stripe.com', blogUrl: 'https://stripe.com/blog' },
+    { name: 'ACI Worldwide', website: 'https://aciworldwide.com', blogUrl: 'https://aciworldwide.com/insights' },
+    { name: 'Adyen', website: 'https://adyen.com', blogUrl: 'https://adyen.com/blog' },
+    { name: 'Payline Data', website: 'https://paylinedata.com', blogUrl: 'https://paylinedata.com/blog' },
+    { name: 'CSG Forte', website: 'https://forte.net', blogUrl: 'https://forte.net/blog' },
+    { name: 'Accept Blue', website: 'https://acceptblue.com', blogUrl: 'https://acceptblue.com/news' },
+    { name: 'Authorize.net', website: 'https://authorize.net', blogUrl: 'https://authorize.net/about-us/newsroom' },
+    { name: 'NMI', website: 'https://nmi.com', blogUrl: 'https://nmi.com/blog' },
+    { name: 'PayPal', website: 'https://paypal.com', blogUrl: 'https://newsroom.paypal-corp.com' },
+    { name: 'Square', website: 'https://squareup.com', blogUrl: 'https://squareup.com/us/en/press' },
 
-  async startMonitoring(): Promise<void> {
-    if (this.isRunning) {
-      console.log("Vendor monitoring already running");
-      return;
-    }
+    // Hardware
+    { name: 'Clover', website: 'https://clover.com', blogUrl: 'https://blog.clover.com' },
+    { name: 'Verifone', website: 'https://verifone.com', blogUrl: 'https://verifone.com/en/newsroom' },
+    { name: 'Ingenico', website: 'https://ingenico.com', blogUrl: 'https://ingenico.com/press' },
+    { name: 'NCR Corporation', website: 'https://ncr.com', blogUrl: 'https://ncr.com/news' },
+    { name: 'PAX Technology', website: 'https://pax.us', blogUrl: 'https://pax.us/news' },
+    { name: 'Lightspeed', website: 'https://lightspeedhq.com', blogUrl: 'https://lightspeedhq.com/blog' },
+    { name: 'Elo Touch Solutions', website: 'https://elotouch.com', blogUrl: 'https://elotouch.com/news-events' },
+    { name: 'Datacap Systems', website: 'https://datacapsystems.com', blogUrl: 'https://datacapsystems.com/news' },
+    { name: 'Tabit', website: 'https://tabit.cloud', blogUrl: 'https://tabit.cloud/blog' },
+    { name: 'rPower', website: 'https://rpower.com', blogUrl: 'https://rpower.com/blog' },
+    { name: 'TouchBistro', website: 'https://touchbistro.com', blogUrl: 'https://touchbistro.com/blog' },
+    { name: 'SwipeSimple', website: 'https://swipesimple.com', blogUrl: 'https://swipesimple.com/blog' }
+  ];
 
-    this.isRunning = true;
-    console.log("🕵️ Starting vendor intelligence monitoring...");
+  async performWeeklyCrawl(): Promise<VendorUpdate[]> {
+    console.log('🕷️ Starting weekly vendor intelligence crawl...');
+    const allUpdates: VendorUpdate[] = [];
 
-    // Run initial scan
-    await this.performFullScan();
-
-    // Schedule regular monitoring
-    this.scheduleMonitoring();
-  }
-
-  async stopMonitoring(): Promise<void> {
-    this.isRunning = false;
-    console.log("⏹️ Stopping vendor intelligence monitoring");
-  }
-
-  private scheduleMonitoring(): void {
-    // Check every hour for changes
-    setInterval(async () => {
-      if (!this.isRunning) return;
-      
-      console.log("🔍 Running scheduled vendor document check...");
-      await this.performIncrementalScan();
-    }, 60 * 60 * 1000); // Every hour
-  }
-
-  async performFullScan(): Promise<DocumentChangeDetection[]> {
-    const allChanges: DocumentChangeDetection[] = [];
-
-    for (const vendor of VENDOR_SITES) {
-      if (!vendor.active) continue;
-
+    for (const vendor of this.vendors) {
       try {
-        console.log(`🏢 Scanning ${vendor.name}...`);
-        const changes = await this.scanVendorSite(vendor);
-        allChanges.push(...changes);
+        console.log(`Crawling ${vendor.name}...`);
         
-        // Rate limiting to be respectful to vendor sites
+        // Crawl vendor website and blog
+        const updates = await this.crawlVendorSources(vendor);
+        allUpdates.push(...updates);
+
+        // Analyze industry news mentions
+        const newsUpdates = await this.analyzeIndustryNews(vendor.name);
+        allUpdates.push(...newsUpdates);
+
+        // Update vendor intelligence database
+        await this.updateVendorIntelligence(vendor.name, updates);
+
+        // Rate limit to avoid overwhelming servers
         await this.delay(2000);
       } catch (error) {
-        console.error(`❌ Error scanning ${vendor.name}:`, error);
+        console.error(`Error crawling ${vendor.name}:`, error);
       }
     }
 
-    return allChanges;
+    // Generate competitive intelligence reports
+    await this.generateCompetitiveIntelligence(allUpdates);
+
+    console.log(`✅ Weekly crawl completed. Found ${allUpdates.length} updates.`);
+    return allUpdates;
   }
 
-  async performIncrementalScan(): Promise<DocumentChangeDetection[]> {
-    const changes: DocumentChangeDetection[] = [];
+  private async crawlVendorSources(vendor: any): Promise<VendorUpdate[]> {
+    const updates: VendorUpdate[] = [];
 
-    for (const vendor of VENDOR_SITES) {
-      if (!vendor.active) continue;
-
-      try {
-        const vendorChanges = await this.checkVendorForChanges(vendor);
-        if (vendorChanges.length > 0) {
-          console.log(`📄 Found ${vendorChanges.length} changes for ${vendor.name}`);
-          changes.push(...vendorChanges);
-        }
-      } catch (error) {
-        console.error(`❌ Error checking ${vendor.name}:`, error);
-      }
-    }
-
-    if (changes.length > 0) {
-      await this.notifyTeamOfChanges(changes);
-    }
-
-    return changes;
-  }
-
-  private async scanVendorSite(vendor: VendorSite): Promise<DocumentChangeDetection[]> {
-    const changes: DocumentChangeDetection[] = [];
-
-    for (const path of vendor.documentPaths) {
-      try {
-        const url = vendor.baseUrl + path;
-        const content = await this.fetchPage(url);
-        const $ = cheerio.load(content);
-
-        // Find all document links
-        const documentLinks = $(vendor.selectors.documentLinks);
-        
-        for (let i = 0; i < documentLinks.length; i++) {
-          const link = documentLinks.eq(i);
-          const href = link.attr('href');
-          
-          if (!href) continue;
-
-          const documentUrl = href.startsWith('http') ? href : vendor.baseUrl + href;
-          const title = link.text().trim() || $(vendor.selectors.title).first().text().trim();
-          
-          // Get document content hash
-          const docContent = await this.fetchDocument(documentUrl);
-          const contentHash = this.generateContentHash(docContent);
-
-          // Check if this is a new or changed document
-          const existingDoc = await this.getExistingDocument(vendor.id, documentUrl);
-          
-          if (!existingDoc) {
-            // New document
-            changes.push({
-              url: documentUrl,
-              title,
-              contentHash,
-              changeType: 'new',
-              changes: { added: ['New document discovered'], removed: [], modified: [] }
-            });
-
-            await this.saveVendorDocument(vendor.id, documentUrl, title, contentHash);
-          } else if (existingDoc.contentHash !== contentHash) {
-            // Document updated
-            const documentChanges = await this.analyzeDocumentChanges(
-              existingDoc.content || '',
-              docContent
-            );
-
-            changes.push({
-              url: documentUrl,
-              title,
-              contentHash,
-              changeType: 'updated',
-              changes: documentChanges
-            });
-
-            await this.updateVendorDocument(existingDoc.id, contentHash, docContent);
-          }
-        }
-      } catch (error) {
-        console.error(`Error scanning path ${path} for ${vendor.name}:`, error);
-      }
-    }
-
-    return changes;
-  }
-
-  private async checkVendorForChanges(vendor: VendorSite): Promise<DocumentChangeDetection[]> {
-    // Get all known documents for this vendor
-    const existingDocs = await db
-      .select()
-      .from(vendorDocuments)
-      .where(eq(vendorDocuments.vendorId, vendor.id));
-
-    const changes: DocumentChangeDetection[] = [];
-
-    for (const doc of existingDocs) {
-      try {
-        // Re-fetch the document
-        const currentContent = await this.fetchDocument(doc.url);
-        const currentHash = this.generateContentHash(currentContent);
-
-        if (currentHash !== doc.contentHash) {
-          const documentChanges = await this.analyzeDocumentChanges(
-            doc.content || '',
-            currentContent
-          );
-
-          changes.push({
-            url: doc.url,
-            title: doc.title,
-            contentHash: currentHash,
-            changeType: 'updated',
-            changes: documentChanges
-          });
-
-          // Update the stored document
-          await this.updateVendorDocument(doc.id, currentHash, currentContent);
-          
-          // Log the change
-          await this.logDocumentChange(doc.id, 'updated', documentChanges);
-        }
-      } catch (error) {
-        console.error(`Error checking document ${doc.url}:`, error);
-      }
-    }
-
-    return changes;
-  }
-
-  private async fetchPage(url: string): Promise<string> {
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'JACC-Intelligence-Bot/1.0 (Merchant Services Document Monitor)'
-      }
-    });
-    
-    if (!response.ok) {
-      throw new Error(`Failed to fetch ${url}: ${response.statusText}`);
-    }
-    
-    return response.text();
-  }
-
-  private async fetchDocument(url: string): Promise<string> {
     try {
-      const response = await fetch(url, {
-        headers: {
-          'User-Agent': 'JACC-Intelligence-Bot/1.0'
-        }
+      // Crawl main website for pricing changes
+      const websiteContent = await this.fetchWebContent(vendor.website);
+      const pricingUpdates = await this.analyzePricingChanges(vendor.name, websiteContent);
+      updates.push(...pricingUpdates);
+
+      // Crawl blog for feature announcements
+      if (vendor.blogUrl) {
+        const blogContent = await this.fetchWebContent(vendor.blogUrl);
+        const featureUpdates = await this.analyzeFeatureAnnouncements(vendor.name, blogContent);
+        updates.push(...featureUpdates);
+      }
+
+      // Check for press releases
+      const pressUpdates = await this.analyzePressReleases(vendor.name);
+      updates.push(...pressUpdates);
+
+    } catch (error) {
+      console.error(`Error crawling ${vendor.name}:`, error);
+    }
+
+    return updates;
+  }
+
+  private async fetchWebContent(url: string): Promise<string> {
+    // Implement web scraping logic here
+    // This would use a service like Puppeteer or cheerio
+    // For now, return placeholder that indicates we need to implement actual scraping
+    return `Content from ${url} - Implementation needed for actual scraping`;
+  }
+
+  private async analyzePricingChanges(vendorName: string, content: string): Promise<VendorUpdate[]> {
+    try {
+      const response = await openai.chat.completions.create({
+        model: 'gpt-4o',
+        messages: [
+          {
+            role: 'system',
+            content: `You are a payment processing industry analyst. Analyze the content for pricing changes, rate updates, or fee modifications. Focus on:
+            - Processing rate changes
+            - Fee structure updates
+            - New pricing models
+            - Promotional rates
+            - Contract term changes
+            
+            Return only significant changes that would impact competitive analysis.`
+          },
+          {
+            role: 'user',
+            content: `Analyze this content from ${vendorName} for pricing changes:\n\n${content.substring(0, 4000)}`
+          }
+        ],
+        response_format: { type: "json_object" },
+        max_tokens: 500
       });
 
-      if (!response.ok) {
-        throw new Error(`Failed to fetch document ${url}`);
-      }
-
-      const contentType = response.headers.get('content-type');
+      const analysis = JSON.parse(response.choices[0].message.content || '{}');
       
-      if (contentType?.includes('application/pdf')) {
-        // For PDFs, we'll get metadata and basic info
-        return `PDF Document - ${url} - Size: ${response.headers.get('content-length')} bytes`;
-      } else {
-        return response.text();
+      if (analysis.changes && analysis.changes.length > 0) {
+        return analysis.changes.map((change: any) => ({
+          vendorName,
+          updateType: 'pricing' as const,
+          content: change.description,
+          sourceUrl: '',
+          confidence: change.confidence || 0.7,
+          impact: change.impact || 'medium',
+          actionRequired: change.significant || false
+        }));
       }
     } catch (error) {
-      console.error(`Error fetching document ${url}:`, error);
-      return '';
+      console.error(`Error analyzing pricing for ${vendorName}:`, error);
     }
+
+    return [];
   }
 
-  private generateContentHash(content: string): string {
-    return crypto.createHash('sha256').update(content).digest('hex');
-  }
+  private async analyzeFeatureAnnouncements(vendorName: string, content: string): Promise<VendorUpdate[]> {
+    try {
+      const response = await openai.chat.completions.create({
+        model: 'gpt-4o',
+        messages: [
+          {
+            role: 'system',
+            content: `You are a payment technology analyst. Analyze content for new feature announcements, product launches, or technology updates. Focus on:
+            - New payment methods
+            - Security enhancements
+            - Integration capabilities
+            - Hardware releases
+            - Software updates
+            - API improvements
+            
+            Identify features that would impact competitive positioning.`
+          },
+          {
+            role: 'user',
+            content: `Analyze this content from ${vendorName} for feature announcements:\n\n${content.substring(0, 4000)}`
+          }
+        ],
+        response_format: { type: "json_object" },
+        max_tokens: 500
+      });
 
-  private async analyzeDocumentChanges(
-    oldContent: string, 
-    newContent: string
-  ): Promise<{ added: string[]; removed: string[]; modified: string[] }> {
-    // Simple line-by-line diff analysis
-    const oldLines = oldContent.split('\n').filter(line => line.trim());
-    const newLines = newContent.split('\n').filter(line => line.trim());
-
-    const added: string[] = [];
-    const removed: string[] = [];
-    const modified: string[] = [];
-
-    // Find new lines
-    for (const line of newLines) {
-      if (!oldLines.includes(line)) {
-        added.push(line.substring(0, 200)); // Truncate for storage
+      const analysis = JSON.parse(response.choices[0].message.content || '{}');
+      
+      if (analysis.features && analysis.features.length > 0) {
+        return analysis.features.map((feature: any) => ({
+          vendorName,
+          updateType: 'feature' as const,
+          content: feature.description,
+          sourceUrl: '',
+          confidence: feature.confidence || 0.8,
+          impact: feature.impact || 'medium',
+          actionRequired: feature.competitive_threat || false
+        }));
       }
+    } catch (error) {
+      console.error(`Error analyzing features for ${vendorName}:`, error);
     }
 
-    // Find removed lines
-    for (const line of oldLines) {
-      if (!newLines.includes(line)) {
-        removed.push(line.substring(0, 200));
+    return [];
+  }
+
+  private async analyzePressReleases(vendorName: string): Promise<VendorUpdate[]> {
+    try {
+      // Search for recent press releases using news APIs or RSS feeds
+      const newsContent = await this.searchVendorNews(vendorName);
+      
+      const response = await openai.chat.completions.create({
+        model: 'gpt-4o',
+        messages: [
+          {
+            role: 'system',
+            content: `You are a business intelligence analyst. Analyze press releases and news for significant business developments:
+            - Acquisitions and mergers
+            - Partnership announcements
+            - Executive changes
+            - Funding rounds
+            - Market expansion
+            - Regulatory changes
+            
+            Focus on developments that impact competitive landscape.`
+          },
+          {
+            role: 'user',
+            content: `Analyze recent news about ${vendorName}:\n\n${newsContent.substring(0, 4000)}`
+          }
+        ],
+        response_format: { type: "json_object" },
+        max_tokens: 500
+      });
+
+      const analysis = JSON.parse(response.choices[0].message.content || '{}');
+      
+      if (analysis.developments && analysis.developments.length > 0) {
+        return analysis.developments.map((dev: any) => ({
+          vendorName,
+          updateType: 'news' as const,
+          content: dev.description,
+          sourceUrl: dev.url || '',
+          confidence: dev.confidence || 0.8,
+          impact: dev.impact || 'medium',
+          actionRequired: dev.action_needed || false
+        }));
       }
+    } catch (error) {
+      console.error(`Error analyzing press releases for ${vendorName}:`, error);
     }
 
-    return { added, removed, modified };
+    return [];
   }
 
-  private async getExistingDocument(vendorId: string, url: string) {
-    const [doc] = await db
-      .select()
-      .from(vendorDocuments)
-      .where(and(
-        eq(vendorDocuments.vendorId, vendorId),
-        eq(vendorDocuments.url, url)
-      ));
-    
-    return doc;
+  private async searchVendorNews(vendorName: string): Promise<string> {
+    // Implement news search using news APIs (NewsAPI, Google News, etc.)
+    // For now return placeholder
+    return `Recent news about ${vendorName} - News API integration needed`;
   }
 
-  private async saveVendorDocument(
-    vendorId: string, 
-    url: string, 
-    title: string, 
-    contentHash: string
-  ): Promise<void> {
-    await db.insert(vendorDocuments).values({
-      id: crypto.randomUUID(),
-      vendorId,
-      url,
-      title,
-      contentHash,
-      discoveredAt: new Date(),
-      lastChecked: new Date()
-    });
-  }
+  private async analyzeIndustryNews(vendorName: string): Promise<VendorUpdate[]> {
+    try {
+      // Search for industry-wide news that mentions the vendor
+      const industryNews = await this.searchIndustryMentions(vendorName);
+      
+      if (!industryNews) return [];
 
-  private async updateVendorDocument(
-    docId: string, 
-    contentHash: string, 
-    content: string
-  ): Promise<void> {
-    await db
-      .update(vendorDocuments)
-      .set({
-        contentHash,
-        content,
-        lastChecked: new Date(),
-        lastModified: new Date()
-      })
-      .where(eq(vendorDocuments.id, docId));
-  }
+      const response = await openai.chat.completions.create({
+        model: 'gpt-4o',
+        messages: [
+          {
+            role: 'system',
+            content: `Analyze industry news mentions of payment processors. Look for:
+            - Market share changes
+            - Competitive comparisons
+            - Industry rankings
+            - Customer wins/losses
+            - Regulatory impacts
+            - Technology trends affecting the vendor`
+          },
+          {
+            role: 'user',
+            content: `Analyze industry mentions of ${vendorName}:\n\n${industryNews.substring(0, 4000)}`
+          }
+        ],
+        response_format: { type: "json_object" },
+        max_tokens: 500
+      });
 
-  private async logDocumentChange(
-    documentId: string,
-    changeType: string,
-    changes: any
-  ): Promise<void> {
-    await db.insert(documentChanges).values({
-      id: crypto.randomUUID(),
-      documentId,
-      changeType,
-      changeDetails: JSON.stringify(changes),
-      detectedAt: new Date()
-    });
-  }
-
-  private async notifyTeamOfChanges(changes: DocumentChangeDetection[]): Promise<void> {
-    console.log(`🚨 VENDOR INTELLIGENCE ALERT: ${changes.length} document changes detected!`);
-    
-    for (const change of changes) {
-      console.log(`
-📄 ${change.changeType.toUpperCase()}: ${change.title}
-🔗 URL: ${change.url}
-${change.changeType === 'updated' ? `
-📝 Changes:
-  ✅ Added: ${change.changes.added.length} items
-  ❌ Removed: ${change.changes.removed.length} items
-  🔄 Modified: ${change.changes.modified.length} items
-` : ''}
-      `);
+      const analysis = JSON.parse(response.choices[0].message.content || '{}');
+      
+      if (analysis.mentions && analysis.mentions.length > 0) {
+        return analysis.mentions.map((mention: any) => ({
+          vendorName,
+          updateType: 'news' as const,
+          content: mention.description,
+          sourceUrl: mention.url || '',
+          confidence: mention.confidence || 0.7,
+          impact: mention.impact || 'low',
+          actionRequired: mention.competitive_impact || false
+        }));
+      }
+    } catch (error) {
+      console.error(`Error analyzing industry news for ${vendorName}:`, error);
     }
 
-    // Here you would integrate with notification systems:
-    // - Slack webhooks
-    // - Email alerts
-    // - Teams notifications
-    // - In-app notifications
+    return [];
   }
 
-  async getVendorStats(): Promise<any> {
-    const totalVendors = VENDOR_SITES.filter(v => v.active).length;
-    
-    const totalDocuments = await db
-      .select({ count: vendorDocuments.id })
-      .from(vendorDocuments);
+  private async searchIndustryMentions(vendorName: string): Promise<string> {
+    // Search industry publications for vendor mentions
+    // Implementation would use news APIs, RSS feeds, or web scraping
+    return `Industry mentions of ${vendorName} - Industry news API integration needed`;
+  }
 
-    const recentChanges = await db
-      .select()
-      .from(documentChanges)
-      .orderBy(desc(documentChanges.detectedAt))
-      .limit(10);
+  private async updateVendorIntelligence(vendorName: string, updates: VendorUpdate[]): Promise<void> {
+    try {
+      if (updates.length === 0) return;
 
-    return {
-      totalVendors,
-      totalDocuments: totalDocuments.length,
-      recentChanges: recentChanges.length,
-      lastScan: new Date().toISOString(),
-      isMonitoring: this.isRunning
-    };
+      // Store updates in the database for JACC's knowledge base
+      for (const update of updates) {
+        await db.insert(documents).values({
+          id: crypto.randomUUID(),
+          name: `${vendorName} Intelligence Update - ${update.updateType}`,
+          content: update.content,
+          mimeType: 'text/plain',
+          size: update.content.length,
+          uploadedBy: 'system',
+          folderId: await this.getOrCreateIntelligenceFolder(),
+          isProcessed: true,
+          isIndexed: true,
+          isPublic: true
+        });
+      }
+
+      console.log(`✅ Stored ${updates.length} updates for ${vendorName}`);
+    } catch (error) {
+      console.error(`Error updating vendor intelligence for ${vendorName}:`, error);
+    }
+  }
+
+  private async getOrCreateIntelligenceFolder(): Promise<string> {
+    // Implementation to get or create a "Vendor Intelligence" folder
+    // This would query/create the appropriate folder structure
+    return 'vendor-intelligence-folder-id';
+  }
+
+  private async generateCompetitiveIntelligence(updates: VendorUpdate[]): Promise<void> {
+    try {
+      // Group updates by impact and type
+      const highImpactUpdates = updates.filter(u => u.impact === 'high');
+      const actionRequiredUpdates = updates.filter(u => u.actionRequired);
+
+      if (highImpactUpdates.length > 0 || actionRequiredUpdates.length > 0) {
+        // Generate competitive intelligence report
+        const report = await this.generateIntelligenceReport(updates);
+        
+        // Store report in document center
+        await db.insert(documents).values({
+          id: crypto.randomUUID(),
+          name: `Weekly Competitive Intelligence Report - ${new Date().toISOString().split('T')[0]}`,
+          content: report,
+          mimeType: 'text/markdown',
+          size: report.length,
+          uploadedBy: 'system',
+          folderId: await this.getOrCreateIntelligenceFolder(),
+          isProcessed: true,
+          isIndexed: true,
+          isPublic: true
+        });
+
+        console.log('✅ Generated weekly competitive intelligence report');
+      }
+    } catch (error) {
+      console.error('Error generating competitive intelligence:', error);
+    }
+  }
+
+  private async generateIntelligenceReport(updates: VendorUpdate[]): Promise<string> {
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4o',
+      messages: [
+        {
+          role: 'system',
+          content: `Generate a comprehensive competitive intelligence report for sales agents. Include:
+          - Executive summary of key developments
+          - Competitive threats and opportunities
+          - Pricing changes that affect positioning
+          - New features that require response
+          - Recommended actions for sales team
+          - Updated talking points against competitors
+          
+          Format as markdown for easy reading.`
+        },
+        {
+          role: 'user',
+          content: `Generate report from these vendor updates:\n\n${JSON.stringify(updates, null, 2)}`
+        }
+      ],
+      max_tokens: 2000
+    });
+
+    return response.choices[0].message.content || 'Report generation failed';
   }
 
   private delay(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
+
+  // Method to manually trigger intelligence gathering for a specific vendor
+  async gatherVendorIntelligence(vendorName: string): Promise<VendorIntelligence> {
+    const vendor = this.vendors.find(v => v.name === vendorName);
+    if (!vendor) {
+      throw new Error(`Vendor ${vendorName} not found in intelligence system`);
+    }
+
+    const updates = await this.crawlVendorSources(vendor);
+    await this.updateVendorIntelligence(vendorName, updates);
+
+    return {
+      vendorName,
+      website: vendor.website,
+      blogUrl: vendor.blogUrl,
+      lastCrawled: new Date(),
+      updates,
+      competitiveMetrics: await this.calculateCompetitiveMetrics(vendorName)
+    };
+  }
+
+  private async calculateCompetitiveMetrics(vendorName: string): Promise<any> {
+    // Placeholder for competitive metrics calculation
+    // This would integrate with market research APIs, sentiment analysis, etc.
+    return {
+      marketShare: 0,
+      growthRate: 0,
+      customerSentiment: 0
+    };
+  }
 }
 
-export const vendorIntelligenceService = new VendorIntelligenceService();
+export const vendorIntelligence = new VendorIntelligenceEngine();
