@@ -70,7 +70,7 @@ export class PDFStatementAnalyzer {
 
   private async analyzeWithAI(statementText: string): Promise<ExtractedStatementData> {
     const prompt = `
-You are an expert at analyzing merchant services bank statements. Extract the following information from this merchant processing statement and return it as JSON:
+You are an expert at analyzing merchant account processing statements from payment processors. Extract the following information from this merchant processing statement and return it as JSON:
 
 REQUIRED FIELDS:
 1. monthlyVolume: Total processing volume in dollars
@@ -114,10 +114,11 @@ REQUIRED FIELDS:
 10. confidence: Your confidence level in the extraction (0-1)
 
 Look for these common processor names and fee patterns:
-- Square, Stripe, PayPal, First Data, Worldpay, Chase Paymentech, Bank of America, Wells Fargo Merchant Services
-- Interchange rates, assessment fees, processor markups
-- Monthly fees, statement fees, batch fees, PCI fees
-- Equipment leases for terminals
+- Processors: Square, Stripe, PayPal, First Data, Worldpay, Chase Paymentech, Bank of America, Wells Fargo Merchant Services, Elavon, Heartland, Global Payments, TSYS, Fiserv, Clover, Toast, Aloha
+- Rate structures: Interchange Plus, Tiered Pricing (Qualified/Mid-Qualified/Non-Qualified), Flat Rate, Subscription
+- Common fees: Discount rate, Transaction fee, Monthly fee, Statement fee, Batch fee, Gateway fee, PCI compliance fee, Early termination fee, Chargeback fee
+- Equipment: Terminal lease, POS system lease, Gateway fees
+- Card types: Visa/MC Credit, Visa/MC Debit, AMEX, Discover, PIN Debit
 
 If specific data cannot be found, make reasonable estimates based on industry standards but lower the confidence score accordingly.
 

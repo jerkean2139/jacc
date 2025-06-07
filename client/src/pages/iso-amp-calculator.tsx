@@ -194,11 +194,31 @@ export default function ISOAmpCalculator() {
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      // Validate file type and size
+      if (file.type !== 'application/pdf') {
+        toast({
+          title: "Invalid File Type",
+          description: "Please upload a PDF merchant statement.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      if (file.size > 10 * 1024 * 1024) { // 10MB limit
+        toast({
+          title: "File Too Large",
+          description: "Please upload a file smaller than 10MB.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
       setUploadedFile(file);
+      setAnalysisResults(null); // Clear previous results
     }
   };
 
-  // Bank statement analysis mutation
+  // Merchant statement analysis mutation
   const statementAnalysisMutation = useMutation({
     mutationFn: async (file: File) => {
       const formData = new FormData();
@@ -336,12 +356,12 @@ export default function ISOAmpCalculator() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Bank Statement Upload Section */}
+              {/* Merchant Statement Upload Section */}
               <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center">
                 <Upload className="w-8 h-8 mx-auto mb-3 text-gray-400" />
-                <h3 className="text-lg font-medium mb-2">Upload Bank Statement for Auto-Analysis</h3>
+                <h3 className="text-lg font-medium mb-2">Upload Merchant Processing Statement</h3>
                 <p className="text-sm text-gray-500 mb-4">
-                  Upload a PDF merchant processing statement to automatically extract volume and pricing data
+                  Upload a PDF merchant account statement from their current processor to automatically extract volume and pricing data
                 </p>
                 <input
                   type="file"
@@ -352,10 +372,13 @@ export default function ISOAmpCalculator() {
                 />
                 <label htmlFor="statement-upload" className="cursor-pointer">
                   <Button variant="outline" className="gap-2">
-                    <FileText className="w-4 h-4" />
-                    Choose PDF Statement
+                    <CreditCard className="w-4 h-4" />
+                    Choose Merchant Statement
                   </Button>
                 </label>
+                <p className="text-xs text-gray-400 mt-2">
+                  Supports statements from Square, Stripe, First Data, Chase, Elavon, Heartland, and other major processors
+                </p>
               </div>
 
               {/* Uploaded File Display */}
