@@ -522,6 +522,36 @@ export const userStatsExtended = pgTable("user_stats_extended", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Interchange rates management (updated by Visa/MC twice yearly)
+export const interchangeRates = pgTable("interchange_rates", {
+  id: varchar("id").primaryKey().notNull().$defaultFn(() => crypto.randomUUID()),
+  category: varchar("category").notNull().unique(), // CPS/Retail, CPS/Restaurant, etc.
+  rate: decimal("rate", { precision: 6, scale: 4 }).notNull(),
+  effectiveDate: timestamp("effective_date").notNull(),
+  network: varchar("network").notNull(), // Visa, Mastercard
+  cardType: varchar("card_type").notNull(), // credit, debit, prepaid, business
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Processor markup intelligence (competitive analysis)
+export const processorMarkups = pgTable("processor_markups", {
+  id: varchar("id").primaryKey().notNull().$defaultFn(() => crypto.randomUUID()),
+  processorName: varchar("processor_name").notNull(),
+  merchantType: varchar("merchant_type").notNull(), // restaurant, retail, ecommerce, etc.
+  volumeTier: varchar("volume_tier").notNull(), // 0-10k, 10k-50k, 50k-250k, 250k+
+  creditMarkup: decimal("credit_markup", { precision: 6, scale: 4 }).notNull(),
+  debitMarkup: decimal("debit_markup", { precision: 6, scale: 4 }).notNull(),
+  authFeeMarkup: decimal("auth_fee_markup", { precision: 6, scale: 4 }).notNull(),
+  averageEffectiveRate: decimal("average_effective_rate", { precision: 6, scale: 4 }).notNull(),
+  competitivePosition: varchar("competitive_position").notNull(), // aggressive, competitive, premium
+  dataSource: varchar("data_source").notNull(), // market_research, client_analysis, industry_report
+  confidenceLevel: integer("confidence_level").notNull(), // 1-10 scale
+  lastUpdated: timestamp("last_updated").defaultNow(),
+  updatedBy: varchar("updated_by").notNull(),
+});
+
 // Define relations
 export const vendorsRelations = relations(vendors, ({ many }) => ({
   intelligence: many(vendorIntelligence),

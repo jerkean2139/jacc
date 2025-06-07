@@ -4040,6 +4040,59 @@ User Context: {userRole}`,
     }
   });
 
+  // Intelligent Pricing Analysis Routes
+  app.post('/api/pricing/analyze', async (req, res) => {
+    try {
+      const { intelligentPricingEngine } = await import('./intelligent-pricing-engine');
+      const merchantProfile = req.body;
+      
+      const recommendations = await intelligentPricingEngine.generateProcessorRecommendations(merchantProfile);
+      const competitiveAnalysis = await intelligentPricingEngine.generateCompetitiveAnalysis(merchantProfile);
+      
+      res.json({
+        recommendations,
+        competitiveAnalysis,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Error generating pricing analysis:', error);
+      res.status(500).json({ error: 'Failed to generate pricing analysis' });
+    }
+  });
+
+  app.get('/api/pricing/interchange-rates', async (req, res) => {
+    try {
+      const { interchangeManager } = await import('./interchange-rates');
+      const rates = await interchangeManager.getCurrentInterchangeRates();
+      res.json({ rates, timestamp: new Date().toISOString() });
+    } catch (error) {
+      console.error('Error fetching interchange rates:', error);
+      res.status(500).json({ error: 'Failed to fetch interchange rates' });
+    }
+  });
+
+  app.get('/api/pricing/market-intelligence', async (req, res) => {
+    try {
+      const { pricingIntelligenceDashboard } = await import('./pricing-intelligence-dashboard');
+      const intelligence = await pricingIntelligenceDashboard.getMarketIntelligence();
+      res.json({ intelligence, timestamp: new Date().toISOString() });
+    } catch (error) {
+      console.error('Error fetching market intelligence:', error);
+      res.status(500).json({ error: 'Failed to fetch market intelligence' });
+    }
+  });
+
+  app.post('/api/pricing/merchant-recommendation', async (req, res) => {
+    try {
+      const { pricingIntelligenceDashboard } = await import('./pricing-intelligence-dashboard');
+      const recommendation = await pricingIntelligenceDashboard.generateMerchantRecommendation(req.body);
+      res.json({ recommendation, timestamp: new Date().toISOString() });
+    } catch (error) {
+      console.error('Error generating merchant recommendation:', error);
+      res.status(500).json({ error: 'Failed to generate merchant recommendation' });
+    }
+  });
+
   // Pricing Management Routes
   app.get('/api/pricing/processors', async (req, res) => {
     try {
