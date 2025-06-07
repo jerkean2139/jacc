@@ -4045,12 +4045,19 @@ User Context: {userRole}`,
     try {
       const { merchantData } = req.body;
       
+      // Debug environment variables
+      console.log('ISO AMP API URL:', process.env.ISO_AMP_API_URL);
+      console.log('ISO AMP API Key exists:', !!process.env.ISO_AMP_API_KEY);
+      
+      const apiUrl = process.env.ISO_AMP_API_URL || 'https://api.getisoamp.com';
+      const apiKey = process.env.ISO_AMP_API_KEY || 'WrBwthTURUViFLt5Xhpfd12eXPkX6Cgm';
+      
       // Call ISO AMP API for merchant analysis
-      const response = await fetch(`${process.env.ISO_AMP_API_URL}/v1/analyze`, {
+      const response = await fetch(`${apiUrl}/v1/analyze`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.ISO_AMP_API_KEY}`
+          'Authorization': `Bearer ${apiKey}`
         },
         body: JSON.stringify(merchantData)
       });
