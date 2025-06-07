@@ -4852,6 +4852,194 @@ Document content: {content}`,
     }
   });
 
+  // Donna AI - Advanced Sales Intelligence API Routes
+  app.post('/api/donna-ai/build-profile', async (req: any, res) => {
+    try {
+      const { companyName, conversationData } = req.body;
+      const { donnaAI } = await import('./donna-ai-engine');
+      
+      const profile = await donnaAI.buildProspectProfile(companyName, conversationData);
+      res.json(profile);
+    } catch (error) {
+      console.error("Error building prospect profile:", error);
+      res.status(500).json({ error: "Failed to build prospect profile" });
+    }
+  });
+
+  app.post('/api/donna-ai/deal-intelligence', async (req: any, res) => {
+    try {
+      const { profile, dealStage } = req.body;
+      const { donnaAI } = await import('./donna-ai-engine');
+      
+      const intelligence = await donnaAI.generateDealIntelligence(profile, dealStage);
+      res.json(intelligence);
+    } catch (error) {
+      console.error("Error generating deal intelligence:", error);
+      res.status(500).json({ error: "Failed to generate deal intelligence" });
+    }
+  });
+
+  app.post('/api/donna-ai/opportunities', async (req: any, res) => {
+    try {
+      const { conversationText, profile } = req.body;
+      const { donnaAI } = await import('./donna-ai-engine');
+      
+      const opportunities = await donnaAI.identifyOpportunities(conversationText, profile);
+      res.json({ opportunities });
+    } catch (error) {
+      console.error("Error identifying opportunities:", error);
+      res.status(500).json({ error: "Failed to identify opportunities" });
+    }
+  });
+
+  app.post('/api/donna-ai/strategic-guidance', async (req: any, res) => {
+    try {
+      const { conversationHistory, currentMessage, profile } = req.body;
+      const { donnaAI } = await import('./donna-ai-engine');
+      
+      const guidance = await donnaAI.generateStrategicGuidance(conversationHistory, currentMessage, profile);
+      res.json(guidance);
+    } catch (error) {
+      console.error("Error generating strategic guidance:", error);
+      res.status(500).json({ error: "Failed to generate strategic guidance" });
+    }
+  });
+
+  app.post('/api/donna-ai/competitive-analysis', async (req: any, res) => {
+    try {
+      const { industry, painPoints } = req.body;
+      const { donnaAI } = await import('./donna-ai-engine');
+      
+      const analysis = await donnaAI.analyzeCompetitiveLandscape(industry, painPoints);
+      res.json({ analysis });
+    } catch (error) {
+      console.error("Error analyzing competitive landscape:", error);
+      res.status(500).json({ error: "Failed to analyze competitive landscape" });
+    }
+  });
+
+  app.get('/api/donna-ai/prospect/:companyName', async (req: any, res) => {
+    try {
+      const { companyName } = req.params;
+      const { donnaAI } = await import('./donna-ai-engine');
+      
+      const profile = donnaAI.getProspectProfile(companyName);
+      if (profile) {
+        res.json(profile);
+      } else {
+        res.status(404).json({ error: "Prospect profile not found" });
+      }
+    } catch (error) {
+      console.error("Error getting prospect profile:", error);
+      res.status(500).json({ error: "Failed to get prospect profile" });
+    }
+  });
+
+  // Sales Intelligence & Predictive Analytics API Routes
+  app.get('/api/sales-intelligence/alerts', async (req: any, res) => {
+    try {
+      const { predictiveAnalytics } = await import('./predictive-sales-analytics');
+      
+      // Simulate active deals data - in production this would come from database
+      const activeDeals = [
+        { id: '1', prospectName: 'Acme Restaurant Group', lastContact: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000) },
+        { id: '2', prospectName: 'TechStart Solutions', lastContact: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000) },
+        { id: '3', prospectName: 'Metro Retail Chain', lastContact: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000) }
+      ];
+      
+      const marketData = [
+        'Q4 budget cycles are now active across most industries',
+        'Competitive pricing pressure increasing in restaurant segment',
+        'Digital payment adoption accelerating post-pandemic'
+      ];
+      
+      const alerts = await predictiveAnalytics.generateProactiveAlerts(activeDeals, marketData);
+      res.json({ alerts });
+    } catch (error) {
+      console.error("Error getting sales intelligence alerts:", error);
+      res.status(500).json({ error: "Failed to get alerts" });
+    }
+  });
+
+  app.get('/api/sales-intelligence/predictions', async (req: any, res) => {
+    try {
+      const { predictiveAnalytics } = await import('./predictive-sales-analytics');
+      
+      // Simulate deal prediction data - in production this would analyze real conversations
+      const mockConversations = [
+        ['Customer asking about pricing for 50 locations', 'Mentioned current processor issues', 'Timeline: end of quarter'],
+        ['Small restaurant needs mobile processing', 'Budget conscious', 'Decision maker confirmed'],
+        ['Healthcare practice, HIPAA requirements', 'High volume processing', 'Comparing multiple vendors']
+      ];
+      
+      const mockProfiles = [
+        { companyName: 'Acme Restaurant Group', industry: 'restaurant', revenue: '$2M', urgency: 'high' },
+        { companyName: 'TechStart Solutions', industry: 'tech', revenue: '$500K', urgency: 'medium' },
+        { companyName: 'Metro Retail Chain', industry: 'retail', revenue: '$5M', urgency: 'high' }
+      ];
+      
+      const predictions = await Promise.all(
+        mockConversations.map(async (conv, index) => {
+          const prediction = await predictiveAnalytics.analyzeDealProbability(conv, mockProfiles[index], 'discovery');
+          return {
+            ...prediction,
+            prospectName: mockProfiles[index].companyName
+          };
+        })
+      );
+      
+      res.json({ predictions });
+    } catch (error) {
+      console.error("Error getting deal predictions:", error);
+      res.status(500).json({ error: "Failed to get predictions" });
+    }
+  });
+
+  app.post('/api/sales-intelligence/analyze-sentiment', async (req: any, res) => {
+    try {
+      const { messages } = req.body;
+      const { predictiveAnalytics } = await import('./predictive-sales-analytics');
+      
+      const sentiment = await predictiveAnalytics.analyzeConversationSentiment(messages);
+      res.json(sentiment);
+    } catch (error) {
+      console.error("Error analyzing sentiment:", error);
+      res.status(500).json({ error: "Failed to analyze sentiment" });
+    }
+  });
+
+  app.post('/api/sales-intelligence/deal-strategy', async (req: any, res) => {
+    try {
+      const { dealPrediction, competitiveIntel } = req.body;
+      const { predictiveAnalytics } = await import('./predictive-sales-analytics');
+      
+      const strategy = await predictiveAnalytics.generateDealStrategy(dealPrediction, competitiveIntel);
+      res.json(strategy);
+    } catch (error) {
+      console.error("Error generating deal strategy:", error);
+      res.status(500).json({ error: "Failed to generate deal strategy" });
+    }
+  });
+
+  app.get('/api/sales-intelligence/market-trends', async (req: any, res) => {
+    try {
+      const { predictiveAnalytics } = await import('./predictive-sales-analytics');
+      
+      const industryData = [
+        'Payment processing volumes up 12% YoY',
+        'Mobile payment adoption at 78% for restaurants',
+        'SMB segment showing increased price sensitivity',
+        'Contactless payment mandates expanding globally'
+      ];
+      
+      const trends = await predictiveAnalytics.predictMarketTrends(industryData);
+      res.json(trends);
+    } catch (error) {
+      console.error("Error predicting market trends:", error);
+      res.status(500).json({ error: "Failed to predict market trends" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
