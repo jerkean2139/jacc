@@ -204,6 +204,9 @@ export default function VendorIntelligenceDashboard() {
               <div>
                 <p className="text-sm font-medium text-gray-600">Vendors Monitored</p>
                 <p className="text-2xl font-bold">{stats?.totalVendors || 0}</p>
+                <p className="text-xs text-gray-500">
+                  Processors • Gateways • POS Systems
+                </p>
               </div>
               <Globe className="h-8 w-8 text-green-600" />
             </div>
@@ -306,9 +309,24 @@ export default function VendorIntelligenceDashboard() {
                   <div key={vendor.id} className="flex items-center justify-between p-3 border rounded-lg">
                     <div className="flex items-center gap-3">
                       <div className={`w-3 h-3 rounded-full ${getStatusColor(vendor.status)}`} />
-                      <div>
-                        <p className="font-medium">{vendor.name}</p>
-                        <p className="text-sm text-gray-600">{vendor.documentsFound} documents</p>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <p className="font-medium">{vendor.name}</p>
+                          <Badge 
+                            variant="outline" 
+                            className={`text-xs ${
+                              vendor.companyType === 'processor' ? 'border-blue-200 text-blue-700' :
+                              vendor.companyType === 'gateway' ? 'border-purple-200 text-purple-700' :
+                              'border-green-200 text-green-700'
+                            }`}
+                          >
+                            {vendor.companyType?.toUpperCase() || 'PROCESSOR'}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-gray-600">{vendor.documentsFound} documents tracked</p>
+                        <p className="text-xs text-gray-500">
+                          Priority {vendor.priority || 1} • {vendor.crawlFrequency || 'daily'} scans
+                        </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">

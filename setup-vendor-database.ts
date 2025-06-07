@@ -154,6 +154,467 @@ const realVendorData = [
       support: '1-800-ELAVON-HELP',
       integration: 'integration@elavon.com'
     }
+  },
+  {
+    id: 'square',
+    name: 'Square',
+    companyType: 'processor',
+    baseUrl: 'https://squareup.com',
+    documentPortalUrl: 'https://developer.squareup.com/docs',
+    supportUrl: 'https://squareup.com/help',
+    active: true,
+    crawlFrequency: 'daily',
+    priority: 2,
+    selectors: {
+      documentLinks: '.doc-link, a[href*="/docs/"], .guide-item a',
+      title: 'h1, .doc-title, .guide-heading',
+      lastModified: '.last-updated, .version-info'
+    },
+    documentPaths: [
+      '/developer/docs/api',
+      '/developer/docs/webhooks',
+      '/developer/docs/terminal',
+      '/help/us/en/merchant-pricing'
+    ],
+    apiEndpoints: [
+      'https://developer.squareup.com/reference/square',
+      'https://developer.squareup.com/docs/terminal-api'
+    ],
+    contactInfo: {
+      sales: '1-855-700-6000',
+      support: '1-855-700-6000',
+      integration: 'developer@squareup.com'
+    }
+  },
+  {
+    id: 'shift4-skytab',
+    name: 'Shift4 (SkyTab)',
+    companyType: 'pos',
+    baseUrl: 'https://www.shift4.com',
+    documentPortalUrl: 'https://www.shift4.com/resources',
+    supportUrl: 'https://www.shift4.com/support',
+    active: true,
+    crawlFrequency: 'daily',
+    priority: 1,
+    selectors: {
+      documentLinks: 'a[href*=".pdf"], .resource-download, .documentation-link',
+      title: 'h1, .resource-title, .doc-heading',
+      lastModified: '.updated-date, .publish-date'
+    },
+    documentPaths: [
+      '/resources/documentation',
+      '/resources/api-guides',
+      '/resources/pos-integration',
+      '/resources/skytab-guides'
+    ],
+    apiEndpoints: [
+      'https://developer.shift4.com/docs',
+      'https://www.shift4.com/api-documentation'
+    ],
+    contactInfo: {
+      sales: '1-888-675-2427',
+      support: '1-888-674-4382',
+      integration: 'developer@shift4.com'
+    }
+  },
+  {
+    id: 'clover-fiserv',
+    name: 'Clover (Fiserv)',
+    companyType: 'pos',
+    baseUrl: 'https://www.clover.com',
+    documentPortalUrl: 'https://docs.clover.com',
+    supportUrl: 'https://help.clover.com',
+    active: true,
+    crawlFrequency: 'daily',
+    priority: 1,
+    selectors: {
+      documentLinks: '.docs-link, a[href*="/docs/"], .api-reference a',
+      title: 'h1, .docs-title, .guide-heading',
+      lastModified: '.last-updated, .version-date'
+    },
+    documentPaths: [
+      '/docs/api-reference',
+      '/docs/build',
+      '/docs/launch',
+      '/docs/merchant-pricing'
+    ],
+    apiEndpoints: [
+      'https://docs.clover.com/reference',
+      'https://docs.clover.com/docs/ecommerce-api'
+    ],
+    contactInfo: {
+      sales: '1-855-853-8340',
+      support: '1-855-853-8340',
+      integration: 'developer@clover.com'
+    }
+  },
+  {
+    id: 'quantic-pos',
+    name: 'Quantic POS',
+    companyType: 'pos',
+    baseUrl: 'https://www.quanticpos.com',
+    documentPortalUrl: 'https://www.quanticpos.com/resources',
+    supportUrl: 'https://www.quanticpos.com/support',
+    active: true,
+    crawlFrequency: 'daily',
+    priority: 2,
+    selectors: {
+      documentLinks: 'a[href*=".pdf"], .resource-item a, .documentation-link',
+      title: 'h1, .page-title, .resource-heading',
+      lastModified: '.date-updated, .last-modified'
+    },
+    documentPaths: [
+      '/resources/documentation',
+      '/resources/integration-guides',
+      '/resources/api-documentation',
+      '/support/technical-guides'
+    ],
+    apiEndpoints: [
+      'https://api.quanticpos.com/docs'
+    ],
+    contactInfo: {
+      sales: '1-800-QUANTIC',
+      support: '1-855-QUANTIC',
+      integration: 'api@quanticpos.com'
+    }
+  },
+  {
+    id: 'stripe',
+    name: 'Stripe',
+    companyType: 'processor',
+    baseUrl: 'https://stripe.com',
+    documentPortalUrl: 'https://stripe.com/docs',
+    supportUrl: 'https://support.stripe.com',
+    active: true,
+    crawlFrequency: 'daily',
+    priority: 2,
+    selectors: {
+      documentLinks: '.docs-link, a[href*="/docs/"], .api-reference a',
+      title: 'h1, .docs-title, .page-heading',
+      lastModified: '.last-updated, .version-date'
+    },
+    documentPaths: [
+      '/docs/api',
+      '/docs/payments',
+      '/docs/terminal',
+      '/docs/connect',
+      '/pricing'
+    ],
+    apiEndpoints: [
+      'https://stripe.com/docs/api',
+      'https://stripe.com/docs/terminal/sdk'
+    ],
+    contactInfo: {
+      sales: 'sales@stripe.com',
+      support: 'support@stripe.com',
+      integration: 'developer@stripe.com'
+    }
+  },
+  {
+    id: 'paypal-braintree',
+    name: 'PayPal (Braintree)',
+    companyType: 'processor',
+    baseUrl: 'https://www.braintreepayments.com',
+    documentPortalUrl: 'https://developer.paypal.com/braintree/docs',
+    supportUrl: 'https://developer.paypal.com/braintree/help',
+    active: true,
+    crawlFrequency: 'daily',
+    priority: 2,
+    selectors: {
+      documentLinks: '.docs-link, a[href*="/docs/"], .guide-link',
+      title: 'h1, .doc-heading, .guide-title',
+      lastModified: '.updated, .version-info'
+    },
+    documentPaths: [
+      '/braintree/docs/guides',
+      '/braintree/docs/reference',
+      '/braintree/articles',
+      '/us/business/merchant-fees'
+    ],
+    apiEndpoints: [
+      'https://developer.paypal.com/braintree/docs/reference/overview',
+      'https://developer.paypal.com/braintree/docs/guides/webhooks'
+    ],
+    contactInfo: {
+      sales: '1-877-434-2894',
+      support: '1-877-434-2894',
+      integration: 'bt_developer@paypal.com'
+    }
+  },
+  {
+    id: 'authorize-net',
+    name: 'Authorize.Net (Visa)',
+    companyType: 'gateway',
+    baseUrl: 'https://www.authorize.net',
+    documentPortalUrl: 'https://developer.authorize.net',
+    supportUrl: 'https://support.authorize.net',
+    active: true,
+    crawlFrequency: 'daily',
+    priority: 2,
+    selectors: {
+      documentLinks: '.api-doc a, a[href*=".pdf"], .guide-download',
+      title: 'h1, .api-title, .guide-heading',
+      lastModified: '.last-updated, .version'
+    },
+    documentPaths: [
+      '/developer/api/reference',
+      '/developer/integration-guides',
+      '/developer/sample-code',
+      '/support/merchant-pricing'
+    ],
+    apiEndpoints: [
+      'https://developer.authorize.net/api/reference',
+      'https://developer.authorize.net/api/webhooks'
+    ],
+    contactInfo: {
+      sales: '1-888-323-4289',
+      support: '1-877-447-3938',
+      integration: 'developer@authorize.net'
+    }
+  },
+  {
+    id: 'adyen',
+    name: 'Adyen',
+    companyType: 'processor',
+    baseUrl: 'https://www.adyen.com',
+    documentPortalUrl: 'https://docs.adyen.com',
+    supportUrl: 'https://www.adyen.com/support',
+    active: true,
+    crawlFrequency: 'daily',
+    priority: 2,
+    selectors: {
+      documentLinks: '.docs-link, a[href*="/docs/"], .api-reference a',
+      title: 'h1, .docs-title, .api-heading',
+      lastModified: '.last-updated, .version-date'
+    },
+    documentPaths: [
+      '/docs/api-explorer',
+      '/docs/development-resources',
+      '/docs/point-of-sale',
+      '/pricing'
+    ],
+    apiEndpoints: [
+      'https://docs.adyen.com/api-explorer',
+      'https://docs.adyen.com/point-of-sale/design-and-deployment'
+    ],
+    contactInfo: {
+      sales: 'sales@adyen.com',
+      support: 'support@adyen.com',
+      integration: 'developer@adyen.com'
+    }
+  },
+  {
+    id: 'cybersource-visa',
+    name: 'CyberSource (Visa)',
+    companyType: 'gateway',
+    baseUrl: 'https://www.cybersource.com',
+    documentPortalUrl: 'https://developer.cybersource.com',
+    supportUrl: 'https://support.cybersource.com',
+    active: true,
+    crawlFrequency: 'daily',
+    priority: 2,
+    selectors: {
+      documentLinks: '.developer-resource a, a[href*=".pdf"], .api-doc-link',
+      title: 'h1, .resource-title, .api-heading',
+      lastModified: '.updated-date, .version-info'
+    },
+    documentPaths: [
+      '/developer/documentation',
+      '/developer/api-reference',
+      '/developer/integration-guides',
+      '/support/resources'
+    ],
+    apiEndpoints: [
+      'https://developer.cybersource.com/api/reference',
+      'https://developer.cybersource.com/docs'
+    ],
+    contactInfo: {
+      sales: '1-888-330-2300',
+      support: '1-800-530-9095',
+      integration: 'developer@cybersource.com'
+    }
+  },
+  {
+    id: 'nmi-gateway',
+    name: 'Network Merchants Inc (NMI)',
+    companyType: 'gateway',
+    baseUrl: 'https://www.nmi.com',
+    documentPortalUrl: 'https://www.nmi.com/resources',
+    supportUrl: 'https://www.nmi.com/support',
+    active: true,
+    crawlFrequency: 'daily',
+    priority: 2,
+    selectors: {
+      documentLinks: 'a[href*=".pdf"], .resource-download, .documentation-link',
+      title: 'h1, .resource-heading, .doc-title',
+      lastModified: '.date-updated, .last-modified'
+    },
+    documentPaths: [
+      '/resources/documentation',
+      '/resources/api-guides',
+      '/resources/integration-manuals',
+      '/support/technical-resources'
+    ],
+    apiEndpoints: [
+      'https://www.nmi.com/api-documentation'
+    ],
+    contactInfo: {
+      sales: '1-847-352-4007',
+      support: '1-847-352-4007',
+      integration: 'support@nmi.com'
+    }
+  },
+  {
+    id: 'payment-express',
+    name: 'Payment Express (Windcave)',
+    companyType: 'gateway',
+    baseUrl: 'https://www.windcave.com',
+    documentPortalUrl: 'https://www.windcave.com/developer-e-commerce',
+    supportUrl: 'https://www.windcave.com/support-centre',
+    active: true,
+    crawlFrequency: 'daily',
+    priority: 3,
+    selectors: {
+      documentLinks: '.developer-resource a, a[href*=".pdf"], .guide-link',
+      title: 'h1, .page-title, .resource-title',
+      lastModified: '.updated-date, .version-date'
+    },
+    documentPaths: [
+      '/developer-e-commerce/api-reference',
+      '/developer-e-commerce/integration-guides',
+      '/support-centre/documentation',
+      '/developer-e-commerce/sdks'
+    ],
+    apiEndpoints: [
+      'https://www.windcave.com/developer-e-commerce/api-reference'
+    ],
+    contactInfo: {
+      sales: 'sales@windcave.com',
+      support: 'support@windcave.com',
+      integration: 'developer@windcave.com'
+    }
+  },
+  {
+    id: 'toast-pos',
+    name: 'Toast POS',
+    companyType: 'pos',
+    baseUrl: 'https://pos.toasttab.com',
+    documentPortalUrl: 'https://doc.toasttab.com',
+    supportUrl: 'https://pos.toasttab.com/support',
+    active: true,
+    crawlFrequency: 'daily',
+    priority: 2,
+    selectors: {
+      documentLinks: '.docs-link, a[href*="/docs/"], .api-reference a',
+      title: 'h1, .docs-title, .api-heading',
+      lastModified: '.last-updated, .version-info'
+    },
+    documentPaths: [
+      '/docs/devguide',
+      '/docs/api',
+      '/docs/integrations',
+      '/pricing'
+    ],
+    apiEndpoints: [
+      'https://doc.toasttab.com/doc/devguide',
+      'https://doc.toasttab.com/doc/api'
+    ],
+    contactInfo: {
+      sales: '1-617-682-5393',
+      support: '1-617-682-5393',
+      integration: 'developer@toasttab.com'
+    }
+  },
+  {
+    id: 'lightspeed-pos',
+    name: 'Lightspeed POS',
+    companyType: 'pos',
+    baseUrl: 'https://www.lightspeedhq.com',
+    documentPortalUrl: 'https://developers.lightspeedhq.com',
+    supportUrl: 'https://www.lightspeedhq.com/support',
+    active: true,
+    crawlFrequency: 'daily',
+    priority: 2,
+    selectors: {
+      documentLinks: '.developer-link a, a[href*="/docs/"], .api-doc-link',
+      title: 'h1, .developer-title, .api-heading',
+      lastModified: '.updated-date, .version-date'
+    },
+    documentPaths: [
+      '/developers/ecom',
+      '/developers/retail',
+      '/developers/restaurant',
+      '/support/api-documentation'
+    ],
+    apiEndpoints: [
+      'https://developers.lightspeedhq.com/ecom/introduction',
+      'https://developers.lightspeedhq.com/retail/introduction'
+    ],
+    contactInfo: {
+      sales: '1-855-932-0422',
+      support: '1-855-932-0422',
+      integration: 'api@lightspeedhq.com'
+    }
+  },
+  {
+    id: 'revel-pos',
+    name: 'Revel Systems',
+    companyType: 'pos',
+    baseUrl: 'https://revelsystems.com',
+    documentPortalUrl: 'https://revelsystems.com/resources',
+    supportUrl: 'https://revelsystems.com/support',
+    active: true,
+    crawlFrequency: 'daily',
+    priority: 3,
+    selectors: {
+      documentLinks: 'a[href*=".pdf"], .resource-item a, .documentation-link',
+      title: 'h1, .resource-title, .page-heading',
+      lastModified: '.updated-date, .publish-date'
+    },
+    documentPaths: [
+      '/resources/documentation',
+      '/resources/api-guides',
+      '/resources/integration-manuals',
+      '/support/technical-resources'
+    ],
+    apiEndpoints: [
+      'https://revelsystems.com/api-documentation'
+    ],
+    contactInfo: {
+      sales: '1-415-598-7375',
+      support: '1-415-598-7375',
+      integration: 'api@revelsystems.com'
+    }
+  },
+  {
+    id: 'aloha-pos',
+    name: 'Aloha POS (NCR)',
+    companyType: 'pos',
+    baseUrl: 'https://www.ncr.com',
+    documentPortalUrl: 'https://www.ncr.com/restaurants/aloha-pos',
+    supportUrl: 'https://www.ncr.com/support',
+    active: true,
+    crawlFrequency: 'daily',
+    priority: 2,
+    selectors: {
+      documentLinks: 'a[href*=".pdf"], .resource-download, .documentation-link',
+      title: 'h1, .product-title, .resource-heading',
+      lastModified: '.updated-date, .version-info'
+    },
+    documentPaths: [
+      '/restaurants/aloha-pos/resources',
+      '/restaurants/aloha-pos/documentation',
+      '/support/aloha-guides',
+      '/developers/aloha-api'
+    ],
+    apiEndpoints: [
+      'https://developer.ncr.com/portals/dev-portal'
+    ],
+    contactInfo: {
+      sales: '1-800-CALL-NCR',
+      support: '1-800-CALL-NCR',
+      integration: 'developer@ncr.com'
+    }
   }
 ];
 
@@ -193,7 +654,14 @@ async function seedVendorDatabase() {
       }
     }
     
-    console.log('Vendor database seeding completed');
+    console.log(`Vendor database seeding completed - ${realVendorData.length} vendors processed`);
+    
+    // Display summary by company type
+    const processorCount = realVendorData.filter(v => v.companyType === 'processor').length;
+    const gatewayCount = realVendorData.filter(v => v.companyType === 'gateway').length;
+    const posCount = realVendorData.filter(v => v.companyType === 'pos').length;
+    
+    console.log(`Payment Processors: ${processorCount}, Gateways: ${gatewayCount}, POS Systems: ${posCount}`);
     
   } catch (error) {
     console.error('Error during vendor database seeding:', error);
