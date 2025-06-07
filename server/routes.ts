@@ -4040,72 +4040,59 @@ User Context: {userRole}`,
     }
   });
 
-  // Intelligent Pricing Analysis Routes
-  app.post('/api/pricing/analyze', async (req, res) => {
+  // ISO AMP API Integration Routes
+  app.post('/api/iso-amp/analyze', async (req, res) => {
     try {
-      const { intelligentPricingEngine } = await import('./intelligent-pricing-engine');
-      const merchantProfile = req.body;
+      const { merchantData } = req.body;
       
-      const recommendations = await intelligentPricingEngine.generateProcessorRecommendations(merchantProfile);
-      const competitiveAnalysis = await intelligentPricingEngine.generateCompetitiveAnalysis(merchantProfile);
-      
-      res.json({
-        recommendations,
-        competitiveAnalysis,
-        timestamp: new Date().toISOString()
+      // Call ISO AMP API for processor comparison
+      const response = await fetch(`${process.env.ISO_AMP_API_URL}/analyze`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.ISO_AMP_API_KEY}`
+        },
+        body: JSON.stringify(merchantData)
       });
-    } catch (error) {
-      console.error('Error generating pricing analysis:', error);
-      res.status(500).json({ error: 'Failed to generate pricing analysis' });
-    }
-  });
 
-  app.get('/api/pricing/interchange-rates', async (req, res) => {
-    try {
-      const { interchangeManager } = await import('./interchange-rates');
-      const rates = await interchangeManager.getCurrentInterchangeRates();
-      res.json({ rates, timestamp: new Date().toISOString() });
-    } catch (error) {
-      console.error('Error fetching interchange rates:', error);
-      res.status(500).json({ error: 'Failed to fetch interchange rates' });
-    }
-  });
+      if (!response.ok) {
+        throw new Error(`ISO AMP API error: ${response.status}`);
+      }
 
-  app.get('/api/pricing/market-intelligence', async (req, res) => {
-    try {
-      const { pricingIntelligenceDashboard } = await import('./pricing-intelligence-dashboard');
-      const intelligence = await pricingIntelligenceDashboard.getMarketIntelligence();
-      res.json({ intelligence, timestamp: new Date().toISOString() });
-    } catch (error) {
-      console.error('Error fetching market intelligence:', error);
-      res.status(500).json({ error: 'Failed to fetch market intelligence' });
-    }
-  });
-
-  app.post('/api/pricing/merchant-recommendation', async (req, res) => {
-    try {
-      const { pricingIntelligenceDashboard } = await import('./pricing-intelligence-dashboard');
-      const recommendation = await pricingIntelligenceDashboard.generateMerchantRecommendation(req.body);
-      res.json({ recommendation, timestamp: new Date().toISOString() });
-    } catch (error) {
-      console.error('Error generating merchant recommendation:', error);
-      res.status(500).json({ error: 'Failed to generate merchant recommendation' });
-    }
-  });
-
-  app.get('/api/pricing/demo/trx-tracerpay', async (req, res) => {
-    try {
-      const { pricingDemoSetup } = await import('./pricing-demo-setup');
-      await pricingDemoSetup.initializeTRXTracerPayDemo();
-      const recommendation = await pricingDemoSetup.generateSampleRecommendation();
+      const analysisData = await response.json();
       res.json({ 
-        demo: recommendation, 
-        message: 'TRX and TracerPay pricing demo initialized',
+        analysis: analysisData,
+        source: 'ISO AMP API',
         timestamp: new Date().toISOString() 
       });
     } catch (error) {
-      console.error('Error generating TRX/TracerPay demo:', error);
-      res.status(500).json({ error: 'Failed to generate pricing demo' });
+      console.error('Error calling ISO AMP API:', error);
+      res.status(500).json({ error: 'Failed to analyze merchant data' });
+    }
+  });
+
+  app.get('/api/iso-amp/processors', async (req, res) => {
+    try {
+      const response = await fetch(`${process.env.ISO_AMP_API_URL}/processors`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${process.env.ISO_AMP_API_KEY}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`ISO AMP API error: ${response.status}`);
+      }
+
+      const processors = await response.json();
+      res.json({ 
+        processors,
+        source: 'ISO AMP API',
+        timestamp: new Date().toISOString() 
+      });
+    } catch (error) {
+      console.error('Error fetching processors from ISO AMP API:', error);
+      res.status(500).json({ error: 'Failed to fetch processor data' });
     }
   });
 
