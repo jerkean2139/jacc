@@ -447,25 +447,94 @@ export default function ISOAmpCalculator() {
                       </p>
                     </div>
                   </div>
-                  <Button 
-                    onClick={handleAnalyzeStatement}
-                    disabled={statementAnalysisMutation.isPending}
-                    className="gap-2"
-                  >
-                    {statementAnalysisMutation.isPending ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        Analyzing...
-                      </>
-                    ) : (
-                      <>
-                        <FileBarChart className="w-4 h-4" />
-                        Analyze Statement
-                      </>
-                    )}
-                  </Button>
+                  <div className="flex gap-3">
+                    <Button 
+                      onClick={handleAnalyzeStatement}
+                      disabled={statementAnalysisMutation.isPending}
+                      className="gap-2"
+                    >
+                      {statementAnalysisMutation.isPending ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          Analyzing...
+                        </>
+                      ) : (
+                        <>
+                          <FileBarChart className="w-4 h-4" />
+                          Analyze Statement
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 </div>
               )}
+
+              {/* OCR Accuracy Test Section */}
+              <Card className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Zap className="w-5 h-5 text-purple-600" />
+                    Enhanced OCR Testing
+                  </CardTitle>
+                  <CardDescription>
+                    Test advanced document processing with the Genesis merchant statement example
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button 
+                    onClick={() => {
+                      // Test OCR accuracy with Genesis statement
+                      fetch('/api/iso-amp/test-ocr-accuracy', {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                        },
+                      })
+                      .then(response => response.json())
+                      .then(data => {
+                        if (data.success) {
+                          setAnalysisResults({
+                            extractedData: data.testResults.extractedData,
+                            analysisMetadata: data.testResults.extractionMetadata,
+                            qualityReport: data.qualityReport,
+                            testResults: data.testResults
+                          });
+                          
+                          // Auto-populate with extracted data
+                          if (data.testResults.extractedData) {
+                            setBusinessData(prev => ({
+                              ...prev,
+                              ...data.testResults.extractedData
+                            }));
+                          }
+                          
+                          toast({
+                            title: `OCR Test Complete (${data.testResults.overallAccuracy}% accuracy)`,
+                            description: `Genesis statement analyzed with ${data.testResults.extractionMetadata.method} extraction`,
+                          });
+                        } else {
+                          throw new Error(data.error);
+                        }
+                      })
+                      .catch(error => {
+                        toast({
+                          title: "Test Failed",
+                          description: error.message || "Could not test OCR accuracy",
+                          variant: "destructive",
+                        });
+                      });
+                    }}
+                    className="gap-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                  >
+                    <Brain className="w-4 h-4" />
+                    Test Enhanced OCR with Genesis Statement
+                  </Button>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                    This will analyze a real Genesis merchant statement ($76,268 volume, 82 transactions) 
+                    to demonstrate OCR accuracy and processor-specific pattern recognition.
+                  </p>
+                </CardContent>
+              </Card>
 
               {/* Enhanced Analysis Results Display */}
               {analysisResults && (

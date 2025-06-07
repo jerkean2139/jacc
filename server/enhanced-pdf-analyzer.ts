@@ -342,16 +342,34 @@ Return detailed JSON with:
   }
 
   private getProcessorSpecificGuidance(processor: ProcessorPattern): string {
+    if (processor.name === 'Genesis') {
+      return `
+Processor: Genesis (Reynolds & Reynolds) - Interchange Plus Model
+CRITICAL EXTRACTION POINTS:
+- Total Monthly Volume: Look for "Total" row in deposit summary or processing activity
+- Transaction Count: Sum of all "Number Sales" or look for total transaction count
+- Processor Name: "Genesis", "Reynolds and Reynolds", or merchant number format
+- Rate Structure: Interchange Plus (separate interchange fees + markup)
+- Key Sections:
+  * DEPOSIT SUMMARY: Daily transaction totals
+  * PROCESSING ACTIVITY SUMMARY: Card type breakdown with volumes and fees
+  * INTERCHANGE FEES: Detailed interchange costs by card type
+  * OTHER FEES: Assessments, per-item fees, monthly charges
+- Card Mix Analysis: Extract individual card type volumes (Visa, MC, Amex, Discover, Debit)
+- Average Ticket: May be shown per card type or calculate from total volume/count
+- Effective Rate Calculation: (Total Interchange + Other Fees) / Total Volume`;
+    }
+    
     return `
 Processor: ${processor.name}
 Look for these specific patterns:
-- Rate patterns: ${processor.ratePatterns.map(p => p.source).join(', ')}
-- Fee patterns: ${processor.feePatterns.map(p => p.source).join(', ')}
-- Volume patterns: ${processor.volumePatterns.map(p => p.source).join(', ')}
+- Rate patterns: Common rate structures and fee formats
+- Fee patterns: Monthly fees, per-transaction fees, assessments
+- Volume patterns: Total processing volume and transaction counts
 
 Common ${processor.name} statement sections:
 - Transaction summary
-- Rate breakdown
+- Rate breakdown  
 - Fee itemization
 - Volume analysis
 - Monthly totals`;

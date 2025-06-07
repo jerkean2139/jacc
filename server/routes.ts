@@ -3955,6 +3955,77 @@ User Context: {userRole}`,
     }
   });
 
+  // Test enhanced OCR with sample Genesis statement
+  app.post('/api/iso-amp/test-ocr-accuracy', async (req, res) => {
+    try {
+      const fs = require('fs');
+      const path = require('path');
+      
+      // Use the provided Genesis statement for testing
+      const sampleStatementPath = path.join(process.cwd(), 'attached_assets', 'Genesis - ReyPay Stmt Feb 2024_1749308319523.pdf');
+      
+      if (!fs.existsSync(sampleStatementPath)) {
+        return res.status(404).json({ error: 'Sample Genesis statement not found' });
+      }
+      
+      const fileBuffer = fs.readFileSync(sampleStatementPath);
+      const fileName = 'Genesis - ReyPay Stmt Feb 2024_1749308319523.pdf';
+      
+      // Analyze with enhanced OCR
+      const { enhancedPDFAnalyzer } = await import('./enhanced-pdf-analyzer');
+      const enhancedResult = await enhancedPDFAnalyzer.analyzeStatement(fileBuffer, fileName);
+      
+      // Generate quality report
+      const qualityReport = await enhancedPDFAnalyzer.generateExtractionReport(enhancedResult);
+      
+      // Expected values for accuracy testing
+      const expectedData = {
+        monthlyVolume: 76268.10,
+        transactionCount: 82,
+        averageTicket: 930.10,
+        processorName: 'Genesis',
+        businessName: 'GENESIS OF CONWAY'
+      };
+      
+      // Calculate accuracy scores
+      const extractedData = enhancedResult.extractedData;
+      const accuracyMetrics = {
+        volumeAccuracy: Math.abs(extractedData.monthlyVolume - expectedData.monthlyVolume) < 100,
+        transactionAccuracy: Math.abs(extractedData.transactionCount - expectedData.transactionCount) < 5,
+        ticketAccuracy: Math.abs(extractedData.averageTicket - expectedData.averageTicket) < 50,
+        processorDetected: extractedData.currentProcessor?.name?.toLowerCase().includes('genesis') || false
+      };
+      
+      const overallAccuracy = Object.values(accuracyMetrics).filter(Boolean).length / Object.keys(accuracyMetrics).length;
+      
+      res.json({
+        success: true,
+        testResults: {
+          extractedData,
+          expectedData,
+          accuracyMetrics,
+          overallAccuracy: Math.round(overallAccuracy * 100),
+          extractionMetadata: {
+            method: enhancedResult.extractionMethod,
+            confidence: enhancedResult.confidence,
+            dataQuality: enhancedResult.dataQuality,
+            validationErrors: enhancedResult.validationErrors,
+            improvementSuggestions: enhancedResult.improvementSuggestions
+          }
+        },
+        qualityReport,
+        timestamp: new Date().toISOString()
+      });
+      
+    } catch (error) {
+      console.error('OCR accuracy test error:', error);
+      res.status(500).json({ 
+        error: 'Failed to test OCR accuracy',
+        details: error.message 
+      });
+    }
+  });
+
   // Enhanced bank statement analysis endpoint with OCR capabilities
   app.post('/api/iso-amp/analyze-statement', upload.single('statement'), async (req, res) => {
     try {
