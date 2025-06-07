@@ -397,9 +397,13 @@ Support Services:
       const flexDocId = crypto.randomUUID();
       await db.insert(documents).values({
         id: flexDocId,
+        name: 'TracerFlex - Coming Soon',
+        originalName: 'TracerFlex - Coming Soon',
+        path: '/tracerflex/coming-soon',
         userId: 'system',
         folderId: tracerFlexId,
         title: 'TracerFlex - Coming Soon',
+        mimeType: 'text/plain',
         content: `TracerFlex - Flexible Payment Solutions (Coming Soon)
 
 TracerFlex represents the next evolution in flexible payment processing solutions, designed to meet the diverse needs of modern businesses.
@@ -454,9 +458,13 @@ Note for Sales Agents: When asked about TracerFlex, emphasize that it's a new pr
       const autoDocId = crypto.randomUUID();
       await db.insert(documents).values({
         id: autoDocId,
+        name: 'TracerAuto - Coming Soon',
+        originalName: 'TracerAuto - Coming Soon',
+        path: '/tracerauto/coming-soon',
         userId: 'system',
         folderId: tracerAutoId,
         title: 'TracerAuto - Coming Soon',
+        mimeType: 'text/plain',
         content: `TracerAuto - Automated Payment Solutions (Coming Soon)
 
 TracerAuto is our upcoming automated payment processing platform designed to streamline operations and reduce manual intervention for businesses of all sizes.
@@ -512,9 +520,13 @@ Note for Sales Agents: When discussing TracerAuto, highlight the automation bene
       const docId = crypto.randomUUID();
       await db.insert(documents).values({
         id: docId,
+        name: 'TracerPay Payment Gateway - Sales Presentation.pptx',
+        originalName: 'TracerPay Payment Gateway - Sales Presentation.pptx',
+        path: '/attached_assets/TracerPay Payment Gateway - Sales Presentation.pptx',
         userId: 'system',
         folderId,
         title: 'TracerPay Payment Gateway - Sales Presentation.pptx',
+        mimeType: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
         content: `TracerPay Payment Gateway Sales Presentation
 
 This comprehensive sales presentation covers:
