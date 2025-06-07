@@ -2267,45 +2267,8 @@ User Context: {userRole}`,
       const chatHistory = await storage.getChatMessages(chatId);
       const isFirstMessage = chatHistory.filter(m => m.role === 'user').length === 1;
       
-      // Add optimized welcome message for new chats
-      if (isFirstMessage && chatHistory.length === 1) {
-        // Use faster welcome message without conversation starters
-        const welcomeMessage = await storage.createMessage({
-          chatId,
-          content: "Hi! I'm JACC, your merchant services expert. How can I help you today?",
-          role: 'assistant',
-          metadata: {
-            actions: [],
-            suggestions: []
-          }
-        });
-        
-        // Capture first interaction for admin monitoring
-        try {
-          await chatMonitoringService.captureFirstInteraction(
-            chatId,
-            userId,
-            messageData.content,
-            welcomeMessage.content,
-            {
-              responseTime: 50, // Fast welcome message
-              tokensUsed: 15,
-              model: 'welcome-template',
-              confidence: 1.0
-            }
-          );
-        } catch (monitorError) {
-          console.error('Failed to capture welcome interaction:', monitorError);
-        }
-        
-        // Return immediately for faster performance
-        return res.json({
-          userMessage,
-          assistantMessage: welcomeMessage,
-          actions: [],
-          suggestions: []
-        });
-      }
+      // Process all messages through AI, including first messages
+      // This ensures proper document search and contextual responses
       
       if (isFirstMessage) {
         try {

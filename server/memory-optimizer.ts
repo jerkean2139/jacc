@@ -2,7 +2,7 @@
 
 export class MemoryOptimizer {
   private static instance: MemoryOptimizer;
-  private memoryThreshold = 0.85; // 85% memory usage threshold
+  private memoryThreshold = 0.80; // 80% memory usage threshold
   private cleanupInterval: NodeJS.Timeout | null = null;
   private documentCache = new Map<string, { data: any; lastAccessed: number; size: number }>();
   private maxCacheSize = 100 * 1024 * 1024; // 100MB cache limit
