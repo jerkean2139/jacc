@@ -6,6 +6,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useCoaching } from '@/hooks/useCoaching';
+import CoachingSettingsPanel from './coaching-settings';
 import { 
   Brain, 
   Target, 
@@ -24,7 +26,8 @@ import {
   EyeOff,
   Minimize2,
   Maximize2,
-  X
+  X,
+  Settings
 } from 'lucide-react';
 
 interface CoachingTip {
@@ -62,87 +65,60 @@ export default function CoachingOverlay() {
   const [isVisible, setIsVisible] = useState(true);
   const [isMinimized, setIsMinimized] = useState(false);
   const [activeTab, setActiveTab] = useState('tips');
-  const [coachingTips, setCoachingTips] = useState<CoachingTip[]>([]);
-  const [salesMetrics, setSalesMetrics] = useState<SalesMetrics>({
+  const [showSettings, setShowSettings] = useState(false);
+  const [coachingSettings, setCoachingSettings] = useState({
+    enabled: true,
+    realTimeAnalysis: true,
+    urgentTipsOnly: false,
+    priorityFilter: 'high' as const,
+    categoryFilter: ['discovery', 'objection', 'closing'],
+    confidenceThreshold: 80,
+    autoAnalyzeConversations: true,
+    showMetricsOverlay: true,
+    playSoundAlerts: false
+  });
+
+  // Use real coaching data from the hook
+  const coaching = useCoaching();
+  const coachingTips = coaching.coachingTips || [];
+  const salesMetrics = coaching.metrics || {
     callDuration: 0,
     questionsAsked: 0,
     objections: 0,
     nextSteps: 0,
-    engagementScore: 75,
-    closingSignals: 0
-  });
-  const [context, setContext] = useState<ConversationContext>({
-    stage: 'discovery',
-    prospectType: 'new',
+    engagementScore: 0,
+    closingSignals: 0,
+    talkToListenRatio: 0,
+    discoveryCompleteness: 0
+  };
+  const context = coaching.currentAnalysis || {
+    stage: 'discovery' as const,
+    prospectType: 'new' as const,
     productInterest: [],
-    painPoints: []
+    painPoints: [],
+    engagementLevel: 0,
+    closingSignals: 0,
+    objections: [],
+    questionsAsked: 0,
+    nextSteps: []
+  };
+
+  // Filter tips based on settings
+  const filteredTips = coachingTips.filter(tip => {
+    if (coachingSettings.urgentTipsOnly && tip.priority !== 'critical' && tip.priority !== 'high') {
+      return false;
+    }
+    if (coachingSettings.priorityFilter !== 'all' && tip.priority !== coachingSettings.priorityFilter) {
+      return false;
+    }
+    if (coachingSettings.categoryFilter.length > 0 && !coachingSettings.categoryFilter.includes(tip.category)) {
+      return false;
+    }
+    if (tip.confidence < coachingSettings.confidenceThreshold) {
+      return false;
+    }
+    return true;
   });
-
-  useEffect(() => {
-    // Simulate real-time coaching tips
-    const generateCoachingTips = () => {
-      const tips: CoachingTip[] = [
-        {
-          id: '1',
-          type: 'opportunity',
-          title: 'Perfect Discovery Moment',
-          message: 'The prospect just mentioned payment processing challenges. This is an ideal time to ask about their current volume and pain points.',
-          priority: 'high',
-          category: 'discovery',
-          confidence: 92,
-          suggestedAction: 'Ask: "What volume are you currently processing monthly, and what specific challenges are you facing with your current processor?"',
-          relatedDocs: ['TracerPay Product Features', 'Discovery Question Bank']
-        },
-        {
-          id: '2',
-          type: 'warning',
-          title: 'Missing Key Qualification',
-          message: 'You haven\'t established budget parameters yet. This is critical for proposal preparation.',
-          priority: 'medium',
-          category: 'discovery',
-          confidence: 88,
-          suggestedAction: 'Ask about their current processing costs and pain threshold for fees.',
-          relatedDocs: ['Qualification Framework', 'Budget Discovery Scripts']
-        },
-        {
-          id: '3',
-          type: 'insight',
-          title: 'Competitive Intelligence',
-          message: 'Based on their current processor mention, they likely have rate issues. TracerPay\'s interchange-plus model could save them 0.15-0.25%.',
-          priority: 'high',
-          category: 'presentation',
-          confidence: 95,
-          suggestedAction: 'Present interchange-plus savings calculator and position TracerPay\'s transparent pricing.',
-          relatedDocs: ['TracerPay Pricing Guide', 'Competitive Analysis']
-        },
-        {
-          id: '4',
-          type: 'next-step',
-          title: 'Demo Readiness Check',
-          message: 'You\'ve gathered enough discovery information. The prospect is showing interest signals - time to suggest a demo.',
-          priority: 'high',
-          category: 'presentation',
-          confidence: 87,
-          suggestedAction: 'Suggest a 15-minute TracerPay demo focused on their specific pain points.',
-          relatedDocs: ['Demo Scripts', 'TracerPay Features']
-        }
-      ];
-      setCoachingTips(tips);
-    };
-
-    generateCoachingTips();
-    
-    // Update metrics periodically
-    const metricsInterval = setInterval(() => {
-      setSalesMetrics(prev => ({
-        ...prev,
-        callDuration: prev.callDuration + 1,
-        engagementScore: Math.min(100, prev.engagementScore + Math.random() * 2 - 1)
-      }));
-    }, 1000);
-
-    return () => clearInterval(metricsInterval);
-  }, []);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -199,6 +175,14 @@ export default function CoachingOverlay() {
           <Button
             variant="ghost"
             size="sm"
+            onClick={() => setShowSettings(true)}
+            className="h-8 w-8 p-0"
+          >
+            <Settings className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => setIsMinimized(true)}
             className="h-8 w-8 p-0"
           >
@@ -226,8 +210,15 @@ export default function CoachingOverlay() {
           <TabsContent value="tips" className="mt-0 p-0">
             <ScrollArea className="h-96">
               <div className="p-3 space-y-3">
-                {coachingTips.map((tip) => (
-                  <Card key={tip.id} className="border-l-4 border-l-blue-500">
+                {filteredTips.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                    <Brain className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">No coaching tips available</p>
+                    <p className="text-xs mt-1">Start a conversation to get real-time coaching insights</p>
+                  </div>
+                ) : (
+                  filteredTips.map((tip) => (
+                    <Card key={tip.id} className="border-l-4 border-l-blue-500">
                     <CardHeader className="pb-2">
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-2">
@@ -264,7 +255,8 @@ export default function CoachingOverlay() {
                       )}
                     </CardContent>
                   </Card>
-                ))}
+                  ))
+                )}
               </div>
             </ScrollArea>
           </TabsContent>
@@ -421,6 +413,14 @@ export default function CoachingOverlay() {
           </TabsContent>
         </div>
       </Tabs>
+
+      {/* Settings Panel */}
+      <CoachingSettingsPanel
+        isOpen={showSettings}
+        onClose={() => setShowSettings(false)}
+        settings={coachingSettings}
+        onSettingsChange={setCoachingSettings}
+      />
     </div>
   );
 }
