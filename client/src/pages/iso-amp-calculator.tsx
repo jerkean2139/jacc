@@ -613,29 +613,7 @@ export default function ISOAmpCalculator() {
                 </div>
               </div>
 
-              {/* File Upload Section */}
-              <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6">
-                <div className="text-center">
-                  <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                  <div className="mt-4">
-                    <label htmlFor="statement-upload" className="cursor-pointer">
-                      <span className="mt-2 block text-sm font-medium text-gray-900 dark:text-gray-100">
-                        Or Upload Processing Statement (Optional)
-                      </span>
-                      <span className="mt-1 block text-xs text-gray-500 dark:text-gray-400">
-                        PDF parsing in development - use manual input above for now
-                      </span>
-                    </label>
-                    <input
-                      id="statement-upload"
-                      type="file"
-                      className="hidden"
-                      accept=".pdf,.csv,.xlsx,.xls"
-                      onChange={handleFileUpload}
-                    />
-                  </div>
-                </div>
-              </div>
+
 
               {/* Uploaded File Display */}
               {uploadedFile && (
