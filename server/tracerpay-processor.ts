@@ -112,6 +112,7 @@ export class TracerPayProcessor {
             const docId = crypto.randomUUID();
             await db.insert(documents).values({
               id: docId,
+              name: path.basename(entry.fileName),
               userId: 'system',
               folderId,
               title: path.basename(entry.fileName),

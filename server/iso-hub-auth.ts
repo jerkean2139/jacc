@@ -2,6 +2,14 @@ import type { Request, Response, NextFunction } from 'express';
 import type { User } from '@shared/schema';
 import { storage } from './storage';
 
+// Extend session type for ISO Hub integration
+declare module 'express-session' {
+  interface SessionData {
+    userId?: string;
+    isoHubToken?: string;
+  }
+}
+
 export interface ISOHubUser {
   id: number;
   first_name: string;
@@ -218,8 +226,8 @@ export const handleISOHubSSO = async (req: Request, res: Response) => {
     
     // Create JACC session
     if (req.session) {
-      req.session.userId = jaccUser.id;
-      req.session.isoHubToken = token;
+      (req.session as any).userId = jaccUser.id;
+      (req.session as any).isoHubToken = token;
     }
 
     res.json({

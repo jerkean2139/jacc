@@ -648,6 +648,7 @@ export const insertApiKeySchema = createInsertSchema(apiKeys).omit({
 
 // Types
 export type UpsertUser = typeof users.$inferInsert;
+export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 
 // Processor pricing management

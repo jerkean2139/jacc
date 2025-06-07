@@ -16,7 +16,7 @@ import {
   adminSettings,
   type User, 
   type UpsertUser,
-  type InsertUser,
+
   type Folder,
   type Chat,
   type Message,
