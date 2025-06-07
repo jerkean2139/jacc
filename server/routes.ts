@@ -4067,7 +4067,10 @@ User Context: {userRole}`,
       });
     } catch (error) {
       console.error('Error calling ISO AMP API:', error);
-      res.status(500).json({ error: 'Failed to analyze merchant data' });
+      res.status(500).json({ 
+        error: 'ISO AMP API connection failed. Please verify API credentials and endpoint.',
+        details: error.message 
+      });
     }
   });
 
