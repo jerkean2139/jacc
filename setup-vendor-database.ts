@@ -474,15 +474,7 @@ async function seedVendorDatabase() {
           website: vendor.baseUrl,
           contactInfo: JSON.stringify(vendor.contactInfo),
           isActive: vendor.active,
-          priority: vendor.priority,
-          scanStatus: 'pending',
-          errorCount: 0
-        }).onConflictDoUpdate({
-          target: vendors.id,
-          set: {
-            name: vendor.name,
-            updatedAt: new Date()
-          }
+          priority: vendor.priority
         });
         
         console.log(`Seeded vendor: ${vendor.name}`);

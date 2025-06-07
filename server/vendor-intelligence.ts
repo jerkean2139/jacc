@@ -718,4 +718,5 @@ export class VendorIntelligenceEngine {
   }
 }
 
-export const vendorIntelligence = new VendorIntelligenceEngine();
+export const vendorIntelligenceEngine = new VendorIntelligenceEngine();
+export const vendorIntelligence = vendorIntelligenceEngine;
