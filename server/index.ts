@@ -51,6 +51,15 @@ app.use((req, res, next) => {
     console.log("ℹ️ Vendor database initialization will occur after schema migration");
   }
 
+  // Initialize TracerPay documentation
+  try {
+    const { tracerPayProcessor } = await import('./tracerpay-processor');
+    await tracerPayProcessor.processTracerPayUploads();
+    console.log("✅ TracerPay documentation folder created with sales materials");
+  } catch (error) {
+    console.log("ℹ️ TracerPay documentation will be processed after schema migration");
+  }
+
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
