@@ -250,7 +250,7 @@ export default function ISOAmpCalculator() {
     }
   };
 
-  // Merchant statement analysis mutation
+  // Enhanced merchant statement analysis mutation with OCR
   const statementAnalysisMutation = useMutation({
     mutationFn: async (file: File) => {
       const formData = new FormData();
@@ -262,13 +262,15 @@ export default function ISOAmpCalculator() {
       });
       
       if (!response.ok) {
-        throw new Error('Failed to analyze statement');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to analyze statement');
       }
       
       return response.json();
     },
     onSuccess: (data) => {
       setAnalysisResults(data);
+      
       // Auto-populate business data from analysis
       if (data.extractedData) {
         setBusinessData(prev => ({
@@ -276,15 +278,35 @@ export default function ISOAmpCalculator() {
           ...data.extractedData
         }));
       }
+      
+      // Show detailed success message with extraction quality
+      const metadata = data.analysisMetadata;
+      const qualityMessage = metadata.dataQuality === 'high' 
+        ? 'High quality data extraction completed'
+        : metadata.dataQuality === 'medium'
+        ? 'Good quality data extracted with minor gaps'
+        : 'Basic data extracted - some manual verification recommended';
+      
       toast({
-        title: "Statement Analyzed",
-        description: "Business data has been extracted and populated.",
+        title: `Statement Analyzed (${Math.round(metadata.confidence * 100)}% confidence)`,
+        description: `${qualityMessage}. Processor: ${metadata.processorDetected}`,
       });
+      
+      // Show improvement suggestions if any
+      if (metadata.improvementSuggestions?.length > 0) {
+        setTimeout(() => {
+          toast({
+            title: "Extraction Tips",
+            description: metadata.improvementSuggestions[0],
+            variant: "default",
+          });
+        }, 2000);
+      }
     },
     onError: (error) => {
       toast({
         title: "Analysis Failed",
-        description: "Could not analyze the uploaded statement. Please try again.",
+        description: error.message || "Could not analyze the uploaded statement. Please try again.",
         variant: "destructive",
       });
     },
@@ -445,33 +467,123 @@ export default function ISOAmpCalculator() {
                 </div>
               )}
 
-              {/* Analysis Results Display */}
+              {/* Enhanced Analysis Results Display */}
               {analysisResults && (
-                <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg space-y-3">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="w-5 h-5 text-green-600" />
-                    <h4 className="font-medium">Statement Analysis Complete</h4>
-                    <span className="text-sm bg-green-100 dark:bg-green-800 px-2 py-1 rounded">
-                      {Math.round(analysisResults.confidence * 100)}% confidence
-                    </span>
-                  </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
-                    Current Processor: <span className="font-medium">{analysisResults.processorName}</span>
-                  </p>
-                  {analysisResults.insights && analysisResults.insights.length > 0 && (
-                    <div className="mt-2">
-                      <p className="text-sm font-medium mb-2">Key Insights:</p>
-                      <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1">
-                        {analysisResults.insights.map((insight: string, index: number) => (
-                          <li key={index} className="flex items-start gap-2">
-                            <span className="text-blue-600">•</span>
-                            {insight}
-                          </li>
-                        ))}
-                      </ul>
+                <Card className="mt-4">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <FileCheck className="w-5 h-5" />
+                      Enhanced OCR Statement Analysis
+                    </CardTitle>
+                    <CardDescription>
+                      Advanced document processing with AI-powered data extraction
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-6">
+                      {/* Quality Metrics Dashboard */}
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                          <div className="text-2xl font-bold text-blue-600">
+                            {Math.round((analysisResults.analysisMetadata?.confidence || analysisResults.confidence || 0) * 100)}%
+                          </div>
+                          <div className="text-sm text-gray-600 dark:text-gray-400">Extraction Confidence</div>
+                        </div>
+                        <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                          <div className="text-lg font-bold text-green-600 capitalize">
+                            {analysisResults.analysisMetadata?.dataQuality || 'Good'}
+                          </div>
+                          <div className="text-sm text-gray-600 dark:text-gray-400">Data Quality</div>
+                        </div>
+                        <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                          <div className="text-lg font-bold text-purple-600 capitalize">
+                            {analysisResults.analysisMetadata?.extractionMethod || 'Enhanced'}
+                          </div>
+                          <div className="text-sm text-gray-600 dark:text-gray-400">OCR Method</div>
+                        </div>
+                        <div className="text-center p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
+                          <div className="text-lg font-bold text-orange-600">
+                            {analysisResults.analysisMetadata?.processorDetected || analysisResults.processorName || 'Unknown'}
+                          </div>
+                          <div className="text-sm text-gray-600 dark:text-gray-400">Processor</div>
+                        </div>
+                      </div>
+
+                      {/* Financial Data Summary */}
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <Label className="text-sm text-gray-600 dark:text-gray-400">Monthly Volume</Label>
+                          <p className="text-xl font-bold text-green-600">
+                            ${(analysisResults.extractedData?.monthlyVolume || 0).toLocaleString()}
+                          </p>
+                        </div>
+                        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <Label className="text-sm text-gray-600 dark:text-gray-400">Transaction Count</Label>
+                          <p className="text-xl font-bold">
+                            {(analysisResults.extractedData?.transactionCount || 0).toLocaleString()}
+                          </p>
+                        </div>
+                        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <Label className="text-sm text-gray-600 dark:text-gray-400">Average Ticket</Label>
+                          <p className="text-xl font-bold">
+                            ${(analysisResults.extractedData?.averageTicket || 0).toFixed(2)}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Validation Alerts */}
+                      {analysisResults.analysisMetadata?.validationErrors?.length > 0 && (
+                        <Alert className="border-yellow-200 bg-yellow-50 dark:bg-yellow-900/20">
+                          <AlertTriangle className="h-4 w-4 text-yellow-600" />
+                          <AlertTitle className="text-yellow-800 dark:text-yellow-200">
+                            Data Validation Notices ({analysisResults.analysisMetadata.validationErrors.length})
+                          </AlertTitle>
+                          <AlertDescription className="text-yellow-700 dark:text-yellow-300">
+                            <ul className="list-disc list-inside space-y-1 text-sm mt-2">
+                              {analysisResults.analysisMetadata.validationErrors.map((error: string, index: number) => (
+                                <li key={index}>{error}</li>
+                              ))}
+                            </ul>
+                          </AlertDescription>
+                        </Alert>
+                      )}
+
+                      {/* Optimization Tips */}
+                      {analysisResults.analysisMetadata?.improvementSuggestions?.length > 0 && (
+                        <Alert className="border-blue-200 bg-blue-50 dark:bg-blue-900/20">
+                          <Lightbulb className="h-4 w-4 text-blue-600" />
+                          <AlertTitle className="text-blue-800 dark:text-blue-200">
+                            OCR Optimization Tips
+                          </AlertTitle>
+                          <AlertDescription className="text-blue-700 dark:text-blue-300">
+                            <ul className="list-disc list-inside space-y-1 text-sm mt-2">
+                              {analysisResults.analysisMetadata.improvementSuggestions.map((suggestion: string, index: number) => (
+                                <li key={index}>{suggestion}</li>
+                              ))}
+                            </ul>
+                          </AlertDescription>
+                        </Alert>
+                      )}
+
+                      {/* Detailed Report Accordion */}
+                      {analysisResults.qualityReport && (
+                        <div className="border rounded-lg">
+                          <details className="group">
+                            <summary className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                              <span className="font-medium">View Detailed OCR Analysis Report</span>
+                              <ChevronDown className="w-4 h-4 group-open:rotate-180 transition-transform" />
+                            </summary>
+                            <div className="p-4 border-t">
+                              <pre className="text-xs bg-gray-100 dark:bg-gray-900 p-3 rounded overflow-auto whitespace-pre-wrap font-mono">
+                                {analysisResults.qualityReport}
+                              </pre>
+                            </div>
+                          </details>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
+                  </CardContent>
+                </Card>
               )}
 
               {/* Basic Volume Information */}

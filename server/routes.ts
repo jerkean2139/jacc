@@ -3955,7 +3955,7 @@ User Context: {userRole}`,
     }
   });
 
-  // Bank statement analysis endpoint
+  // Enhanced bank statement analysis endpoint with OCR capabilities
   app.post('/api/iso-amp/analyze-statement', upload.single('statement'), async (req, res) => {
     try {
       if (!req.file) {
@@ -3963,41 +3963,81 @@ User Context: {userRole}`,
       }
 
       const filePath = req.file.path;
+      const fileName = req.file.originalname;
       const mimeType = req.file.mimetype;
 
-      // Use the comprehensive PDF analyzer for better extraction
+      // Validate file type
+      if (!mimeType.includes('pdf')) {
+        return res.status(400).json({ error: 'Only PDF files are supported for statement analysis' });
+      }
+
       const fs = require('fs');
       const fileBuffer = fs.readFileSync(filePath);
       
-      const { pdfStatementAnalyzer } = await import('./pdf-statement-analyzer');
-      const extractedData = await pdfStatementAnalyzer.analyzeStatement(fileBuffer);
+      // Use enhanced PDF analyzer with OCR capabilities
+      const { enhancedPDFAnalyzer } = await import('./enhanced-pdf-analyzer');
+      const enhancedResult = await enhancedPDFAnalyzer.analyzeStatement(fileBuffer, fileName);
       
-      // Generate insights about the statement
-      const insights = await pdfStatementAnalyzer.generateStatementInsights(extractedData);
+      // Generate extraction quality report
+      const qualityReport = await enhancedPDFAnalyzer.generateExtractionReport(enhancedResult);
+      
+      // Fallback to basic analyzer if enhanced analysis fails
+      let fallbackData = null;
+      if (enhancedResult.confidence < 0.3) {
+        try {
+          const { pdfStatementAnalyzer } = await import('./pdf-statement-analyzer');
+          fallbackData = await pdfStatementAnalyzer.analyzeStatement(fileBuffer);
+        } catch (fallbackError) {
+          console.warn('Fallback analysis also failed:', fallbackError);
+        }
+      }
+
+      // Use best available data
+      const finalData = enhancedResult.confidence >= 0.3 ? enhancedResult.extractedData : fallbackData;
+      
+      if (!finalData) {
+        return res.status(422).json({ 
+          error: 'Unable to extract meaningful data from statement',
+          suggestions: [
+            'Ensure the PDF is not password protected',
+            'Try uploading a higher quality scan',
+            'Verify the document is a merchant processing statement'
+          ]
+        });
+      }
 
       res.json({
         success: true,
-        extractedData,
-        insights,
+        extractedData: finalData,
+        analysisMetadata: {
+          extractionMethod: enhancedResult.extractionMethod,
+          dataQuality: enhancedResult.dataQuality,
+          confidence: enhancedResult.confidence,
+          processorDetected: finalData.currentProcessor?.name || 'Unknown',
+          validationErrors: enhancedResult.validationErrors,
+          improvementSuggestions: enhancedResult.improvementSuggestions
+        },
+        qualityReport,
         fileName: req.file.originalname,
         fileSize: req.file.size,
-        confidence: extractedData.confidence,
-        processorName: extractedData.currentProcessor.name,
         timestamp: new Date().toISOString()
       });
 
       // Clean up uploaded file
       setTimeout(() => {
         try {
-          require('fs').unlinkSync(filePath);
+          fs.unlinkSync(filePath);
         } catch (error) {
           console.log('Could not delete temp file:', error.message);
         }
       }, 1000);
 
     } catch (error) {
-      console.error('Statement analysis error:', error);
-      res.status(500).json({ error: 'Failed to analyze statement' });
+      console.error('Enhanced statement analysis error:', error);
+      res.status(500).json({ 
+        error: 'Failed to analyze statement',
+        details: error.message 
+      });
     }
   });
 
