@@ -318,27 +318,70 @@ export default function ISOAmpCalculator() {
     }
   };
 
-  // Rate comparison mutation
+  // Rate comparison mutation with integrated calculator
   const rateComparisonMutation = useMutation({
-    mutationFn: (data: BusinessData) => apiRequest('POST', '/api/iso-amp/rate-comparison', data),
+    mutationFn: (data: BusinessData) => {
+      const merchantProfile = {
+        businessName: data.businessName || 'Unknown Business',
+        industry: data.industry,
+        businessType: data.businessType as 'retail' | 'restaurant' | 'ecommerce' | 'service' | 'healthcare' | 'automotive' | 'other',
+        monthlyVolume: data.monthlyVolume,
+        averageTicket: data.averageTicket,
+        transactionCount: data.transactionCount,
+        cardPresentPercentage: data.transactionBreakdown.cardPresentPercentage
+      };
+      
+      return apiRequest('POST', '/api/iso-amp/rate-comparison', {
+        merchantProfile,
+        currentProcessor: data.currentProcessor
+      });
+    },
     onSuccess: (data) => {
       setResults({ type: 'comparison', data });
-      toast({ title: 'Success', description: 'Rate comparison completed successfully' });
+      toast({ 
+        title: 'Rate Comparison Complete', 
+        description: `Found ${data.comparisons?.length || 0} processor options for comparison` 
+      });
     },
     onError: () => {
-      toast({ title: 'Error', description: 'Failed to fetch rate comparison. Please check your connection.' });
+      toast({ 
+        title: 'Comparison Failed', 
+        description: 'Unable to calculate rate comparisons. Please verify your data.' 
+      });
     }
   });
 
-  // Advanced savings mutation
+  // Advanced savings mutation with integrated calculator
   const advancedSavingsMutation = useMutation({
-    mutationFn: (data: BusinessData) => apiRequest('POST', '/api/iso-amp/advanced-savings', data),
+    mutationFn: (data: BusinessData) => {
+      const merchantProfile = {
+        businessName: data.businessName || 'Unknown Business',
+        industry: data.industry,
+        businessType: data.businessType as 'retail' | 'restaurant' | 'ecommerce' | 'service' | 'healthcare' | 'automotive' | 'other',
+        monthlyVolume: data.monthlyVolume,
+        averageTicket: data.averageTicket,
+        transactionCount: data.transactionCount,
+        cardPresentPercentage: data.transactionBreakdown.cardPresentPercentage
+      };
+      
+      return apiRequest('POST', '/api/iso-amp/advanced-savings', {
+        merchantProfile,
+        currentProcessor: data.currentProcessor,
+        proposedProcessor: data.proposedProcessor
+      });
+    },
     onSuccess: (data) => {
       setResults({ type: 'savings', data });
-      toast({ title: 'Success', description: 'Advanced savings analysis completed' });
+      toast({ 
+        title: 'Savings Analysis Complete', 
+        description: `Potential monthly savings: $${data.savings?.monthly?.toFixed(2) || '0.00'}` 
+      });
     },
     onError: () => {
-      toast({ title: 'Error', description: 'Failed to calculate advanced savings. Please try again.' });
+      toast({ 
+        title: 'Analysis Failed', 
+        description: 'Unable to calculate savings analysis. Please check your processor data.' 
+      });
     }
   });
 
@@ -650,7 +693,215 @@ export default function ISOAmpCalculator() {
                           </details>
                         </div>
                       )}
+                      {/* OCR Test Results */}
+                      {analysisResults.testResults && (
+                        <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                          <h4 className="font-semibold text-green-800 dark:text-green-200 mb-2">
+                            OCR Accuracy Test ({analysisResults.testResults.overallAccuracy}% accurate)
+                          </h4>
+                          <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                              <strong>Expected Values:</strong>
+                              <ul className="text-green-700 dark:text-green-300 mt-1">
+                                <li>Volume: ${analysisResults.testResults.expectedData.monthlyVolume.toLocaleString()}</li>
+                                <li>Transactions: {analysisResults.testResults.expectedData.transactionCount}</li>
+                                <li>Processor: {analysisResults.testResults.expectedData.processorName}</li>
+                              </ul>
+                            </div>
+                            <div>
+                              <strong>Extracted Values:</strong>
+                              <ul className="text-green-700 dark:text-green-300 mt-1">
+                                <li>Volume: ${(analysisResults.testResults.extractedData.monthlyVolume || 0).toLocaleString()}</li>
+                                <li>Transactions: {analysisResults.testResults.extractedData.transactionCount || 0}</li>
+                                <li>Processor: {analysisResults.testResults.extractedData.currentProcessor?.name || 'Unknown'}</li>
+                              </ul>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Processor Comparison Results */}
+              {results?.type === 'comparison' && (
+                <Card className="mt-6">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <BarChart3 className="w-5 h-5" />
+                      Processor Comparison Results
+                    </CardTitle>
+                    <CardDescription>
+                      Side-by-side analysis of payment processors for your business
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {results.data.comparisons?.map((comparison: any, index: number) => (
+                        <Card key={index} className="p-4 border-l-4 border-l-blue-500">
+                          <div className="flex justify-between items-start mb-4">
+                            <div>
+                              <h4 className="font-semibold text-lg">{comparison.processor.name}</h4>
+                              <p className="text-sm text-gray-600 dark:text-gray-400 capitalize">
+                                {comparison.processor.type.replace('_', ' ')} pricing model
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-2xl font-bold text-green-600">
+                                ${Math.abs(comparison.savings.monthly).toFixed(2)}
+                              </div>
+                              <div className="text-sm text-gray-600">
+                                {comparison.savings.monthly >= 0 ? 'monthly savings' : 'monthly increase'}
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                            <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded">
+                              <div className="text-sm text-gray-600 dark:text-gray-400">Monthly Cost</div>
+                              <div className="text-lg font-semibold">${comparison.proposedCosts.totalMonthlyCost.toFixed(2)}</div>
+                            </div>
+                            <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded">
+                              <div className="text-sm text-gray-600 dark:text-gray-400">Effective Rate</div>
+                              <div className="text-lg font-semibold">{(comparison.proposedCosts.effectiveRate * 100).toFixed(2)}%</div>
+                            </div>
+                            <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded">
+                              <div className="text-sm text-gray-600 dark:text-gray-400">Annual Impact</div>
+                              <div className="text-lg font-semibold text-green-600">${Math.abs(comparison.savings.annual).toFixed(0)}</div>
+                            </div>
+                            <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded">
+                              <div className="text-sm text-gray-600 dark:text-gray-400">ROI</div>
+                              <div className="text-lg font-semibold">{comparison.savings.roi.toFixed(1)}%</div>
+                            </div>
+                          </div>
+
+                          {comparison.recommendations?.length > 0 && (
+                            <div className="border-t pt-3">
+                              <h5 className="font-medium mb-2">Recommendations:</h5>
+                              <ul className="text-sm space-y-1">
+                                {comparison.recommendations.map((rec: string, idx: number) => (
+                                  <li key={idx} className="flex items-start gap-2">
+                                    <span className="text-blue-600 mt-1">•</span>
+                                    <span>{rec}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </Card>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Advanced Savings Analysis */}
+              {results?.type === 'savings' && (
+                <Card className="mt-6">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <TrendingUp className="w-5 h-5" />
+                      Advanced Savings Analysis
+                    </CardTitle>
+                    <CardDescription>
+                      Detailed cost breakdown and ROI analysis
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                      <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                        <h4 className="font-semibold mb-3 text-red-800 dark:text-red-200">Current Processor</h4>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span>Monthly Cost:</span>
+                            <span className="font-medium">${results.data.savings.current.totalMonthlyCost.toFixed(2)}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Effective Rate:</span>
+                            <span className="font-medium">{(results.data.savings.current.effectiveRate * 100).toFixed(2)}%</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Annual Cost:</span>
+                            <span className="font-medium">${results.data.savings.current.annualCost.toFixed(0)}</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                        <h4 className="font-semibold mb-3 text-green-800 dark:text-green-200">Proposed Processor</h4>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span>Monthly Cost:</span>
+                            <span className="font-medium">${results.data.savings.proposed.totalMonthlyCost.toFixed(2)}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Effective Rate:</span>
+                            <span className="font-medium">{(results.data.savings.proposed.effectiveRate * 100).toFixed(2)}%</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Annual Cost:</span>
+                            <span className="font-medium">${results.data.savings.proposed.annualCost.toFixed(0)}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="border-t pt-6">
+                      <h4 className="font-semibold mb-4">Financial Impact Summary</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-center">
+                        <div className="p-4 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-lg">
+                          <div className="text-2xl font-bold text-green-600">
+                            ${Math.abs(results.data.savings.monthly).toFixed(2)}
+                          </div>
+                          <div className="text-sm text-gray-600">Monthly {results.data.savings.monthly >= 0 ? 'Savings' : 'Increase'}</div>
+                        </div>
+                        <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg">
+                          <div className="text-2xl font-bold text-blue-600">
+                            ${Math.abs(results.data.savings.annual).toFixed(0)}
+                          </div>
+                          <div className="text-sm text-gray-600">Annual {results.data.savings.annual >= 0 ? 'Savings' : 'Increase'}</div>
+                        </div>
+                        <div className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-lg">
+                          <div className="text-2xl font-bold text-purple-600">
+                            {results.data.savings.paybackPeriod.toFixed(1)}
+                          </div>
+                          <div className="text-sm text-gray-600">Payback Months</div>
+                        </div>
+                        <div className="p-4 bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 rounded-lg">
+                          <div className="text-2xl font-bold text-orange-600">
+                            {results.data.savings.roi.toFixed(0)}%
+                          </div>
+                          <div className="text-sm text-gray-600">Annual ROI</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {results.data.savings.breakdownAnalysis && (
+                      <div className="border-t mt-6 pt-6">
+                        <h4 className="font-semibold mb-4">Cost Breakdown Analysis</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div className="text-center">
+                            <div className="text-lg font-semibold text-green-600">
+                              ${Math.abs(results.data.savings.breakdownAnalysis.processingCostSavings).toFixed(2)}
+                            </div>
+                            <div className="text-sm text-gray-600">Processing Costs</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-lg font-semibold text-blue-600">
+                              ${Math.abs(results.data.savings.breakdownAnalysis.feeSavings).toFixed(2)}
+                            </div>
+                            <div className="text-sm text-gray-600">Monthly Fees</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-lg font-semibold text-purple-600">
+                              ${Math.abs(results.data.savings.breakdownAnalysis.equipmentSavings).toFixed(2)}
+                            </div>
+                            <div className="text-sm text-gray-600">Equipment Costs</div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               )}

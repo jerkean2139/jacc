@@ -3911,33 +3911,96 @@ User Context: {userRole}`,
     }
   });
 
+  // Integrated merchant services calculator routes
   app.post('/api/iso-amp/rate-comparison', async (req, res) => {
     try {
-      const { isoAMPService } = await import('./iso-amp-api');
-      const comparisons = await isoAMPService.getRateComparisons(req.body);
-      res.json({ comparisons, timestamp: new Date().toISOString() });
+      const { integratedCalculator } = await import('./integrated-merchant-calculator');
+      const { merchantProfile, currentProcessor } = req.body;
+      
+      const comparisons = await integratedCalculator.compareProcessors(merchantProfile, currentProcessor);
+      res.json({ 
+        comparisons: comparisons.map(comp => ({
+          processor: comp.proposedProcessor,
+          currentCosts: comp.currentCosts,
+          proposedCosts: comp.proposedCosts,
+          savings: {
+            monthly: comp.monthlySavings,
+            annual: comp.annualSavings,
+            percentage: comp.savingsPercentage,
+            paybackPeriod: comp.paybackPeriod,
+            roi: comp.roi
+          },
+          recommendations: comp.recommendations
+        })),
+        timestamp: new Date().toISOString() 
+      });
     } catch (error) {
       console.error('Rate comparison error:', error);
-      res.status(500).json({ error: 'Failed to get rate comparisons' });
+      res.status(500).json({ error: 'Failed to calculate rate comparisons' });
     }
   });
 
   app.post('/api/iso-amp/advanced-savings', async (req, res) => {
     try {
-      const { isoAMPService } = await import('./iso-amp-api');
-      const savings = await isoAMPService.calculateAdvancedSavings(req.body);
-      res.json({ savings, timestamp: new Date().toISOString() });
+      const { integratedCalculator } = await import('./integrated-merchant-calculator');
+      const { merchantProfile, currentProcessor, proposedProcessor } = req.body;
+      
+      const currentCosts = await integratedCalculator.calculateCosts(merchantProfile, currentProcessor);
+      const proposedCosts = await integratedCalculator.calculateCosts(merchantProfile, proposedProcessor);
+      
+      const monthlySavings = currentCosts.totalMonthlyCost - proposedCosts.totalMonthlyCost;
+      const annualSavings = monthlySavings * 12;
+      const setupCosts = proposedProcessor.equipment?.setupFee || 0;
+      const paybackPeriod = monthlySavings > 0 ? setupCosts / monthlySavings : 0;
+      
+      res.json({ 
+        savings: {
+          current: currentCosts,
+          proposed: proposedCosts,
+          monthly: monthlySavings,
+          annual: annualSavings,
+          setupCosts,
+          paybackPeriod,
+          roi: annualSavings > 0 ? ((annualSavings - setupCosts) / setupCosts) * 100 : 0,
+          breakdownAnalysis: {
+            processingCostSavings: currentCosts.monthlyProcessingCosts - proposedCosts.monthlyProcessingCosts,
+            feeSavings: currentCosts.monthlyFees - proposedCosts.monthlyFees,
+            equipmentSavings: currentCosts.monthlyEquipment - proposedCosts.monthlyEquipment
+          }
+        },
+        timestamp: new Date().toISOString() 
+      });
     } catch (error) {
       console.error('Advanced savings error:', error);
-      res.status(500).json({ error: 'Failed to calculate savings' });
+      res.status(500).json({ error: 'Failed to calculate advanced savings' });
     }
   });
 
   app.post('/api/iso-amp/equipment-costs', async (req, res) => {
     try {
-      const { isoAMPService } = await import('./iso-amp-api');
-      const equipment = await isoAMPService.calculateEquipmentCosts(req.body);
-      res.json({ equipment, timestamp: new Date().toISOString() });
+      const { integratedCalculator } = await import('./integrated-merchant-calculator');
+      const { processorName, category } = req.body;
+      
+      const equipmentOptions = integratedCalculator.getCompatibleEquipment(processorName, category);
+      const totalEquipmentCatalog = integratedCalculator.getEquipmentCatalog();
+      
+      res.json({ 
+        equipment: {
+          compatible: equipmentOptions,
+          categories: ['terminal', 'mobile', 'virtual', 'gateway', 'pos_system'],
+          totalOptions: totalEquipmentCatalog.length,
+          recommendations: equipmentOptions.slice(0, 3).map(eq => ({
+            ...eq,
+            costAnalysis: {
+              upfront: eq.price,
+              monthly: eq.monthlyLease || 0,
+              annual: (eq.monthlyLease || 0) * 12,
+              threeYearTotal: eq.price + ((eq.monthlyLease || 0) * 36)
+            }
+          }))
+        },
+        timestamp: new Date().toISOString() 
+      });
     } catch (error) {
       console.error('Equipment costs error:', error);
       res.status(500).json({ error: 'Failed to calculate equipment costs' });
@@ -3946,9 +4009,31 @@ User Context: {userRole}`,
 
   app.post('/api/iso-amp/generate-proposal', async (req, res) => {
     try {
-      const { isoAMPService } = await import('./iso-amp-api');
-      const proposal = await isoAMPService.generateProposal(req.body);
-      res.json({ proposal, timestamp: new Date().toISOString() });
+      const { integratedCalculator } = await import('./integrated-merchant-calculator');
+      const { merchantProfile, selectedProcessor, selectedEquipment } = req.body;
+      
+      const proposal = await integratedCalculator.generateProposal(
+        merchantProfile, 
+        selectedProcessor, 
+        selectedEquipment
+      );
+      
+      const costs = await integratedCalculator.calculateCosts(merchantProfile, selectedProcessor);
+      
+      res.json({ 
+        proposal: {
+          content: proposal,
+          summary: {
+            processor: selectedProcessor.name,
+            monthlyVolume: merchantProfile.monthlyVolume,
+            effectiveRate: costs.effectiveRate,
+            monthlyCost: costs.totalMonthlyCost,
+            annualCost: costs.annualCost,
+            equipmentIncluded: selectedEquipment?.length || 0
+          }
+        },
+        timestamp: new Date().toISOString() 
+      });
     } catch (error) {
       console.error('Proposal generation error:', error);
       res.status(500).json({ error: 'Failed to generate proposal' });
