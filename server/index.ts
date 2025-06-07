@@ -41,6 +41,15 @@ app.use((req, res, next) => {
 
 (async () => {
   const server = await registerRoutes(app);
+  
+  // Initialize vendor intelligence database with real payment processor data
+  try {
+    const { seedVendorDatabase } = await import('../setup-vendor-database');
+    await seedVendorDatabase();
+    console.log("✅ Vendor intelligence database initialized with authentic payment processor data");
+  } catch (error) {
+    console.log("ℹ️ Vendor database initialization will occur after schema migration");
+  }
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;

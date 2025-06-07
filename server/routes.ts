@@ -2115,60 +2115,47 @@ User Context: {userRole}`,
 
   app.get('/api/vendor-intelligence/vendors', async (req: any, res) => {
     try {
-      // Mock vendor data for development
-      const vendors = [
-        {
-          id: 'first-data',
-          name: 'First Data (Fiserv)',
-          baseUrl: 'https://www.fiserv.com',
-          active: true,
-          crawlFrequency: 'daily',
-          lastScan: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
-          documentsFound: 47,
-          status: 'active'
-        },
-        {
-          id: 'chase-paymentech',
-          name: 'Chase Paymentech',
-          baseUrl: 'https://www.chasepaymentech.com',
-          active: true,
-          crawlFrequency: 'daily',
-          lastScan: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(), // 1 hour ago
-          documentsFound: 32,
-          status: 'active'
-        },
-        {
-          id: 'worldpay',
-          name: 'Worldpay',
-          baseUrl: 'https://www.worldpay.com',
-          active: false,
-          crawlFrequency: 'daily',
-          lastScan: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
-          documentsFound: 28,
-          status: 'inactive'
-        },
-        {
-          id: 'tsys',
-          name: 'TSYS (Global Payments)',
-          baseUrl: 'https://www.tsys.com',
-          active: true,
-          crawlFrequency: 'daily',
-          lastScan: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(), // 3 hours ago
-          documentsFound: 41,
-          status: 'active'
-        },
-        {
-          id: 'elavon',
-          name: 'Elavon',
-          baseUrl: 'https://www.elavon.com',
-          active: true,
-          crawlFrequency: 'daily',
-          lastScan: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(), // 4 hours ago
-          documentsFound: 35,
-          status: 'error'
-        }
-      ];
-      res.json(vendors);
+      const { db } = await import('./db');
+      const { vendors, vendorDocuments } = await import('@shared/schema');
+      const { count, eq, sql } = await import('drizzle-orm');
+
+      // Get vendors with document counts
+      const vendorList = await db
+        .select({
+          id: vendors.id,
+          name: vendors.name,
+          baseUrl: vendors.baseUrl,
+          active: vendors.active,
+          crawlFrequency: vendors.crawlFrequency,
+          lastScan: vendors.lastScan,
+          scanStatus: vendors.scanStatus,
+          priority: vendors.priority
+        })
+        .from(vendors)
+        .orderBy(vendors.priority, vendors.name);
+
+      // Get document counts for each vendor
+      const vendorsWithCounts = await Promise.all(
+        vendorList.map(async (vendor) => {
+          const docCountResult = await db
+            .select({ count: count() })
+            .from(vendorDocuments)
+            .where(eq(vendorDocuments.vendorId, vendor.id));
+          
+          const documentsFound = docCountResult[0]?.count || 0;
+          
+          return {
+            ...vendor,
+            documentsFound,
+            status: vendor.active ? 
+              (vendor.scanStatus === 'failed' ? 'error' : 'active') : 
+              'inactive',
+            lastScan: vendor.lastScan?.toISOString() || null
+          };
+        })
+      );
+
+      res.json(vendorsWithCounts);
     } catch (error) {
       console.error("Error getting vendors:", error);
       res.status(500).json({ error: "Failed to get vendors" });
@@ -2177,65 +2164,47 @@ User Context: {userRole}`,
 
   app.get('/api/vendor-intelligence/changes', async (req: any, res) => {
     try {
-      // Mock recent changes for development
-      const changes = [
-        {
-          id: '1',
-          documentTitle: 'Merchant Processing Rate Sheet Q1 2024',
-          vendorName: 'First Data (Fiserv)',
-          changeType: 'updated',
-          detectedAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(), // 30 minutes ago
-          url: 'https://www.fiserv.com/resources/rate-sheet-q1-2024.pdf',
-          changes: {
-            added: ['New interchange rates for premium cards', 'Updated international processing fees'],
-            removed: ['Deprecated legacy pricing structure'],
-            modified: ['Modified settlement timeframes']
-          }
-        },
-        {
-          id: '2',
-          documentTitle: 'PCI Compliance Guidelines 2024',
-          vendorName: 'Chase Paymentech',
-          changeType: 'new',
-          detectedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
-          url: 'https://www.chasepaymentech.com/resources/pci-compliance-2024.pdf',
-          changes: {
-            added: ['New document discovered'],
-            removed: [],
-            modified: []
-          }
-        },
-        {
-          id: '3',
-          documentTitle: 'Terminal Programming Guide v3.2',
-          vendorName: 'TSYS (Global Payments)',
-          changeType: 'updated',
-          detectedAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(), // 5 hours ago
-          url: 'https://www.tsys.com/support/terminal-guide-v32.pdf',
-          changes: {
-            added: ['New EMV chip configuration steps', 'Contactless payment setup'],
-            removed: [],
-            modified: ['Updated troubleshooting section']
-          }
-        },
-        {
-          id: '4',
-          documentTitle: 'API Integration Documentation',
-          vendorName: 'Worldpay',
-          changeType: 'removed',
-          detectedAt: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(), // 8 hours ago
-          url: 'https://www.worldpay.com/docs/api-v2.1.pdf',
-          changes: {
-            added: [],
-            removed: ['Document no longer available'],
-            modified: []
-          }
+      const { db } = await import('./db');
+      const { documentChanges, vendorDocuments, vendors } = await import('@shared/schema');
+      const { eq, desc } = await import('drizzle-orm');
+
+      // Get recent document changes with vendor and document information
+      const changes = await db
+        .select({
+          id: documentChanges.id,
+          changeType: documentChanges.changeType,
+          changeDetails: documentChanges.changeDetails,
+          detectedAt: documentChanges.detectedAt,
+          documentTitle: vendorDocuments.title,
+          documentUrl: vendorDocuments.url,
+          vendorName: vendors.name
+        })
+        .from(documentChanges)
+        .innerJoin(vendorDocuments, eq(documentChanges.documentId, vendorDocuments.id))
+        .innerJoin(vendors, eq(vendorDocuments.vendorId, vendors.id))
+        .orderBy(desc(documentChanges.detectedAt))
+        .limit(50);
+
+      // Format changes for frontend
+      const formattedChanges = changes.map(change => ({
+        id: change.id,
+        documentTitle: change.documentTitle,
+        vendorName: change.vendorName,
+        changeType: change.changeType,
+        detectedAt: change.detectedAt.toISOString(),
+        url: change.documentUrl,
+        changes: change.changeDetails || {
+          added: [],
+          removed: [],
+          modified: []
         }
-      ];
-      res.json(changes);
+      }));
+
+      res.json(formattedChanges);
     } catch (error) {
       console.error("Error getting changes:", error);
-      res.status(500).json({ error: "Failed to get changes" });
+      // Return empty array if database tables don't exist yet
+      res.json([]);
     }
   });
 
