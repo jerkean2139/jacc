@@ -4077,7 +4077,8 @@ User Context: {userRole}`,
       
       // Fallback to internal analysis when API is unavailable
       try {
-        const internalAnalysis = generateInternalAnalysis(merchantData);
+        const { merchantData: data } = req.body;
+        const internalAnalysis = generateInternalAnalysis(data);
         res.json({
           analysis: internalAnalysis,
           source: 'Internal Analysis Engine',

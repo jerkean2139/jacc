@@ -1,5 +1,6 @@
 import { db } from './server/db';
 import { vendors } from './shared/schema';
+import { randomUUID } from 'crypto';
 
 const realVendorData = [
   {
@@ -465,19 +466,15 @@ async function seedVendorDatabase() {
     for (const vendor of realVendorData) {
       try {
         await db.insert(vendors).values({
-          id: vendor.id,
+          id: randomUUID(),
           name: vendor.name,
-          companyType: vendor.companyType,
-          baseUrl: vendor.baseUrl,
-          documentPortalUrl: vendor.documentPortalUrl,
-          supportUrl: vendor.supportUrl,
-          active: vendor.active,
-          crawlFrequency: vendor.crawlFrequency,
+          type: vendor.companyType, // Map companyType to required type field
+          category: vendor.companyType,
+          description: `${vendor.name} - ${vendor.companyType}`,
+          website: vendor.baseUrl,
+          contactInfo: JSON.stringify(vendor.contactInfo),
+          isActive: vendor.active,
           priority: vendor.priority,
-          selectors: vendor.selectors,
-          documentPaths: vendor.documentPaths,
-          apiEndpoints: vendor.apiEndpoints,
-          contactInfo: vendor.contactInfo,
           scanStatus: 'pending',
           errorCount: 0
         }).onConflictDoUpdate({
