@@ -1519,63 +1519,83 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/vendor-intelligence/updates', isAuthenticated, async (req, res) => {
     try {
-      // Return recent vendor intelligence updates with data freshness indicators
-      const mockUpdates = [
-        {
+      const updates = [];
+      
+      if (process.env.NEWS_API_KEY) {
+        // Fetch live news updates for key vendors
+        const keyVendors = ['Stripe', 'Square', 'PayPal', 'Adyen', 'TracerPay'];
+        
+        for (const vendor of keyVendors) {
+          try {
+            const response = await axios.get('https://newsapi.org/v2/everything', {
+              params: {
+                q: `"${vendor}" AND (payment OR processing OR merchant OR fintech)`,
+                domains: 'techcrunch.com,reuters.com,bloomberg.com,cnbc.com,paymentssource.com',
+                language: 'en',
+                sortBy: 'publishedAt',
+                pageSize: 2,
+                from: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+              },
+              headers: {
+                'X-API-Key': process.env.NEWS_API_KEY
+              }
+            });
+
+            if (response.data.articles) {
+              for (const article of response.data.articles) {
+                const publishedAt = new Date(article.publishedAt);
+                const hoursAgo = Math.floor((Date.now() - publishedAt.getTime()) / (1000 * 60 * 60));
+                
+                let dataFreshness = 'Live';
+                if (hoursAgo > 0 && hoursAgo < 24) {
+                  dataFreshness = `${hoursAgo} hours ago`;
+                } else if (hoursAgo >= 24) {
+                  const daysAgo = Math.floor(hoursAgo / 24);
+                  dataFreshness = `${daysAgo} day${daysAgo > 1 ? 's' : ''} ago`;
+                }
+
+                updates.push({
+                  id: crypto.randomUUID(),
+                  vendorName: vendor,
+                  updateType: 'news',
+                  content: article.title,
+                  sourceUrl: article.url,
+                  impact: hoursAgo < 12 ? 'high' : hoursAgo < 48 ? 'medium' : 'low',
+                  confidence: 0.85,
+                  actionRequired: hoursAgo < 24,
+                  createdAt: article.publishedAt,
+                  lastUpdated: article.publishedAt,
+                  dataFreshness
+                });
+              }
+            }
+            
+            // Rate limiting
+            await new Promise(resolve => setTimeout(resolve, 200));
+          } catch (error) {
+            console.error(`Error fetching news for ${vendor}:`, error);
+          }
+        }
+      }
+      
+      // Add fallback data if no news found
+      if (updates.length === 0) {
+        updates.push({
           id: '1',
-          vendorName: 'Stripe',
-          updateType: 'pricing',
-          content: 'Stripe announced reduced processing fees for high-volume merchants',
-          sourceUrl: 'https://stripe.com/blog/pricing-update',
-          impact: 'high',
-          confidence: 0.95,
-          actionRequired: true,
+          vendorName: 'System',
+          updateType: 'info',
+          content: 'Vendor intelligence monitoring is active. Live updates will appear as industry news becomes available.',
+          sourceUrl: '',
+          impact: 'low',
+          confidence: 1.0,
+          actionRequired: false,
           createdAt: new Date().toISOString(),
           lastUpdated: new Date().toISOString(),
           dataFreshness: 'Live'
-        },
-        {
-          id: '2',
-          vendorName: 'Square',
-          updateType: 'feature',
-          content: 'Square launches new AI-powered fraud detection for restaurants',
-          sourceUrl: 'https://squareup.com/townsquare/ai-fraud-detection',
-          impact: 'medium',
-          confidence: 0.87,
-          actionRequired: false,
-          createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-          lastUpdated: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
-          dataFreshness: '12 hours ago'
-        },
-        {
-          id: '3',
-          vendorName: 'Adyen',
-          updateType: 'partnership',
-          content: 'Adyen partners with Google to expand payment solutions in emerging markets',
-          sourceUrl: 'https://adyen.com/blog/google-partnership',
-          impact: 'medium',
-          confidence: 0.92,
-          actionRequired: false,
-          createdAt: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(),
-          lastUpdated: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-          dataFreshness: '1 day ago'
-        },
-        {
-          id: '4',
-          vendorName: 'TracerPay',
-          updateType: 'pricing',
-          content: 'TracerPay introduces competitive rates for small business segment',
-          sourceUrl: 'https://tracerpay.com/news/small-business-rates',
-          impact: 'high',
-          confidence: 0.89,
-          actionRequired: true,
-          createdAt: new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString(),
-          lastUpdated: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(),
-          dataFreshness: '2 days ago'
-        }
-      ];
+        });
+      }
       
-      res.json(mockUpdates);
+      res.json(updates.slice(0, 10)); // Limit to 10 most recent
     } catch (error) {
       console.error("Error fetching vendor intelligence updates:", error);
       res.status(500).json({ error: "Failed to fetch vendor intelligence updates" });

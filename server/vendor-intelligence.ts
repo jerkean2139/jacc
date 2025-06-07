@@ -475,9 +475,37 @@ export class VendorIntelligenceEngine {
   }
 
   private async searchVendorNews(vendorName: string): Promise<string> {
-    // Implement news search using news APIs (NewsAPI, Google News, etc.)
-    // For now return placeholder
-    return `Recent news about ${vendorName} - News API integration needed`;
+    if (!process.env.NEWS_API_KEY) {
+      console.warn('NEWS_API_KEY not found, skipping news search');
+      return '';
+    }
+
+    try {
+      const response = await axios.get('https://newsapi.org/v2/everything', {
+        params: {
+          q: `"${vendorName}" AND (payment OR processing OR merchant OR fintech)`,
+          domains: 'techcrunch.com,reuters.com,bloomberg.com,cnbc.com,paymentssource.com,americanbanker.com',
+          language: 'en',
+          sortBy: 'publishedAt',
+          pageSize: 10,
+          from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString() // Last 30 days
+        },
+        headers: {
+          'X-API-Key': process.env.NEWS_API_KEY
+        }
+      });
+
+      if (response.data.articles && response.data.articles.length > 0) {
+        return response.data.articles
+          .map((article: any) => `${article.title}\n${article.description}\nURL: ${article.url}\n`)
+          .join('\n---\n');
+      }
+
+      return '';
+    } catch (error) {
+      console.error(`Error searching news for ${vendorName}:`, error);
+      return '';
+    }
   }
 
   private async analyzeIndustryNews(vendorName: string): Promise<VendorUpdate[]> {
@@ -530,9 +558,39 @@ export class VendorIntelligenceEngine {
   }
 
   private async searchIndustryMentions(vendorName: string): Promise<string> {
-    // Search industry publications for vendor mentions
-    // Implementation would use news APIs, RSS feeds, or web scraping
-    return `Industry mentions of ${vendorName} - Industry news API integration needed`;
+    if (!process.env.NEWS_API_KEY) {
+      console.warn('NEWS_API_KEY not found, skipping industry mentions search');
+      return '';
+    }
+
+    try {
+      const response = await axios.get('https://newsapi.org/v2/everything', {
+        params: {
+          q: `(${vendorName} OR "payment processing" OR "merchant services") AND (market share OR competition OR ranking OR industry)`,
+          domains: 'paymentssource.com,americanbanker.com,finextra.com,thepaypers.com,pymnts.com',
+          language: 'en',
+          sortBy: 'publishedAt',
+          pageSize: 15,
+          from: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString() // Last 14 days
+        },
+        headers: {
+          'X-API-Key': process.env.NEWS_API_KEY
+        }
+      });
+
+      if (response.data.articles && response.data.articles.length > 0) {
+        return response.data.articles
+          .filter((article: any) => article.title.toLowerCase().includes(vendorName.toLowerCase()) || 
+                                   article.description?.toLowerCase().includes(vendorName.toLowerCase()))
+          .map((article: any) => `${article.title}\n${article.description}\nSource: ${article.source.name}\nURL: ${article.url}\n`)
+          .join('\n---\n');
+      }
+
+      return '';
+    } catch (error) {
+      console.error(`Error searching industry mentions for ${vendorName}:`, error);
+      return '';
+    }
   }
 
   private async updateVendorIntelligence(vendorName: string, updates: VendorUpdate[]): Promise<void> {
