@@ -262,30 +262,136 @@ JSON format: [{"type":"...", "title":"...", "message":"...", "priority":"...", "
   }
 
   async getProductRecommendations(analysis: ConversationAnalysis): Promise<string[]> {
-    const { painPoints, productInterest } = analysis;
+    const { painPoints, productInterest, stage, prospectType } = analysis;
+    
+    // Import vendor recommendation engine
+    const { VendorRecommendationEngine } = await import('./vendor-recommendation-engine');
+    
+    // Determine business scenario from conversation analysis
+    const businessScenario = {
+      industry: this.extractIndustryFromAnalysis(analysis),
+      businessType: this.extractBusinessTypeFromAnalysis(analysis),
+      needs: productInterest,
+      painPoints: painPoints
+    };
+    
+    // Get smart recommendations based on actual Q&A database
+    const smartRecs = VendorRecommendationEngine.getSmartRecommendations(businessScenario);
     
     const recommendations = [];
     
-    // TracerPay recommendations
-    if (painPoints.some(p => p.toLowerCase().includes('rate') || p.toLowerCase().includes('fee'))) {
-      recommendations.push('TracerPay Interchange-Plus Pricing');
+    // Primary vendor recommendations with context
+    smartRecs.primary.forEach(vendor => {
+      const relevantProducts = vendor.products.filter(product => 
+        productInterest.some(interest => 
+          product.toLowerCase().includes(interest.toLowerCase()) ||
+          interest.toLowerCase().includes(product.toLowerCase())
+        )
+      );
+      
+      if (relevantProducts.length > 0) {
+        recommendations.push(`${vendor.vendor}: ${relevantProducts.join(', ')}`);
+      } else {
+        recommendations.push(`${vendor.vendor}: ${vendor.strengths[0] || vendor.products[0]}`);
+      }
+      
+      // Add contact info if available and in presentation/closing stage
+      if (vendor.contactInfo && (stage === 'presentation' || stage === 'closing')) {
+        recommendations.push(`Contact: ${vendor.contactInfo}`);
+      }
+    });
+    
+    // Add specific niche recommendations
+    const nicheRecs = VendorRecommendationEngine.getSpecificNicheRecommendations();
+    const detectedNiche = this.detectBusinessNiche(analysis);
+    
+    if (detectedNiche && nicheRecs[detectedNiche]) {
+      recommendations.push(`${detectedNiche} specialists: ${nicheRecs[detectedNiche].join(', ')}`);
     }
     
-    if (painPoints.some(p => p.toLowerCase().includes('integration') || p.toLowerCase().includes('api'))) {
-      recommendations.push('TracerPay Developer APIs');
+    // Add integration-specific recommendations
+    if (painPoints.some(p => p.toLowerCase().includes('integration') || p.toLowerCase().includes('software'))) {
+      recommendations.push('MiCamp: Best for software integrations (Epicor, Roommaster, Aloha)');
+      recommendations.push('TRX: QuickBooks integration via Hyfin');
+      recommendations.push('Clearent: Hyfin QuickBooks integration');
     }
     
-    // TracerFlex for complex needs
-    if (painPoints.some(p => p.toLowerCase().includes('flexible') || p.toLowerCase().includes('custom'))) {
-      recommendations.push('TracerFlex Flexible Solutions (Coming Soon)');
+    // Add mobile processing recommendations
+    if (painPoints.some(p => p.toLowerCase().includes('mobile') || p.toLowerCase().includes('portable'))) {
+      recommendations.push('Mobile Solutions: TRX, Clearent, MiCamp');
+      recommendations.push('Food Truck POS: HubWallet, Quantic');
     }
     
-    // TracerAuto for automation needs
-    if (painPoints.some(p => p.toLowerCase().includes('manual') || p.toLowerCase().includes('automat'))) {
-      recommendations.push('TracerAuto Automation Platform (Coming Soon)');
+    return recommendations.slice(0, 8); // Limit to top 8 recommendations
+  }
+  
+  private extractIndustryFromAnalysis(analysis: ConversationAnalysis): string {
+    const { painPoints, productInterest } = analysis;
+    const allText = [...painPoints, ...productInterest].join(' ').toLowerCase();
+    
+    if (allText.includes('restaurant') || allText.includes('food') || allText.includes('dining')) {
+      return 'restaurant';
+    }
+    if (allText.includes('retail') || allText.includes('store') || allText.includes('shop')) {
+      return 'retail';
+    }
+    if (allText.includes('salon') || allText.includes('beauty') || allText.includes('spa')) {
+      return 'salon';
+    }
+    if (allText.includes('healthcare') || allText.includes('medical') || allText.includes('dental')) {
+      return 'healthcare';
+    }
+    if (allText.includes('ecommerce') || allText.includes('online') || allText.includes('web')) {
+      return 'ecommerce';
     }
     
-    return recommendations;
+    return 'general';
+  }
+  
+  private extractBusinessTypeFromAnalysis(analysis: ConversationAnalysis): string {
+    const { painPoints, productInterest } = analysis;
+    const allText = [...painPoints, ...productInterest].join(' ').toLowerCase();
+    
+    if (allText.includes('mobile') || allText.includes('truck') || allText.includes('portable')) {
+      return 'mobile';
+    }
+    if (allText.includes('high risk') || allText.includes('specialized')) {
+      return 'high risk';
+    }
+    if (allText.includes('high ticket') || allText.includes('expensive') || allText.includes('luxury')) {
+      return 'high ticket';
+    }
+    if (allText.includes('multi-location') || allText.includes('chain') || allText.includes('franchise')) {
+      return 'multi-location';
+    }
+    
+    return 'standard';
+  }
+  
+  private detectBusinessNiche(analysis: ConversationAnalysis): string | null {
+    const { painPoints, productInterest } = analysis;
+    const allText = [...painPoints, ...productInterest].join(' ').toLowerCase();
+    
+    const niches = {
+      'Archery Business': ['archery', 'bow', 'shooting'],
+      'Food Truck': ['food truck', 'mobile food', 'truck'],
+      'Salon': ['salon', 'beauty', 'hair', 'spa'],
+      'Liquor Store': ['liquor', 'alcohol', 'wine', 'spirits'],
+      'Restaurant - Full Service': ['full service', 'sit down', 'table service'],
+      'Restaurant - Quick Service': ['quick service', 'fast food', 'qsr'],
+      'High Risk': ['high risk', 'adult', 'gambling', 'cbd'],
+      'High Ticket': ['high ticket', 'luxury', 'expensive'],
+      'Healthcare': ['healthcare', 'medical', 'dental', 'clinic'],
+      'E-commerce': ['ecommerce', 'online', 'website', 'internet']
+    };
+    
+    for (const [niche, keywords] of Object.entries(niches)) {
+      if (keywords.some(keyword => allText.includes(keyword))) {
+        return niche;
+      }
+    }
+    
+    return null;
   }
 
   updateMetrics(updates: Partial<SalesMetrics>): void {
