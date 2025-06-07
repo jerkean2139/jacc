@@ -396,17 +396,17 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserDefaultPrompt(userId: string, category?: string): Promise<UserPrompt | undefined> {
-    const query = db.select().from(userPrompts)
-      .where(and(
-        eq(userPrompts.userId, userId),
-        eq(userPrompts.isDefault, true)
-      ));
+    const whereConditions = [
+      eq(userPrompts.userId, userId),
+      eq(userPrompts.isDefault, true)
+    ];
     
     if (category) {
-      query.where(eq(userPrompts.category, category));
+      whereConditions.push(eq(userPrompts.category, category));
     }
     
-    const [prompt] = await query;
+    const [prompt] = await db.select().from(userPrompts)
+      .where(and(...whereConditions));
     return prompt;
   }
 

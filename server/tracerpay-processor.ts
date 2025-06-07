@@ -113,11 +113,14 @@ export class TracerPayProcessor {
             await db.insert(documents).values({
               id: docId,
               name: path.basename(entry.fileName),
+              originalName: path.basename(entry.fileName),
+              path: entry.fileName,
               userId: 'system',
               folderId,
               title: path.basename(entry.fileName),
               content: content.substring(0, 10000), // Limit content size
               type: this.getFileType(entry.fileName),
+              mimeType: this.getMimeType(entry.fileName),
               size: entry.uncompressedSize || 0,
               permissions: 'public',
               createdAt: new Date(),
@@ -331,6 +334,26 @@ Support Services:
       case '.txt': return 'text';
       case '.zip': return 'archive';
       default: return 'unknown';
+    }
+  }
+
+  private getMimeType(fileName: string): string {
+    const ext = path.extname(fileName).toLowerCase();
+    switch (ext) {
+      case '.pdf': return 'application/pdf';
+      case '.pptx': return 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+      case '.ppt': return 'application/vnd.ms-powerpoint';
+      case '.docx': return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+      case '.doc': return 'application/msword';
+      case '.xlsx': return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+      case '.xls': return 'application/vnd.ms-excel';
+      case '.txt': return 'text/plain';
+      case '.html': case '.htm': return 'text/html';
+      case '.jpg': case '.jpeg': return 'image/jpeg';
+      case '.png': return 'image/png';
+      case '.gif': return 'image/gif';
+      case '.zip': return 'application/zip';
+      default: return 'application/octet-stream';
     }
   }
 
