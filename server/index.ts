@@ -51,6 +51,33 @@ app.use((req, res, next) => {
     console.log("ℹ️ Vendor database initialization will occur after schema migration");
   }
 
+  // Initialize memory optimizer for production deployment
+  try {
+    const { memoryOptimizer } = await import('./memory-optimizer');
+    memoryOptimizer.initialize();
+    memoryOptimizer.optimizeForProduction();
+    console.log("✅ Memory optimizer initialized for production deployment");
+  } catch (error) {
+    console.log("⚠️ Memory optimizer initialization failed:", error);
+  }
+
+  // Initialize knowledge base manager for automated maintenance
+  try {
+    const { knowledgeBaseManager } = await import('./knowledge-base-manager');
+    knowledgeBaseManager.initialize();
+    console.log("✅ Knowledge base manager initialized with automated maintenance");
+  } catch (error) {
+    console.log("⚠️ Knowledge base manager initialization failed:", error);
+  }
+
+  // Initialize multi-tenant architecture
+  try {
+    const { multiTenantManager } = await import('./multi-tenant-manager');
+    console.log("✅ Multi-tenant architecture initialized for enterprise deployment");
+  } catch (error) {
+    console.log("⚠️ Multi-tenant manager initialization failed:", error);
+  }
+
   // Initialize TracerPay documentation
   try {
     const { tracerPayProcessor } = await import('./tracerpay-processor');
