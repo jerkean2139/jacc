@@ -2256,6 +2256,170 @@ User Context: {userRole}`,
     }
   });
 
+  // Document Approval Workflow Routes
+  app.get('/api/document-approvals/pending', async (req: any, res) => {
+    try {
+      const { db } = await import('./db');
+      const { pendingDocumentApprovals, vendors } = await import('@shared/schema');
+      const { eq } = await import('drizzle-orm');
+
+      const pending = await db
+        .select({
+          id: pendingDocumentApprovals.id,
+          vendorId: pendingDocumentApprovals.vendorId,
+          vendorName: vendors.name,
+          documentTitle: pendingDocumentApprovals.documentTitle,
+          documentUrl: pendingDocumentApprovals.documentUrl,
+          documentType: pendingDocumentApprovals.documentType,
+          contentPreview: pendingDocumentApprovals.contentPreview,
+          aiRecommendation: pendingDocumentApprovals.aiRecommendation,
+          aiReasoning: pendingDocumentApprovals.aiReasoning,
+          suggestedFolder: pendingDocumentApprovals.suggestedFolder,
+          newsWorthiness: pendingDocumentApprovals.newsWorthiness,
+          detectedAt: pendingDocumentApprovals.detectedAt
+        })
+        .from(pendingDocumentApprovals)
+        .innerJoin(vendors, eq(pendingDocumentApprovals.vendorId, vendors.id))
+        .where(eq(pendingDocumentApprovals.status, 'pending'))
+        .orderBy(pendingDocumentApprovals.detectedAt);
+
+      res.json(pending.map(item => ({
+        ...item,
+        detectedAt: item.detectedAt.toISOString()
+      })));
+    } catch (error) {
+      console.error("Error getting pending approvals:", error);
+      res.json([]); // Return empty array if tables don't exist yet
+    }
+  });
+
+  app.post('/api/document-approvals/decide', async (req: any, res) => {
+    try {
+      const { approvalId, decision, selectedFolder, permissionLevel, notes } = req.body;
+      const { db } = await import('./db');
+      const { pendingDocumentApprovals, documentApprovalDecisions, documents } = await import('@shared/schema');
+      const { eq } = await import('drizzle-orm');
+      
+      // Record the decision
+      const decisionId = `decision_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      await db.insert(documentApprovalDecisions).values({
+        id: decisionId,
+        approvalId,
+        adminUserId: 'admin_user', // Would be from session in production
+        decision,
+        selectedFolder,
+        permissionLevel,
+        notes,
+        decidedAt: new Date()
+      });
+
+      // Update approval status
+      await db
+        .update(pendingDocumentApprovals)
+        .set({ 
+          status: decision === 'approve' ? 'approved' : 'rejected'
+        })
+        .where(eq(pendingDocumentApprovals.id, approvalId));
+
+      // If approved, add to documents table
+      if (decision === 'approve' && selectedFolder) {
+        const approval = await db
+          .select()
+          .from(pendingDocumentApprovals)
+          .where(eq(pendingDocumentApprovals.id, approvalId))
+          .limit(1);
+
+        if (approval[0]) {
+          const docId = `doc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+          await db.insert(documents).values({
+            id: docId,
+            userId: 'system',
+            folderId: selectedFolder,
+            title: approval[0].documentTitle,
+            content: approval[0].contentPreview,
+            type: approval[0].documentType,
+            size: 0,
+            permissions: permissionLevel || 'public',
+            createdAt: new Date(),
+            updatedAt: new Date()
+          });
+        }
+      }
+
+      res.json({ success: true, decision, approvalId });
+    } catch (error) {
+      console.error("Error processing approval decision:", error);
+      res.status(500).json({ error: "Failed to process decision" });
+    }
+  });
+
+  // Vendor News Routes for What's Happening Dashboard
+  app.get('/api/vendor-news', async (req: any, res) => {
+    try {
+      const { timeRange = 'week', filterType = 'all', filterImportance = 'all' } = req.query;
+      const { db } = await import('./db');
+      const { vendorNews, vendors } = await import('@shared/schema');
+      const { eq, gte, and, sql } = await import('drizzle-orm');
+
+      // Calculate time filter
+      let timeFilter = new Date();
+      switch (timeRange) {
+        case 'day':
+          timeFilter.setDate(timeFilter.getDate() - 1);
+          break;
+        case 'month':
+          timeFilter.setMonth(timeFilter.getMonth() - 1);
+          break;
+        default: // week
+          timeFilter.setDate(timeFilter.getDate() - 7);
+          break;
+      }
+
+      let conditions = [
+        eq(vendorNews.isVisible, true),
+        gte(vendorNews.publishedAt, timeFilter)
+      ];
+
+      if (filterType !== 'all') {
+        conditions.push(eq(vendorNews.newsType, filterType));
+      }
+
+      if (filterImportance !== 'all') {
+        const minImportance = parseInt(filterImportance);
+        conditions.push(gte(vendorNews.importance, minImportance));
+      }
+
+      const news = await db
+        .select({
+          id: vendorNews.id,
+          vendorName: vendors.name,
+          title: vendorNews.title,
+          summary: vendorNews.summary,
+          url: vendorNews.url,
+          newsType: vendorNews.newsType,
+          importance: vendorNews.importance,
+          publishedAt: vendorNews.publishedAt,
+          detectedAt: vendorNews.detectedAt,
+          tags: vendorNews.tags
+        })
+        .from(vendorNews)
+        .innerJoin(vendors, eq(vendorNews.vendorId, vendors.id))
+        .where(and(...conditions))
+        .orderBy(sql`${vendorNews.importance} DESC, ${vendorNews.publishedAt} DESC`)
+        .limit(100);
+
+      res.json(news.map(item => ({
+        ...item,
+        publishedAt: item.publishedAt?.toISOString() || null,
+        detectedAt: item.detectedAt.toISOString(),
+        tags: item.tags || []
+      })));
+    } catch (error) {
+      console.error("Error getting vendor news:", error);
+      res.json([]); // Return empty array if tables don't exist yet
+    }
+  });
+
   // Duplicate detection routes
   app.post('/api/documents/check-duplicates', async (req: any, res) => {
     try {

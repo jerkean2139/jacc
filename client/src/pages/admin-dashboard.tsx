@@ -27,6 +27,8 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import VendorIntelligenceDashboard from "@/components/vendor-intelligence-dashboard";
+import DocumentApprovalWorkflow from "@/components/document-approval-workflow";
+import WhatsHappeningDashboard from "@/components/whats-happening-dashboard";
 
 interface UserAnalytics {
   id: string;
@@ -271,6 +273,8 @@ export default function AdminDashboard() {
           <TabsTrigger value="monitoring">Chat Monitoring</TabsTrigger>
           <TabsTrigger value="sessions">Session Logs</TabsTrigger>
           <TabsTrigger value="settings">System Settings</TabsTrigger>
+          <TabsTrigger value="document-approvals">Document Approvals</TabsTrigger>
+          <TabsTrigger value="whats-happening">What's Happening</TabsTrigger>
           {/* Development Only - Hidden in Production */}
           {import.meta.env.DEV && (
             <TabsTrigger value="vendor-intelligence">Real-Time Intelligence</TabsTrigger>
@@ -689,6 +693,16 @@ export default function AdminDashboard() {
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        {/* Document Approvals Tab */}
+        <TabsContent value="document-approvals" className="space-y-4">
+          <DocumentApprovalWorkflow />
+        </TabsContent>
+
+        {/* What's Happening Tab */}
+        <TabsContent value="whats-happening" className="space-y-4">
+          <WhatsHappeningDashboard />
         </TabsContent>
 
         {/* Vendor Intelligence Tab - Development Only */}

@@ -937,6 +937,49 @@ export const documentChanges = pgTable("document_changes", {
   notified: boolean("notified").default(false),
 });
 
+// Document approval workflow tables
+export const pendingDocumentApprovals = pgTable("pending_document_approvals", {
+  id: varchar("id").primaryKey().notNull(),
+  vendorId: varchar("vendor_id").notNull().references(() => vendors.id),
+  documentTitle: varchar("document_title").notNull(),
+  documentUrl: varchar("document_url").notNull(),
+  documentType: varchar("document_type").notNull(), // 'pdf', 'sales_flyer', 'product_announcement', 'blog_post', 'news', 'promotion'
+  contentPreview: text("content_preview"), // First 500 chars of content
+  aiRecommendation: varchar("ai_recommendation").notNull(), // 'recommend', 'review_needed', 'skip'
+  aiReasoning: text("ai_reasoning"), // Why AI recommends this action
+  suggestedFolder: varchar("suggested_folder"), // AI suggested folder placement
+  newsWorthiness: integer("news_worthiness").default(0), // 1-10 scale
+  detectedAt: timestamp("detected_at").defaultNow(),
+  status: varchar("status").default('pending'), // 'pending', 'approved', 'rejected', 'archived'
+});
+
+export const documentApprovalDecisions = pgTable("document_approval_decisions", {
+  id: varchar("id").primaryKey().notNull(),
+  approvalId: varchar("approval_id").notNull().references(() => pendingDocumentApprovals.id),
+  adminUserId: varchar("admin_user_id").notNull(),
+  decision: varchar("decision").notNull(), // 'approve', 'reject'
+  selectedFolder: varchar("selected_folder"), // Admin chosen folder
+  permissionLevel: varchar("permission_level"), // 'public', 'admin_only', 'manager_access', 'training_data'
+  decidedAt: timestamp("decided_at").defaultNow(),
+  notes: text("notes"), // Admin notes
+});
+
+// News and updates dashboard
+export const vendorNews = pgTable("vendor_news", {
+  id: varchar("id").primaryKey().notNull(),
+  vendorId: varchar("vendor_id").notNull().references(() => vendors.id),
+  title: varchar("title").notNull(),
+  summary: text("summary"),
+  content: text("content"),
+  url: varchar("url").notNull(),
+  newsType: varchar("news_type").notNull(), // 'product_announcement', 'rate_change', 'policy_update', 'promotion', 'blog_post'
+  importance: integer("importance").default(5), // 1-10 scale for prioritization
+  publishedAt: timestamp("published_at"),
+  detectedAt: timestamp("detected_at").defaultNow(),
+  isVisible: boolean("is_visible").default(true),
+  tags: jsonb("tags"), // Array of relevant tags
+});
+
 export const vendorRelations = relations(vendors, ({ many }) => ({
   documents: many(vendorDocuments),
 }));
