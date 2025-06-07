@@ -4096,55 +4096,56 @@ User Context: {userRole}`,
     }
   });
 
-  // Pricing Management Routes
-  app.get('/api/pricing/processors', async (req, res) => {
+  // ISO AMP API additional endpoints
+  app.post('/api/iso-amp/calculate', async (req, res) => {
     try {
-      const { pricingManager } = await import('./pricing-manager');
-      const processors = await pricingManager.getAllProcessorPricing();
-      res.json({ processors, timestamp: new Date().toISOString() });
+      const response = await fetch(`${process.env.ISO_AMP_API_URL}/calculate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.ISO_AMP_API_KEY}`
+        },
+        body: JSON.stringify(req.body)
+      });
+
+      if (!response.ok) {
+        throw new Error(`ISO AMP API error: ${response.status}`);
+      }
+
+      const calculation = await response.json();
+      res.json({ 
+        calculation,
+        source: 'ISO AMP API',
+        timestamp: new Date().toISOString() 
+      });
     } catch (error) {
-      console.error('Error fetching processor pricing:', error);
-      res.status(500).json({ error: 'Failed to fetch processor pricing' });
+      console.error('Error calculating with ISO AMP API:', error);
+      res.status(500).json({ error: 'Failed to calculate pricing' });
     }
   });
 
-  app.post('/api/pricing/processors', async (req, res) => {
+  app.get('/api/iso-amp/hardware', async (req, res) => {
     try {
-      const { pricingManager } = await import('./pricing-manager');
-      const processorData = { ...req.body, updatedBy: 'system' }; // TODO: Get from authenticated user
-      const result = await pricingManager.upsertProcessorPricing(processorData);
-      res.json({ processor: result, timestamp: new Date().toISOString() });
-    } catch (error) {
-      console.error('Error saving processor pricing:', error);
-      res.status(500).json({ error: 'Failed to save processor pricing' });
-    }
-  });
+      const response = await fetch(`${process.env.ISO_AMP_API_URL}/hardware`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${process.env.ISO_AMP_API_KEY}`
+        }
+      });
 
-  app.get('/api/pricing/hardware', async (req, res) => {
-    try {
-      const { pricingManager } = await import('./pricing-manager');
-      const { category } = req.query;
-      
-      const hardware = category ? 
-        await pricingManager.getHardwareByCategory(category as string) :
-        await pricingManager.getAllHardwareOptions();
-        
-      res.json({ hardware, timestamp: new Date().toISOString() });
-    } catch (error) {
-      console.error('Error fetching hardware options:', error);
-      res.status(500).json({ error: 'Failed to fetch hardware options' });
-    }
-  });
+      if (!response.ok) {
+        throw new Error(`ISO AMP API error: ${response.status}`);
+      }
 
-  app.post('/api/pricing/hardware', async (req, res) => {
-    try {
-      const { pricingManager } = await import('./pricing-manager');
-      const hardwareData = { ...req.body, updatedBy: 'system' }; // TODO: Get from authenticated user
-      const result = await pricingManager.upsertHardwareOption(hardwareData);
-      res.json({ hardware: result, timestamp: new Date().toISOString() });
+      const hardware = await response.json();
+      res.json({ 
+        hardware,
+        source: 'ISO AMP API',
+        timestamp: new Date().toISOString() 
+      });
     } catch (error) {
-      console.error('Error saving hardware option:', error);
-      res.status(500).json({ error: 'Failed to save hardware option' });
+      console.error('Error fetching hardware from ISO AMP API:', error);
+      res.status(500).json({ error: 'Failed to fetch hardware data' });
     }
   });
 

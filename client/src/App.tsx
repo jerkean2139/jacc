@@ -67,8 +67,7 @@ function Router() {
           <Route path="/chat/:chatId" component={HomeStable} />
           <Route path="/calculator" component={ISOAmpCalculator} />
           <Route path="/iso-amp-calculator" component={ISOAmpCalculator} />
-          <Route path="/pricing-management" component={PricingManagement} />
-          <Route path="/pricing-demo" component={PricingDemo} />
+
           <Route path="/guide" component={UserGuide} />
           {/* Documents only accessible to admin users */}
           {user?.role === 'admin' && (
