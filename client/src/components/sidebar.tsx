@@ -27,7 +27,8 @@ import {
   Download,
   Calculator,
   FileSearch,
-  Brain
+  Brain,
+  RotateCcw
 } from "lucide-react";
 
 import type { User, Chat, Folder as FolderType } from "@shared/schema";
@@ -225,6 +226,19 @@ export default function Sidebar({
           New Chat
         </Button>
         
+        <Button
+          onClick={() => {
+            if (window.confirm('This will restart the interactive tutorial. Continue?')) {
+              localStorage.removeItem('tutorial-completed');
+              window.location.reload();
+            }
+          }}
+          variant="outline"
+          className="w-full text-sm"
+        >
+          <RotateCcw className="w-4 h-4 mr-2" />
+          Restart Tutorial
+        </Button>
 
       </div>
 
