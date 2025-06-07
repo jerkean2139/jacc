@@ -272,7 +272,7 @@ export default function AdminDashboard() {
           <TabsTrigger value="sessions">Session Logs</TabsTrigger>
           <TabsTrigger value="settings">System Settings</TabsTrigger>
           {/* Development Only - Hidden in Production */}
-          {process.env.NODE_ENV === 'development' && (
+          {import.meta.env.DEV && (
             <TabsTrigger value="vendor-intelligence">Real-Time Intelligence</TabsTrigger>
           )}
         </TabsList>
@@ -690,6 +690,13 @@ export default function AdminDashboard() {
             </Card>
           </div>
         </TabsContent>
+
+        {/* Vendor Intelligence Tab - Development Only */}
+        {import.meta.env.DEV && (
+          <TabsContent value="vendor-intelligence" className="space-y-4">
+            <VendorIntelligenceDashboard />
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );
