@@ -26,6 +26,7 @@ import AIConfigurationPage from "@/pages/ai-configuration";
 import SimpleAdminLogin from "@/pages/simple-admin-login";
 import ISOAmpCalculator from "@/pages/iso-amp-calculator";
 import PricingManagement from "@/pages/pricing-management";
+import PricingDemo from "@/pages/pricing-demo";
 import PromptCustomization from "@/pages/prompt-customization";
 import UserGuide from "@/pages/user-guide";
 import DocumentsPage from "@/pages/documents-page";
@@ -67,6 +68,7 @@ function Router() {
           <Route path="/calculator" component={ISOAmpCalculator} />
           <Route path="/iso-amp-calculator" component={ISOAmpCalculator} />
           <Route path="/pricing-management" component={PricingManagement} />
+          <Route path="/pricing-demo" component={PricingDemo} />
           <Route path="/guide" component={UserGuide} />
           {/* Documents only accessible to admin users */}
           {user?.role === 'admin' && (

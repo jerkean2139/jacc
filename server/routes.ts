@@ -4093,6 +4093,22 @@ User Context: {userRole}`,
     }
   });
 
+  app.get('/api/pricing/demo/trx-tracerpay', async (req, res) => {
+    try {
+      const { pricingDemoSetup } = await import('./pricing-demo-setup');
+      await pricingDemoSetup.initializeTRXTracerPayDemo();
+      const recommendation = await pricingDemoSetup.generateSampleRecommendation();
+      res.json({ 
+        demo: recommendation, 
+        message: 'TRX and TracerPay pricing demo initialized',
+        timestamp: new Date().toISOString() 
+      });
+    } catch (error) {
+      console.error('Error generating TRX/TracerPay demo:', error);
+      res.status(500).json({ error: 'Failed to generate pricing demo' });
+    }
+  });
+
   // Pricing Management Routes
   app.get('/api/pricing/processors', async (req, res) => {
     try {
