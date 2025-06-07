@@ -177,7 +177,8 @@ const realVendorData = [
     documentPortalUrl: 'https://www.shift4.com/resources',
     supportUrl: 'https://www.shift4.com/support',
     active: true,
-    crawlFrequency: 'daily',
+    crawlFrequency: 'weekly',
+    scanDay: 'monday',
     priority: 1,
     selectors: {
       documentLinks: 'a[href*=".pdf"], .resource-download, .documentation-link',
@@ -208,7 +209,8 @@ const realVendorData = [
     documentPortalUrl: 'https://docs.clover.com',
     supportUrl: 'https://help.clover.com',
     active: true,
-    crawlFrequency: 'daily',
+    crawlFrequency: 'weekly',
+    scanDay: 'tuesday',
     priority: 1,
     selectors: {
       documentLinks: '.docs-link, a[href*="/docs/"], .api-reference a',
@@ -239,7 +241,8 @@ const realVendorData = [
     documentPortalUrl: 'https://www.quanticpos.com/resources',
     supportUrl: 'https://www.quanticpos.com/support',
     active: true,
-    crawlFrequency: 'daily',
+    crawlFrequency: 'weekly',
+    scanDay: 'wednesday',
     priority: 2,
     selectors: {
       documentLinks: 'a[href*=".pdf"], .resource-item a, .documentation-link',
@@ -270,7 +273,8 @@ const realVendorData = [
     documentPortalUrl: 'https://developer.authorize.net',
     supportUrl: 'https://support.authorize.net',
     active: true,
-    crawlFrequency: 'daily',
+    crawlFrequency: 'weekly',
+    scanDay: 'friday',
     priority: 2,
     selectors: {
       documentLinks: '.api-doc a, a[href*=".pdf"], .guide-download',
@@ -302,7 +306,8 @@ const realVendorData = [
     documentPortalUrl: 'https://developer.cybersource.com',
     supportUrl: 'https://support.cybersource.com',
     active: true,
-    crawlFrequency: 'daily',
+    crawlFrequency: 'weekly',
+    scanDay: 'friday',
     priority: 2,
     selectors: {
       documentLinks: '.developer-resource a, a[href*=".pdf"], .api-doc-link',
@@ -333,7 +338,8 @@ const realVendorData = [
     documentPortalUrl: 'https://www.nmi.com/resources',
     supportUrl: 'https://www.nmi.com/support',
     active: true,
-    crawlFrequency: 'daily',
+    crawlFrequency: 'weekly',
+    scanDay: 'friday',
     priority: 2,
     selectors: {
       documentLinks: 'a[href*=".pdf"], .resource-download, .documentation-link',
