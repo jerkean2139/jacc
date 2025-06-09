@@ -170,12 +170,32 @@ export default function HomeStable() {
           />
           <h1 className="text-lg font-semibold text-slate-900 dark:text-white">JACC</h1>
         </div>
-        <button
-          onClick={handleNewChat}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-        >
-          New Chat
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => {
+              const input = document.createElement('input');
+              input.type = 'file';
+              input.accept = '.pdf,.doc,.docx,.txt';
+              input.onchange = (e) => {
+                const file = (e.target as HTMLInputElement).files?.[0];
+                if (file) {
+                  console.log('File selected:', file.name);
+                  // Handle file upload here
+                }
+              };
+              input.click();
+            }}
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+          >
+            📄 Upload Statement
+          </button>
+          <button
+            onClick={handleNewChat}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+          >
+            New Chat
+          </button>
+        </div>
       </div>
 
       {/* Mobile Chat Area */}
