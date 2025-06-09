@@ -110,12 +110,12 @@ export class EnhancedAIService {
       customPrompt = await storage.getUserDefaultPrompt(userId);
     }
 
-    // Step 2: Use ZenBot knowledge base guided document search (PRIORITIZED)
-    const searchResults = await this.searchDocuments(message);
+    // Step 2: Memory-optimized document search with limited results
+    const searchResults = await this.searchDocuments(message, 5); // Limit to 5 results for memory optimization
     
     if (searchResults.length > 0) {
-      console.log(`📋 Found ${searchResults.length} documents using ZenBot guidance for: "${message}"`);
-      const messages = [...conversationHistory, { role: 'user' as const, content: message }];
+      console.log(`📋 Found ${searchResults.length} documents for: "${message.substring(0, 50)}..."`);
+      const messages = [...conversationHistory.slice(-3), { role: 'user' as const, content: message }]; // Keep only last 3 messages
       return await this.generateResponseWithDocuments(messages, { searchResults, customPrompt });
     }
     
@@ -729,7 +729,7 @@ When appropriate, suggest actions like saving payment processing information to 
     return matches / queryWords.length;
   }
 
-  async searchDocuments(query: string): Promise<VectorSearchResult[]> {
+  async searchDocuments(query: string, limit: number = 10): Promise<VectorSearchResult[]> {
     try {
       // PRIORITY 1: Search ZenBot Knowledge Base for internal guidance (not user-facing)
       const knowledgeBaseGuidance = await this.searchZenBotKnowledgeBase(query);

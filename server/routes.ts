@@ -2407,8 +2407,8 @@ User Context: {userRole}`,
             {
               responseTime: Date.now() - (userMessage.createdAt?.getTime() || Date.now()),
               tokensUsed: aiResponse.message.length / 4, // Estimate
-              model: orchestratedResult?.model || 'enhanced-ai',
-              confidence: orchestratedResult?.confidence || 0.8
+              model: 'enhanced-ai',
+              confidence: 0.8
             }
           );
         } catch (monitorError) {
