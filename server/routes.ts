@@ -3697,49 +3697,22 @@ User Context: {userRole}`,
     }
   });
 
-  // Gamification API routes
+  // Gamification API routes (disabled for memory optimization)
   app.get("/api/user/stats", isAuthenticated, async (req, res) => {
-    try {
-      const userId = (req as any).user?.id;
-      if (!userId) {
-        return res.status(401).json({ error: "User ID not found in session" });
-      }
-
-      const { gamificationService } = await import('./gamification');
-      const stats = await gamificationService.getUserStats(userId);
-      
-      if (!stats) {
-        try {
-          // Initialize stats for new user
-          const newStats = await gamificationService.initializeUserStats(userId);
-          return res.json(newStats);
-        } catch (initError: any) {
-          if (initError.message?.includes('not found')) {
-            // User doesn't exist in database, return empty stats
-            console.log(`User ${userId} not found, returning empty stats`);
-            return res.json({
-              userId,
-              totalMessages: 0,
-              totalChats: 0,
-              calculationsPerformed: 0,
-              documentsAnalyzed: 0,
-              proposalsGenerated: 0,
-              currentStreak: 0,
-              longestStreak: 0,
-              lastActiveDate: new Date(),
-              totalPoints: 0,
-              level: 1
-            });
-          }
-          throw initError;
-        }
-      }
-      
-      res.json(stats);
-    } catch (error) {
-      console.error("Failed to get user stats:", error);
-      res.status(500).json({ error: "Failed to get user stats" });
-    }
+    // Return minimal stats to reduce memory usage
+    res.json({
+      userId: (req as any).user?.id || 'anonymous',
+      totalMessages: 0,
+      totalChats: 0,
+      calculationsPerformed: 0,
+      documentsAnalyzed: 0,
+      proposalsGenerated: 0,
+      currentStreak: 0,
+      longestStreak: 0,
+      lastActiveDate: new Date(),
+      totalPoints: 0,
+      level: 1
+    });
   });
 
   app.get("/api/user/achievements", isAuthenticated, async (req, res) => {

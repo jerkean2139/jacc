@@ -2,10 +2,10 @@
 
 export class MemoryOptimizer {
   private static instance: MemoryOptimizer;
-  private memoryThreshold = 0.80; // 80% memory usage threshold
+  private memoryThreshold = 0.70; // Lowered to 70% for aggressive cleanup
   private cleanupInterval: NodeJS.Timeout | null = null;
   private documentCache = new Map<string, { data: any; lastAccessed: number; size: number }>();
-  private maxCacheSize = 25 * 1024 * 1024; // 25MB cache limit
+  private maxCacheSize = 10 * 1024 * 1024; // Reduced to 10MB cache limit
   private currentCacheSize = 0;
 
   static getInstance(): MemoryOptimizer {
@@ -40,7 +40,7 @@ export class MemoryOptimizer {
       (global as any).memoryMetrics.heapUsed = heapUsedMB;
       (global as any).memoryMetrics.heapTotal = heapTotalMB;
       (global as any).memoryMetrics.usagePercent = usagePercent * 100;
-    }, 10000); // Check every 10 seconds
+    }, 30000); // Check every 30 seconds to reduce overhead
   }
 
   private startPeriodicCleanup(): void {
@@ -53,14 +53,20 @@ export class MemoryOptimizer {
   private performEmergencyCleanup(): void {
     console.log('Performing emergency memory cleanup...');
     
-    // Clear document cache
+    // Clear ALL caches aggressively
     this.documentCache.clear();
     this.currentCacheSize = 0;
     
-    // Force garbage collection
-    this.forceGarbageCollection();
+    // Clear any global caches that might exist
+    if ((global as any).documentCache) delete (global as any).documentCache;
+    if ((global as any).queryCache) delete (global as any).queryCache;
+    if ((global as any).vectorCache) delete (global as any).vectorCache;
     
-    // Clear any large temporary arrays
+    // Multiple garbage collection cycles
+    this.forceGarbageCollection();
+    setTimeout(() => this.forceGarbageCollection(), 50);
+    
+    // Clear temporary data
     this.clearTempData();
     
     console.log('Emergency cleanup completed');
