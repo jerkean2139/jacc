@@ -1,11 +1,13 @@
 import { useState, useRef, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
-import { Menu, Plus, MessageSquare, Folder, Download, Settings, HelpCircle, Calculator, BookOpen, Search } from "lucide-react";
+import { Menu, Plus, MessageSquare, Folder, Download, Settings, HelpCircle, Calculator, BookOpen, Search, FileText, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Progress } from "@/components/ui/progress";
 import Sidebar from "@/components/sidebar";
 import ChatInterface from "@/components/chat-interface";
 import { useAuth } from "@/hooks/useAuth";
@@ -20,6 +22,8 @@ export default function HomeStable() {
   const [location, navigate] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [isProcessingStatement, setIsProcessingStatement] = useState(false);
+  const [processingProgress, setProcessingProgress] = useState(0);
 
   // Extract chatId from URL
   const activeChatId = location.includes('/chat/') ? location.split('/chat/')[1] : null;
@@ -138,6 +142,22 @@ export default function HomeStable() {
   const handleStatementUpload = async (file: File) => {
     try {
       console.log('Processing statement upload:', file.name);
+      setIsProcessingStatement(true);
+      setProcessingProgress(0);
+      
+      // Show initial progress
+      toast({
+        title: "Processing Statement",
+        description: `Analyzing ${file.name}...`,
+      });
+      
+      // Simulate progress updates
+      const progressInterval = setInterval(() => {
+        setProcessingProgress(prev => {
+          if (prev < 90) return prev + 10;
+          return prev;
+        });
+      }, 500);
       
       // Create FormData to upload the file
       const formData = new FormData();
@@ -148,6 +168,9 @@ export default function HomeStable() {
         method: 'POST',
         body: formData,
       });
+      
+      clearInterval(progressInterval);
+      setProcessingProgress(100);
       
       if (!response.ok) {
         throw new Error(`Upload failed: ${response.status}`);
@@ -174,6 +197,11 @@ Would you like me to run a competitive analysis and show you better processing o
 
       handleNewChatWithMessage(summaryMessage);
       
+      toast({
+        title: "Analysis Complete",
+        description: "Statement processed successfully!",
+      });
+      
     } catch (error) {
       console.error('Statement upload error:', error);
       toast({
@@ -181,6 +209,9 @@ Would you like me to run a competitive analysis and show you better processing o
         description: "Failed to process statement. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsProcessingStatement(false);
+      setProcessingProgress(0);
     }
   };
 
@@ -322,6 +353,42 @@ Would you like me to run a competitive analysis and show you better processing o
 
 
       </div>
+
+      {/* Processing Modal */}
+      <Dialog open={isProcessingStatement} onOpenChange={() => {}}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5" />
+              Analyzing Statement
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
+              <div className="flex-1">
+                <p className="text-sm font-medium">Processing your statement...</p>
+                <p className="text-xs text-muted-foreground">This may take a few moments</p>
+              </div>
+            </div>
+            <Progress value={processingProgress} className="w-full" />
+            <div className="text-xs text-muted-foreground space-y-1">
+              <div className="flex justify-between">
+                <span>Extracting data</span>
+                <span>{processingProgress < 30 ? '...' : '✓'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Analyzing patterns</span>
+                <span>{processingProgress < 60 ? '...' : '✓'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Generating insights</span>
+                <span>{processingProgress < 90 ? '...' : '✓'}</span>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
