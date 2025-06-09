@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import crypto from "crypto";
+import axios from "axios";
 import { storage } from "./storage";
 import { setupAuth as setupReplitAuth, isAuthenticated as isReplitAuthenticated } from "./replitAuth";
 import { setupDevAuth, isDevAuthenticated } from "./dev-auth";
@@ -535,7 +536,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/health', async (req, res) => {
     try {
       // Test database connection
-      await storage.getUsers();
+      await storage.getUser("test");
       
       res.status(200).json({
         status: 'healthy',

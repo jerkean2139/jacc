@@ -88,6 +88,19 @@ export const userSessions = pgTable("user_sessions", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// User prompts management
+export const userPrompts = pgTable("user_prompts", {
+  id: varchar("id").primaryKey().notNull().$defaultFn(() => crypto.randomUUID()),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  category: varchar("category").notNull(),
+  content: text("content").notNull(),
+  isActive: boolean("is_active").default(true),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Prompt usage analytics
 export const promptUsageLog = pgTable("prompt_usage_log", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -654,6 +667,9 @@ export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+  passwordHash: true,
+}).extend({
+  password: z.string().min(6),
 });
 
 export const insertApiKeySchema = createInsertSchema(apiKeys).omit({
@@ -732,20 +748,7 @@ export type InsertHardwareOption = typeof hardwareOptions.$inferInsert;
 export type PdfReport = typeof pdfReports.$inferSelect;
 export type InsertPdfReport = typeof pdfReports.$inferInsert;
 
-// User prompt customization table
-export const userPrompts = pgTable("user_prompts", {
-  id: varchar("id").primaryKey().notNull(),
-  userId: varchar("user_id").notNull().references(() => users.id),
-  name: varchar("name").notNull(), // e.g., "Email Writing", "Marketing Ideas"
-  content: text("content").notNull().default(""), // Legacy field for compatibility
-  writingStyle: text("writing_style"), // User's personal writing style description
-  systemRules: text("system_rules"), // Rules for how AI should respond
-  promptTemplate: text("prompt_template"), // The actual prompt template
-  isDefault: boolean("is_default").default(false),
-  category: varchar("category").default("general"), // "writing", "marketing", "communication", etc.
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
+// User prompt relations and types
 
 // Vendor intelligence types
 export type Vendor = typeof vendors.$inferSelect;
