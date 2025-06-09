@@ -1,0 +1,134 @@
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+contentScript.bundle.js:69 Loaded contentScript
+chat-interface.tsx:100 Messages Query Status: {chatId: '033e6a31-2e5e-4954-804a-b8c105448046', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:110 Chat Interface Debug: {chatId: '033e6a31-2e5e-4954-804a-b8c105448046', messagesCount: 0, isLoading: true, hasMessages: false}
+sidebar.tsx:63 Sidebar Debug: {chatsCount: 0, hasOnChatDelete: false, onChatDeleteType: 'undefined'}
+chat-interface.tsx:100 Messages Query Status: {chatId: '033e6a31-2e5e-4954-804a-b8c105448046', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:110 Chat Interface Debug: {chatId: '033e6a31-2e5e-4954-804a-b8c105448046', messagesCount: 0, isLoading: true, hasMessages: false}
+queryClient.ts:32 
+            
+            
+           GET https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/api/achievements/progress 500 (Internal Server Error)
+(anonymous) @ queryClient.ts:32
+fetchFn @ @tanstack_react-query.js?v=bb61563a:840
+run @ @tanstack_react-query.js?v=bb61563a:494
+start @ @tanstack_react-query.js?v=bb61563a:536
+fetch @ @tanstack_react-query.js?v=bb61563a:926
+executeFetch_fn @ @tanstack_react-query.js?v=bb61563a:2211
+onSubscribe @ @tanstack_react-query.js?v=bb61563a:1898
+subscribe @ @tanstack_react-query.js?v=bb61563a:24
+(anonymous) @ @tanstack_react-query.js?v=bb61563a:3022
+subscribeToStore @ chunk-WERSD76P.js?v=bb61563a:11984
+commitHookEffectListMount @ chunk-WERSD76P.js?v=bb61563a:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=bb61563a:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=bb61563a:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=bb61563a:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=bb61563a:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=bb61563a:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=bb61563a:19447
+commitRootImpl @ chunk-WERSD76P.js?v=bb61563a:19416
+commitRoot @ chunk-WERSD76P.js?v=bb61563a:19277
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=bb61563a:18895
+flushSyncCallbacks @ chunk-WERSD76P.js?v=bb61563a:9119
+(anonymous) @ chunk-WERSD76P.js?v=bb61563a:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=bb61563a:555
+flush @ @tanstack_react-query.js?v=bb61563a:569
+batch @ @tanstack_react-query.js?v=bb61563a:587
+dispatch_fn @ @tanstack_react-query.js?v=bb61563a:996
+setData @ @tanstack_react-query.js?v=bb61563a:696
+onSuccess @ @tanstack_react-query.js?v=bb61563a:897
+resolve @ @tanstack_react-query.js?v=bb61563a:456
+Promise.then
+run @ @tanstack_react-query.js?v=bb61563a:498
+start @ @tanstack_react-query.js?v=bb61563a:536
+fetch @ @tanstack_react-query.js?v=bb61563a:926
+executeFetch_fn @ @tanstack_react-query.js?v=bb61563a:2211
+onSubscribe @ @tanstack_react-query.js?v=bb61563a:1898
+subscribe @ @tanstack_react-query.js?v=bb61563a:24
+(anonymous) @ @tanstack_react-query.js?v=bb61563a:3022
+subscribeToStore @ chunk-WERSD76P.js?v=bb61563a:11984
+commitHookEffectListMount @ chunk-WERSD76P.js?v=bb61563a:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=bb61563a:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=bb61563a:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=bb61563a:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=bb61563a:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=bb61563a:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=bb61563a:19447
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=bb61563a:18868
+flushSyncCallbacks @ chunk-WERSD76P.js?v=bb61563a:9119
+commitRootImpl @ chunk-WERSD76P.js?v=bb61563a:19432
+commitRoot @ chunk-WERSD76P.js?v=bb61563a:19277
+finishConcurrentRender @ chunk-WERSD76P.js?v=bb61563a:18805
+performConcurrentWorkOnRoot @ chunk-WERSD76P.js?v=bb61563a:18718
+workLoop @ chunk-WERSD76P.js?v=bb61563a:197
+flushWork @ chunk-WERSD76P.js?v=bb61563a:176
+performWorkUntilDeadline @ chunk-WERSD76P.js?v=bb61563a:384Understand this error
+queryClient.ts:32 
+            
+            
+           GET https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/api/user/stats 500 (Internal Server Error)
+(anonymous) @ queryClient.ts:32
+fetchFn @ @tanstack_react-query.js?v=bb61563a:840
+run @ @tanstack_react-query.js?v=bb61563a:494
+start @ @tanstack_react-query.js?v=bb61563a:536
+fetch @ @tanstack_react-query.js?v=bb61563a:926
+executeFetch_fn @ @tanstack_react-query.js?v=bb61563a:2211
+setOptions @ @tanstack_react-query.js?v=bb61563a:1955
+(anonymous) @ @tanstack_react-query.js?v=bb61563a:3032
+commitHookEffectListMount @ chunk-WERSD76P.js?v=bb61563a:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=bb61563a:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=bb61563a:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=bb61563a:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=bb61563a:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=bb61563a:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=bb61563a:19447
+commitRootImpl @ chunk-WERSD76P.js?v=bb61563a:19416
+commitRoot @ chunk-WERSD76P.js?v=bb61563a:19277
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=bb61563a:18895
+flushSyncCallbacks @ chunk-WERSD76P.js?v=bb61563a:9119
+(anonymous) @ chunk-WERSD76P.js?v=bb61563a:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=bb61563a:555
+flush @ @tanstack_react-query.js?v=bb61563a:569
+batch @ @tanstack_react-query.js?v=bb61563a:587
+dispatch_fn @ @tanstack_react-query.js?v=bb61563a:996
+setData @ @tanstack_react-query.js?v=bb61563a:696
+onSuccess @ @tanstack_react-query.js?v=bb61563a:897
+resolve @ @tanstack_react-query.js?v=bb61563a:456
+Promise.then
+run @ @tanstack_react-query.js?v=bb61563a:498
+start @ @tanstack_react-query.js?v=bb61563a:536
+fetch @ @tanstack_react-query.js?v=bb61563a:926
+executeFetch_fn @ @tanstack_react-query.js?v=bb61563a:2211
+onSubscribe @ @tanstack_react-query.js?v=bb61563a:1898
+subscribe @ @tanstack_react-query.js?v=bb61563a:24
+(anonymous) @ @tanstack_react-query.js?v=bb61563a:3022
+subscribeToStore @ chunk-WERSD76P.js?v=bb61563a:11984
+commitHookEffectListMount @ chunk-WERSD76P.js?v=bb61563a:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=bb61563a:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=bb61563a:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=bb61563a:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=bb61563a:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=bb61563a:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=bb61563a:19447
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=bb61563a:18868
+flushSyncCallbacks @ chunk-WERSD76P.js?v=bb61563a:9119
+commitRootImpl @ chunk-WERSD76P.js?v=bb61563a:19432
+commitRoot @ chunk-WERSD76P.js?v=bb61563a:19277
+finishConcurrentRender @ chunk-WERSD76P.js?v=bb61563a:18805
+performConcurrentWorkOnRoot @ chunk-WERSD76P.js?v=bb61563a:18718
+workLoop @ chunk-WERSD76P.js?v=bb61563a:197
+flushWork @ chunk-WERSD76P.js?v=bb61563a:176
+performWorkUntilDeadline @ chunk-WERSD76P.js?v=bb61563a:384Understand this error
+chat-interface.tsx:100 Messages Query Status: {chatId: '033e6a31-2e5e-4954-804a-b8c105448046', queryKey: Array(1), enabled: true, isLoading: false, hasError: false, …}
+chat-interface.tsx:110 Chat Interface Debug: {chatId: '033e6a31-2e5e-4954-804a-b8c105448046', messagesCount: 0, isLoading: false, hasMessages: false}
+chat-interface.tsx:100 Messages Query Status: {chatId: '033e6a31-2e5e-4954-804a-b8c105448046', queryKey: Array(1), enabled: true, isLoading: false, hasError: false, …}
+chat-interface.tsx:110 Chat Interface Debug: {chatId: '033e6a31-2e5e-4954-804a-b8c105448046', messagesCount: 0, isLoading: false, hasMessages: false}
+chat-interface.tsx:100 Messages Query Status: {chatId: '033e6a31-2e5e-4954-804a-b8c105448046', queryKey: Array(1), enabled: true, isLoading: false, hasError: false, …}
+chat-interface.tsx:110 Chat Interface Debug: {chatId: '033e6a31-2e5e-4954-804a-b8c105448046', messagesCount: 0, isLoading: false, hasMessages: false}
+sidebar.tsx:63 Sidebar Debug: {chatsCount: 83, hasOnChatDelete: false, onChatDeleteType: 'undefined'}
+chat-interface.tsx:100 Messages Query Status: {chatId: '033e6a31-2e5e-4954-804a-b8c105448046', queryKey: Array(1), enabled: true, isLoading: false, hasError: false, …}
+chat-interface.tsx:110 Chat Interface Debug: {chatId: '033e6a31-2e5e-4954-804a-b8c105448046', messagesCount: 0, isLoading: false, hasMessages: false}
+033e6a31-2e5e-4954-804a-b8c105448046:1 Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner.
+033e6a31-2e5e-4954-804a-b8c105448046:1 Unchecked runtime.lastError: The message port closed before a response was received.Understand this error

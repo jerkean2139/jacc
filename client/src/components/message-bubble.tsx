@@ -21,9 +21,10 @@ import { MessageContent } from "./message-content";
 interface MessageBubbleProps {
   message: Message;
   actions?: Array<{
-    type: 'save_to_folder' | 'download' | 'create_proposal';
+    type: 'save_to_folder' | 'download' | 'create_proposal' | 'external_search_request';
     label: string;
     data?: any;
+    query?: string;
   }>;
 }
 
@@ -49,6 +50,9 @@ export default function MessageBubble({ message, actions }: MessageBubbleProps) 
         break;
       case 'create_proposal':
         // Create client proposal
+        break;
+      case 'external_search_request':
+        // Handle external search request
         break;
     }
   };
@@ -137,7 +141,7 @@ export default function MessageBubble({ message, actions }: MessageBubbleProps) 
           </span>
           <span className="text-slate-300 dark:text-slate-600">•</span>
           <span className="text-slate-400 dark:text-slate-500">
-            {formatTimestamp(message.createdAt!)}
+            {formatTimestamp(typeof message.createdAt === 'string' ? message.createdAt : message.createdAt!.toISOString())}
           </span>
           
           {/* Feedback buttons for AI messages */}
