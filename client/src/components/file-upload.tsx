@@ -81,7 +81,7 @@ export default function FileUpload({
         id: `${file.name}-${Date.now()}-${index}`,
         progress: 0,
         status: error ? 'error' : 'pending',
-        error
+        error: error ?? undefined
       };
 
       newFiles.push(uploadFile);

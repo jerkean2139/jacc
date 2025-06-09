@@ -30,7 +30,8 @@ import {
   Zap,
   MessageSquare,
   Search,
-  X
+  X,
+  Upload
 } from "lucide-react";
 import { Link } from "wouter";
 import MessageBubble from "./message-bubble";
@@ -667,6 +668,18 @@ With these details, I'll create a customized proposal highlighting value proposi
 
       {/* Chat Input */}
       <div className="border-t border-slate-200 dark:border-slate-700 p-4 pb-safe md:pb-4">
+        {/* Statement Upload Button - Always Visible */}
+        <div className="mb-3 max-w-4xl mx-auto">
+          <Button
+            variant="outline"
+            onClick={() => setShowFileUpload(!showFileUpload)}
+            className="w-full bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700"
+          >
+            <Upload className="w-4 h-4 mr-2" />
+            Upload Merchant Statement for Analysis
+          </Button>
+        </div>
+        
         {/* Input Box */}
         <div className="flex items-end space-x-3 max-w-4xl mx-auto">
           <div className="flex-1 relative">
