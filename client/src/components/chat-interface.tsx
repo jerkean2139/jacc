@@ -626,9 +626,16 @@ With these details, I'll create a customized proposal highlighting value proposi
               <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
                 Start the conversation
               </h3>
-              <p className="text-slate-600 dark:text-slate-400">
+              <p className="text-slate-600 dark:text-slate-400 mb-6">
                 Ask me anything about insurance rates, documents, or client questions.
               </p>
+              <button
+                onClick={() => setShowFileUpload(!showFileUpload)}
+                className="mx-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-sm transition-colors duration-200 flex items-center gap-2"
+              >
+                <Upload className="w-5 h-5" />
+                Upload Merchant Statement for Analysis
+              </button>
             </div>
           ) : (
             safeMessages.map((message) => (
@@ -669,15 +676,14 @@ With these details, I'll create a customized proposal highlighting value proposi
       {/* Chat Input */}
       <div className="border-t border-slate-200 dark:border-slate-700 p-4 pb-safe md:pb-4">
         {/* Statement Upload Button - Always Visible */}
-        <div className="mb-3 max-w-4xl mx-auto">
-          <Button
-            variant="outline"
+        <div className="mb-4 max-w-4xl mx-auto">
+          <button
             onClick={() => setShowFileUpload(!showFileUpload)}
-            className="w-full bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700"
+            className="w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg border border-blue-600 shadow-sm transition-colors duration-200 flex items-center justify-center gap-2"
           >
-            <Upload className="w-4 h-4 mr-2" />
+            <Upload className="w-5 h-5" />
             Upload Merchant Statement for Analysis
-          </Button>
+          </button>
         </div>
         
         {/* Input Box */}
