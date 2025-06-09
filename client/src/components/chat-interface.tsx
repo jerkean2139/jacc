@@ -611,15 +611,7 @@ With these details, I'll create a customized proposal highlighting value proposi
   return (
     <div className="h-full flex flex-col bg-white dark:bg-slate-900">
       
-      {/* EMERGENCY UPLOAD BUTTON - ALWAYS VISIBLE */}
-      <div className="p-4 bg-blue-50 border-b">
-        <button
-          onClick={() => setShowFileUpload(!showFileUpload)}
-          className="w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg flex items-center justify-center gap-2"
-        >
-          📄 UPLOAD MERCHANT STATEMENT FOR ANALYSIS
-        </button>
-      </div>
+
 
       {/* Chat Messages */}
       <ScrollArea className="flex-1 p-4">

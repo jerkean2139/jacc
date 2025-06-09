@@ -208,7 +208,7 @@ export default function HomeStable() {
       </div>
 
       {/* Desktop Layout - CSS Grid for stability */}
-      <div className="hidden lg:grid grid-cols-[320px_1fr_300px] h-full w-full">
+      <div className="hidden lg:grid grid-cols-[320px_1fr] h-full w-full">
         {/* Sidebar - Fixed width grid column */}
         <div className="border-r border-border overflow-hidden">
           <Sidebar
@@ -271,16 +271,7 @@ export default function HomeStable() {
           </div>
         </div>
 
-        {/* Gamification Panel - Right sidebar */}
-        <div className="border-l border-border bg-gray-50 dark:bg-gray-900 overflow-y-auto">
-          <div className="p-4 space-y-6">
-            {/* Usage Meter */}
-            <UsageMeter />
-            
-            {/* Leaderboard */}
-            <Leaderboard />
-          </div>
-        </div>
+
       </div>
     </div>
   );
