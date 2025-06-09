@@ -370,8 +370,22 @@ export class DatabaseStorage implements IStorage {
 
   // Prompt customization operations
   async getUserPrompts(userId: string): Promise<UserPrompt[]> {
-    const prompts = await db.select().from(userPrompts).where(eq(userPrompts.userId, userId));
-    return prompts;
+    try {
+      const prompts = await db.select({
+        id: userPrompts.id,
+        userId: userPrompts.userId,
+        name: userPrompts.name,
+        description: userPrompts.description,
+        category: userPrompts.category,
+        content: userPrompts.content,
+        createdAt: userPrompts.createdAt,
+        updatedAt: userPrompts.updatedAt
+      }).from(userPrompts).where(eq(userPrompts.userId, userId));
+      return prompts;
+    } catch (error) {
+      console.log("UserPrompts table not yet migrated, returning empty array");
+      return [];
+    }
   }
 
   async createUserPrompt(promptData: InsertUserPrompt): Promise<UserPrompt> {

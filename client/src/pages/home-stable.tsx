@@ -135,6 +135,55 @@ export default function HomeStable() {
     deleteFolderMutation.mutate(folderId);
   };
 
+  const handleStatementUpload = async (file: File) => {
+    try {
+      console.log('Processing statement upload:', file.name);
+      
+      // Create FormData to upload the file
+      const formData = new FormData();
+      formData.append('statement', file);
+      
+      // Upload to statement analyzer API
+      const response = await fetch('/api/iso-amp/analyze-statement', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Upload failed: ${response.status}`);
+      }
+      
+      const analysisResult = await response.json();
+      console.log('Statement analysis result:', analysisResult);
+      
+      // Create a new chat with the analysis results
+      const summaryMessage = `I've analyzed your statement from ${file.name}. Here are the key findings:
+
+**Business Information:**
+- Business: ${analysisResult.analysis?.extractedData?.businessName || 'Not detected'}
+- Current Processor: ${analysisResult.analysis?.extractedData?.currentProcessor || 'Not detected'}
+- Monthly Volume: $${(analysisResult.analysis?.extractedData?.monthlyVolume || 0).toLocaleString()}
+- Transaction Count: ${analysisResult.analysis?.extractedData?.transactionCount || 'Not detected'}
+- Average Ticket: $${analysisResult.analysis?.extractedData?.averageTicket || 'Not calculated'}
+- Effective Rate: ${analysisResult.analysis?.extractedData?.effectiveRate || 'Not calculated'}%
+
+**Potential Savings:**
+${analysisResult.analysis?.competitiveAnalysis?.potentialSavings || 'Analysis in progress'}
+
+Would you like me to run a competitive analysis and show you better processing options, or do you have specific questions about your current processing costs?`;
+
+      handleNewChatWithMessage(summaryMessage);
+      
+    } catch (error) {
+      console.error('Statement upload error:', error);
+      toast({
+        title: "Upload Failed",
+        description: "Failed to process statement. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Connect the floating action button to new chat creation
   useNewChatFAB(handleNewChat);
 
@@ -176,11 +225,11 @@ export default function HomeStable() {
               const input = document.createElement('input');
               input.type = 'file';
               input.accept = '.pdf,.doc,.docx,.txt';
-              input.onchange = (e) => {
+              input.onchange = async (e) => {
                 const file = (e.target as HTMLInputElement).files?.[0];
                 if (file) {
                   console.log('File selected:', file.name);
-                  // Handle file upload here
+                  await handleStatementUpload(file);
                 }
               };
               input.click();
