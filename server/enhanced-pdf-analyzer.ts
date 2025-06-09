@@ -1,7 +1,4 @@
-import pdf from 'pdf-parse';
 import OpenAI from 'openai';
-import { createCanvas, loadImage } from 'canvas';
-import pdf2pic from 'pdf2pic';
 import fs from 'fs';
 import path from 'path';
 
@@ -126,7 +123,10 @@ export class EnhancedPDFAnalyzer {
 
   private async extractTextFromPDF(fileBuffer: Buffer): Promise<{ text: string; confidence: number }> {
     try {
-      const pdfData = await pdf(fileBuffer);
+      // Use dynamic import to avoid initialization issues
+      const pdf = await import('pdf-parse');
+      const pdfParse = pdf.default || pdf;
+      const pdfData = await pdfParse(fileBuffer);
       const text = pdfData.text;
       
       // Calculate confidence based on text quality indicators
@@ -173,34 +173,14 @@ export class EnhancedPDFAnalyzer {
 
   private async extractWithOCR(fileBuffer: Buffer, filename: string, tempDir: string): Promise<{ text: string; confidence: number }> {
     try {
-      // Convert PDF to images
-      const tempPdfPath = path.join(tempDir, `temp_${Date.now()}_${filename}`);
-      fs.writeFileSync(tempPdfPath, fileBuffer);
+      // Simplified OCR extraction - use OpenAI's vision API directly
+      // Convert PDF buffer to base64 for vision processing
+      const base64Buffer = fileBuffer.toString('base64');
       
-      const convert = pdf2pic.fromPath(tempPdfPath, {
-        density: 300,
-        saveFilename: 'page',
-        savePath: tempDir,
-        format: 'png',
-        width: 2100,
-        height: 2970
-      });
+      const ocrText = await this.performVisionOCR(base64Buffer);
+      const confidence = this.calculateTextConfidence(ocrText);
       
-      const results = await convert.bulk(-1);
-      let combinedText = '';
-      
-      // Process each page with OpenAI Vision
-      for (const result of results) {
-        const imageBuffer = fs.readFileSync(result.path);
-        const base64Image = imageBuffer.toString('base64');
-        
-        const ocrText = await this.performVisionOCR(base64Image);
-        combinedText += ocrText + '\n\n';
-      }
-      
-      const confidence = this.calculateTextConfidence(combinedText);
-      
-      return { text: combinedText, confidence };
+      return { text: ocrText, confidence };
     } catch (error) {
       console.error('OCR extraction error:', error);
       return { text: '', confidence: 0 };
