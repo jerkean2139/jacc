@@ -37,12 +37,14 @@ export default function FileUpload({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const getFileIcon = (type: string) => {
+    if (!type) return File;
     if (type.includes('image')) return Image;
     if (type.includes('pdf') || type.includes('document')) return FileText;
     return File;
   };
 
   const getFileTypeColor = (type: string) => {
+    if (!type) return 'text-slate-500';
     if (type.includes('image')) return 'text-blue-500';
     if (type.includes('pdf')) return 'text-red-500';
     if (type.includes('spreadsheet') || type.includes('excel')) return 'text-green-500';

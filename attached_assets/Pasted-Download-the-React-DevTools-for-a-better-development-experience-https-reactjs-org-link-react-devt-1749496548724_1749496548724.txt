@@ -1,0 +1,96 @@
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+contentScript.bundle.js:69 Loaded contentScript
+chat-interface.tsx:99 Messages Query Status: Object
+chat-interface.tsx:109 Chat Interface Debug: Object
+sidebar.tsx:63 Sidebar Debug: Object
+chat-interface.tsx:99 Messages Query Status: Object
+chat-interface.tsx:109 Chat Interface Debug: Object
+/api/achievements/progress:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 (Internal Server Error)Understand this error
+/api/user/stats:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 (Internal Server Error)Understand this error
+chat-interface.tsx:99 Messages Query Status: Object
+chat-interface.tsx:109 Chat Interface Debug: Object
+chat-interface.tsx:99 Messages Query Status: Object
+chat-interface.tsx:109 Chat Interface Debug: Object
+chat-interface.tsx:99 Messages Query Status: Object
+chat-interface.tsx:109 Chat Interface Debug: Object
+sidebar.tsx:63 Sidebar Debug: Object
+chat-interface.tsx:99 Messages Query Status: Object
+chat-interface.tsx:109 Chat Interface Debug: Object
+033e6a31-2e5e-4954-804a-b8c105448046:1 Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner.
+033e6a31-2e5e-4954-804a-b8c105448046:1 Unchecked runtime.lastError: The message port closed before a response was received.Understand this error
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 updating page active status
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:99 Messages Query Status: Object
+chat-interface.tsx:109 Chat Interface Debug: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:99 Messages Query Status: Object
+chat-interface.tsx:109 Chat Interface Debug: Object
+contentScript.bundle.js:28 updating page active status
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:99 Messages Query Status: Object
+chat-interface.tsx:109 Chat Interface Debug: Object
+contentScript.bundle.js:28 updating page active status
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 updating page active status
+2file-upload.tsx:40 Uncaught TypeError: Cannot read properties of undefined (reading 'includes')
+    at getFileIcon (file-upload.tsx:40:14)
+    at file-upload.tsx:232:35
+    at Array.map (<anonymous>)
+    at FileUpload (file-upload.tsx:231:18)
+    at renderWithHooks (chunk-WERSD76P.js?v=bb61563a:11548:26)
+    at updateFunctionComponent (chunk-WERSD76P.js?v=bb61563a:14582:28)
+    at beginWork (chunk-WERSD76P.js?v=bb61563a:15924:22)
+    at HTMLUnknownElement.callCallback2 (chunk-WERSD76P.js?v=bb61563a:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-WERSD76P.js?v=bb61563a:3699:24)
+    at invokeGuardedCallback (chunk-WERSD76P.js?v=bb61563a:3733:39)Understand this error
+chunk-WERSD76P.js?v=bb61563a:14032 The above error occurred in the <FileUpload> component:
+
+    at FileUpload (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/components/file-upload.tsx:32:3)
+    at div
+    at div
+    at ChatInterface (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/components/chat-interface.tsx:43:41)
+    at div
+    at div
+    at div
+    at div
+    at HomeStable (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/pages/home-stable.tsx:33:20)
+    at Route (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=bb61563a:323:16)
+    at Switch (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=bb61563a:379:17)
+    at Router (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/App.tsx?v=ob5xzL7ni87zWXyTaUMBU:55:31)
+    at DragDropProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/components/drag-drop-provider.tsx:20:36)
+    at GamificationProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/hooks/useGamification.tsx:22:40)
+    at AppContent (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/App.tsx?v=ob5xzL7ni87zWXyTaUMBU:220:20)
+    at Provider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-PLT6GTVM.js?v=bb61563a:38:15)
+    at TooltipProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=bb61563a:64:5)
+    at QueryClientProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=bb61563a:2805:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+logCapturedError @ chunk-WERSD76P.js?v=bb61563a:14032Understand this error
+chunk-WERSD76P.js?v=bb61563a:9129 Uncaught TypeError: Cannot read properties of undefined (reading 'includes')
+    at getFileIcon (file-upload.tsx:40:14)
+    at file-upload.tsx:232:35
+    at Array.map (<anonymous>)
+    at FileUpload (file-upload.tsx:231:18)
+    at renderWithHooks (chunk-WERSD76P.js?v=bb61563a:11548:26)
+    at updateFunctionComponent (chunk-WERSD76P.js?v=bb61563a:14582:28)
+    at beginWork (chunk-WERSD76P.js?v=bb61563a:15924:22)
+    at beginWork$1 (chunk-WERSD76P.js?v=bb61563a:19753:22)
+    at performUnitOfWork (chunk-WERSD76P.js?v=bb61563a:19198:20)
+    at workLoopSync (chunk-WERSD76P.js?v=bb61563a:19137:13)Understand this error
+/api/documents/upload:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 (Bad Request)Understand this error
+2contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 updating page active status
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 updating page active status
