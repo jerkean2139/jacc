@@ -859,8 +859,8 @@ With these details, I'll create a customized proposal highlighting value proposi
         </div>
       </div>
 
-      {/* Sales Coaching Overlay */}
-      {coaching.isCoachingEnabled && <CoachingOverlay />}
+      {/* Sales Coaching Overlay - Temporarily disabled */}
+      {/* {coaching.isCoachingEnabled && <CoachingOverlay />} */}
     </div>
   );
 }
