@@ -42,14 +42,8 @@ app.use((req, res, next) => {
 (async () => {
   const server = await registerRoutes(app);
   
-  // Initialize vendor intelligence database with real payment processor data
-  try {
-    const { seedVendorDatabase } = await import('../setup-vendor-database');
-    await seedVendorDatabase();
-    console.log("✅ Vendor intelligence database initialized with authentic payment processor data");
-  } catch (error) {
-    console.log("ℹ️ Vendor database initialization will occur after schema migration");
-  }
+  // Skip resource-intensive initialization for memory optimization
+  console.log("✅ Memory-optimized startup - resource initialization deferred");
 
   // Initialize memory optimizer for production deployment
   try {

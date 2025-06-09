@@ -5,7 +5,7 @@ export class MemoryOptimizer {
   private memoryThreshold = 0.80; // 80% memory usage threshold
   private cleanupInterval: NodeJS.Timeout | null = null;
   private documentCache = new Map<string, { data: any; lastAccessed: number; size: number }>();
-  private maxCacheSize = 100 * 1024 * 1024; // 100MB cache limit
+  private maxCacheSize = 25 * 1024 * 1024; // 25MB cache limit
   private currentCacheSize = 0;
 
   static getInstance(): MemoryOptimizer {
@@ -36,11 +36,11 @@ export class MemoryOptimizer {
       console.log(`Memory usage: ${heapUsedMB.toFixed(1)}MB / ${heapTotalMB.toFixed(1)}MB (${(usagePercent * 100).toFixed(1)}%)`);
       
       // Store metrics in global object for monitoring
-      if (!global.memoryMetrics) global.memoryMetrics = {};
-      global.memoryMetrics.heapUsed = heapUsedMB;
-      global.memoryMetrics.heapTotal = heapTotalMB;
-      global.memoryMetrics.usagePercent = usagePercent * 100;
-    }, 30000); // Check every 30 seconds
+      if (!(global as any).memoryMetrics) (global as any).memoryMetrics = {};
+      (global as any).memoryMetrics.heapUsed = heapUsedMB;
+      (global as any).memoryMetrics.heapTotal = heapTotalMB;
+      (global as any).memoryMetrics.usagePercent = usagePercent * 100;
+    }, 10000); // Check every 10 seconds
   }
 
   private startPeriodicCleanup(): void {
