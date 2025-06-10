@@ -639,207 +639,256 @@ export function AdminTrainingPage() {
 
         {/* Knowledge Base Tab */}
         <TabsContent value="knowledge" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Knowledge Base Entries */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BookOpen className="w-5 h-5" />
-                  Knowledge Base Entries
-                </CardTitle>
-                <CardDescription>
-                  Manage structured knowledge entries for AI training
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Add New KB Entry Form */}
-                <div className="border rounded-lg p-4 bg-gray-50 dark:bg-gray-900">
-                  <h4 className="font-medium mb-3 flex items-center gap-2">
-                    <Plus className="w-4 h-4" />
-                    Add Knowledge Entry
-                  </h4>
-                  <div className="space-y-3">
-                    <div>
-                      <Label htmlFor="kb-title">Title</Label>
-                      <Input
-                        id="kb-title"
-                        value={newKBEntry.title || ''}
-                        onChange={(e) => setNewKBEntry({ ...newKBEntry, title: e.target.value })}
-                        placeholder="e.g., POS System Comparison Guide"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="kb-category">Category</Label>
-                      <Select value={newKBEntry.category} onValueChange={(value) => setNewKBEntry({ ...newKBEntry, category: value })}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="merchant_services">Merchant Services</SelectItem>
-                          <SelectItem value="payment_processing">Payment Processing</SelectItem>
-                          <SelectItem value="pos_systems">POS Systems</SelectItem>
-                          <SelectItem value="pricing_guides">Pricing Guides</SelectItem>
-                          <SelectItem value="technical_specs">Technical Specifications</SelectItem>
-                          <SelectItem value="compliance">Compliance & Security</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label htmlFor="kb-content">Content</Label>
-                      <Textarea
-                        id="kb-content"
-                        value={newKBEntry.content || ''}
-                        onChange={(e) => setNewKBEntry({ ...newKBEntry, content: e.target.value })}
-                        placeholder="Enter detailed knowledge content..."
-                        rows={4}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="kb-tags">Tags (comma-separated)</Label>
-                      <Input
-                        id="kb-tags"
-                        value={newKBEntry.tags?.join(', ') || ''}
-                        onChange={(e) => setNewKBEntry({ ...newKBEntry, tags: e.target.value.split(',').map(t => t.trim()) })}
-                        placeholder="pos, clover, square, pricing"
-                      />
-                    </div>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BookOpen className="w-5 h-5" />
+                Knowledge Base Management
+              </CardTitle>
+              <CardDescription>
+                Create structured Q&A entries for AI training and user support
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {/* Add New KB Entry Form */}
+              <div className="border rounded-lg p-4 bg-gray-50 dark:bg-gray-900 mb-6">
+                <h3 className="font-medium mb-4 flex items-center gap-2">
+                  <Plus className="w-4 h-4" />
+                  Add New Knowledge Base Entry
+                </h3>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Left Column - Q&A Structure */}
+                  <div className="space-y-4">
+                    <div className="border rounded-lg p-4 bg-white dark:bg-gray-800">
+                      <h4 className="font-medium mb-3 flex items-center gap-2">
+                        <MessageSquare className="w-4 h-4" />
+                        Question & Answer
+                      </h4>
+                      
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="kb-category" className="text-sm font-medium text-gray-700 dark:text-gray-300">Category</Label>
+                          <Select value={newKBEntry.category} onValueChange={(value) => setNewKBEntry({ ...newKBEntry, category: value })}>
+                            <SelectTrigger className="mt-1">
+                              <SelectValue placeholder="Select category" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="merchant_services">Merchant Services</SelectItem>
+                              <SelectItem value="payment_processing">Payment Processing</SelectItem>
+                              <SelectItem value="pos_systems">POS Systems</SelectItem>
+                              <SelectItem value="pricing_guides">Pricing Guides</SelectItem>
+                              <SelectItem value="technical_specs">Technical Specifications</SelectItem>
+                              <SelectItem value="compliance">Compliance & Security</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
 
-                    {/* Document Permissions */}
-                    <div className="border-t pt-4 mt-4">
-                      <h5 className="font-medium text-sm mb-3">Document Permissions</h5>
-                      <div className="space-y-2">
-                        <div className="flex items-center space-x-2">
-                          <input 
-                            type="checkbox" 
-                            id="kb-view-all" 
-                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                            checked={documentPermissions.viewAll}
-                            onChange={(e) => handlePermissionChange('viewAll', e.target.checked)}
+                        <div>
+                          <Label htmlFor="kb-question" className="text-sm font-medium text-gray-700 dark:text-gray-300">Question/Topic</Label>
+                          <Input
+                            id="kb-question"
+                            value={newKBEntry.title || ''}
+                            onChange={(e) => setNewKBEntry({ ...newKBEntry, title: e.target.value })}
+                            placeholder="e.g., How do I process a refund in Clover?"
+                            className="mt-1"
                           />
-                          <Label htmlFor="kb-view-all" className="text-sm">Allow all users to view</Label>
                         </div>
-                        <div className="flex items-center space-x-2">
-                          <input 
-                            type="checkbox" 
-                            id="kb-admin-only" 
-                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                            checked={documentPermissions.adminOnly}
-                            onChange={(e) => handlePermissionChange('adminOnly', e.target.checked)}
+
+                        <div>
+                          <Label htmlFor="kb-answer" className="text-sm font-medium text-gray-700 dark:text-gray-300">Answer/Content</Label>
+                          <Textarea
+                            id="kb-answer"
+                            value={newKBEntry.content || ''}
+                            onChange={(e) => setNewKBEntry({ ...newKBEntry, content: e.target.value })}
+                            placeholder="Provide step-by-step instructions or detailed explanation..."
+                            rows={8}
+                            className="mt-1"
                           />
-                          <Label htmlFor="kb-admin-only" className="text-sm">Admin only</Label>
                         </div>
-                        <div className="flex items-center space-x-2">
-                          <input 
-                            type="checkbox" 
-                            id="kb-manager-access" 
-                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                            checked={documentPermissions.managerAccess}
-                            onChange={(e) => handlePermissionChange('managerAccess', e.target.checked)}
+
+                        <div>
+                          <Label htmlFor="kb-tags" className="text-sm font-medium text-gray-700 dark:text-gray-300">Tags</Label>
+                          <Input
+                            id="kb-tags"
+                            value={newKBEntry.tags?.join(', ') || ''}
+                            onChange={(e) => setNewKBEntry({ ...newKBEntry, tags: e.target.value.split(',').map(t => t.trim()) })}
+                            placeholder="refund, clover, pos, transaction"
+                            className="mt-1"
                           />
-                          <Label htmlFor="kb-manager-access" className="text-sm">Manager access</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <input 
-                            type="checkbox" 
-                            id="kb-agent-access" 
-                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                            checked={documentPermissions.agentAccess}
-                            onChange={(e) => handlePermissionChange('agentAccess', e.target.checked)}
-                          />
-                          <Label htmlFor="kb-agent-access" className="text-sm">Agent access</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <input 
-                            type="checkbox" 
-                            id="kb-training-data" 
-                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                            checked={documentPermissions.trainingData}
-                            onChange={(e) => handlePermissionChange('trainingData', e.target.checked)}
-                          />
-                          <Label htmlFor="kb-training-data" className="text-sm">Use for AI training</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <input 
-                            type="checkbox" 
-                            id="kb-auto-vectorize" 
-                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                            checked={documentPermissions.autoVectorize}
-                            onChange={(e) => handlePermissionChange('autoVectorize', e.target.checked)}
-                          />
-                          <Label htmlFor="kb-auto-vectorize" className="text-sm">Auto-vectorize for search</Label>
                         </div>
                       </div>
                     </div>
+                  </div>
 
-                    <Button 
-                      onClick={() => createKBMutation.mutate(newKBEntry)}
-                      disabled={!newKBEntry.title || !newKBEntry.content || createKBMutation.isPending}
-                      className="w-full"
-                    >
-                      <Save className="w-4 h-4 mr-2" />
-                      {createKBMutation.isPending ? 'Adding...' : 'Add Entry'}
-                    </Button>
+                  {/* Right Column - Settings & Permissions */}
+                  <div className="space-y-4">
+                    <div className="border rounded-lg p-4 bg-white dark:bg-gray-800">
+                      <h4 className="font-medium mb-3 flex items-center gap-2">
+                        <Settings className="w-4 h-4" />
+                        Entry Settings
+                      </h4>
+                      
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="kb-priority" className="text-sm font-medium text-gray-700 dark:text-gray-300">Priority Level</Label>
+                          <Select value={newKBEntry.priority?.toString()} onValueChange={(value) => setNewKBEntry({ ...newKBEntry, priority: parseInt(value) })}>
+                            <SelectTrigger className="mt-1">
+                              <SelectValue placeholder="Select priority" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="1">High Priority</SelectItem>
+                              <SelectItem value="2">Medium Priority</SelectItem>
+                              <SelectItem value="3">Low Priority</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="space-y-3">
+                          <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Access Permissions</Label>
+                          <div className="space-y-2">
+                            <div className="flex items-center space-x-2">
+                              <input 
+                                type="checkbox" 
+                                id="kb-view-all" 
+                                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                checked={documentPermissions.viewAll}
+                                onChange={(e) => handlePermissionChange('viewAll', e.target.checked)}
+                              />
+                              <Label htmlFor="kb-view-all" className="text-sm">Visible to all users</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <input 
+                                type="checkbox" 
+                                id="kb-admin-only" 
+                                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                checked={documentPermissions.adminOnly}
+                                onChange={(e) => handlePermissionChange('adminOnly', e.target.checked)}
+                              />
+                              <Label htmlFor="kb-admin-only" className="text-sm">Admin only</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <input 
+                                type="checkbox" 
+                                id="kb-manager-access" 
+                                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                checked={documentPermissions.managerAccess}
+                                onChange={(e) => handlePermissionChange('managerAccess', e.target.checked)}
+                              />
+                              <Label htmlFor="kb-manager-access" className="text-sm">Manager access</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <input 
+                                type="checkbox" 
+                                id="kb-agent-access" 
+                                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                checked={documentPermissions.agentAccess}
+                                onChange={(e) => handlePermissionChange('agentAccess', e.target.checked)}
+                              />
+                              <Label htmlFor="kb-agent-access" className="text-sm">Agent access</Label>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-3">
+                          <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">AI Training Options</Label>
+                          <div className="space-y-2">
+                            <div className="flex items-center space-x-2">
+                              <input 
+                                type="checkbox" 
+                                id="kb-training-data" 
+                                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                checked={documentPermissions.trainingData}
+                                onChange={(e) => handlePermissionChange('trainingData', e.target.checked)}
+                              />
+                              <Label htmlFor="kb-training-data" className="text-sm">Use for AI training</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <input 
+                                type="checkbox" 
+                                id="kb-auto-vectorize" 
+                                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                checked={documentPermissions.autoVectorize}
+                                onChange={(e) => handlePermissionChange('autoVectorize', e.target.checked)}
+                              />
+                              <Label htmlFor="kb-auto-vectorize" className="text-sm">Enable semantic search</Label>
+                            </div>
+                          </div>
+                        </div>
+
+                        <Button 
+                          onClick={() => createKBMutation.mutate(newKBEntry)}
+                          disabled={!newKBEntry.title || !newKBEntry.content || createKBMutation.isPending}
+                          className="w-full mt-4"
+                        >
+                          <Save className="w-4 h-4 mr-2" />
+                          {createKBMutation.isPending ? 'Adding...' : 'Add Knowledge Base Entry'}
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 </div>
+              </div>
 
-                {/* Existing KB Entries */}
-                <div className="space-y-3">
-                  <h4 className="font-medium">Existing Entries</h4>
-                  {Array.isArray(knowledgeBaseData) && knowledgeBaseData.length > 0 ? (
-                    <div className="space-y-2">
-                      {knowledgeBaseData.map((entry: KnowledgeBaseEntry) => (
-                        <div key={entry.id} className="border rounded-lg p-3 bg-white dark:bg-gray-900">
-                          <div className="flex items-start justify-between mb-2">
-                            <h5 className="font-medium text-sm">{entry.title}</h5>
-                            <div className="flex items-center gap-1">
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => setEditingKBEntry(entry)}
-                              >
-                                <Edit className="w-3 h-3" />
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => deleteKBMutation.mutate(entry.id)}
-                              >
-                                <Trash2 className="w-3 h-3 text-red-500" />
-                              </Button>
-                            </div>
+              {/* Existing KB Entries */}
+              <div className="space-y-3">
+                <h4 className="font-medium">Existing Entries</h4>
+                {Array.isArray(knowledgeBaseData) && knowledgeBaseData.length > 0 ? (
+                  <div className="space-y-2">
+                    {knowledgeBaseData.map((entry: KnowledgeBaseEntry) => (
+                      <div key={entry.id} className="border rounded-lg p-3 bg-white dark:bg-gray-900">
+                        <div className="flex items-start justify-between mb-2">
+                          <h5 className="font-medium text-sm">{entry.title}</h5>
+                          <div className="flex items-center gap-1">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => setEditingKBEntry(entry)}
+                            >
+                              <Edit className="w-3 h-3" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => deleteKBMutation.mutate(entry.id)}
+                            >
+                              <Trash2 className="w-3 h-3 text-red-500" />
+                            </Button>
                           </div>
-                          <p className="text-xs text-gray-600 dark:text-gray-400 mb-2 line-clamp-2">
-                            {entry.content}
-                          </p>
-                          <div className="flex items-center gap-2 text-xs">
-                            <Badge variant="outline">{entry.category}</Badge>
-                            <span className="text-gray-500">Priority: {entry.priority}</span>
-                          </div>
-                          {entry.tags?.length > 0 && (
-                            <div className="flex flex-wrap gap-1 mt-2">
-                              {entry.tags.map((tag, idx) => (
-                                <span key={idx} className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-1 rounded">
-                                  {tag}
-                                </span>
-                              ))}
-                            </div>
-                          )}
                         </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-gray-500">No knowledge base entries found.</p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 mb-2 line-clamp-2">
+                          {entry.content}
+                        </p>
+                        <div className="flex items-center gap-2 text-xs">
+                          <Badge variant="outline">{entry.category}</Badge>
+                          <span className="text-gray-500">Priority: {entry.priority}</span>
+                        </div>
+                        {entry.tags?.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            {entry.tags.map((tag, idx) => (
+                              <span key={idx} className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-1 rounded">
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500">No knowledge base entries found.</p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-            {/* Document Management */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Database className="w-5 h-5" />
-                  Document Library
+        {/* Document Library Tab */}
+        <TabsContent value="documents" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Database className="w-5 h-5" />
+                Document Library
                 </CardTitle>
                 <CardDescription>
                   Manage uploaded documents and their vectorization status
@@ -940,7 +989,6 @@ export function AdminTrainingPage() {
                 </div>
               </CardContent>
             </Card>
-          </div>
         </TabsContent>
       </Tabs>
     </div>
