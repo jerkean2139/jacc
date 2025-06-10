@@ -588,16 +588,7 @@ With these details, I'll create a customized proposal highlighting value proposi
             </div>
           )}
 
-          {/* Statement Upload Button */}
-          <div className="mb-4 max-w-4xl mx-auto">
-            <button
-              onClick={() => setShowFileUpload(!showFileUpload)}
-              className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg border border-blue-600 shadow-sm transition-colors duration-200 flex items-center justify-center gap-2"
-            >
-              <Upload className="w-4 h-4" />
-              Upload Statement
-            </button>
-          </div>
+
           
           {/* Enhanced Input Box */}
           <div className="flex items-end space-x-3 max-w-4xl mx-auto">
@@ -737,7 +728,7 @@ With these details, I'll create a customized proposal highlighting value proposi
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => handleQuickAction("Analyze Document")}
+                onClick={() => handleQuickAction("I need to analyze a merchant statement using the ISO AMP integration. Please help me upload and analyze bank or processor statements to extract transaction data, fees, and generate competitive savings analysis.")}
                 className="flex items-center gap-2 text-blue-600 hover:bg-blue-50 border-blue-200"
               >
                 <FileSearch className="w-4 h-4" />
@@ -747,7 +738,7 @@ With these details, I'll create a customized proposal highlighting value proposi
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => handleQuickAction("Create Proposal")}
+                onClick={() => handleQuickAction("I need to create a merchant services proposal using the ISO AMP integration. Please help me generate a professional proposal with competitive rates, processor recommendations, and implementation details.")}
                 className="flex items-center gap-2 text-green-600 hover:bg-green-50 border-green-200"
               >
                 <FileText className="w-4 h-4" />
