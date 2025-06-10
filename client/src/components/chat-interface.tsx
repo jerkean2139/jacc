@@ -178,11 +178,21 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!input.trim() || sendMessageMutation.isPending) return;
 
-    sendMessageMutation.mutate(input);
-    setInput("");
+    // If no active chat, create one first and then send message
+    if (!chatId && onNewChatWithMessage) {
+      onNewChatWithMessage(input);
+      setInput("");
+      return;
+    }
+
+    // If we have an active chat, send the message normally
+    if (chatId) {
+      sendMessageMutation.mutate(input);
+      setInput("");
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -453,6 +463,8 @@ With these details, I'll create a customized proposal highlighting value proposi
     textareaRef.current?.focus();
   };
 
+
+
   if (!chatId) {
     return (
       <div className="h-full flex flex-col bg-white dark:bg-slate-900">
@@ -567,30 +579,180 @@ With these details, I'll create a customized proposal highlighting value proposi
           </div>
         </div>
 
-        {/* Input Box for New Chat */}
-        <div className="border-t border-slate-200 dark:border-slate-700 p-4">
+        {/* Enhanced Input Box for New Chat */}
+        <div className="border-t border-slate-200 dark:border-slate-700 p-4 pb-safe md:pb-4">
+          {/* File Upload Area */}
+          {showFileUpload && (
+            <div className="mb-4 max-w-4xl mx-auto">
+              <FileUpload onFileUpload={handleFileUpload} />
+            </div>
+          )}
+
+          {/* Statement Upload Button */}
+          <div className="mb-4 max-w-4xl mx-auto">
+            <button
+              onClick={() => setShowFileUpload(!showFileUpload)}
+              className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg border border-blue-600 shadow-sm transition-colors duration-200 flex items-center justify-center gap-2"
+            >
+              <Upload className="w-4 h-4" />
+              Upload Statement
+            </button>
+          </div>
+          
+          {/* Enhanced Input Box */}
           <div className="flex items-end space-x-3 max-w-4xl mx-auto">
             <div className="flex-1 relative">
               <Textarea
+                ref={textareaRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyPress}
-                placeholder="Ask JACC anything about merchant services..."
-                className="auto-resize border-slate-300 dark:border-slate-600 rounded-xl pr-12 min-h-[50px] max-h-[120px] resize-none focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Ask JACC anything about rates, documents, or client questions..."
+                className="auto-resize border-slate-300 dark:border-slate-600 rounded-xl pr-28 min-h-[50px] max-h-[120px] resize-none focus:ring-green-500 focus:border-green-500"
                 disabled={sendMessageMutation.isPending}
               />
               
-              <div className="absolute right-2 bottom-2">
+              {/* Input Actions */}
+              <div className="absolute right-2 bottom-2 flex items-center space-x-1">
                 <Button
-                  type="submit"
+                  variant="ghost"
                   size="icon"
-                  onClick={handleSendMessage}
-                  disabled={!input.trim() || sendMessageMutation.isPending}
-                  className="w-8 h-8 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
+                  onClick={() => setShowFileUpload(!showFileUpload)}
+                  className="w-8 h-8"
+                  title="Attach file"
                 >
-                  <Send className="w-4 h-4" />
+                  <Paperclip className="w-4 h-4" />
+                </Button>
+                
+                {/* AI PROMPTS BUTTON */}
+                <Button
+                  variant="default"
+                  size="icon"
+                  onClick={() => setShowPromptDropdown(!showPromptDropdown)}
+                  className="w-8 h-8 bg-purple-600 hover:bg-purple-700 text-white shadow-md"
+                  title="AI Prompts"
+                >
+                  <Brain className="w-4 h-4" />
+                </Button>
+                
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleVoiceInput}
+                  className={cn(
+                    "w-8 h-8",
+                    isListening && "text-red-500"
+                  )}
+                  title="Voice input"
+                >
+                  <Mic className="w-4 h-4" />
                 </Button>
               </div>
+              
+              {/* AI Prompt Dropdown */}
+              {showPromptDropdown && (
+                <div className="absolute right-2 bottom-14 w-96 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg z-50">
+                  {/* Header with search */}
+                  <div className="p-3 border-b border-slate-200 dark:border-slate-700">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Brain className="w-4 h-4 text-purple-600" />
+                      <span className="font-medium text-sm">AI Prompts</span>
+                      <Link href="/prompts">
+                        <Button variant="ghost" size="sm" className="ml-auto text-xs">
+                          Manage →
+                        </Button>
+                      </Link>
+                    </div>
+                    <div className="relative">
+                      <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Search prompts..."
+                        value={promptSearchTerm}
+                        onChange={(e) => setPromptSearchTerm(e.target.value)}
+                        className="pl-8"
+                      />
+                    </div>
+                  </div>
+                  
+                  {/* Category filters */}
+                  <div className="p-2 border-b border-slate-200 dark:border-slate-700">
+                    <div className="flex flex-wrap gap-1">
+                      {categories.map((category) => (
+                        <Button
+                          key={category}
+                          variant={selectedCategory === category ? "default" : "ghost"}
+                          size="sm"
+                          onClick={() => setSelectedCategory(category)}
+                          className="text-xs h-6 px-2 capitalize"
+                        >
+                          {category}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  {/* Prompt list */}
+                  <div className="max-h-64 overflow-y-auto">
+                    {filteredPrompts.length > 0 ? (
+                      filteredPrompts.map((prompt: any) => (
+                        <div
+                          key={prompt.id}
+                          onClick={() => handlePromptSelect(prompt)}
+                          className="flex flex-col items-start p-3 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700 border-b border-slate-100 dark:border-slate-600 last:border-b-0"
+                        >
+                          <div className="font-medium text-sm text-slate-900 dark:text-white">{prompt.name}</div>
+                          <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
+                            {prompt.promptTemplate.slice(0, 100)}...
+                          </div>
+                          <div className="flex items-center gap-1 mt-2">
+                            <Badge variant="secondary" className="text-xs">
+                              {prompt.category}
+                            </Badge>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="p-4 text-center text-sm text-slate-500 dark:text-slate-400">
+                        {promptSearchTerm || selectedCategory !== "all" ? "No prompts found" : "No saved prompts available"}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            {/* Send Button */}
+            <Button
+              onClick={handleSendMessage}
+              disabled={!input.trim() || sendMessageMutation.isPending}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-xl hover:opacity-90 disabled:opacity-50"
+            >
+              <Send className="w-4 h-4" />
+            </Button>
+          </div>
+
+          {/* Quick Action Buttons */}
+          <div className="mt-4 max-w-4xl mx-auto">
+            <div className="flex flex-wrap gap-2 justify-center">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleQuickAction("Analyze Document")}
+                className="flex items-center gap-2 text-blue-600 hover:bg-blue-50 border-blue-200"
+              >
+                <FileSearch className="w-4 h-4" />
+                Analyze Document
+              </Button>
+              
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleQuickAction("Create Proposal")}
+                className="flex items-center gap-2 text-green-600 hover:bg-green-50 border-green-200"
+              >
+                <FileText className="w-4 h-4" />
+                Create Proposal
+              </Button>
             </div>
           </div>
         </div>
