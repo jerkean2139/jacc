@@ -631,13 +631,6 @@ With these details, I'll create a customized proposal highlighting value proposi
               <p className="text-slate-600 dark:text-slate-400 mb-6">
                 Ask me anything about insurance rates, documents, or client questions.
               </p>
-              <button
-                onClick={() => setShowFileUpload(!showFileUpload)}
-                className="mx-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-sm transition-colors duration-200 flex items-center gap-2"
-              >
-                <Upload className="w-5 h-5" />
-                Upload Merchant Statement for Analysis
-              </button>
             </div>
           ) : (
             safeMessages.map((message) => (
@@ -681,10 +674,10 @@ With these details, I'll create a customized proposal highlighting value proposi
         <div className="mb-4 max-w-4xl mx-auto">
           <button
             onClick={() => setShowFileUpload(!showFileUpload)}
-            className="w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg border border-blue-600 shadow-sm transition-colors duration-200 flex items-center justify-center gap-2"
+            className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg border border-blue-600 shadow-sm transition-colors duration-200 flex items-center justify-center gap-2"
           >
-            <Upload className="w-5 h-5" />
-            Upload Merchant Statement for Analysis
+            <Upload className="w-4 h-4" />
+            Upload Statement
           </button>
         </div>
         
