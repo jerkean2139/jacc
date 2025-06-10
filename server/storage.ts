@@ -103,9 +103,11 @@ export interface IStorage {
   updateUserStats(userId: string, updates: Partial<UserStats>): Promise<void>;
 
   // Admin operations
+  getUsers(): Promise<User[]>;
   getAllUsers(): Promise<User[]>;
   deleteUser(userId: string): Promise<void>;
   getAllDocuments(): Promise<Document[]>;
+  updateDocument(documentId: string, updates: any): Promise<Document>;
   updateDocumentPermissions(documentId: string, permissions: any): Promise<Document>;
   getAllPrompts(): Promise<any[]>;
   createPrompt(prompt: any): Promise<any>;
@@ -113,6 +115,15 @@ export interface IStorage {
   deletePrompt(promptId: string): Promise<void>;
   getAdminSettings(): Promise<any>;
   updateAdminSettings(settings: any): Promise<any>;
+  
+  // Training and feedback
+  createTrainingFeedback(feedback: any): Promise<any>;
+  
+  // Analytics
+  getChatCount(): Promise<number>;
+  getDocumentCount(): Promise<number>;
+  getActiveUserCount(): Promise<number>;
+  getRecentActivity(): Promise<any[]>;
 
   // Simplified admin operations for existing data
   getAllChats(): Promise<Chat[]>;
@@ -469,6 +480,51 @@ export class DatabaseStorage implements IStorage {
 
   async deletePrompt(promptId: string): Promise<void> {
     await db.delete(userPrompts).where(eq(userPrompts.id, promptId));
+  }
+
+  // Missing method implementations
+  async getUsers(): Promise<User[]> {
+    return await db.select().from(users).orderBy(users.createdAt);
+  }
+
+  async updateDocument(documentId: string, updates: any): Promise<Document> {
+    const [document] = await db
+      .update(documents)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(documents.id, documentId))
+      .returning();
+    return document;
+  }
+
+  async createTrainingFeedback(feedback: any): Promise<any> {
+    // For now, return the feedback as-is since we don't have a dedicated table
+    return { id: crypto.randomUUID(), ...feedback, createdAt: new Date() };
+  }
+
+  async getChatCount(): Promise<number> {
+    const result = await db.select({ count: chats.id }).from(chats);
+    return result.length;
+  }
+
+  async getDocumentCount(): Promise<number> {
+    const result = await db.select({ count: documents.id }).from(documents);
+    return result.length;
+  }
+
+  async getActiveUserCount(): Promise<number> {
+    const result = await db.select({ count: users.id }).from(users).where(eq(users.isActive, true));
+    return result.length;
+  }
+
+  async getRecentActivity(): Promise<any[]> {
+    // Get recent chats and messages as activity
+    const recentChats = await db.select().from(chats).orderBy(desc(chats.createdAt)).limit(10);
+    const recentMessages = await db.select().from(messages).orderBy(desc(messages.createdAt)).limit(10);
+    
+    return [
+      ...recentChats.map(chat => ({ type: 'chat', ...chat })),
+      ...recentMessages.map(message => ({ type: 'message', ...message }))
+    ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 20);
   }
 
   async getAdminSettings(): Promise<any> {

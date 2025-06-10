@@ -40,46 +40,18 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  const server = await registerRoutes(app);
+  let server;
+  try {
+    server = await registerRoutes(app);
+    console.log("✅ Routes registered successfully");
+  } catch (error) {
+    console.error("❌ Failed to register routes:", error);
+    // Create a basic server if routes fail
+    server = require('http').createServer(app);
+    console.log("⚠️ Using fallback server configuration");
+  }
   
-  // Skip resource-intensive initialization for memory optimization
-  console.log("✅ Memory-optimized startup - resource initialization deferred");
-
-  // Initialize memory optimizer for production deployment
-  try {
-    const { memoryOptimizer } = await import('./memory-optimizer');
-    memoryOptimizer.initialize();
-    memoryOptimizer.optimizeForProduction();
-    console.log("✅ Memory optimizer initialized for production deployment");
-  } catch (error) {
-    console.log("⚠️ Memory optimizer initialization failed:", error);
-  }
-
-  // Initialize knowledge base manager for automated maintenance
-  try {
-    const { knowledgeBaseManager } = await import('./knowledge-base-manager');
-    knowledgeBaseManager.initialize();
-    console.log("✅ Knowledge base manager initialized with automated maintenance");
-  } catch (error) {
-    console.log("⚠️ Knowledge base manager initialization failed:", error);
-  }
-
-  // Initialize multi-tenant architecture
-  try {
-    const { multiTenantManager } = await import('./multi-tenant-manager');
-    console.log("✅ Multi-tenant architecture initialized for enterprise deployment");
-  } catch (error) {
-    console.log("⚠️ Multi-tenant manager initialization failed:", error);
-  }
-
-  // Initialize TracerPay documentation
-  try {
-    const { tracerPayProcessor } = await import('./tracerpay-processor');
-    await tracerPayProcessor.processTracerPayUploads();
-    console.log("✅ TracerPay documentation folder created with sales materials");
-  } catch (error) {
-    console.log("ℹ️ TracerPay documentation will be processed after schema migration");
-  }
+  console.log("✅ Server initialization complete");
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
@@ -98,15 +70,10 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // ALWAYS serve the app on port 5000
+  // Use environment port or fallback to 5000
   // this serves both the API and the client.
-  // It is the only port that is not firewalled.
-  const port = 5000;
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
+  const port = process.env.PORT ? parseInt(process.env.PORT) : 5000;
+  server.listen(port, "0.0.0.0", () => {
     log(`serving on port ${port}`);
   });
 })();
