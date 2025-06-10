@@ -116,19 +116,141 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // In-memory storage for chats and messages
+  const chats = new Map<string, any>();
+  const messages = new Map<string, any[]>();
+
   // Basic folders endpoint
   app.get('/api/folders', (req: Request, res: Response) => {
     res.json([]);
   });
 
-  // Basic chats endpoint
+  // Get all chats
   app.get('/api/chats', (req: Request, res: Response) => {
-    res.json([]);
+    const sessionId = req.cookies?.sessionId;
+    if (!sessionId || !sessions.has(sessionId)) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+    
+    const userChats = Array.from(chats.values()).filter(chat => chat.userId === sessions.get(sessionId).id);
+    res.json(userChats);
+  });
+
+  // Create new chat
+  app.post('/api/chats', (req: Request, res: Response) => {
+    try {
+      const sessionId = req.cookies?.sessionId;
+      if (!sessionId || !sessions.has(sessionId)) {
+        return res.status(401).json({ error: 'Not authenticated' });
+      }
+
+      const user = sessions.get(sessionId);
+      const chatId = Math.random().toString(36).substring(2, 15);
+      const newChat = {
+        id: chatId,
+        title: req.body.title || "New Chat",
+        userId: user.id,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      chats.set(chatId, newChat);
+      messages.set(chatId, []);
+      
+      res.json(newChat);
+    } catch (error) {
+      console.error('Create chat error:', error);
+      res.status(500).json({ error: 'Failed to create chat' });
+    }
+  });
+
+  // Get messages for a chat
+  app.get('/api/chats/:chatId/messages', (req: Request, res: Response) => {
+    try {
+      const sessionId = req.cookies?.sessionId;
+      if (!sessionId || !sessions.has(sessionId)) {
+        return res.status(401).json({ error: 'Not authenticated' });
+      }
+
+      const { chatId } = req.params;
+      const chatMessages = messages.get(chatId) || [];
+      res.json(chatMessages);
+    } catch (error) {
+      console.error('Get messages error:', error);
+      res.status(500).json({ error: 'Failed to get messages' });
+    }
+  });
+
+  // Send message to chat
+  app.post('/api/chats/:chatId/messages', (req: Request, res: Response) => {
+    try {
+      const sessionId = req.cookies?.sessionId;
+      if (!sessionId || !sessions.has(sessionId)) {
+        return res.status(401).json({ error: 'Not authenticated' });
+      }
+
+      const { chatId } = req.params;
+      const { content, role } = req.body;
+      const user = sessions.get(sessionId);
+
+      const messageId = Math.random().toString(36).substring(2, 15);
+      const newMessage = {
+        id: messageId,
+        chatId,
+        content,
+        role: role || 'user',
+        userId: user.id,
+        createdAt: new Date().toISOString()
+      };
+
+      if (!messages.has(chatId)) {
+        messages.set(chatId, []);
+      }
+      
+      const chatMessages = messages.get(chatId);
+      chatMessages.push(newMessage);
+
+      // If it's a user message, generate a simple AI response
+      if (role === 'user') {
+        const aiResponseId = Math.random().toString(36).substring(2, 15);
+        const aiMessage = {
+          id: aiResponseId,
+          chatId,
+          content: `I received your message: "${content}". This is a basic response from JACC. The full AI functionality is being configured.`,
+          role: 'assistant',
+          userId: 'system',
+          createdAt: new Date().toISOString()
+        };
+        chatMessages.push(aiMessage);
+      }
+
+      res.json(newMessage);
+    } catch (error) {
+      console.error('Send message error:', error);
+      res.status(500).json({ error: 'Failed to send message' });
+    }
   });
 
   // Basic documents endpoint
   app.get('/api/documents', (req: Request, res: Response) => {
     res.json([]);
+  });
+
+  // Additional endpoints that the frontend expects
+  app.get('/api/user/stats', (req: Request, res: Response) => {
+    res.json({});
+  });
+
+  app.get('/api/user/achievements', (req: Request, res: Response) => {
+    res.json([]);
+  });
+
+  app.get('/api/user/prompts', (req: Request, res: Response) => {
+    res.json([]);
+  });
+
+  app.get('/api/coaching/metrics', (req: Request, res: Response) => {
+    res.json({});
   });
 
   console.log("✅ Simple routes registered successfully");
