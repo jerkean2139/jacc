@@ -2,20 +2,64 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import cookieParser from "cookie-parser";
 import OpenAI from "openai";
+import axios from "axios";
 
 // Initialize OpenAI client
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+// Perplexity API configuration
+const PERPLEXITY_API_URL = 'https://api.perplexity.ai/chat/completions';
+const PERPLEXITY_API_KEY = process.env.PERPLEXITY_API_KEY;
+
+// Function to search web for industry articles using Perplexity
+async function searchWebForIndustryArticles(query: string): Promise<string> {
+  try {
+    const searchQuery = `Find 5 recent articles about ${query} in payment processing, merchant services, or fintech industry. Include titles, key insights, and sources.`;
+    
+    const response = await axios.post(PERPLEXITY_API_URL, {
+      model: "llama-3.1-sonar-small-128k-online",
+      messages: [
+        {
+          role: "system",
+          content: "You are a research assistant specializing in payment processing and merchant services industry. Search for and summarize recent industry articles, trends, and insights. Always include source URLs when available."
+        },
+        {
+          role: "user",
+          content: searchQuery
+        }
+      ],
+      max_tokens: 1500,
+      temperature: 0.2,
+    }, {
+      headers: {
+        'Authorization': `Bearer ${PERPLEXITY_API_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    return response.data.choices[0]?.message?.content || "No recent articles found.";
+  } catch (error) {
+    console.error('Perplexity API error:', error);
+    return "Unable to fetch current industry articles at this time.";
+  }
+}
+
 // AI Response Generation Function
 async function generateAIResponse(userMessage: string, chatHistory: any[], user: any): Promise<string> {
   try {
+    // Check if user is asking for industry intelligence, trends, or market insights
+    const needsWebSearch = /\b(industry|intelligence|trends|market|recent|current|latest|news|articles|updates|developments)\b/i.test(userMessage);
+    
+    let webContent = "";
+    if (needsWebSearch) {
+      console.log("Fetching current industry articles for enhanced response...");
+      webContent = await searchWebForIndustryArticles(userMessage);
+    }
+
     // Build conversation context from chat history
-    const messages = [
-      {
-        role: "system",
-        content: `You are JACC (Just Another Credit Card Assistant), an AI-powered assistant specialized in merchant services and payment processing. You work for a company that helps businesses optimize their payment processing solutions.
+    const systemPrompt = `You are JACC (Just Another Credit Card Assistant), an AI-powered assistant specialized in merchant services and payment processing. You work for a company that helps businesses optimize their payment processing solutions.
 
 Your expertise includes:
 - Payment processing rates and fee structures
@@ -28,7 +72,14 @@ Your expertise includes:
 
 You should provide helpful, accurate, and professional responses about merchant services, payment processing, and related financial technology topics. When asked about industry intelligence or market trends, provide relevant insights about the payment processing landscape.
 
-Always maintain a professional tone and focus on providing valuable information that helps sales agents and merchants make informed decisions about their payment processing needs.`
+Always maintain a professional tone and focus on providing valuable information that helps sales agents and merchants make informed decisions about their payment processing needs.
+
+${webContent ? `\n\nCURRENT INDUSTRY INTELLIGENCE:\n${webContent}\n\nUse this current information to enhance your response with the latest industry insights and trends.` : ''}`;
+
+    const messages = [
+      {
+        role: "system",
+        content: systemPrompt
       },
       ...chatHistory
         .filter(msg => msg.role && msg.content)
@@ -46,7 +97,7 @@ Always maintain a professional tone and focus on providing valuable information 
     const completion = await openai.chat.completions.create({
       model: "gpt-4",
       messages: messages,
-      max_tokens: 1000,
+      max_tokens: 1500,
       temperature: 0.7,
     });
 
