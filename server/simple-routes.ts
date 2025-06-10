@@ -1,6 +1,61 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import cookieParser from "cookie-parser";
+import OpenAI from "openai";
+
+// Initialize OpenAI client
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+// AI Response Generation Function
+async function generateAIResponse(userMessage: string, chatHistory: any[], user: any): Promise<string> {
+  try {
+    // Build conversation context from chat history
+    const messages = [
+      {
+        role: "system",
+        content: `You are JACC (Just Another Credit Card Assistant), an AI-powered assistant specialized in merchant services and payment processing. You work for a company that helps businesses optimize their payment processing solutions.
+
+Your expertise includes:
+- Payment processing rates and fee structures
+- Merchant services recommendations
+- Credit card processing technology
+- Industry trends and market intelligence
+- Document analysis for merchant statements
+- Proposal generation for clients
+- Competitive analysis of payment processors
+
+You should provide helpful, accurate, and professional responses about merchant services, payment processing, and related financial technology topics. When asked about industry intelligence or market trends, provide relevant insights about the payment processing landscape.
+
+Always maintain a professional tone and focus on providing valuable information that helps sales agents and merchants make informed decisions about their payment processing needs.`
+      },
+      ...chatHistory
+        .filter(msg => msg.role && msg.content)
+        .slice(-10) // Keep last 10 messages for context
+        .map(msg => ({
+          role: msg.role,
+          content: msg.content
+        })),
+      {
+        role: "user",
+        content: userMessage
+      }
+    ];
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4",
+      messages: messages,
+      max_tokens: 1000,
+      temperature: 0.7,
+    });
+
+    return completion.choices[0]?.message?.content || "I apologize, but I'm having trouble generating a response right now. Please try again.";
+  } catch (error) {
+    console.error("OpenAI API error:", error);
+    throw new Error("Failed to generate AI response");
+  }
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   console.log("🔄 Setting up simple routes...");
@@ -182,7 +237,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Send message to chat
-  app.post('/api/chats/:chatId/messages', (req: Request, res: Response) => {
+  app.post('/api/chats/:chatId/messages', async (req: Request, res: Response) => {
     try {
       const sessionId = req.cookies?.sessionId;
       if (!sessionId || !sessions.has(sessionId)) {
@@ -207,21 +262,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
         messages.set(chatId, []);
       }
       
-      const chatMessages = messages.get(chatId);
+      const chatMessages = messages.get(chatId) || [];
       chatMessages.push(newMessage);
+      messages.set(chatId, chatMessages);
 
-      // If it's a user message, generate a simple AI response
+      // If it's a user message, generate AI response using OpenAI
       if (role === 'user') {
-        const aiResponseId = Math.random().toString(36).substring(2, 15);
-        const aiMessage = {
-          id: aiResponseId,
-          chatId,
-          content: `I received your message: "${content}". This is a basic response from JACC. The full AI functionality is being configured.`,
-          role: 'assistant',
-          userId: 'system',
-          createdAt: new Date().toISOString()
-        };
-        chatMessages.push(aiMessage);
+        try {
+          const aiResponse = await generateAIResponse(content, chatMessages, user);
+          const aiResponseId = Math.random().toString(36).substring(2, 15);
+          const aiMessage = {
+            id: aiResponseId,
+            chatId,
+            content: aiResponse,
+            role: 'assistant',
+            userId: 'system',
+            createdAt: new Date().toISOString()
+          };
+          chatMessages.push(aiMessage);
+          messages.set(chatId, chatMessages);
+        } catch (aiError) {
+          console.error('AI response error:', aiError);
+          // Fallback response if AI fails
+          const aiResponseId = Math.random().toString(36).substring(2, 15);
+          const aiMessage = {
+            id: aiResponseId,
+            chatId,
+            content: `I'm currently experiencing technical difficulties. Please try again in a moment, or contact support if the issue persists.`,
+            role: 'assistant',
+            userId: 'system',
+            createdAt: new Date().toISOString()
+          };
+          chatMessages.push(aiMessage);
+          messages.set(chatId, chatMessages);
+        }
       }
 
       res.json(newMessage);
