@@ -475,104 +475,94 @@ With these details, I'll create a customized proposal highlighting value proposi
 
           {/* Conversation Starters - Coming Soon */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-4xl mb-8">
-            <div className="relative group w-full">
+            <div className="w-full">
               <Button
                 variant="outline"
-                className="p-3 h-auto text-left justify-start hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-300 hover:border-blue-200 dark:hover:border-blue-700 transition-colors w-full cursor-not-allowed opacity-75"
-                onClick={(e) => {
-                  e.preventDefault();
-                  // Temporarily disabled - show coming soon
+                className="p-3 h-auto text-left justify-start hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-300 hover:border-blue-200 dark:hover:border-blue-700 transition-colors w-full"
+                onClick={() => {
+                  if (onNewChatWithMessage) {
+                    onNewChatWithMessage("I need help calculating processing rates and fees for a merchant. Please show me the ISO-AMP integration for rate calculations.");
+                  }
                 }}
               >
                 <Calculator className="mr-3 h-4 w-4 text-blue-600 flex-shrink-0" />
                 <div className="flex-1 min-w-0 overflow-hidden">
                   <div className="font-medium mb-1 text-sm truncate">Calculate Rates</div>
-                  <div className="text-xs text-slate-500 group-hover:text-blue-600 dark:group-hover:text-blue-400 line-clamp-2">Calculate processing rates and fees</div>
+                  <div className="text-xs text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 line-clamp-2">Calculate processing rates and fees</div>
                 </div>
               </Button>
-              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
-                Coming Soon
-              </div>
             </div>
 
-            <div className="relative group w-full">
+            <div className="w-full">
               <Button
                 variant="outline"
-                className="p-3 h-auto text-left justify-start hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-700 dark:hover:text-green-300 hover:border-green-200 dark:hover:border-green-700 transition-colors w-full cursor-not-allowed opacity-75"
-                onClick={(e) => {
-                  e.preventDefault();
-                  // Temporarily disabled - show coming soon
+                className="p-3 h-auto text-left justify-start hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-700 dark:hover:text-green-300 hover:border-green-200 dark:hover:border-green-700 transition-colors w-full"
+                onClick={() => {
+                  if (onNewChatWithMessage) {
+                    onNewChatWithMessage("Show me real-time market intelligence including current processor pricing and industry trends for merchant services.");
+                  }
                 }}
               >
                 <Globe className="mr-3 h-4 w-4 text-green-600 flex-shrink-0" />
                 <div className="flex-1 min-w-0 overflow-hidden">
                   <div className="font-medium mb-1 text-sm truncate">Real-Time Market Intelligence</div>
-                  <div className="text-xs text-slate-500 group-hover:text-green-600 dark:group-hover:text-green-400 line-clamp-2">Get current processor pricing and industry trends</div>
+                  <div className="text-xs text-slate-500 hover:text-green-600 dark:hover:text-green-400 line-clamp-2">Get current processor pricing and industry trends</div>
                 </div>
               </Button>
-              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
-                Coming Soon
-              </div>
             </div>
             
-            <div className="relative group w-full">
+            <div className="w-full">
               <Button
                 variant="outline"
-                className="p-3 h-auto text-left justify-start hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-700 dark:hover:text-purple-300 hover:border-purple-200 dark:hover:border-purple-700 transition-colors w-full cursor-not-allowed opacity-75"
-                onClick={(e) => {
-                  e.preventDefault();
-                  // Temporarily disabled - show coming soon
+                className="p-3 h-auto text-left justify-start hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-700 dark:hover:text-purple-300 hover:border-purple-200 dark:hover:border-purple-700 transition-colors w-full"
+                onClick={() => {
+                  if (onNewChatWithMessage) {
+                    onNewChatWithMessage("I need an AI-powered competitor analysis comparing different payment processors. Please analyze and compare the top processors with detailed insights on rates, features, and competitive advantages.");
+                  }
                 }}
               >
                 <Brain className="mr-3 h-4 w-4 text-purple-600 flex-shrink-0" />
                 <div className="flex-1 min-w-0 overflow-hidden">
                   <div className="font-medium mb-1 text-sm truncate">AI Competitor Analysis</div>
-                  <div className="text-xs text-slate-500 group-hover:text-purple-600 dark:group-hover:text-purple-400 line-clamp-2">Compare processors with AI insights</div>
+                  <div className="text-xs text-slate-500 hover:text-purple-600 dark:hover:text-purple-400 line-clamp-2">Compare processors with AI insights</div>
                 </div>
               </Button>
-              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
-                Coming Soon
-              </div>
             </div>
             
-            <div className="relative group w-full">
+            <div className="w-full">
               <Button
                 variant="outline"
-                className="p-3 h-auto text-left justify-start hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-700 dark:hover:text-orange-300 hover:border-orange-200 dark:hover:border-orange-700 transition-colors w-full cursor-not-allowed opacity-75"
-                onClick={(e) => {
-                  e.preventDefault();
-                  // Temporarily disabled - show coming soon
+                className="p-3 h-auto text-left justify-start hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-700 dark:hover:text-orange-300 hover:border-orange-200 dark:hover:border-orange-700 transition-colors w-full"
+                onClick={() => {
+                  if (onNewChatWithMessage) {
+                    onNewChatWithMessage("I need industry intelligence on payment processing trends. Please provide real-time market trends, industry insights, and analysis of the current payment processing landscape.");
+                  }
                 }}
               >
                 <Zap className="mr-3 h-4 w-4 text-orange-600 flex-shrink-0" />
                 <div className="flex-1 min-w-0 overflow-hidden">
                   <div className="font-medium mb-1 text-sm truncate">Industry Intelligence</div>
-                  <div className="text-xs text-slate-500 group-hover:text-orange-600 dark:group-hover:text-orange-400 line-clamp-2">Real-time market trends and insights</div>
+                  <div className="text-xs text-slate-500 hover:text-orange-600 dark:hover:text-orange-400 line-clamp-2">Real-time market trends and insights</div>
                 </div>
               </Button>
-              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
-                Coming Soon
-              </div>
             </div>
             
-            <div className="relative group w-full">
+            <div className="w-full">
               <Button
                 variant="outline"
-                className="p-3 h-auto text-left justify-start hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:text-indigo-700 dark:hover:text-indigo-300 hover:border-indigo-200 dark:hover:border-indigo-700 transition-colors w-full cursor-not-allowed opacity-75"
-                onClick={(e) => {
-                  e.preventDefault();
-                  // Temporarily disabled - show coming soon
+                className="p-3 h-auto text-left justify-start hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:text-indigo-700 dark:hover:text-indigo-300 hover:border-indigo-200 dark:hover:border-indigo-700 transition-colors w-full"
+                onClick={() => {
+                  if (onNewChatWithMessage) {
+                    onNewChatWithMessage("I need help creating a client proposal for merchant services. Please generate a professional proposal document with competitive rates and service details.");
+                  }
                 }}
               >
                 <FileText className="mr-3 h-4 w-4 text-indigo-600 flex-shrink-0" />
                 <div className="flex-1 min-w-0 overflow-hidden">
                   <div className="font-medium mb-1 text-sm truncate">Create Proposal</div>
-                  <div className="text-xs text-slate-500 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 line-clamp-2">Generate client proposals and documents</div>
+                  <div className="text-xs text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 line-clamp-2">Generate client proposals and documents</div>
                 </div>
               </Button>
-              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
-                Coming Soon
-              </div>
             </div>
           </div>
         </div>
@@ -813,42 +803,34 @@ With these details, I'll create a customized proposal highlighting value proposi
           </Button>
         </div>
 
-        {/* Quick Actions - Simplified to avoid redundancy with bottom nav */}
+        {/* Quick Actions */}
         <div className="flex flex-wrap gap-2 mt-3 max-w-4xl mx-auto">
-          <div className="relative group">
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={(e) => {
-                e.preventDefault();
-                // Temporarily disabled - show coming soon
-              }}
-              className="text-blue-700 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 cursor-not-allowed opacity-75"
-            >
-              <FileSearch className="w-3 h-3 mr-2 text-blue-600" />
-              Analyze Document
-            </Button>
-            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
-              Coming Soon
-            </div>
-          </div>
-          <div className="relative group">
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={(e) => {
-                e.preventDefault();
-                // Temporarily disabled - show coming soon
-              }}
-              className="text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 cursor-not-allowed opacity-75"
-            >
-              <FileText className="w-3 h-3 mr-2 text-indigo-600" />
-              Create Proposal
-            </Button>
-            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
-              Coming Soon
-            </div>
-          </div>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => {
+              if (onNewChatWithMessage) {
+                onNewChatWithMessage("Please help me analyze a document. I need to extract key information and insights from uploaded files.");
+              }
+            }}
+            className="text-blue-700 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+          >
+            <FileSearch className="w-3 h-3 mr-2 text-blue-600" />
+            Analyze Document
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => {
+              if (onNewChatWithMessage) {
+                onNewChatWithMessage("I need help creating a client proposal for merchant services. Please generate a professional proposal document with competitive rates and service details.");
+              }
+            }}
+            className="text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
+          >
+            <FileText className="w-3 h-3 mr-2 text-indigo-600" />
+            Create Proposal
+          </Button>
         </div>
       </div>
 
