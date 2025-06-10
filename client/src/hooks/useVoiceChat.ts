@@ -1,5 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 
+// TypeScript declarations for Web Speech API
+declare global {
+  interface Window {
+    SpeechRecognition: any;
+    webkitSpeechRecognition: any;
+  }
+}
+
 interface VoiceSettings {
   enabled: boolean;
   autoSpeak: boolean;

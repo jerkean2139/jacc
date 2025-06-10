@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useLocation } from 'wouter';
+import VoiceTestDemo from './voice-test-demo';
 
 interface TutorialStep {
   id: string;
@@ -42,6 +43,7 @@ export default function InteractiveTutorial() {
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [showVoiceTest, setShowVoiceTest] = useState(false);
 
   // Check if user has completed tutorial
   useEffect(() => {
@@ -380,6 +382,12 @@ export default function InteractiveTutorial() {
 
   const handleNext = () => {
     if (currentStep < tutorialSteps.length - 1) {
+      // Special handling for voice features step
+      if (tutorialSteps[currentStep]?.id === 'voice-features') {
+        setShowVoiceTest(true);
+        return;
+      }
+      
       setCompletedSteps(prev => [...prev, tutorialSteps[currentStep].id]);
       setCurrentStep(prev => prev + 1);
       
@@ -393,6 +401,12 @@ export default function InteractiveTutorial() {
       setIsActive(false);
       setIsCompleted(true);
     }
+  };
+
+  const handleVoiceTestComplete = () => {
+    setShowVoiceTest(false);
+    setCompletedSteps(prev => [...prev, tutorialSteps[currentStep].id]);
+    setCurrentStep(prev => prev + 1);
   };
 
   const handlePrevious = () => {
@@ -416,73 +430,85 @@ export default function InteractiveTutorial() {
   }
 
   return (
-    <Dialog open={isActive} onOpenChange={setIsActive}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-green-500 rounded-full flex items-center justify-center">
-                <span className="text-sm font-bold text-white">
-                  {currentStep + 1}
-                </span>
+    <>
+      <Dialog open={isActive} onOpenChange={setIsActive}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-green-500 rounded-full flex items-center justify-center">
+                  <span className="text-sm font-bold text-white">
+                    {currentStep + 1}
+                  </span>
+                </div>
+                <div>
+                  <DialogTitle className="text-left text-xl">{currentStepData.title}</DialogTitle>
+                  <p className="text-left text-muted-foreground">{currentStepData.description}</p>
+                </div>
               </div>
-              <div>
-                <DialogTitle className="text-left text-xl">{currentStepData.title}</DialogTitle>
-                <p className="text-left text-muted-foreground">{currentStepData.description}</p>
-              </div>
+              <Badge variant="secondary" className="px-3 py-1">
+                Interactive Tutorial
+              </Badge>
             </div>
-            <Badge variant="secondary" className="px-3 py-1">
-              Interactive Tutorial
-            </Badge>
-          </div>
-          
-          <div className="space-y-3">
-            <Progress value={progress} className="w-full h-2" />
-            <div className="flex justify-between text-sm text-muted-foreground">
-              <span>Step {currentStep + 1} of {tutorialSteps.length}</span>
-              <span>{Math.round(progress)}% Complete</span>
-            </div>
-          </div>
-        </DialogHeader>
-
-        <div className="py-6">
-          {currentStepData.content}
-          
-          {currentStepData.action && (
-            <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-950 rounded-lg border border-blue-200 dark:border-blue-800">
-              <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300 mb-2">
-                <MousePointer className="w-5 h-5" />
-                <span className="font-semibold">Try This:</span>
-              </div>
-              <p className="text-blue-600 dark:text-blue-400">
-                {currentStepData.action}
-              </p>
-            </div>
-          )}
-        </div>
-
-        <div className="flex justify-between items-center pt-4 border-t">
-          <div className="flex gap-2">
-            {currentStep > 0 && (
-              <Button variant="outline" onClick={handlePrevious}>
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Previous
-              </Button>
-            )}
             
-            {currentStep < tutorialSteps.length - 1 && (
-              <Button variant="ghost" onClick={handleSkip} className="text-muted-foreground">
-                Skip Tutorial
-              </Button>
+            <div className="space-y-3">
+              <Progress value={progress} className="w-full h-2" />
+              <div className="flex justify-between text-sm text-muted-foreground">
+                <span>Step {currentStep + 1} of {tutorialSteps.length}</span>
+                <span>{Math.round(progress)}% Complete</span>
+              </div>
+            </div>
+          </DialogHeader>
+
+          <div className="py-6">
+            {currentStepData.content}
+            
+            {currentStepData.action && (
+              <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-950 rounded-lg border border-blue-200 dark:border-blue-800">
+                <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300 mb-2">
+                  <MousePointer className="w-5 h-5" />
+                  <span className="font-semibold">Try This:</span>
+                </div>
+                <p className="text-blue-600 dark:text-blue-400">
+                  {currentStepData.action}
+                </p>
+              </div>
             )}
           </div>
 
-          <Button onClick={handleNext} className="px-6">
-            {currentStepData.nextButton || 'Next'}
-            {currentStep < tutorialSteps.length - 1 && <ArrowRight className="w-4 h-4 ml-2" />}
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+          <div className="flex justify-between items-center pt-4 border-t">
+            <div className="flex gap-2">
+              {currentStep > 0 && (
+                <Button variant="outline" onClick={handlePrevious}>
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Previous
+                </Button>
+              )}
+              
+              {currentStep < tutorialSteps.length - 1 && (
+                <Button variant="ghost" onClick={handleSkip} className="text-muted-foreground">
+                  Skip Tutorial
+                </Button>
+              )}
+            </div>
+
+            <Button onClick={handleNext} className="px-6">
+              {currentStepData.nextButton || 'Next'}
+              {currentStep < tutorialSteps.length - 1 && <ArrowRight className="w-4 h-4 ml-2" />}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Voice Test Demo Dialog */}
+      <Dialog open={showVoiceTest} onOpenChange={setShowVoiceTest}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <VoiceTestDemo 
+            onComplete={handleVoiceTestComplete}
+            onClose={() => setShowVoiceTest(false)}
+          />
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
