@@ -984,8 +984,6 @@ export function AdminTrainingPage() {
                       Upload Documents
                     </Button>
                   </div>
-                  
-
                 </div>
               </CardContent>
             </Card>
