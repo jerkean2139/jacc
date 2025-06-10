@@ -2676,6 +2676,127 @@ User Context: {userRole}`,
     }
   });
 
+  // Step 1: Temporary upload for documents
+  app.post('/api/documents/upload-temp', upload.array('files'), async (req: any, res) => {
+    try {
+      const userId = 'simple-user-001'; // Temporary for testing
+      const files = req.files;
+      
+      if (!files || files.length === 0) {
+        return res.status(400).json({ message: "No files uploaded" });
+      }
+
+      const tempFiles = [];
+      const errors = [];
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        try {
+          const customName = req.body[`customName_${i}`];
+          
+          // Create temporary document entry
+          const tempDocument = await storage.createDocument({
+            userId,
+            name: customName || file.originalname.replace(/\.[^/.]+$/, ""),
+            originalName: file.originalname,
+            mimeType: file.mimetype,
+            size: file.size,
+            path: file.filename,
+            // Mark as temporary by not setting folder/permissions yet
+            isPublic: false,
+            adminOnly: false,
+            managerOnly: false,
+            agentOnly: false,
+            trainingData: false,
+            autoVectorize: false,
+          });
+
+          tempFiles.push({
+            id: tempDocument.id,
+            filename: tempDocument.originalName || tempDocument.name,
+            size: tempDocument.size,
+            mimeType: tempDocument.mimeType
+          });
+
+        } catch (error) {
+          console.error(`Error processing file ${file.originalname}:`, error);
+          errors.push(`Failed to process ${file.originalname}: ${error.message}`);
+        }
+      }
+
+      res.json({
+        files: tempFiles,
+        errors: errors.length > 0 ? errors : undefined,
+        message: `${tempFiles.length} files uploaded successfully. Configure placement and permissions to complete.`
+      });
+
+    } catch (error) {
+      console.error("Error in temporary upload:", error);
+      res.status(500).json({ message: "Upload failed" });
+    }
+  });
+
+  // Step 2: Process document placement and permissions
+  app.post('/api/documents/process-placement', async (req: any, res) => {
+    try {
+      const userId = 'simple-user-001'; // Temporary for testing
+      const { documentIds, folderId, permissions } = req.body;
+
+      if (!documentIds || !Array.isArray(documentIds)) {
+        return res.status(400).json({ message: "Document IDs are required" });
+      }
+
+      const processedDocuments = [];
+      const errors = [];
+
+      for (const documentId of documentIds) {
+        try {
+          // Update document with folder and permissions
+          const updateData: any = {
+            folderId: folderId === 'root' ? null : folderId,
+            isPublic: permissions.viewAll || false,
+            adminOnly: permissions.adminOnly || false,
+            managerOnly: permissions.managerAccess || false,
+            agentOnly: permissions.agentAccess || false,
+            trainingData: permissions.trainingData || false,
+            autoVectorize: permissions.autoVectorize || false,
+          };
+
+          const updatedDocument = await storage.updateDocument(documentId, updateData);
+          
+          // Process document for vectorization if enabled
+          if (permissions.autoVectorize) {
+            try {
+              const { enhancedPdfAnalyzer } = await import('./enhanced-pdf-analyzer');
+              const document = await storage.getDocument(documentId);
+              if (document) {
+                await enhancedPdfAnalyzer.processDocument(document);
+              }
+            } catch (vectorError) {
+              console.error(`Vectorization failed for ${documentId}:`, vectorError);
+            }
+          }
+
+          processedDocuments.push(updatedDocument);
+
+        } catch (error) {
+          console.error(`Error processing document ${documentId}:`, error);
+          errors.push(`Failed to process document ${documentId}: ${error.message}`);
+        }
+      }
+
+      res.json({
+        processedDocuments,
+        errors: errors.length > 0 ? errors : undefined,
+        message: `${processedDocuments.length} documents processed successfully`
+      });
+
+    } catch (error) {
+      console.error("Error in document placement processing:", error);
+      res.status(500).json({ message: "Document placement processing failed" });
+    }
+  });
+
   app.post('/api/documents/upload', upload.array('files'), async (req: any, res) => {
     try {
       const userId = 'simple-user-001'; // Temporary for testing
