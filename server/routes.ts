@@ -67,6 +67,16 @@ const upload = multer({
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Test database connection before setting up routes
+  try {
+    console.log("🔄 Testing database connection...");
+    await db.execute('SELECT NOW()');
+    console.log("✅ Database connection successful");
+  } catch (error) {
+    console.error("❌ Database connection failed:", error);
+    console.log("⚠️ Continuing with limited functionality");
+  }
+
   // Setup authentication system
   setupAuth(app);
   
@@ -1838,7 +1848,7 @@ User Context: {userRole}`,
       console.log(`🔍 Training Test: Searching internal documents for query: "${query}"`);
       
       // Step 1: Search internal documents first (same as production workflow)
-      let documentResults = [];
+      let documentResults: any[] = [];
       try {
         documentResults = await enhancedAIService.searchDocuments(query);
         console.log(`📄 Training Test: Found ${documentResults.length} relevant documents`);
