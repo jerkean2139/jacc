@@ -20,11 +20,13 @@ import {
   Edit2,
   Trash2,
   Save,
-  AlertTriangle
+  AlertTriangle,
+  Settings
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import type { Document } from "@shared/schema";
 import { cn } from "@/lib/utils";
+import DocumentPlacementDialog from "./document-placement-dialog";
 
 interface DocumentUploadProps {
   folderId?: string;
@@ -34,6 +36,8 @@ interface DocumentUploadProps {
 export default function DocumentUpload({ folderId, onUploadComplete }: DocumentUploadProps) {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
+  const [uploadedFiles, setUploadedFiles] = useState<Array<{ id: string; filename: string; size: number; mimeType: string }>>([]);
+  const [showPlacementDialog, setShowPlacementDialog] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -99,10 +103,10 @@ export default function DocumentUpload({ folderId, onUploadComplete }: DocumentU
 
 
 
-  // Upload mutation
+  // Upload mutation - Step 1: Upload files temporarily
   const uploadMutation = useMutation({
     mutationFn: async (formData: FormData) => {
-      const response = await fetch("/api/documents/upload", {
+      const response = await fetch("/api/documents/upload-temp", {
         method: "POST",
         credentials: "include",
         body: formData,
@@ -114,15 +118,15 @@ export default function DocumentUpload({ folderId, onUploadComplete }: DocumentU
 
       return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/documents"] });
+    onSuccess: (data) => {
+      setUploadedFiles(data.files);
       setSelectedFiles([]);
       setUploadProgress({});
+      setShowPlacementDialog(true);
       toast({
         title: "Upload successful",
-        description: "Your documents have been uploaded and are now searchable in Tracer.",
+        description: "Files uploaded. Please configure folder placement and permissions.",
       });
-      onUploadComplete?.();
     },
     onError: (error) => {
       toast({
@@ -491,6 +495,25 @@ export default function DocumentUpload({ folderId, onUploadComplete }: DocumentU
           </CardContent>
         </Card>
       )}
+
+      {/* Document Placement Dialog */}
+      <DocumentPlacementDialog
+        open={showPlacementDialog}
+        onClose={() => {
+          setShowPlacementDialog(false);
+          setUploadedFiles([]);
+        }}
+        uploadedFiles={uploadedFiles}
+        onComplete={() => {
+          queryClient.invalidateQueries({ queryKey: ["/api/documents"] });
+          setUploadedFiles([]);
+          onUploadComplete?.();
+          toast({
+            title: "Documents processed",
+            description: "Your documents have been placed in the document library and are now searchable.",
+          });
+        }}
+      />
     </div>
   );
 }
