@@ -545,11 +545,7 @@ With these details, I'll create a customized proposal highlighting value proposi
               <Button
                 variant="outline"
                 className="p-3 h-auto text-left justify-start hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-700 dark:hover:text-orange-300 hover:border-orange-200 dark:hover:border-orange-700 transition-colors w-full"
-                onClick={() => {
-                  if (onNewChatWithMessage) {
-                    onNewChatWithMessage("I need industry intelligence on payment processing trends. Please provide real-time market trends, industry insights, and analysis of the current payment processing landscape.");
-                  }
-                }}
+                onClick={() => handleQuickAction("Find the most current market trends and insights from payment processing and merchant services industry articles from the previous 7 days. Please provide comprehensive analysis with recent developments, regulatory changes, technology updates, and competitive landscape shifts.")}
               >
                 <Zap className="mr-3 h-4 w-4 text-orange-600 flex-shrink-0" />
                 <div className="flex-1 min-w-0 overflow-hidden">

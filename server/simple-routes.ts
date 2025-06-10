@@ -16,22 +16,41 @@ const PERPLEXITY_API_KEY = process.env.PERPLEXITY_API_KEY;
 // Function to search web for industry articles using Perplexity
 async function searchWebForIndustryArticles(query: string): Promise<string> {
   try {
-    const searchQuery = `Find 5 recent articles about ${query} in payment processing, merchant services, or fintech industry. Include titles, key insights, and sources.`;
+    const currentDate = new Date();
+    const sevenDaysAgo = new Date(currentDate.getTime() - (7 * 24 * 60 * 60 * 1000));
+    const dateRange = `from ${sevenDaysAgo.toISOString().split('T')[0]} to ${currentDate.toISOString().split('T')[0]}`;
+    
+    const searchQuery = `Find the 5 most recent and relevant articles from the previous 7 days (${dateRange}) about payment processing, merchant services, fintech industry trends, regulatory changes, technology updates, and competitive landscape developments. Focus on:
+    - Current market trends and insights
+    - Recent regulatory changes or announcements
+    - New technology launches or updates
+    - Industry mergers, acquisitions, or partnerships
+    - Competitive analysis and market shifts
+    - Rate changes or fee structure updates
+
+    For each article, provide:
+    1. Article title and publication
+    2. Publication date
+    3. Key insights and main points
+    4. Source URL if available
+    5. Relevance to merchant services industry
+
+    Query context: ${query}`;
     
     const response = await axios.post(PERPLEXITY_API_URL, {
       model: "llama-3.1-sonar-small-128k-online",
       messages: [
         {
           role: "system",
-          content: "You are a research assistant specializing in payment processing and merchant services industry. Search for and summarize recent industry articles, trends, and insights. Always include source URLs when available."
+          content: "You are a specialized research assistant for the payment processing and merchant services industry. Search for the most current articles from the past 7 days only. Prioritize official industry publications, regulatory announcements, and major financial news sources. Always include specific dates, sources, and direct relevance to payment processing or merchant services."
         },
         {
           role: "user",
           content: searchQuery
         }
       ],
-      max_tokens: 1500,
-      temperature: 0.2,
+      max_tokens: 2000,
+      temperature: 0.1,
     }, {
       headers: {
         'Authorization': `Bearer ${PERPLEXITY_API_KEY}`,
@@ -39,10 +58,10 @@ async function searchWebForIndustryArticles(query: string): Promise<string> {
       }
     });
 
-    return response.data.choices[0]?.message?.content || "No recent articles found.";
+    return response.data.choices[0]?.message?.content || "No recent articles from the past 7 days found.";
   } catch (error) {
     console.error('Perplexity API error:', error);
-    return "Unable to fetch current industry articles at this time.";
+    return "Unable to fetch current industry articles from the past 7 days at this time.";
   }
 }
 
