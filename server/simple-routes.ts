@@ -3,7 +3,8 @@ import { createServer, type Server } from "http";
 import cookieParser from "cookie-parser";
 import multer from "multer";
 import fs from "fs";
-// PDF parsing will be imported dynamically
+// PDF parsing and OCR will be imported dynamically
+import { fromPath } from "pdf2pic";
 import OpenAI from "openai";
 import axios from "axios";
 
@@ -169,33 +170,106 @@ async function extractPDFText(filePath: string): Promise<string> {
   }
 }
 
+// Enhanced OCR-based PDF text extraction for better accuracy
+async function enhancedOCRExtraction(filePath: string): Promise<string> {
+  try {
+    // Ensure temp directory exists
+    if (!fs.existsSync('./temp')) {
+      fs.mkdirSync('./temp', { recursive: true });
+    }
+
+    // Convert PDF to images first for better OCR
+    const convert = fromPath(filePath, {
+      density: 300,           // Higher DPI for better text recognition
+      saveFilename: "page",
+      savePath: "./temp/",
+      format: "png",
+      width: 2000,
+      height: 2000
+    });
+
+    console.log('Converting PDF to images for OCR processing...');
+    const results = await convert.bulk(-1); // Convert all pages
+    let combinedText = "";
+
+    // Import Tesseract dynamically
+    const Tesseract = (await import('tesseract.js')).default;
+
+    for (const result of results) {
+      if (result && result.path) {
+        console.log(`Processing OCR on: ${result.path}`);
+        
+        // Run OCR on each page with enhanced settings
+        const { data: { text } } = await Tesseract.recognize(result.path, 'eng', {
+          logger: m => {
+            if (m.status === 'recognizing text') {
+              console.log(`OCR Progress: ${Math.round(m.progress * 100)}%`);
+            }
+          }
+        });
+        
+        combinedText += text + "\n\n--- PAGE BREAK ---\n\n";
+        
+        // Clean up temporary image
+        try {
+          fs.unlinkSync(result.path);
+        } catch (cleanupError) {
+          console.warn('Failed to cleanup temp file:', result.path);
+        }
+      }
+    }
+
+    console.log('OCR extraction completed successfully');
+    return combinedText || "OCR extraction completed but no text found";
+  } catch (error) {
+    console.error('Enhanced OCR extraction failed:', error);
+    // Fallback to regular PDF extraction
+    return await extractPDFText(filePath);
+  }
+}
+
 // Function to analyze statement text and filename using AI
 async function analyzeStatementText(text: string, filename?: string): Promise<any> {
   try {
-    // Enhanced prompt that can work with basic file info when full text extraction isn't available
-    const prompt = `Analyze this merchant processing statement and extract the following information:
+    // Enhanced prompt focused on the labeled sections from the user's images
+    const prompt = `Analyze this merchant processing statement and extract key financial data from the PROCESSING ACTIVITY SUMMARY and INTERCHANGE FEES sections:
 
 File Information: ${filename || 'Unknown file'}
 Statement Content: ${text}
 
-Based on the filename and any available content, please extract and return in JSON format:
-1. Merchant name/business name (look for business names in filename or content)
-2. Current processor name (identify from filename like "worldpay", "chase", "square", etc.)
-3. Monthly processing volume (estimate if not available)
-4. Average ticket size (estimate if not available)
-5. Total number of transactions (estimate if not available)
-6. Current processing rate/fees (estimate typical rates if not available)
-7. Monthly processing costs (estimate if not available)
-8. Statement period (extract from filename if possible)
+Focus on extracting data from these critical sections:
 
-For processor identification:
-- If filename contains "worldpay" → "WorldPay"
-- If filename contains "chase" → "Chase Paymentech"  
-- If filename contains "square" → "Square"
-- If filename contains "stripe" → "Stripe"
-- etc.
+1. PROCESSING ACTIVITY SUMMARY TABLE:
+   - Look for "Card Type", "Settled Sales", "Amount of Sales", "Average Ticket", "Processing Rate", "Processing Fees" columns
+   - Extract total processing volume from "Amount of Sales" 
+   - Calculate average ticket from data in table
+   - Extract processing rates and fees for each card type
+   - Sum up total processing fees
 
-If specific data isn't available, make reasonable estimates based on typical merchant processing patterns.
+2. INTERCHANGE FEES SECTION:
+   - Look for interchange fee descriptions and amounts
+   - Extract fee amounts and calculate total interchange costs
+   - Identify different card types and their associated fees
+
+3. HEADER/MERCHANT INFO:
+   - Extract merchant name from document header
+   - Identify processor from filename or letterhead
+   - Extract statement period/date
+
+Return JSON with these exact fields:
+{
+  "merchantName": "extracted from document",
+  "currentProcessor": "identified from filename/content", 
+  "monthlyVolume": actual_dollar_amount,
+  "averageTicket": calculated_from_data,
+  "totalTransactions": sum_of_transactions,
+  "currentRate": weighted_average_rate,
+  "monthlyProcessingCost": total_fees_from_statement,
+  "statementPeriod": "extracted_period",
+  "additionalFees": "interchange_and_other_fees"
+}
+
+Extract REAL numerical values from the statement data when available. Only use estimates if specific data cannot be found.
 
 Return only the JSON object with these fields:
 {
@@ -531,14 +605,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       let extractedData;
       
-      // Extract text from PDF
+      // Extract text from PDF using enhanced OCR
       if (req.file.mimetype === 'application/pdf') {
-        const pdfText = await extractPDFText(req.file.path);
-        console.log('Extracted PDF text (first 500 chars):', pdfText.substring(0, 500));
-        console.log('Original filename:', req.file.originalname);
+        console.log('Starting enhanced OCR extraction for:', req.file.originalname);
+        
+        // Try enhanced OCR extraction first for better accuracy
+        const ocrText = await enhancedOCRExtraction(req.file.path);
+        console.log('Enhanced OCR extraction completed');
+        console.log('Extracted text (first 500 chars):', ocrText.substring(0, 500));
         
         // Analyze the extracted text with AI, including filename for processor identification
-        extractedData = await analyzeStatementText(pdfText, req.file.originalname);
+        extractedData = await analyzeStatementText(ocrText, req.file.originalname);
       } else {
         // For image files, return an error for now
         return res.status(400).json({ error: 'Image processing not yet implemented. Please upload a PDF statement.' });
