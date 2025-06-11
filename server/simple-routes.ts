@@ -149,6 +149,7 @@ const upload = multer({
 // Function to extract text from PDF
 async function extractPDFText(filePath: string): Promise<string> {
   try {
+    const pdfParse = (await import('pdf-parse')).default;
     const dataBuffer = fs.readFileSync(filePath);
     const data = await pdfParse(dataBuffer);
     return data.text;
