@@ -3492,6 +3492,172 @@ User Context: {userRole}`,
     }
   });
 
+  // Admin Chat Monitoring Routes
+  app.get('/api/admin/chat-monitoring', async (req: any, res) => {
+    try {
+      const { db } = await import('./db');
+      const { chats, messages, users } = await import('@shared/schema');
+      const { eq, desc, sql, and } = await import('drizzle-orm');
+
+      // Get all chats with their first user message and JACC's first response
+      const chatData = await db
+        .select({
+          chatId: chats.id,
+          chatTitle: chats.title,
+          userId: chats.userId,
+          username: users.username,
+          userEmail: users.email,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          chatCreatedAt: chats.createdAt,
+          chatUpdatedAt: chats.updatedAt
+        })
+        .from(chats)
+        .innerJoin(users, eq(chats.userId, users.id))
+        .orderBy(desc(chats.createdAt));
+
+      // For each chat, get the first user message and first assistant response
+      const chatMonitoringData = await Promise.all(
+        chatData.map(async (chat) => {
+          // Get first user message
+          const firstUserMessage = await db
+            .select({
+              id: messages.id,
+              content: messages.content,
+              createdAt: messages.createdAt
+            })
+            .from(messages)
+            .where(and(
+              eq(messages.chatId, chat.chatId),
+              eq(messages.role, 'user')
+            ))
+            .orderBy(messages.createdAt)
+            .limit(1);
+
+          // Get first assistant message
+          const firstAssistantMessage = await db
+            .select({
+              id: messages.id,
+              content: messages.content,
+              createdAt: messages.createdAt
+            })
+            .from(messages)
+            .where(and(
+              eq(messages.chatId, chat.chatId),
+              eq(messages.role, 'assistant')
+            ))
+            .orderBy(messages.createdAt)
+            .limit(1);
+
+          // Get total message count for this chat
+          const messageCount = await db
+            .select({ count: sql`count(*)` })
+            .from(messages)
+            .where(eq(messages.chatId, chat.chatId));
+
+          return {
+            ...chat,
+            firstUserMessage: firstUserMessage[0] || null,
+            firstAssistantMessage: firstAssistantMessage[0] || null,
+            totalMessages: Number(messageCount[0]?.count) || 0
+          };
+        })
+      );
+
+      res.json({
+        success: true,
+        data: chatMonitoringData,
+        totalChats: chatMonitoringData.length
+      });
+    } catch (error) {
+      console.error("Error fetching chat monitoring data:", error);
+      res.status(500).json({ 
+        success: false,
+        error: "Failed to fetch chat monitoring data",
+        data: [],
+        totalChats: 0
+      });
+    }
+  });
+
+  // Get detailed chat analysis for admin
+  app.get('/api/admin/chat-analytics', async (req: any, res) => {
+    try {
+      const { db } = await import('./db');
+      const { chats, messages, users } = await import('@shared/schema');
+      const { eq, desc, sql, and, gte } = await import('drizzle-orm');
+
+      const dateRange = req.query.dateRange || '7d';
+      let dateFilter;
+      
+      const now = new Date();
+      switch (dateRange) {
+        case '1d':
+          dateFilter = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+          break;
+        case '7d':
+          dateFilter = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          break;
+        case '30d':
+          dateFilter = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+          break;
+        default:
+          dateFilter = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      }
+
+      // Get chat statistics
+      const totalChats = await db
+        .select({ count: sql`count(*)` })
+        .from(chats)
+        .where(gte(chats.createdAt, dateFilter));
+
+      const totalMessages = await db
+        .select({ count: sql`count(*)` })
+        .from(messages)
+        .where(gte(messages.createdAt, dateFilter));
+
+      const activeUsers = await db
+        .select({ count: sql`count(distinct ${chats.userId})` })
+        .from(chats)
+        .where(gte(chats.createdAt, dateFilter));
+
+      // Get user engagement metrics
+      const userEngagement = await db
+        .select({
+          userId: chats.userId,
+          username: users.username,
+          chatCount: sql`count(${chats.id})`,
+          lastActive: sql`max(${chats.updatedAt})`
+        })
+        .from(chats)
+        .innerJoin(users, eq(chats.userId, users.id))
+        .where(gte(chats.createdAt, dateFilter))
+        .groupBy(chats.userId, users.username)
+        .orderBy(desc(sql`count(${chats.id})`));
+
+      res.json({
+        success: true,
+        analytics: {
+          totalChats: Number(totalChats[0]?.count) || 0,
+          totalMessages: Number(totalMessages[0]?.count) || 0,
+          activeUsers: Number(activeUsers[0]?.count) || 0,
+          userEngagement: userEngagement || []
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching chat analytics:", error);
+      res.status(500).json({ 
+        success: false,
+        analytics: {
+          totalChats: 0,
+          totalMessages: 0,
+          activeUsers: 0,
+          userEngagement: []
+        }
+      });
+    }
+  });
+
   // Document Approval Workflow Routes
   app.get('/api/document-approvals/pending', async (req: any, res) => {
     try {

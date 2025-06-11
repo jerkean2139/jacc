@@ -39,6 +39,7 @@ import HelpPage from "@/pages/help";
 import VendorIntelligenceDashboard from "@/pages/vendor-intelligence-dashboard";
 import ISOHubIntegration from "@/pages/iso-hub-integration";
 import ISOHub from "@/pages/iso-hub";
+import AdminChatMonitoring from "@/pages/admin-chat-monitoring";
 
 function Router() {
   const { user, isLoading } = useAuth();
