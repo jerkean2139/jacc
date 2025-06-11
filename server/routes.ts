@@ -2373,88 +2373,23 @@ User Context: {userRole}`,
         spreadsheetData: null // TODO: Add Google Sheets integration
       };
       
-      // Use AI orchestrator for multi-agent coordination (95/100 grade optimization)
+      // Use optimized direct AI for fast responses
       let aiResponse;
+      console.log('🚀 Processing with fast AI service');
       try {
-        // Create orchestration context for multi-agent workflow
-        const orchestrationContext = {
-          userId,
-          sessionId: req.sessionID || 'default',
-          originalQuery: messageData.content,
-          searchNamespaces: ['merchant-services', 'payment-processing', 'business-intelligence'],
-          preferences: {
-            responseFormat: 'detailed' as const,
-            includeSourceLinks: true,
-            maxResults: 10
-          },
-          sharedMemory: new Map()
-        };
-
-        console.log(`🎯 Orchestrating multi-agent search for: "${messageData.content}"`);
-        
-        // Execute orchestrated search with parallel agents
-        const orchestratedResult = await aiOrchestrator.orchestrateSearch(
-          messageData.content, 
-          orchestrationContext
-        );
-        
-        // Track performance metrics for monitoring
-        await monitoringService.trackSearchPerformance(
-          'ai_enhanced',
-          orchestratedResult.metadata?.executionTime || 0,
-          orchestratedResult.confidence || 0.8,
-          orchestratedResult.results?.length || 0
-        );
-
-        // Capture implicit feedback for continuous learning
-        await userFeedbackSystem.captureImplicitFeedback(
-          userId,
-          req.sessionID || 'default',
-          messageData.content,
-          {
-            clickedResults: [],
-            timeSpent: 0,
-            scrollDepth: 0.5,
-            queryRefinements: 0
-          }
-        );
-
+        const directResponse = await generateChatResponse(messages, context);
         aiResponse = {
-          message: orchestratedResult.synthesizedResponse || orchestratedResult.message || 'I found relevant information for your query.',
-          sources: orchestratedResult.sources || [],
-          reasoning: orchestratedResult.reasoning || 'Response generated using advanced AI orchestration with parallel agent coordination',
-          suggestions: orchestratedResult.suggestions || ["Ask about merchant services", "Request payment processing rates", "Inquire about documentation"],
-          actions: orchestratedResult.actions || []
+          message: directResponse.message,
+          suggestions: directResponse.suggestions || ["Upload documents for analysis", "Compare processing rates", "Create merchant proposals"],
+          actions: directResponse.actions || []
         };
-        
-        console.log(`✅ Orchestration complete - confidence: ${orchestratedResult.confidence || 0.8}`);
-        
-      } catch (orchestrationError) {
-        console.log('🔄 Orchestrator unavailable, using enhanced AI service');
-        try {
-          aiResponse = await enhancedAIService.generateChainedResponse(
-            messageData.content,
-            messages,
-            userId
-          );
-        } catch (enhancedError) {
-          console.error("Enhanced AI failed, using optimized direct AI:", enhancedError);
-          try {
-            const directResponse = await generateChatResponse(messages, context);
-            aiResponse = {
-              message: directResponse.message,
-              suggestions: directResponse.suggestions || ["Upload documents for analysis", "Compare processing rates", "Create merchant proposals"],
-              actions: directResponse.actions || []
-            };
-          } catch (fallbackError) {
-            console.error("Direct AI failed, using merchant services response:", fallbackError);
-            aiResponse = {
-              message: "I can help you analyze merchant statements, compare processing rates, and create proposals. What would you like me to help you with today?",
-              suggestions: ["Analyze a merchant statement", "Compare processing options", "Create a client proposal"],
-              actions: []
-            };
-          }
-        }
+      } catch (directError) {
+        console.error("Direct AI failed, using fallback:", directError);
+        aiResponse = {
+          message: "I can help you analyze merchant statements, compare processing rates, and create proposals. What would you like me to help you with today?",
+          suggestions: ["Analyze a merchant statement", "Compare processing options", "Create a client proposal"],
+          actions: []
+        };
       }
       
       // Save AI response
