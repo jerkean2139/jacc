@@ -915,44 +915,8 @@ With these details, I'll create a customized proposal highlighting value proposi
           </Button>
         </div>
 
-        {/* Quick Actions */}
-        <div className="flex flex-wrap gap-2 mt-3 max-w-4xl mx-auto">
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => {
-              window.location.href = "/iso-hub";
-            }}
-            className="text-blue-700 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20"
-          >
-            <FileSearch className="w-3 h-3 mr-2 text-blue-600" />
-            Analyze Processor Statement
-          </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => {
-              if (onNewChatWithMessage) {
-                onNewChatWithMessage("I need help creating a client proposal for merchant services. Please generate a professional proposal document with competitive rates and service details.");
-              }
-            }}
-            className="text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
-          >
-            <FileText className="w-3 h-3 mr-2 text-indigo-600" />
-            Create Proposal
-          </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => {
-              window.location.href = "/iso-hub-integration";
-            }}
-            className="text-green-700 dark:text-green-300 hover:bg-green-50 dark:hover:bg-green-900/20"
-          >
-            <Settings className="w-3 h-3 mr-2 text-green-600" />
-            ISO Hub Integration
-          </Button>
-        </div>
+        {/* Quick Actions - Version 2 features hidden */}
+        {/* Document analysis, proposal creation, and ISO Hub integration moved to Version 2 */}
       </div>
 
       {/* Sales Coaching Overlay - Temporarily disabled */}
