@@ -1,0 +1,76 @@
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+contentScript.bundle.js:69 Loaded contentScript
+queryClient.ts:32 
+            
+            
+           GET https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/api/user 401 (Unauthorized)
+(anonymous) @ queryClient.ts:32
+fetchFn @ @tanstack_react-query.js?v=bc950d56:840
+run @ @tanstack_react-query.js?v=bc950d56:494
+start @ @tanstack_react-query.js?v=bc950d56:536
+fetch @ @tanstack_react-query.js?v=bc950d56:926
+executeFetch_fn @ @tanstack_react-query.js?v=bc950d56:2211
+onSubscribe @ @tanstack_react-query.js?v=bc950d56:1898
+subscribe @ @tanstack_react-query.js?v=bc950d56:24
+(anonymous) @ @tanstack_react-query.js?v=bc950d56:3022
+subscribeToStore @ chunk-WERSD76P.js?v=bc950d56:11984
+commitHookEffectListMount @ chunk-WERSD76P.js?v=bc950d56:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=bc950d56:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=bc950d56:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=bc950d56:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=bc950d56:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=bc950d56:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=bc950d56:19447
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=bc950d56:18868
+flushSyncCallbacks @ chunk-WERSD76P.js?v=bc950d56:9119
+commitRootImpl @ chunk-WERSD76P.js?v=bc950d56:19432
+commitRoot @ chunk-WERSD76P.js?v=bc950d56:19277
+finishConcurrentRender @ chunk-WERSD76P.js?v=bc950d56:18805
+performConcurrentWorkOnRoot @ chunk-WERSD76P.js?v=bc950d56:18718
+workLoop @ chunk-WERSD76P.js?v=bc950d56:197
+flushWork @ chunk-WERSD76P.js?v=bc950d56:176
+performWorkUntilDeadline @ chunk-WERSD76P.js?v=bc950d56:384Understand this error
+iso-hub:1 Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner.
+iso-hub:1 Unchecked runtime.lastError: The message port closed before a response was received.Understand this error
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 updating page active status
+iso-hub.tsx:86 
+            
+            
+           POST https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/api/iso-amp/analyze-statement net::ERR_CONTENT_LENGTH_MISMATCH 200 (OK)
+handleStatementUpload @ iso-hub.tsx:86
+handleFileChange @ iso-hub.tsx:129
+callCallback2 @ chunk-WERSD76P.js?v=bc950d56:3674
+invokeGuardedCallbackDev @ chunk-WERSD76P.js?v=bc950d56:3699
+invokeGuardedCallback @ chunk-WERSD76P.js?v=bc950d56:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-WERSD76P.js?v=bc950d56:3736
+executeDispatch @ chunk-WERSD76P.js?v=bc950d56:7014
+processDispatchQueueItemsInOrder @ chunk-WERSD76P.js?v=bc950d56:7034
+processDispatchQueue @ chunk-WERSD76P.js?v=bc950d56:7043
+dispatchEventsForPlugins @ chunk-WERSD76P.js?v=bc950d56:7051
+(anonymous) @ chunk-WERSD76P.js?v=bc950d56:7174
+batchedUpdates$1 @ chunk-WERSD76P.js?v=bc950d56:18913
+batchedUpdates @ chunk-WERSD76P.js?v=bc950d56:3579
+dispatchEventForPluginEventSystem @ chunk-WERSD76P.js?v=bc950d56:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-WERSD76P.js?v=bc950d56:5478
+dispatchEvent @ chunk-WERSD76P.js?v=bc950d56:5472
+dispatchDiscreteEvent @ chunk-WERSD76P.js?v=bc950d56:5449Understand this error
+iso-hub.tsx:110 Statement analysis error: TypeError: Failed to fetch
+handleStatementUpload @ iso-hub.tsx:110
+await in handleStatementUpload
+handleFileChange @ iso-hub.tsx:129
+callCallback2 @ chunk-WERSD76P.js?v=bc950d56:3674
+invokeGuardedCallbackDev @ chunk-WERSD76P.js?v=bc950d56:3699
+invokeGuardedCallback @ chunk-WERSD76P.js?v=bc950d56:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-WERSD76P.js?v=bc950d56:3736
+executeDispatch @ chunk-WERSD76P.js?v=bc950d56:7014
+processDispatchQueueItemsInOrder @ chunk-WERSD76P.js?v=bc950d56:7034
+processDispatchQueue @ chunk-WERSD76P.js?v=bc950d56:7043
+dispatchEventsForPlugins @ chunk-WERSD76P.js?v=bc950d56:7051
+(anonymous) @ chunk-WERSD76P.js?v=bc950d56:7174
+batchedUpdates$1 @ chunk-WERSD76P.js?v=bc950d56:18913
+batchedUpdates @ chunk-WERSD76P.js?v=bc950d56:3579
+dispatchEventForPluginEventSystem @ chunk-WERSD76P.js?v=bc950d56:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-WERSD76P.js?v=bc950d56:5478
+dispatchEvent @ chunk-WERSD76P.js?v=bc950d56:5472
+dispatchDiscreteEvent @ chunk-WERSD76P.js?v=bc950d56:5449Understand this error
