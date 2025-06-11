@@ -193,7 +193,7 @@ async function enhancedOCRExtraction(filePath: string): Promise<string> {
     let combinedText = "";
 
     // Import Tesseract dynamically
-    const Tesseract = (await import('tesseract.js')).default;
+    const { default: Tesseract } = await import('tesseract.js');
 
     for (const result of results) {
       if (result && result.path) {
