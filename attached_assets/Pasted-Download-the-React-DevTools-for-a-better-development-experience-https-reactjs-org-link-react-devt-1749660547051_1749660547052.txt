@@ -1,0 +1,49 @@
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+contentScript.bundle.js:69 Loaded contentScript
+contentScript.bundle.js:28 received intentional event
+iso-hub:1 Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner.
+iso-hub:1 Unchecked runtime.lastError: The message port closed before a response was received.Understand this error
+contentScript.bundle.js:28 updating page active status
+contentScript.bundle.js:28 received intentional event
+iso-hub.tsx:86 
+            
+            
+           POST https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/api/iso-amp/analyze-statement 500 (Internal Server Error)
+handleStatementUpload @ iso-hub.tsx:86
+handleFileChange @ iso-hub.tsx:129
+callCallback2 @ chunk-WERSD76P.js?v=c6d6ac15:3674
+invokeGuardedCallbackDev @ chunk-WERSD76P.js?v=c6d6ac15:3699
+invokeGuardedCallback @ chunk-WERSD76P.js?v=c6d6ac15:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-WERSD76P.js?v=c6d6ac15:3736
+executeDispatch @ chunk-WERSD76P.js?v=c6d6ac15:7014
+processDispatchQueueItemsInOrder @ chunk-WERSD76P.js?v=c6d6ac15:7034
+processDispatchQueue @ chunk-WERSD76P.js?v=c6d6ac15:7043
+dispatchEventsForPlugins @ chunk-WERSD76P.js?v=c6d6ac15:7051
+(anonymous) @ chunk-WERSD76P.js?v=c6d6ac15:7174
+batchedUpdates$1 @ chunk-WERSD76P.js?v=c6d6ac15:18913
+batchedUpdates @ chunk-WERSD76P.js?v=c6d6ac15:3579
+dispatchEventForPluginEventSystem @ chunk-WERSD76P.js?v=c6d6ac15:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-WERSD76P.js?v=c6d6ac15:5478
+dispatchEvent @ chunk-WERSD76P.js?v=c6d6ac15:5472
+dispatchDiscreteEvent @ chunk-WERSD76P.js?v=c6d6ac15:5449Understand this error
+iso-hub.tsx:110 Statement analysis error: Error: Analysis failed
+    at handleStatementUpload (iso-hub.tsx:95:15)
+handleStatementUpload @ iso-hub.tsx:110
+await in handleStatementUpload
+handleFileChange @ iso-hub.tsx:129
+callCallback2 @ chunk-WERSD76P.js?v=c6d6ac15:3674
+invokeGuardedCallbackDev @ chunk-WERSD76P.js?v=c6d6ac15:3699
+invokeGuardedCallback @ chunk-WERSD76P.js?v=c6d6ac15:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-WERSD76P.js?v=c6d6ac15:3736
+executeDispatch @ chunk-WERSD76P.js?v=c6d6ac15:7014
+processDispatchQueueItemsInOrder @ chunk-WERSD76P.js?v=c6d6ac15:7034
+processDispatchQueue @ chunk-WERSD76P.js?v=c6d6ac15:7043
+dispatchEventsForPlugins @ chunk-WERSD76P.js?v=c6d6ac15:7051
+(anonymous) @ chunk-WERSD76P.js?v=c6d6ac15:7174
+batchedUpdates$1 @ chunk-WERSD76P.js?v=c6d6ac15:18913
+batchedUpdates @ chunk-WERSD76P.js?v=c6d6ac15:3579
+dispatchEventForPluginEventSystem @ chunk-WERSD76P.js?v=c6d6ac15:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-WERSD76P.js?v=c6d6ac15:5478
+dispatchEvent @ chunk-WERSD76P.js?v=c6d6ac15:5472
+dispatchDiscreteEvent @ chunk-WERSD76P.js?v=c6d6ac15:5449Understand this error
+contentScript.bundle.js:28 updating page active status
