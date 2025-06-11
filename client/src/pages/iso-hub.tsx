@@ -78,10 +78,10 @@ export default function ISOHub() {
       // Simulate progress
       const progressInterval = setInterval(() => {
         setAnalysisProgress(prev => {
-          if (prev < 90) return prev + 10;
+          if (prev < 85) return prev + 3;
           return prev;
         });
-      }, 500);
+      }, 2000);
 
       const response = await fetch('/api/iso-amp/analyze-statement', {
         method: 'POST',
