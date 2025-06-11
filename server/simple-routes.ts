@@ -69,35 +69,72 @@ async function searchWebForIndustryArticles(query: string): Promise<string> {
   }
 }
 
-// AI Response Generation Function
+// AI Response Generation Function with Document Retrieval
 async function generateAIResponse(userMessage: string, chatHistory: any[], user: any): Promise<string> {
   try {
+    // Search uploaded documents for relevant information
+    let documentContext = "";
+    try {
+      console.log("🔍 Searching knowledge base for:", userMessage);
+      
+      // Call the document search API
+      const searchResponse = await axios.post('http://localhost:5000/api/documents/search', {
+        query: userMessage,
+        limit: 5
+      });
+      
+      if (searchResponse.data && searchResponse.data.length > 0) {
+        const relevantDocs = searchResponse.data.slice(0, 3); // Top 3 most relevant
+        documentContext = `\n\nKNOWLEDGE BASE INFORMATION:\n${relevantDocs.map((doc: any, idx: number) => 
+          `${idx + 1}. From "${doc.metadata?.documentName || 'Document'}": ${doc.content}`
+        ).join('\n\n')}\n\n`;
+        console.log(`📚 Found ${relevantDocs.length} relevant document sections`);
+      } else {
+        console.log("📝 No specific document matches found, using general knowledge");
+      }
+    } catch (docError) {
+      console.log("⚠️ Document search unavailable, using general knowledge");
+    }
+
     // Check if user is asking for industry intelligence, trends, or market insights
     const needsWebSearch = /\b(industry|intelligence|trends|market|recent|current|latest|news|articles|updates|developments)\b/i.test(userMessage);
     
     let webContent = "";
     if (needsWebSearch) {
-      console.log("Fetching current industry articles for enhanced response...");
+      console.log("🌐 Fetching current industry articles for enhanced response...");
       webContent = await searchWebForIndustryArticles(userMessage);
     }
 
-    // Build conversation context from chat history
-    const systemPrompt = `You are JACC (Just Another Credit Card Assistant), an AI-powered assistant specialized in merchant services and payment processing. You work for a company that helps businesses optimize their payment processing solutions.
+    // Enhanced system prompt for TracerPay sales agent assistant
+    const systemPrompt = `You are JACC (Just Another Credit Card Assistant), an AI-powered assistant specifically designed for TracerPay sales agents. You help independent sales agents succeed in the merchant services industry.
 
-Your expertise includes:
-- Payment processing rates and fee structures
-- Merchant services recommendations
-- Credit card processing technology
-- Industry trends and market intelligence
-- Document analysis for merchant statements
-- Proposal generation for clients
-- Competitive analysis of payment processors
+YOUR PRIMARY ROLE:
+- Expert consultant for TracerPay payment processing solutions
+- Sales support specialist for independent agents
+- Knowledge base for merchant services industry information
+- Competitive analysis and proposal assistance
 
-You should provide helpful, accurate, and professional responses about merchant services, payment processing, and related financial technology topics. When asked about industry intelligence or market trends, provide relevant insights about the payment processing landscape.
+KEY EXPERTISE AREAS:
+- TracerPay rates, fees, and processing solutions
+- Equipment options and pricing (terminals, card readers, POS systems)
+- Merchant onboarding requirements and timelines
+- Commission structures and agent earnings
+- Competitive comparisons (vs Square, Stripe, other processors)
+- Industry-specific processing (restaurants, retail, auto repair, etc.)
+- Chargeback protection and dispute resolution
+- Technical support and troubleshooting
+- Contract terms and merchant agreements
 
-Always maintain a professional tone and focus on providing valuable information that helps sales agents and merchants make informed decisions about their payment processing needs.
+RESPONSE GUIDELINES:
+- Always prioritize information from uploaded documents and knowledge base
+- Provide specific TracerPay rates and details when available
+- Include relevant equipment pricing and options
+- Mention commission opportunities for agents when appropriate
+- Compare TracerPay advantages over competitors
+- Be conversational but professional - you're helping a sales agent succeed
+- If you don't have specific information, recommend contacting TracerPay directly
 
-${webContent ? `\n\nCURRENT INDUSTRY INTELLIGENCE:\n${webContent}\n\nUse this current information to enhance your response with the latest industry insights and trends.` : ''}`;
+${documentContext}${webContent ? `\n\nCURRENT INDUSTRY INTELLIGENCE:\n${webContent}\n\n` : ''}`;
 
     const messages = [
       {
@@ -106,7 +143,7 @@ ${webContent ? `\n\nCURRENT INDUSTRY INTELLIGENCE:\n${webContent}\n\nUse this cu
       },
       ...chatHistory
         .filter(msg => msg.role && msg.content)
-        .slice(-10) // Keep last 10 messages for context
+        .slice(-8) // Keep last 8 messages for context
         .map(msg => ({
           role: msg.role,
           content: msg.content
@@ -497,6 +534,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Basic folders endpoint
   app.get('/api/folders', (req: Request, res: Response) => {
     res.json([]);
+  });
+
+  // Document search endpoint for AI responses
+  app.post('/api/documents/search', async (req: Request, res: Response) => {
+    try {
+      const { query, limit = 5 } = req.body;
+      
+      if (!query) {
+        return res.status(400).json({ error: 'Query is required' });
+      }
+
+      console.log(`📚 Document search query: "${query}"`);
+      
+      // Try to call the main document search service
+      try {
+        const searchResponse = await axios.post('http://localhost:5000/api/ai-enhanced-search', {
+          query: query
+        });
+        
+        if (searchResponse.data && searchResponse.data.results) {
+          console.log(`📖 Found ${searchResponse.data.results.length} document results`);
+          return res.json(searchResponse.data.results.slice(0, limit));
+        }
+      } catch (searchError) {
+        console.log('⚠️ AI enhanced search not available, checking basic document search');
+      }
+
+      // Fallback: return empty results to allow AI to proceed with general knowledge
+      console.log('📝 No document matches found, AI will use general knowledge');
+      res.json([]);
+      
+    } catch (error) {
+      console.error('Document search error:', error);
+      res.status(500).json({ error: 'Search failed' });
+    }
   });
 
   // Get all chats

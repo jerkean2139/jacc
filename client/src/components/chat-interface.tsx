@@ -772,17 +772,6 @@ With these details, I'll create a customized proposal highlighting value proposi
 
       {/* Chat Input */}
       <div className="border-t border-slate-200 dark:border-slate-700 p-4 pb-safe md:pb-4">
-        {/* Statement Upload Button - Always Visible */}
-        <div className="mb-4 max-w-4xl mx-auto">
-          <button
-            onClick={() => setShowFileUpload(!showFileUpload)}
-            className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg border border-blue-600 shadow-sm transition-colors duration-200 flex items-center justify-center gap-2"
-          >
-            <Upload className="w-4 h-4" />
-            Upload Statement
-          </button>
-        </div>
-        
         {/* Input Box */}
         <div className="flex items-end space-x-3 max-w-4xl mx-auto">
           <div className="flex-1 relative">
