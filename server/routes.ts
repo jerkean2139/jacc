@@ -3658,6 +3658,132 @@ User Context: {userRole}`,
     }
   });
 
+  // Admin gamification analytics endpoint
+  app.get('/api/admin/gamification-analytics', async (req: any, res) => {
+    try {
+      const { db } = await import('./db');
+      const { users, userStats, userAchievements } = await import('@shared/schema');
+      const { eq, desc, sql } = await import('drizzle-orm');
+
+      // Get all users with their stats and achievements
+      const allUsers = await db.select().from(users);
+      const allUserStats = await db.select().from(userStats);
+      const allUserAchievements = await db.select().from(userAchievements);
+
+      // Calculate leaderboard with real data
+      const leaderboard = allUsers
+        .map(user => {
+          const stats = allUserStats.find(s => s.userId === user.id);
+          const achievements = allUserAchievements.filter(a => a.userId === user.id);
+          
+          return {
+            userId: user.id,
+            username: user.username,
+            points: stats?.totalPoints || 0,
+            level: stats?.currentLevel || 1,
+            rank: 0, // Will be set after sorting
+            badges: achievements.map(a => a.badgeId).filter(Boolean)
+          };
+        })
+        .filter(user => user.points > 0) // Only show users with points
+        .sort((a, b) => b.points - a.points)
+        .slice(0, 20) // Top 20 users
+        .map((user, index) => ({ ...user, rank: index + 1 }));
+
+      // Calculate global stats from real data
+      const totalPoints = allUserStats.reduce((sum, stats) => sum + (stats.totalPoints || 0), 0);
+      const totalBadges = allUserAchievements.length;
+      const activeParticipants = allUserStats.filter(stats => stats.totalPoints > 0).length;
+      const averageLevel = activeParticipants > 0 
+        ? allUserStats.reduce((sum, stats) => sum + (stats.currentLevel || 1), 0) / activeParticipants 
+        : 0;
+
+      // Define achievement definitions
+      const achievementDefinitions = [
+        {
+          id: 'first_chat',
+          name: 'First Steps',
+          description: 'Started your first conversation with JACC',
+          icon: '🎯',
+        },
+        {
+          id: 'chat_streak_7',
+          name: 'Week Warrior',
+          description: 'Used JACC for 7 consecutive days',
+          icon: '🔥',
+        },
+        {
+          id: 'questions_answered_50',
+          name: 'Knowledge Seeker',
+          description: 'Asked 50 questions and received answers',
+          icon: '🧠',
+        },
+        {
+          id: 'documents_processed_10',
+          name: 'Document Master',
+          description: 'Successfully processed 10 documents',
+          icon: '📄',
+        },
+        {
+          id: 'points_milestone_100',
+          name: 'Century Club',
+          description: 'Earned 100 points through platform engagement',
+          icon: '💯',
+        },
+        {
+          id: 'advanced_user',
+          name: 'Power User',
+          description: 'Reached Level 5 through consistent engagement',
+          icon: '⚡',
+        }
+      ];
+
+      // Calculate achievement progress from real data
+      const achievements = achievementDefinitions.map(def => {
+        const unlockedCount = allUserAchievements.filter(achievement => 
+          achievement.badgeId === def.id
+        ).length;
+        
+        return {
+          ...def,
+          unlockedBy: unlockedCount,
+          totalUsers: allUsers.length
+        };
+      });
+
+      const gamificationData = {
+        leaderboard,
+        achievements,
+        stats: {
+          totalPoints,
+          totalBadges,
+          activeParticipants,
+          averageLevel: Math.round(averageLevel * 10) / 10
+        }
+      };
+
+      res.json({ 
+        success: true,
+        data: gamificationData 
+      });
+    } catch (error) {
+      console.error('Gamification analytics error:', error);
+      res.status(500).json({ 
+        success: false,
+        data: {
+          leaderboard: [],
+          achievements: [],
+          stats: {
+            totalPoints: 0,
+            totalBadges: 0,
+            activeParticipants: 0,
+            averageLevel: 0
+          }
+        }
+      });
+    }
+  });
+
   // Document Approval Workflow Routes
   app.get('/api/document-approvals/pending', async (req: any, res) => {
     try {
