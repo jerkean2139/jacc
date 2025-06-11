@@ -25,6 +25,7 @@ import AdminPanel from "@/pages/admin-panel";
 import AdminTraining from "@/pages/admin-training";
 import AIConfigurationPage from "@/pages/ai-configuration";
 import SimpleAdminLogin from "@/pages/simple-admin-login";
+import DevAdminPanel from "@/pages/dev-admin-panel";
 import ISOAmpCalculator from "@/pages/iso-amp-calculator";
 import PricingManagement from "@/pages/pricing-management";
 import PricingDemo from "@/pages/pricing-demo";
@@ -85,8 +86,14 @@ function Router() {
           <Route path="/help" component={HelpPage} />
           <Route path="/vendor-intelligence" component={VendorIntelligenceDashboard} />
           <Route path="/competitive-intelligence" component={lazy(() => import("@/pages/competitive-intelligence-dashboard"))} />
-          <Route path="/iso-hub-integration" component={ISOHubIntegration} />
-          <Route path="/iso-hub" component={ISOHub} />
+          {/* ISO Hub - Hidden from regular users, accessible only to dev admin */}
+          {user?.role === 'dev' && (
+            <>
+              <Route path="/iso-hub-integration" component={ISOHubIntegration} />
+              <Route path="/iso-hub" component={ISOHub} />
+            </>
+          )}
+          <Route path="/dev-admin" component={DevAdminPanel} />
           <Route path="/admin" component={AdminPanel} />
           <Route path="/admin/dashboard" component={AdminDashboard} />
           <Route path="/admin/settings" component={AdminSettings} />
