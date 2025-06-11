@@ -414,7 +414,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         averageTicket: 35.50,
         totalTransactions: 1268,
         currentRate: 2.89,
+        effectiveRate: 2.89,
         estimatedSavings: 1850,
+        potentialSavings: {
+          monthly: 318.75,
+          annual: 3825.00
+        },
         processingCosts: {
           currentMonthlyCost: 1301.50,
           proposedMonthlyCost: 982.75,
