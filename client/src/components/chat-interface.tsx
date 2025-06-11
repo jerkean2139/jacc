@@ -556,23 +556,7 @@ With these details, I'll create a customized proposal highlighting value proposi
               </Button>
             </div>
             
-            <div className="w-full">
-              <Button
-                variant="outline"
-                className="p-3 h-auto text-left justify-start hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:text-indigo-700 dark:hover:text-indigo-300 hover:border-indigo-200 dark:hover:border-indigo-700 transition-colors w-full"
-                onClick={() => {
-                  if (onNewChatWithMessage) {
-                    onNewChatWithMessage("I need help creating a client proposal for merchant services. Please generate a professional proposal document with competitive rates and service details.");
-                  }
-                }}
-              >
-                <FileText className="mr-3 h-4 w-4 text-indigo-600 flex-shrink-0" />
-                <div className="flex-1 min-w-0 overflow-hidden">
-                  <div className="font-medium mb-1 text-sm truncate">Create Proposal</div>
-                  <div className="text-xs text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 line-clamp-2">Generate client proposals and documents</div>
-                </div>
-              </Button>
-            </div>
+            {/* Create Proposal button hidden for Version 2 */}
           </div>
         </div>
 
@@ -719,30 +703,8 @@ With these details, I'll create a customized proposal highlighting value proposi
             </Button>
           </div>
 
-          {/* Quick Action Buttons */}
-          <div className="mt-4 max-w-4xl mx-auto">
-            <div className="flex flex-wrap gap-2 justify-center">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleQuickAction("I need to analyze a merchant statement using the ISO AMP integration. Please help me upload and analyze bank or processor statements to extract transaction data, fees, and generate competitive savings analysis.")}
-                className="flex items-center gap-2 text-blue-600 hover:bg-blue-50 border-blue-200"
-              >
-                <FileSearch className="w-4 h-4" />
-                Analyze Document
-              </Button>
-              
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleQuickAction("I need to create a merchant services proposal using the ISO AMP integration. Please help me generate a professional proposal with competitive rates, processor recommendations, and implementation details.")}
-                className="flex items-center gap-2 text-green-600 hover:bg-green-50 border-green-200"
-              >
-                <FileText className="w-4 h-4" />
-                Create Proposal
-              </Button>
-            </div>
-          </div>
+          {/* Quick Action Buttons - Hidden for Version 2 */}
+          {/* Document analysis and proposal creation features moved to Version 2 */}
         </div>
       </div>
     );
