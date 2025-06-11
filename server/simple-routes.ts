@@ -105,6 +105,42 @@ async function generateAIResponse(userMessage: string, chatHistory: any[], user:
       webContent = await searchWebForIndustryArticles(userMessage);
     }
 
+    // TracerPay Knowledge Base - Agent Q&A Reference
+    const tracerPayKnowledge = `
+TRACERPAY KNOWLEDGE BASE - AGENT REFERENCE:
+
+POS SYSTEMS & INTEGRATIONS:
+- Archery business: Quantic, Clover, HubWallet
+- Restaurant POS: Skytab, Clover, Tabit, HubWallet (via Shift4, MiCamp, HubWallet)
+- Retail POS: Quantic, Clover, HubWallet
+- Food truck POS: HubWallet, Quantic
+- Salon POS: HubWallet
+- Liquor stores: Quantic
+
+PROCESSING PARTNERS:
+- TRX: Mobile solutions, high risk, high tickets, ACH, Quickbooks integration
+- Clearent: PAX terminals, mobile solutions, Aloha integration, ACH
+- MiCamp: Epicor integration, high tickets, mobile solutions, Aloha integration
+- Quantic: Retail/ecommerce focus, hardware quotes based on merchant needs
+- Shift4: Restaurant POS, gift cards
+
+SUPPORT CONTACTS:
+- Clearent: 866.435.0666 Option 1, customersupport@clearent.com
+- TRX: 888-933-8797 Option 2, customersupport@trxservices.com
+- MiCamp: Micamp@cocard.net
+- Merchant Lynx: 844-200-8996 Option 2
+- TSYS: 877-608-6599, bf_partnersalessupport@globalpay.com
+- Shift4: 800-201-0461 Option 1
+
+SPECIAL SERVICES:
+- Gift cards: Valutec, Factor4, Shift4, Quantic
+- Gateways: Authorize.net, Fluid Pay, Accept Blue, TRX, Clearent, MiCamp
+- ACH: TRX, ACI, Clearent
+- Small loans: TRX - TuaPay (Contact Joy West)
+- Cash discount: TRX, MiCamp
+- Surcharging: SwipeSimple ($20 monthly)
+`;
+
     // Enhanced system prompt for TracerPay sales agent assistant
     const systemPrompt = `You are JACC (Just Another Credit Card Assistant), an AI-powered assistant specifically designed for TracerPay sales agents. You help independent sales agents succeed in the merchant services industry.
 
@@ -114,25 +150,18 @@ YOUR PRIMARY ROLE:
 - Knowledge base for merchant services industry information
 - Competitive analysis and proposal assistance
 
-KEY EXPERTISE AREAS:
-- TracerPay rates, fees, and processing solutions
-- Equipment options and pricing (terminals, card readers, POS systems)
-- Merchant onboarding requirements and timelines
-- Commission structures and agent earnings
-- Competitive comparisons (vs Square, Stripe, other processors)
-- Industry-specific processing (restaurants, retail, auto repair, etc.)
-- Chargeback protection and dispute resolution
-- Technical support and troubleshooting
-- Contract terms and merchant agreements
+${tracerPayKnowledge}
 
 RESPONSE GUIDELINES:
+- Use the TracerPay knowledge base above to provide specific, accurate information
 - Always prioritize information from uploaded documents and knowledge base
 - Provide specific TracerPay rates and details when available
 - Include relevant equipment pricing and options
 - Mention commission opportunities for agents when appropriate
 - Compare TracerPay advantages over competitors
 - Be conversational but professional - you're helping a sales agent succeed
-- If you don't have specific information, recommend contacting TracerPay directly
+- Reference specific partners (TRX, Clearent, MiCamp, etc.) for solutions
+- Provide support contact information when relevant
 
 ${documentContext}${webContent ? `\n\nCURRENT INDUSTRY INTELLIGENCE:\n${webContent}\n\n` : ''}`;
 
