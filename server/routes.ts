@@ -1645,22 +1645,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/admin/training/feedback', isAuthenticated, async (req, res) => {
     try {
       // Get training feedback from database
-      const trainingFeedback = await db.select({
-        id: aiTrainingFeedback.id,
-        chatId: aiTrainingFeedback.chatId,
-        messageId: aiTrainingFeedback.messageId,
-        userQuery: aiTrainingFeedback.userQuery,
-        aiResponse: aiTrainingFeedback.aiResponse,
-        correctResponse: aiTrainingFeedback.correctResponse,
-        feedbackType: aiTrainingFeedback.feedbackType,
-        adminNotes: aiTrainingFeedback.adminNotes,
-        sourceDocs: aiTrainingFeedback.sourceDocs,
-        status: aiTrainingFeedback.status,
-        priority: aiTrainingFeedback.priority,
-        createdAt: aiTrainingFeedback.createdAt
-      })
-      .from(aiTrainingFeedback)
-      .orderBy(desc(aiTrainingFeedback.priority), desc(aiTrainingFeedback.createdAt));
+      const rawFeedback = await db.select()
+        .from(aiTrainingFeedback)
+        .orderBy(desc(aiTrainingFeedback.priority), desc(aiTrainingFeedback.createdAt));
+
+      // Transform to match frontend interface expectations
+      const trainingFeedback = rawFeedback.map(item => ({
+        id: item.id,
+        chatId: item.chatId,
+        messageId: item.messageId,
+        userQuery: item.userQuery,
+        aiResponse: item.aiResponse,
+        correctResponse: item.correctResponse,
+        feedbackType: item.feedbackType,
+        adminNotes: item.adminNotes,
+        sourceDocs: item.sourceDocs || [],
+        status: item.status,
+        priority: item.priority,
+        createdAt: item.createdAt ? item.createdAt.toISOString() : new Date().toISOString()
+      }));
 
       res.json(trainingFeedback);
     } catch (error) {
