@@ -1672,6 +1672,109 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Knowledge Base Management Routes
+  app.get('/api/admin/knowledge-base', isAuthenticated, async (req, res) => {
+    try {
+      const knowledgeBase = await db.select()
+        .from(qaKnowledgeBase)
+        .orderBy(desc(qaKnowledgeBase.priority), desc(qaKnowledgeBase.createdAt));
+
+      const transformedData = knowledgeBase.map(item => ({
+        id: item.id,
+        title: item.question,
+        content: item.answer,
+        category: item.category,
+        tags: item.tags || [],
+        isActive: item.isActive,
+        priority: item.priority,
+        author: item.createdBy || 'System',
+        lastUpdated: item.updatedAt ? item.updatedAt.toISOString() : item.createdAt?.toISOString() || new Date().toISOString()
+      }));
+
+      res.json(transformedData);
+    } catch (error) {
+      console.error('Error fetching knowledge base:', error);
+      res.status(500).json({ message: "Failed to fetch knowledge base" });
+    }
+  });
+
+  app.post('/api/admin/knowledge-base', isAuthenticated, async (req, res) => {
+    try {
+      const { title, content, category, tags, priority, isActive } = req.body;
+      
+      const [newEntry] = await db.insert(qaKnowledgeBase).values({
+        question: title,
+        answer: content,
+        category: category || 'merchant_services',
+        tags: tags || [],
+        priority: priority || 1,
+        isActive: isActive !== false,
+        createdBy: req.user?.id || 'admin'
+      }).returning();
+
+      res.json({ success: true, entry: newEntry });
+    } catch (error) {
+      console.error('Error creating knowledge base entry:', error);
+      res.status(500).json({ message: "Failed to create knowledge base entry" });
+    }
+  });
+
+  app.delete('/api/admin/knowledge-base/:id', isAuthenticated, async (req, res) => {
+    try {
+      await db.delete(qaKnowledgeBase).where(eq(qaKnowledgeBase.id, req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting knowledge base entry:', error);
+      res.status(500).json({ message: "Failed to delete knowledge base entry" });
+    }
+  });
+
+  // Prompt Templates Management Routes
+  app.get('/api/admin/prompt-templates', isAuthenticated, async (req, res) => {
+    try {
+      const prompts = await db.select()
+        .from(userPrompts)
+        .orderBy(desc(userPrompts.createdAt));
+
+      const transformedData = prompts.map(prompt => ({
+        id: prompt.id,
+        name: prompt.name,
+        description: prompt.description || 'System prompt template',
+        category: prompt.category || 'merchant_services',
+        template: prompt.prompt,
+        temperature: 0.7,
+        maxTokens: 2000,
+        isActive: prompt.isActive !== false,
+        version: 1
+      }));
+
+      res.json(transformedData);
+    } catch (error) {
+      console.error('Error fetching prompt templates:', error);
+      res.status(500).json({ message: "Failed to fetch prompt templates" });
+    }
+  });
+
+  app.post('/api/admin/prompt-templates', isAuthenticated, async (req, res) => {
+    try {
+      const { name, description, category, template, temperature, maxTokens, isActive } = req.body;
+      
+      const [newPrompt] = await db.insert(userPrompts).values({
+        name,
+        description,
+        category: category || 'merchant_services',
+        prompt: template,
+        isActive: isActive !== false,
+        userId: req.user?.id || 'admin'
+      }).returning();
+
+      res.json({ success: true, prompt: newPrompt });
+    } catch (error) {
+      console.error('Error creating prompt template:', error);
+      res.status(500).json({ message: "Failed to create prompt template" });
+    }
+  });
+
   app.post('/api/admin/training/feedback', isAuthenticated, async (req, res) => {
     try {
       // Process feedback submission
