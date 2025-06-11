@@ -605,17 +605,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       let extractedData;
       
-      // Extract text from PDF using enhanced OCR
+      // Extract text from PDF using enhanced OCR with fallback
       if (req.file.mimetype === 'application/pdf') {
         console.log('Starting enhanced OCR extraction for:', req.file.originalname);
         
-        // Try enhanced OCR extraction first for better accuracy
-        const ocrText = await enhancedOCRExtraction(req.file.path);
-        console.log('Enhanced OCR extraction completed');
-        console.log('Extracted text (first 500 chars):', ocrText.substring(0, 500));
+        let extractedText = '';
+        
+        try {
+          // Try enhanced OCR extraction first for better accuracy
+          extractedText = await enhancedOCRExtraction(req.file.path);
+          console.log('Enhanced OCR extraction completed successfully');
+          console.log('Extracted text (first 500 chars):', extractedText.substring(0, 500));
+        } catch (ocrError) {
+          console.log('Enhanced OCR failed, falling back to basic extraction:', ocrError);
+          // Fallback to basic PDF text extraction
+          extractedText = await extractPDFText(req.file.path);
+          console.log('Fallback extraction completed');
+        }
         
         // Analyze the extracted text with AI, including filename for processor identification
-        extractedData = await analyzeStatementText(ocrText, req.file.originalname);
+        extractedData = await analyzeStatementText(extractedText, req.file.originalname);
       } else {
         // For image files, return an error for now
         return res.status(400).json({ error: 'Image processing not yet implemented. Please upload a PDF statement.' });
