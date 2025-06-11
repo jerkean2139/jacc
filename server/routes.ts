@@ -23,7 +23,7 @@ import { semanticChunkingService } from "./semantic-chunking";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-import { insertMessageSchema, insertChatSchema, insertFolderSchema, insertDocumentSchema, insertAdminSettingsSchema, faqKnowledgeBase, aiTrainingFeedback, messages } from "@shared/schema";
+import { insertMessageSchema, insertChatSchema, insertFolderSchema, insertDocumentSchema, insertAdminSettingsSchema, faqKnowledgeBase, aiTrainingFeedback, messages, qaKnowledgeBase, userPrompts } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc } from "drizzle-orm";
 import { setupOAuthHelper } from "./oauth-helper";
@@ -1741,10 +1741,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         name: prompt.name,
         description: prompt.description || 'System prompt template',
         category: prompt.category || 'merchant_services',
-        template: prompt.prompt,
+        template: prompt.content,
         temperature: 0.7,
         maxTokens: 2000,
-        isActive: prompt.isActive !== false,
+        isActive: true,
         version: 1
       }));
 
@@ -1763,9 +1763,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         name,
         description,
         category: category || 'merchant_services',
-        prompt: template,
-        isActive: isActive !== false,
-        userId: req.user?.id || 'admin'
+        content: template,
+        isDefault: isActive !== false,
+        userId: req.user?.id || 'dev-admin-001'
       }).returning();
 
       res.json({ success: true, prompt: newPrompt });
