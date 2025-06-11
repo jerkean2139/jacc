@@ -2438,19 +2438,19 @@ User Context: {userRole}`,
             userId
           );
         } catch (enhancedError) {
-          console.error("Enhanced AI failed, using direct AI:", enhancedError);
+          console.error("Enhanced AI failed, using optimized direct AI:", enhancedError);
           try {
             const directResponse = await generateChatResponse(messages, context);
             aiResponse = {
               message: directResponse.message,
-              suggestions: directResponse.suggestions || ["Ask about merchant services", "Request payment processing rates", "Inquire about documentation"],
+              suggestions: directResponse.suggestions || ["Upload documents for analysis", "Compare processing rates", "Create merchant proposals"],
               actions: directResponse.actions || []
             };
           } catch (fallbackError) {
-            console.error("Direct AI also failed:", fallbackError);
+            console.error("Direct AI failed, using merchant services response:", fallbackError);
             aiResponse = {
-              message: "I'm ready to help with your merchant services questions. Please ask me about payment processing, rates, equipment, or any business questions you have.",
-              suggestions: ["What payment processing options are available?", "Show me current rates", "Help with merchant applications"],
+              message: "I can help you analyze merchant statements, compare processing rates, and create proposals. What would you like me to help you with today?",
+              suggestions: ["Analyze a merchant statement", "Compare processing options", "Create a client proposal"],
               actions: []
             };
           }

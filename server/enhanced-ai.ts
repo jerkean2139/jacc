@@ -305,8 +305,8 @@ When appropriate, suggest actions like saving payment processing information to 
           role: msg.role === 'user' ? 'user' as const : 'assistant' as const,
           content: msg.content
         })),
-        temperature: useExpandedResponse ? 0.45 : 0.3,
-        max_tokens: useExpandedResponse ? 500 : 300,
+        temperature: 0.3,
+        max_tokens: 400,
       });
 
       let content = response.content[0].type === 'text' ? response.content[0].text : "";
