@@ -15,7 +15,10 @@ import {
   Clock,
   Eye,
   BarChart3,
-  Activity
+  Activity,
+  Trophy,
+  Star,
+  Target
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -54,6 +57,31 @@ interface ChatAnalytics {
   }>;
 }
 
+interface GamificationData {
+  leaderboard: Array<{
+    userId: string;
+    username: string;
+    points: number;
+    level: number;
+    rank: number;
+    badges: string[];
+  }>;
+  achievements: Array<{
+    id: string;
+    name: string;
+    description: string;
+    icon: string;
+    unlockedBy: number;
+    totalUsers: number;
+  }>;
+  stats: {
+    totalPoints: number;
+    totalBadges: number;
+    activeParticipants: number;
+    averageLevel: number;
+  };
+}
+
 export default function AdminChatMonitoring() {
   const [dateRange, setDateRange] = useState("7d");
   const [selectedTab, setSelectedTab] = useState("monitoring");
@@ -71,12 +99,19 @@ export default function AdminChatMonitoring() {
     refetchInterval: 30000,
   });
 
+  // Fetch gamification data
+  const { data: gamificationData, isLoading: gamificationLoading, refetch: refetchGamification } = useQuery({
+    queryKey: ["/api/admin/gamification-analytics"],
+    refetchInterval: 30000,
+  });
+
   const handleRefresh = () => {
     refetchChats();
     refetchAnalytics();
+    refetchGamification();
     toast({
       title: "Data Refreshed",
-      description: "Chat monitoring data has been updated."
+      description: "All monitoring data has been updated."
     });
   };
 
@@ -102,6 +137,16 @@ export default function AdminChatMonitoring() {
     totalMessages: 0,
     activeUsers: 0,
     userEngagement: []
+  };
+  const gamification: GamificationData = gamificationData?.data || {
+    leaderboard: [],
+    achievements: [],
+    stats: {
+      totalPoints: 0,
+      totalBadges: 0,
+      activeParticipants: 0,
+      averageLevel: 0
+    }
   };
 
   return (
@@ -133,9 +178,10 @@ export default function AdminChatMonitoring() {
       </div>
 
       <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="monitoring">Chat Monitoring</TabsTrigger>
           <TabsTrigger value="analytics">Analytics Overview</TabsTrigger>
+          <TabsTrigger value="gamification">Gamification</TabsTrigger>
         </TabsList>
 
         <TabsContent value="analytics" className="space-y-6">
@@ -207,6 +253,156 @@ export default function AdminChatMonitoring() {
               </Table>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="gamification" className="space-y-6">
+          {/* Gamification Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Points</CardTitle>
+                <Target className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{gamification.stats.totalPoints}</div>
+                <p className="text-xs text-muted-foreground">
+                  Points earned by all users
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Badges Earned</CardTitle>
+                <Star className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{gamification.stats.totalBadges}</div>
+                <p className="text-xs text-muted-foreground">
+                  Total badges unlocked
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Active Participants</CardTitle>
+                <Users className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{gamification.stats.activeParticipants}</div>
+                <p className="text-xs text-muted-foreground">
+                  Users earning points
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Average Level</CardTitle>
+                <Trophy className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{gamification.stats.averageLevel.toFixed(1)}</div>
+                <p className="text-xs text-muted-foreground">
+                  Across all users
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Leaderboard */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Trophy className="h-5 w-5" />
+                  User Leaderboard
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {gamificationLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Rank</TableHead>
+                        <TableHead>User</TableHead>
+                        <TableHead>Level</TableHead>
+                        <TableHead>Points</TableHead>
+                        <TableHead>Badges</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {gamification.leaderboard.map((user) => (
+                        <TableRow key={user.userId}>
+                          <TableCell className="font-medium">#{user.rank}</TableCell>
+                          <TableCell>{user.username}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline">Level {user.level}</Badge>
+                          </TableCell>
+                          <TableCell>{user.points}</TableCell>
+                          <TableCell>{user.badges.length}</TableCell>
+                        </TableRow>
+                      ))}
+                      {gamification.leaderboard.length === 0 && (
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-center py-8">
+                            <Trophy className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                            <h3 className="text-lg font-medium">No gamification data yet</h3>
+                            <p className="text-muted-foreground">Users will appear here as they earn points and achievements.</p>
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Achievements */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Star className="h-5 w-5" />
+                  Achievement Progress
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ScrollArea className="h-[400px]">
+                  <div className="space-y-4">
+                    {gamification.achievements.map((achievement) => (
+                      <div key={achievement.id} className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <div className="text-2xl">{achievement.icon}</div>
+                          <div>
+                            <h4 className="font-medium">{achievement.name}</h4>
+                            <p className="text-sm text-muted-foreground">{achievement.description}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-sm font-medium">{achievement.unlockedBy}/{achievement.totalUsers}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {Math.round((achievement.unlockedBy / achievement.totalUsers) * 100)}% unlocked
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    {gamification.achievements.length === 0 && (
+                      <div className="text-center py-8">
+                        <Star className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                        <h3 className="text-lg font-medium">No achievements configured</h3>
+                        <p className="text-muted-foreground">Set up achievements to track user progress and engagement.</p>
+                      </div>
+                    )}
+                  </div>
+                </ScrollArea>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
 
         <TabsContent value="monitoring" className="space-y-6">
