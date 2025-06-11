@@ -96,7 +96,7 @@ export default function ISOHub() {
       }
 
       const result = await response.json();
-      setAnalysisResult(result.analysis);
+      setAnalysisResult(result);
 
       toast({
         title: "Analysis Complete",
