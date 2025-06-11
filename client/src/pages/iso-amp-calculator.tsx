@@ -569,35 +569,29 @@ export default function ISOAmpCalculator() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Enhanced Statement Upload Section */}
+              {/* Manual Input Instructions */}
               <div className="border-2 border-dashed border-blue-300 dark:border-blue-600 rounded-lg p-8 text-center bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
                 <div className="flex justify-center mb-4">
                   <div className="p-3 bg-blue-100 dark:bg-blue-800 rounded-full">
-                    <Upload className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                    <Calculator className="w-8 h-8 text-blue-600 dark:text-blue-400" />
                   </div>
                 </div>
                 <h3 className="text-xl font-bold mb-3 text-blue-900 dark:text-blue-100">
-                  ISO AMP Statement Analysis
+                  Manual Rate Analysis
                 </h3>
                 <p className="text-sm text-blue-700 dark:text-blue-300 mb-6 max-w-md mx-auto">
-                  Drop or upload merchant processing statements for instant competitive analysis and savings calculations
+                  Enter merchant processing data manually using the tabs below for competitive analysis and savings calculations
                 </p>
                 
-                <input
-                  type="file"
-                  accept=".pdf"
-                  onChange={handleFileUpload}
-                  className="hidden"
-                  id="statement-upload"
-                />
-                
                 <div className="space-y-4">
-                  <label htmlFor="statement-upload" className="cursor-pointer">
-                    <Button size="lg" className="gap-3 bg-blue-600 hover:bg-blue-700">
-                      <FileBarChart className="w-5 h-5" />
-                      Upload Statement PDF
-                    </Button>
-                  </label>
+                  <Button 
+                    size="lg" 
+                    className="gap-3 bg-blue-600 hover:bg-blue-700"
+                    onClick={() => setActiveTab('current')}
+                  >
+                    <Calculator className="w-5 h-5" />
+                    Start Manual Analysis
+                  </Button>
                   
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs text-blue-600 dark:text-blue-400">
                     <div className="flex items-center gap-1">
@@ -620,52 +614,7 @@ export default function ISOAmpCalculator() {
                 </div>
               </div>
 
-              {/* Enhanced Uploaded File Display */}
-              {uploadedFile && (
-                <Card className="border-green-200 dark:border-green-800">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="p-3 bg-green-100 dark:bg-green-900 rounded-lg">
-                          <FileText className="w-6 h-6 text-green-600 dark:text-green-400" />
-                        </div>
-                        <div>
-                          <p className="font-semibold text-green-900 dark:text-green-100">{uploadedFile.name}</p>
-                          <p className="text-sm text-green-600 dark:text-green-400">
-                            {Math.round(uploadedFile.size / 1024)} KB • Ready for ISO AMP analysis
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex gap-3">
-                        <Button 
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setUploadedFile(null)}
-                        >
-                          Remove
-                        </Button>
-                        <Button 
-                          onClick={handleAnalyzeStatement}
-                          disabled={statementAnalysisMutation.isPending}
-                          className="gap-2 bg-green-600 hover:bg-green-700"
-                        >
-                          {statementAnalysisMutation.isPending ? (
-                            <>
-                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                              Processing with ISO AMP...
-                            </>
-                          ) : (
-                            <>
-                              <Zap className="w-4 h-4" />
-                              Analyze with ISO AMP
-                            </>
-                          )}
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+
 
               {/* OCR Accuracy Test Section */}
               <Card className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20">
