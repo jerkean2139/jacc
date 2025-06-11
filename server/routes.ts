@@ -1644,68 +1644,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // AI Training & Feedback Management Routes
   app.get('/api/admin/training/feedback', isAuthenticated, async (req, res) => {
     try {
-      // Get training feedback from messages that need improvement
-      const feedbackMessages = await db.select({
-        id: messages.id,
-        chatId: messages.chatId,
-        content: messages.content,
-        role: messages.role,
-        createdAt: messages.createdAt
+      // Get training feedback from database
+      const trainingFeedback = await db.select({
+        id: aiTrainingFeedback.id,
+        chatId: aiTrainingFeedback.chatId,
+        messageId: aiTrainingFeedback.messageId,
+        userQuery: aiTrainingFeedback.userQuery,
+        aiResponse: aiTrainingFeedback.aiResponse,
+        correctResponse: aiTrainingFeedback.correctResponse,
+        feedbackType: aiTrainingFeedback.feedbackType,
+        adminNotes: aiTrainingFeedback.adminNotes,
+        sourceDocs: aiTrainingFeedback.sourceDocs,
+        status: aiTrainingFeedback.status,
+        priority: aiTrainingFeedback.priority,
+        createdAt: aiTrainingFeedback.createdAt
       })
-      .from(messages)
-      .where(eq(messages.role, 'assistant'))
-      .orderBy(desc(messages.createdAt))
-      .limit(100);
-
-      // Transform messages into training feedback format
-      const trainingFeedback = [];
-      
-      for (let i = 0; i < feedbackMessages.length; i += 2) {
-        const aiMessage = feedbackMessages[i];
-        const userMessage = feedbackMessages[i + 1];
-        
-        if (userMessage && userMessage.role === 'user') {
-          // Analyze if response needs training based on length and quality indicators
-          const needsTraining = aiMessage.content.length < 100 || 
-                               aiMessage.content.includes('I don\'t know') ||
-                               aiMessage.content.includes('not sure') ||
-                               aiMessage.content.includes('unclear');
-          
-          if (needsTraining) {
-            trainingFeedback.push({
-              id: `feedback-${aiMessage.id}`,
-              chatId: aiMessage.chatId,
-              messageId: aiMessage.id,
-              userQuery: userMessage.content,
-              aiResponse: aiMessage.content,
-              correctResponse: '',
-              feedbackType: aiMessage.content.length < 100 ? 'incomplete' : 'needs_training',
-              adminNotes: 'Auto-detected response that may need improvement',
-              status: 'pending',
-              priority: aiMessage.content.includes('I don\'t know') ? 3 : 2,
-              createdAt: aiMessage.createdAt,
-              sourceDocs: []
-            });
-          }
-        }
-      }
-
-      // If no training feedback detected, provide guidance
-      if (trainingFeedback.length === 0) {
-        trainingFeedback.push({
-          id: 'guidance-1',
-          chatId: null,
-          userQuery: 'No training feedback detected from recent conversations',
-          aiResponse: 'The system automatically analyzes chat conversations to identify responses that need improvement. Training feedback appears when AI responses are too short, contain uncertainty phrases, or lack specificity.',
-          correctResponse: 'Continue using the chat interface. Responses flagged for training will appear here automatically when they need improvement.',
-          feedbackType: 'needs_training',
-          adminNotes: 'System will auto-detect training opportunities from real conversations',
-          status: 'pending',
-          priority: 1,
-          createdAt: new Date().toISOString(),
-          sourceDocs: []
-        });
-      }
+      .from(aiTrainingFeedback)
+      .orderBy(desc(aiTrainingFeedback.priority), desc(aiTrainingFeedback.createdAt));
 
       res.json(trainingFeedback);
     } catch (error) {
