@@ -533,12 +533,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const sessionId = req.cookies?.sessionId;
       if (sessionId) {
         sessions.delete(sessionId);
-        res.clearCookie('sessionId');
+        res.clearCookie('sessionId', { 
+          path: '/',
+          httpOnly: true,
+          secure: false,
+          sameSite: 'lax'
+        });
       }
       res.json({ success: true });
     } catch (error) {
       console.error('Logout error:', error);
       res.status(500).json({ error: 'Logout failed' });
+    }
+  });
+
+  // GET logout endpoint for compatibility
+  app.get('/api/logout', (req: Request, res: Response) => {
+    try {
+      const sessionId = req.cookies?.sessionId;
+      if (sessionId) {
+        sessions.delete(sessionId);
+        res.clearCookie('sessionId', { 
+          path: '/',
+          httpOnly: true,
+          secure: false,
+          sameSite: 'lax'
+        });
+      }
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Logout error:', error);
+      res.status(500).json({ error: 'Logout failed' });
+    }
+  });
+
+  // Clear all sessions endpoint (for cache clearing)
+  app.post('/api/clear-cache', (req: Request, res: Response) => {
+    try {
+      sessions.clear(); // Clear all sessions
+      res.clearCookie('sessionId', { 
+        path: '/',
+        httpOnly: true,
+        secure: false,
+        sameSite: 'lax'
+      });
+      res.json({ success: true, message: 'All sessions cleared' });
+    } catch (error) {
+      console.error('Cache clear error:', error);
+      res.status(500).json({ error: 'Failed to clear cache' });
     }
   });
 
