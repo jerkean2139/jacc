@@ -28,6 +28,7 @@ import {
   Brain,
   Globe,
   Zap,
+  Settings,
   MessageSquare,
   Search,
   X,
@@ -979,6 +980,17 @@ With these details, I'll create a customized proposal highlighting value proposi
           >
             <FileText className="w-3 h-3 mr-2 text-indigo-600" />
             Create Proposal
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => {
+              window.location.href = "/iso-hub-integration";
+            }}
+            className="text-green-700 dark:text-green-300 hover:bg-green-50 dark:hover:bg-green-900/20"
+          >
+            <Settings className="w-3 h-3 mr-2 text-green-600" />
+            ISO Hub Integration
           </Button>
         </div>
       </div>
