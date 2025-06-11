@@ -1,56 +1,56 @@
 # Document Retrieval Test Questions
 
-## Test Questions for JACC Document Search & Knowledge Base
+## Real Agent Questions for JACC Document Search & Knowledge Base
 
-### 1. Processor Rate Comparison
-**Question:** "What are the current interchange rates for Visa and MasterCard credit cards, and how do they compare to debit card rates?"
+### 1. Basic Rates and Fees
+**Question:** "What rates can TracerPay offer for a restaurant doing $15,000 per month in credit card sales?"
 
-**Expected Result:** Should retrieve information about current interchange rate structures, differences between credit/debit processing, and any recent rate changes.
+**Expected Result:** Should retrieve TracerPay pricing information, restaurant industry rates, and volume-based pricing from uploaded documents and FAQ.
 
-### 2. Equipment and Hardware
-**Question:** "What point-of-sale terminals and card readers are compatible with TracerPay processing, and what are their monthly lease rates?"
+### 2. Equipment Questions
+**Question:** "My client wants to know what card terminals are available and how much they cost. What options do we have?"
 
-**Expected Result:** Should return hardware compatibility information, equipment specifications, pricing structures, and lease vs. purchase options.
+**Expected Result:** Should return equipment options, pricing, lease vs purchase information from product catalogs and FAQ sections.
 
-### 3. Industry-Specific Processing
-**Question:** "What are the specific requirements and rates for restaurant payment processing, including tips and gratuity handling?"
+### 3. Getting Started Process
+**Question:** "A new merchant wants to sign up. What documents do they need to provide and how long does approval take?"
 
-**Expected Result:** Should retrieve restaurant industry guidelines, tip processing procedures, specialized rates for food service, and compliance requirements.
+**Expected Result:** Should retrieve onboarding requirements, document checklist, and timeline information from process documents.
 
-### 4. Compliance and Regulations
-**Question:** "What are the current PCI DSS compliance requirements for merchants, and what are the penalties for non-compliance?"
+### 4. Competitive Comparison
+**Question:** "My prospect is currently with Square and paying 2.9%. How can I show them TracerPay is better?"
 
-**Expected Result:** Should return PCI compliance standards, security requirements, audit procedures, and penalty structures for violations.
+**Expected Result:** Should find competitive comparison data, TracerPay advantages, and rate comparison information from sales materials.
 
-### 5. Chargeback and Dispute Management
-**Question:** "How does the chargeback process work, what are the time limits for responding, and what documentation is required?"
+### 5. Problem Resolution
+**Question:** "A merchant is asking about chargebacks. What should I tell them about how we handle disputes?"
 
-**Expected Result:** Should retrieve chargeback procedures, response timeframes, required evidence, and dispute resolution processes.
+**Expected Result:** Should retrieve chargeback support information, dispute resolution process, and merchant protection details from FAQ.
 
-### 6. High-Risk Merchant Processing
-**Question:** "What industries are considered high-risk for payment processing, and what additional requirements or rates apply?"
+### 6. Industry-Specific Questions
+**Question:** "Do we have special programs for auto repair shops? The merchant wants to know about our rates for this industry."
 
-**Expected Result:** Should return high-risk industry classifications, enhanced underwriting requirements, reserve requirements, and specialized pricing.
+**Expected Result:** Should find industry-specific pricing, programs, or requirements for automotive businesses from uploaded materials.
 
-### 7. E-commerce and Card-Not-Present
-**Question:** "What are the security requirements and fraud prevention measures for online payment processing?"
+### 7. Commission and Earnings
+**Question:** "How much commission will I make on a $20,000 monthly volume account, and when do I get paid?"
 
-**Expected Result:** Should retrieve CNP transaction requirements, fraud prevention tools, 3D Secure protocols, and online security standards.
+**Expected Result:** Should retrieve commission structure, payment schedules, and earnings calculator information from agent materials.
 
-### 8. Mobile and Alternative Payments
-**Question:** "What mobile payment solutions are available, and how do digital wallet transactions like Apple Pay and Google Pay get processed?"
+### 8. Technical Support
+**Question:** "My merchant's terminal isn't working. What's the technical support phone number and what troubleshooting steps should we try?"
 
-**Expected Result:** Should return mobile payment options, digital wallet processing flows, contactless payment methods, and associated fees.
+**Expected Result:** Should find technical support contact information and basic troubleshooting steps from support documentation.
 
-### 9. International and Multi-Currency
-**Question:** "How are international transactions processed, and what are the foreign exchange fees and conversion rates?"
+### 9. Contract and Terms
+**Question:** "The merchant wants to know about contract length and early termination fees. What are our standard terms?"
 
-**Expected Result:** Should retrieve international processing procedures, FX fee structures, currency conversion methods, and cross-border regulations.
+**Expected Result:** Should retrieve contract terms, cancellation policies, and fee structures from agreement documents.
 
-### 10. Statement Analysis and Savings
-**Question:** "How can I analyze a merchant's current processing statement to identify potential savings and create a competitive proposal?"
+### 10. Referral and Bonus Programs
+**Question:** "Are there any current promotions or bonus programs I can offer to new merchants to help close deals?"
 
-**Expected Result:** Should return statement analysis procedures, cost breakdown methods, savings calculation techniques, and proposal generation guidelines.
+**Expected Result:** Should find current promotional offers, sign-up bonuses, or incentive programs from marketing materials and FAQ.
 
 ## Testing Instructions
 
