@@ -1,0 +1,39 @@
+beforeinstallpromptevent.prompt() to show the banner.
+02aa0592-869c-416a-8…icard.replit.dev/:1 Unchecked runtime.lastError: The message port closed before a response was received.
+02aa0592-869c-416a-8…icard.replit.dev/:1 Unchecked runtime.lastError: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:101 Messages Query Status: 
+{chatId: null, queryKey: Array(1), enabled: false, isLoading: false, hasError: false, …}
+chat-interface.tsx:111 Chat Interface Debug: 
+{chatId: null, messagesCount: 0, isLoading: false, hasMessages: false}
+contentScript.bundle.js:28 updating page active status
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:101 Messages Query Status: 
+{chatId: null, queryKey: Array(1), enabled: false, isLoading: false, hasError: false, …}
+chat-interface.tsx:111 Chat Interface Debug: 
+{chatId: null, messagesCount: 0, isLoading: false, hasMessages: false}
+queryClient.ts:15 
+ POST https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/api/chats 401 (Unauthorized)
+chat-interface.tsx:101 Messages Query Status: 
+{chatId: null, queryKey: Array(1), enabled: false, isLoading: false, hasError: false, …}
+chat-interface.tsx:111 Chat Interface Debug: 
+{chatId: null, messagesCount: 0, isLoading: false, hasMessages: false}
+sidebar.tsx:63 Sidebar Debug: 
+{chatsCount: 0, hasOnChatDelete: false, onChatDeleteType: 'undefined'}
+chat-interface.tsx:101 Messages Query Status: 
+{chatId: null, queryKey: Array(1), enabled: false, isLoading: false, hasError: false, …}
+chat-interface.tsx:111 Chat Interface Debug: 
+{chatId: null, messagesCount: 0, isLoading: false, hasMessages: false}
+contentScript.bundle.js:28 updating page active status
+chat-interface.tsx:101 Messages Query Status: 
+{chatId: null, queryKey: Array(1), enabled: false, isLoading: false, hasError: false, …}
+chat-interface.tsx:111 Chat Interface Debug: 
+{chatId: null, messagesCount: 0, isLoading: false, hasMessages: false}
+sidebar.tsx:63 Sidebar Debug: 
+{chatsCount: 0, hasOnChatDelete: false, onChatDeleteType: 'undefined'}
+chat-interface.tsx:101 Messages Query Status: 
+{chatId: null, queryKey: Array(1), enabled: false, isLoading: false, hasError: false, …}
+chat-interface.tsx:111 Chat Interface Debug: 
+{chatId: null, messagesCount: 0, isLoading: false, hasMessages: false}
+﻿
+
