@@ -214,6 +214,13 @@ export default function AdminPanel() {
         <div className="flex items-center gap-3">
           <Button 
             variant="outline" 
+            onClick={() => window.location.href = '/admin/chat-monitoring'}
+            className="bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100"
+          >
+            Chat Monitoring
+          </Button>
+          <Button 
+            variant="outline" 
             onClick={() => window.location.href = '/admin/training'}
             className="bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100"
           >

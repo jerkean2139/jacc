@@ -97,6 +97,7 @@ function Router() {
           <Route path="/dev-admin" component={DevAdminPanel} />
           <Route path="/admin" component={AdminPanel} />
           <Route path="/admin/dashboard" component={AdminDashboard} />
+          <Route path="/admin/chat-monitoring" component={AdminChatMonitoring} />
           <Route path="/admin/settings" component={AdminSettings} />
           <Route path="/admin/training" component={AdminTraining} />
           <Route path="/admin/ai-config" component={AIConfigurationPage} />
