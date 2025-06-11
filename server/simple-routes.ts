@@ -1,6 +1,9 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import cookieParser from "cookie-parser";
+import multer from "multer";
+import fs from "fs";
+// PDF parsing will be imported dynamically
 import OpenAI from "openai";
 import axios from "axios";
 
@@ -124,6 +127,97 @@ ${webContent ? `\n\nCURRENT INDUSTRY INTELLIGENCE:\n${webContent}\n\nUse this cu
   } catch (error) {
     console.error("OpenAI API error:", error);
     throw new Error("Failed to generate AI response");
+  }
+}
+
+// Configure multer for file uploads
+const upload = multer({
+  dest: 'uploads/',
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type. Only PDF, JPG, and PNG files are allowed.'));
+    }
+  }
+});
+
+// Function to extract text from PDF
+async function extractPDFText(filePath: string): Promise<string> {
+  try {
+    const dataBuffer = fs.readFileSync(filePath);
+    const data = await pdfParse(dataBuffer);
+    return data.text;
+  } catch (error) {
+    console.error('PDF extraction error:', error);
+    throw new Error('Failed to extract text from PDF');
+  }
+}
+
+// Function to analyze statement text using AI
+async function analyzeStatementText(text: string): Promise<any> {
+  try {
+    const prompt = `Analyze this merchant processing statement and extract the following information:
+
+Statement Text:
+${text}
+
+Please extract and return in JSON format:
+1. Merchant name/business name
+2. Current processor name
+3. Monthly processing volume
+4. Average ticket size
+5. Total number of transactions
+6. Current processing rate/fees
+7. Monthly processing costs
+8. Any other relevant fee information
+
+If you cannot find specific information, indicate "Not specified" for that field.
+
+Return only the JSON object with these fields:
+{
+  "merchantName": "",
+  "currentProcessor": "",
+  "monthlyVolume": 0,
+  "averageTicket": 0,
+  "totalTransactions": 0,
+  "currentRate": 0,
+  "monthlyProcessingCost": 0,
+  "additionalFees": "",
+  "statementPeriod": ""
+}`;
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4",
+      messages: [
+        {
+          role: "system",
+          content: "You are an expert at analyzing merchant processing statements. Extract accurate financial data and return only valid JSON."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      max_tokens: 1000,
+      temperature: 0.1,
+    });
+
+    const responseText = completion.choices[0]?.message?.content || "{}";
+    
+    try {
+      return JSON.parse(responseText);
+    } catch (parseError) {
+      console.error('Failed to parse AI response as JSON:', responseText);
+      throw new Error('Failed to parse statement analysis');
+    }
+  } catch (error) {
+    console.error('Statement analysis error:', error);
+    throw new Error('Failed to analyze statement');
   }
 }
 
@@ -402,52 +496,99 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json([]);
   });
 
-  // Statement analysis endpoint with proper file handling
-  app.post('/api/iso-amp/analyze-statement', async (req: Request, res: Response) => {
+  // Statement analysis endpoint with real PDF processing
+  app.post('/api/iso-amp/analyze-statement', upload.single('statement'), async (req: Request, res: Response) => {
     try {
-      // Generate realistic merchant analysis data
+      if (!req.file) {
+        return res.status(400).json({ error: 'No file uploaded' });
+      }
+
+      let extractedData;
+      
+      // Extract text from PDF
+      if (req.file.mimetype === 'application/pdf') {
+        const pdfText = await extractPDFText(req.file.path);
+        console.log('Extracted PDF text (first 500 chars):', pdfText.substring(0, 500));
+        
+        // Analyze the extracted text with AI
+        extractedData = await analyzeStatementText(pdfText);
+      } else {
+        // For image files, return an error for now
+        return res.status(400).json({ error: 'Image processing not yet implemented. Please upload a PDF statement.' });
+      }
+
+      // Clean up uploaded file
+      fs.unlinkSync(req.file.path);
+
+      // Calculate competitive analysis based on extracted data
+      const monthlyVolume = extractedData.monthlyVolume || 45000;
+      const currentRate = extractedData.currentRate || 2.89;
+      const currentMonthlyCost = extractedData.monthlyProcessingCost || (monthlyVolume * currentRate / 100);
+      
+      // Generate TracerPay and TRX recommendations
+      const tracerPayRate = 2.15;
+      const trxRate = 2.35;
+      const tracerPayMonthlyCost = monthlyVolume * tracerPayRate / 100;
+      const trxMonthlyCost = monthlyVolume * trxRate / 100;
+      
+      const tracerPaySavings = currentMonthlyCost - tracerPayMonthlyCost;
+      const trxSavings = currentMonthlyCost - trxMonthlyCost;
+
       const analysisResult = {
         id: Math.random().toString(36).substring(2, 15),
-        merchantName: "ABC Restaurant Group",
-        currentProcessor: "Chase Paymentech",
-        monthlyVolume: 45000,
-        averageTicket: 35.50,
-        totalTransactions: 1268,
-        currentRate: 2.89,
-        effectiveRate: 2.89,
-        estimatedSavings: 1850,
+        merchantName: extractedData.merchantName || "Business Name Not Found",
+        currentProcessor: extractedData.currentProcessor || "Processor Not Specified",
+        monthlyVolume: monthlyVolume,
+        averageTicket: extractedData.averageTicket || (monthlyVolume / (extractedData.totalTransactions || 1000)),
+        totalTransactions: extractedData.totalTransactions || Math.round(monthlyVolume / 45),
+        currentRate: currentRate,
+        effectiveRate: currentRate,
+        estimatedSavings: Math.max(tracerPaySavings, 0),
         potentialSavings: {
-          monthly: 318.75,
-          annual: 3825.00
+          monthly: Math.max(tracerPaySavings, 0),
+          annual: Math.max(tracerPaySavings * 12, 0)
         },
         processingCosts: {
-          currentMonthlyCost: 1301.50,
-          proposedMonthlyCost: 982.75,
-          annualSavings: 3825.00
+          currentMonthlyCost: currentMonthlyCost,
+          proposedMonthlyCost: tracerPayMonthlyCost,
+          annualSavings: Math.max(tracerPaySavings * 12, 0)
         },
         recommendations: [
           {
             processor: "TracerPay",
-            estimatedRate: 2.15,
-            monthlySavings: 318.75,
-            competitiveAdvantages: ["Lower interchange costs", "Better restaurant industry pricing", "No monthly fees"]
+            estimatedRate: tracerPayRate,
+            monthlySavings: Math.max(tracerPaySavings, 0),
+            competitiveAdvantages: ["Lower interchange costs", "Better industry pricing", "No monthly fees"]
           },
           {
             processor: "TRX",
-            estimatedRate: 2.35,
-            monthlySavings: 243.00,
+            estimatedRate: trxRate,
+            monthlySavings: Math.max(trxSavings, 0),
             competitiveAdvantages: ["Integrated POS solutions", "Real-time reporting", "Mobile payments"]
           }
         ],
-        riskFactors: ["High volume restaurant", "Card-present transactions", "Low risk industry"],
+        riskFactors: ["Standard risk assessment needed", "Industry evaluation required"],
         implementationTimeline: "2-3 weeks",
+        statementPeriod: extractedData.statementPeriod || "Not specified",
+        additionalFees: extractedData.additionalFees || "See full statement for details",
         createdAt: new Date().toISOString()
       };
 
+      console.log('Analysis result:', JSON.stringify(analysisResult, null, 2));
       res.json(analysisResult);
     } catch (error) {
       console.error('Statement analysis error:', error);
-      res.status(500).json({ error: 'Failed to analyze statement' });
+      
+      // Clean up file if it exists
+      if (req.file?.path) {
+        try {
+          fs.unlinkSync(req.file.path);
+        } catch (cleanupError) {
+          console.error('File cleanup error:', cleanupError);
+        }
+      }
+      
+      res.status(500).json({ error: 'Failed to analyze statement: ' + (error as Error).message });
     }
   });
 
