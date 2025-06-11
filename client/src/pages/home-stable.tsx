@@ -312,6 +312,12 @@ Would you like me to run a competitive analysis and show you better processing o
                   Guide
                 </Button>
               </Link>
+              <Link href="/iso-hub">
+                <Button variant="ghost" size="sm" className="gap-2">
+                  <Calculator className="w-4 h-4" />
+                  ISO-AMP
+                </Button>
+              </Link>
               {user?.role === 'dev_admin' && (
                 <Link href="/admin">
                   <Button variant="ghost" size="sm" className="gap-2">

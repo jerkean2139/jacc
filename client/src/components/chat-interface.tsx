@@ -959,14 +959,12 @@ With these details, I'll create a customized proposal highlighting value proposi
             variant="secondary"
             size="sm"
             onClick={() => {
-              if (onNewChatWithMessage) {
-                onNewChatWithMessage("Please help me analyze a document. I need to extract key information and insights from uploaded files.");
-              }
+              window.location.href = "/iso-hub";
             }}
             className="text-blue-700 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20"
           >
             <FileSearch className="w-3 h-3 mr-2 text-blue-600" />
-            Analyze Document
+            Analyze Processor Statement
           </Button>
           <Button
             variant="secondary"
