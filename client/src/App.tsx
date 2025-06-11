@@ -37,6 +37,7 @@ import GamificationPage from "@/pages/gamification-page";
 import HelpPage from "@/pages/help";
 import VendorIntelligenceDashboard from "@/pages/vendor-intelligence-dashboard";
 import ISOHubIntegration from "@/pages/iso-hub-integration";
+import ISOHub from "@/pages/iso-hub";
 
 function Router() {
   const { user, isLoading } = useAuth();
@@ -85,6 +86,7 @@ function Router() {
           <Route path="/vendor-intelligence" component={VendorIntelligenceDashboard} />
           <Route path="/competitive-intelligence" component={lazy(() => import("@/pages/competitive-intelligence-dashboard"))} />
           <Route path="/iso-hub-integration" component={ISOHubIntegration} />
+          <Route path="/iso-hub" component={ISOHub} />
           <Route path="/admin" component={AdminPanel} />
           <Route path="/admin/dashboard" component={AdminDashboard} />
           <Route path="/admin/settings" component={AdminSettings} />

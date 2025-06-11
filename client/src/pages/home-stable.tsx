@@ -252,24 +252,6 @@ Would you like me to run a competitive analysis and show you better processing o
         </div>
         <div className="flex gap-2">
           <button
-            onClick={() => {
-              const input = document.createElement('input');
-              input.type = 'file';
-              input.accept = '.pdf,.doc,.docx,.txt';
-              input.onchange = async (e) => {
-                const file = (e.target as HTMLInputElement).files?.[0];
-                if (file) {
-                  console.log('File selected:', file.name);
-                  await handleStatementUpload(file);
-                }
-              };
-              input.click();
-            }}
-            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-          >
-            📄 Upload Statement
-          </button>
-          <button
             onClick={handleNewChat}
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
           >
