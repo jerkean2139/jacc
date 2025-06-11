@@ -229,7 +229,14 @@ Return only the JSON object with these fields:
     const responseText = completion.choices[0]?.message?.content || "{}";
     
     try {
-      return JSON.parse(responseText);
+      // Extract JSON from markdown code blocks if present
+      let jsonText = responseText;
+      const jsonMatch = responseText.match(/```json\s*([\s\S]*?)\s*```/);
+      if (jsonMatch) {
+        jsonText = jsonMatch[1];
+      }
+      
+      return JSON.parse(jsonText);
     } catch (parseError) {
       console.error('Failed to parse AI response as JSON:', responseText);
       throw new Error('Failed to parse statement analysis');
