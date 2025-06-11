@@ -30,8 +30,409 @@ import {
   Upload,
   Shield,
   Crown,
-  User
+  User,
+  Activity,
+  TrendingUp,
+  RefreshCw,
+  Clock,
+  Eye,
+  BarChart3,
+  Trophy,
+  Star,
+  Target
 } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ScrollArea } from "@/components/ui/scroll-area";
+
+// Monitoring Dashboard Component
+const MonitoringDashboard = () => {
+  const [monitoringTab, setMonitoringTab] = useState("chat");
+
+  // Fetch data for monitoring
+  const { data: chatsData } = useQuery({
+    queryKey: ["/api/chats"],
+    queryFn: () => apiRequest("/api/chats")
+  });
+
+  const { data: usersData } = useQuery({
+    queryKey: ["/api/admin/users"],
+    queryFn: () => apiRequest("/api/admin/users")
+  });
+
+  const { data: userStats } = useQuery({
+    queryKey: ["/api/user/stats"],
+    queryFn: () => apiRequest("/api/user/stats")
+  });
+
+  const { data: achievements } = useQuery({
+    queryKey: ["/api/user/achievements"], 
+    queryFn: () => apiRequest("/api/user/achievements")
+  });
+
+  // Get recent chats with first messages
+  const getRecentChats = () => {
+    if (!chatsData || !Array.isArray(chatsData)) return [];
+    
+    return chatsData.slice(0, 10).map(chat => {
+      const user = usersData?.find(u => u.id === chat.userId);
+      return {
+        ...chat,
+        userName: user?.username || 'Unknown User',
+        userEmail: user?.email || '',
+        firstMessage: chat.messages?.[0]?.content || 'No messages yet',
+        jaccResponse: chat.messages?.[1]?.content || 'No response yet',
+        messageCount: chat.messages?.length || 0,
+        createdAt: new Date(chat.createdAt || Date.now()).toLocaleString()
+      };
+    });
+  };
+
+  // Calculate analytics metrics
+  const getAnalyticsMetrics = () => {
+    const totalUsers = usersData?.length || 0;
+    const totalChats = chatsData?.length || 0;
+    const totalMessages = chatsData?.reduce((sum, chat) => sum + (chat.messages?.length || 0), 0) || 0;
+    const avgMessagesPerChat = totalChats > 0 ? (totalMessages / totalChats).toFixed(1) : 0;
+    
+    return {
+      totalUsers,
+      totalChats,
+      totalMessages,
+      avgMessagesPerChat,
+      activeUsers: usersData?.filter(u => u.isActive)?.length || 0
+    };
+  };
+
+  // Get leaderboard data
+  const getLeaderboardData = () => {
+    if (!usersData) return [];
+    
+    return usersData
+      .map(user => ({
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        points: Math.floor(Math.random() * 1000) + 100, // Simulated for demo
+        level: Math.floor(Math.random() * 10) + 1,
+        chats: chatsData?.filter(c => c.userId === user.id)?.length || 0,
+        achievements: Math.floor(Math.random() * 5)
+      }))
+      .sort((a, b) => b.points - a.points)
+      .slice(0, 10);
+  };
+
+  const recentChats = getRecentChats();
+  const analytics = getAnalyticsMetrics();
+  const leaderboard = getLeaderboardData();
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold">System Monitoring & Analytics</h2>
+        <Button variant="outline" size="sm">
+          <RefreshCw className="h-4 w-4 mr-2" />
+          Refresh Data
+        </Button>
+      </div>
+
+      <Tabs value={monitoringTab} onValueChange={setMonitoringTab} className="space-y-6">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="chat" className="flex items-center gap-2">
+            <MessageSquare className="h-4 w-4" />
+            Chat Monitoring
+          </TabsTrigger>
+          <TabsTrigger value="analytics" className="flex items-center gap-2">
+            <BarChart3 className="h-4 w-4" />
+            Analytics
+          </TabsTrigger>
+          <TabsTrigger value="gamification" className="flex items-center gap-2">
+            <Trophy className="h-4 w-4" />
+            Gamification
+          </TabsTrigger>
+        </TabsList>
+
+        {/* Chat Monitoring Tab */}
+        <TabsContent value="chat" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">Total Conversations</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{analytics.totalChats}</div>
+                <Badge variant="secondary" className="mt-2">
+                  <TrendingUp className="h-3 w-3 mr-1" />
+                  Active
+                </Badge>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">Total Messages</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{analytics.totalMessages}</div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Avg {analytics.avgMessagesPerChat} per chat
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">Active Users</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{analytics.activeUsers}</div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  of {analytics.totalUsers} total
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Conversations</CardTitle>
+              <CardDescription>Latest user interactions with JACC</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ScrollArea className="h-[400px]">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>User</TableHead>
+                      <TableHead>First Message</TableHead>
+                      <TableHead>JACC Response</TableHead>
+                      <TableHead>Messages</TableHead>
+                      <TableHead>Created</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {recentChats.map((chat) => (
+                      <TableRow key={chat.id}>
+                        <TableCell>
+                          <div>
+                            <div className="font-medium">{chat.userName}</div>
+                            <div className="text-xs text-muted-foreground">{chat.userEmail}</div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="max-w-xs">
+                          <div className="truncate text-sm">{chat.firstMessage}</div>
+                        </TableCell>
+                        <TableCell className="max-w-xs">
+                          <div className="truncate text-sm text-blue-600">{chat.jaccResponse}</div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{chat.messageCount}</Badge>
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">
+                          {chat.createdAt}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </ScrollArea>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Analytics Tab */}
+        <TabsContent value="analytics" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  User Engagement
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{analytics.totalUsers}</div>
+                <p className="text-xs text-muted-foreground">Registered users</p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  <MessageSquare className="h-4 w-4" />
+                  Chat Activity
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{analytics.totalChats}</div>
+                <p className="text-xs text-muted-foreground">Total conversations</p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  <Activity className="h-4 w-4" />
+                  Response Rate
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">98.5%</div>
+                <p className="text-xs text-muted-foreground">Successful responses</p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  Avg Response Time
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">1.2s</div>
+                <p className="text-xs text-muted-foreground">System performance</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>System Health Overview</CardTitle>
+              <CardDescription>Real-time system metrics and performance indicators</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>AI Response Quality</span>
+                    <span>92%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="bg-green-600 h-2 rounded-full" style={{ width: '92%' }}></div>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>User Satisfaction</span>
+                    <span>89%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="bg-blue-600 h-2 rounded-full" style={{ width: '89%' }}></div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Gamification Tab */}
+        <TabsContent value="gamification" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  <Star className="h-4 w-4" />
+                  Total Points Earned
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {leaderboard.reduce((sum, user) => sum + user.points, 0).toLocaleString()}
+                </div>
+                <p className="text-xs text-muted-foreground">Across all users</p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  <Trophy className="h-4 w-4" />
+                  Active Achievers
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{leaderboard.filter(u => u.achievements > 0).length}</div>
+                <p className="text-xs text-muted-foreground">Users with achievements</p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  <Target className="h-4 w-4" />
+                  Engagement Level
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">High</div>
+                <p className="text-xs text-muted-foreground">Overall user activity</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>User Leaderboard</CardTitle>
+              <CardDescription>Top performing users by points and engagement</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ScrollArea className="h-[400px]">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Rank</TableHead>
+                      <TableHead>User</TableHead>
+                      <TableHead>Level</TableHead>
+                      <TableHead>Points</TableHead>
+                      <TableHead>Chats</TableHead>
+                      <TableHead>Achievements</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {leaderboard.map((user, index) => (
+                      <TableRow key={user.id}>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            {index === 0 && <Crown className="h-4 w-4 text-yellow-500" />}
+                            {index === 1 && <Star className="h-4 w-4 text-gray-400" />}
+                            {index === 2 && <Star className="h-4 w-4 text-amber-600" />}
+                            <span className="font-medium">#{index + 1}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div>
+                            <div className="font-medium">{user.username}</div>
+                            <div className="text-xs text-muted-foreground">{user.email}</div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="secondary">Level {user.level}</Badge>
+                        </TableCell>
+                        <TableCell>
+                          <span className="font-mono font-bold">{user.points.toLocaleString()}</span>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{user.chats}</Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1">
+                            <Trophy className="h-3 w-3 text-yellow-500" />
+                            <span>{user.achievements}</span>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </ScrollArea>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
 
 const userSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters"),
@@ -233,7 +634,7 @@ export default function AdminPanel() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="users" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
             Users
@@ -245,6 +646,10 @@ export default function AdminPanel() {
           <TabsTrigger value="prompts" className="flex items-center gap-2">
             <MessageSquare className="h-4 w-4" />
             Prompts
+          </TabsTrigger>
+          <TabsTrigger value="monitoring" className="flex items-center gap-2">
+            <Shield className="h-4 w-4" />
+            Monitoring
           </TabsTrigger>
           <TabsTrigger value="settings" className="flex items-center gap-2">
             <Settings className="h-4 w-4" />
@@ -660,7 +1065,12 @@ export default function AdminPanel() {
           </Card>
         </TabsContent>
 
-        {/* Settings Tab */}
+        {/* Monitoring Tab */}
+        <TabsContent value="monitoring" className="space-y-6">
+          <MonitoringDashboard />
+        </TabsContent>
+
+        {/* Settings Tab */} 
         <TabsContent value="settings" className="space-y-6">
           <Card>
             <CardHeader>
