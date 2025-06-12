@@ -58,9 +58,17 @@ interface DocumentEntry {
   originalName: string;
   mimeType: string;
   size: number;
+  path: string;
+  userId: string;
+  folderId?: string;
+  isFavorite: boolean;
+  contentHash?: string;
+  nameHash?: string;
+  isPublic: boolean;
+  adminOnly: boolean;
+  managerOnly: boolean;
   createdAt: string;
-  isActive: boolean;
-  vectorized: boolean;
+  updatedAt: string;
 }
 
 export function AdminTrainingPage() {
@@ -171,6 +179,11 @@ export function AdminTrainingPage() {
     queryKey: ['/api/admin/documents'],
     retry: false,
   });
+
+  // Debug logging to see what documents data we're getting
+  console.log('Documents Data:', documentsData);
+  console.log('Documents Array Length:', Array.isArray(documentsData) ? documentsData.length : 'Not an array');
+  console.log('Documents Data Type:', typeof documentsData);
 
   // Test AI response mutation
   const testAIMutation = useMutation({
