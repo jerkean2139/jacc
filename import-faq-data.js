@@ -45,15 +45,12 @@ async function importFAQData() {
           }
           
           const faq = {
-            id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
             question: question.trim(),
             answer: answer.trim(),
             category: category,
             tags: [],
             isActive: true,
-            priority: priority,
-            createdAt: new Date(),
-            updatedAt: new Date()
+            priority: priority
           };
           
           faqs.push(faq);
