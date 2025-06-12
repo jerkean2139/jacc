@@ -2244,6 +2244,239 @@ User Context: {userRole}`,
     }
   });
 
+  // Learning System API Routes
+  
+  // Get learning paths
+  app.get('/api/learning/paths', isAuthenticated, async (req: any, res) => {
+    try {
+      const { learningPaths, userPathProgress, pathModules } = await import('@shared/schema');
+      const { eq, sql } = await import('drizzle-orm');
+
+      const paths = await db.select({
+        id: learningPaths.id,
+        name: learningPaths.name,
+        description: learningPaths.description,
+        category: learningPaths.category,
+        estimatedDuration: learningPaths.estimatedDuration,
+        difficulty: learningPaths.difficulty,
+        moduleCount: sql<number>`(SELECT COUNT(*) FROM ${pathModules} WHERE ${pathModules.pathId} = ${learningPaths.id})`
+      }).from(learningPaths).where(eq(learningPaths.isActive, true));
+
+      const userProgress = await db.select()
+        .from(userPathProgress)
+        .where(eq(userPathProgress.userId, req.user.id));
+
+      const enrichedPaths = paths.map(path => {
+        const progress = userProgress.find(p => p.pathId === path.id);
+        return {
+          ...path,
+          modules: [], // Will be populated with actual module IDs
+          completionRate: progress?.completionRate || 0,
+          isStarted: !!progress
+        };
+      });
+
+      res.json(enrichedPaths);
+    } catch (error) {
+      console.error('Error fetching learning paths:', error);
+      res.status(500).json({ message: "Failed to fetch learning paths" });
+    }
+  });
+
+  // Get learning modules
+  app.get('/api/learning/modules', isAuthenticated, async (req: any, res) => {
+    try {
+      const { learningModules, userModuleProgress } = await import('@shared/schema');
+      const { eq } = await import('drizzle-orm');
+
+      const modules = await db.select().from(learningModules).where(eq(learningModules.isActive, true));
+      const userProgress = await db.select()
+        .from(userModuleProgress)
+        .where(eq(userModuleProgress.userId, req.user.id));
+
+      const enrichedModules = modules.map(module => {
+        const progress = userProgress.find(p => p.moduleId === module.id);
+        return {
+          ...module,
+          isCompleted: progress?.status === 'completed',
+          isUnlocked: true, // For now, all modules are unlocked
+          completionDate: progress?.completedAt,
+          score: progress?.score
+        };
+      });
+
+      res.json(enrichedModules);
+    } catch (error) {
+      console.error('Error fetching learning modules:', error);
+      res.status(500).json({ message: "Failed to fetch learning modules" });
+    }
+  });
+
+  // Get user skills
+  app.get('/api/learning/skills', isAuthenticated, async (req: any, res) => {
+    try {
+      const { userSkills } = await import('@shared/schema');
+      const { eq } = await import('drizzle-orm');
+
+      const skills = await db.select().from(userSkills).where(eq(userSkills.userId, req.user.id));
+      
+      const enrichedSkills = skills.map(skill => ({
+        ...skill,
+        id: skill.id,
+        name: skill.skillName,
+        maxLevel: 10,
+        xpToNext: (skill.level * 100) - skill.xp,
+        description: `Master ${skill.skillName} to improve your sales performance`,
+        benefits: [`Level ${skill.level} proficiency in ${skill.skillName}`]
+      }));
+
+      res.json(enrichedSkills);
+    } catch (error) {
+      console.error('Error fetching user skills:', error);
+      res.status(500).json({ message: "Failed to fetch user skills" });
+    }
+  });
+
+  // Get achievements
+  app.get('/api/learning/achievements', isAuthenticated, async (req: any, res) => {
+    try {
+      const { learningAchievements, userAchievements } = await import('@shared/schema');
+      const { eq } = await import('drizzle-orm');
+
+      const achievements = await db.select().from(learningAchievements).where(eq(learningAchievements.isActive, true));
+      const userUnlocked = await db.select()
+        .from(userAchievements)
+        .where(eq(userAchievements.userId, req.user.id));
+
+      const enrichedAchievements = achievements.map(achievement => {
+        const unlocked = userUnlocked.find(u => u.achievementId === achievement.id);
+        return {
+          ...achievement,
+          isUnlocked: !!unlocked,
+          unlockedDate: unlocked?.unlockedAt
+        };
+      });
+
+      res.json(enrichedAchievements);
+    } catch (error) {
+      console.error('Error fetching achievements:', error);
+      res.status(500).json({ message: "Failed to fetch achievements" });
+    }
+  });
+
+  // Get user progress
+  app.get('/api/learning/progress', isAuthenticated, async (req: any, res) => {
+    try {
+      const { userLearningStats } = await import('@shared/schema');
+      const { eq } = await import('drizzle-orm');
+
+      let stats = await db.select().from(userLearningStats).where(eq(userLearningStats.userId, req.user.id));
+      
+      if (!stats.length) {
+        // Create initial stats
+        await db.insert(userLearningStats).values({
+          userId: req.user.id,
+          totalXP: 0,
+          currentLevel: 1,
+          modulesCompleted: 0,
+          achievementsUnlocked: 0,
+          totalTimeSpent: 0,
+          streak: 0
+        });
+        stats = await db.select().from(userLearningStats).where(eq(userLearningStats.userId, req.user.id));
+      }
+
+      res.json(stats[0]);
+    } catch (error) {
+      console.error('Error fetching user progress:', error);
+      res.status(500).json({ message: "Failed to fetch user progress" });
+    }
+  });
+
+  // Start learning module
+  app.post('/api/learning/modules/:moduleId/start', isAuthenticated, async (req: any, res) => {
+    try {
+      const { userModuleProgress } = await import('@shared/schema');
+      const { eq, and } = await import('drizzle-orm');
+      const { moduleId } = req.params;
+
+      // Check if progress already exists
+      const existing = await db.select()
+        .from(userModuleProgress)
+        .where(and(
+          eq(userModuleProgress.userId, req.user.id),
+          eq(userModuleProgress.moduleId, moduleId)
+        ));
+
+      if (!existing.length) {
+        await db.insert(userModuleProgress).values({
+          userId: req.user.id,
+          moduleId,
+          status: 'in_progress',
+          startedAt: new Date()
+        });
+      } else {
+        await db.update(userModuleProgress)
+          .set({ status: 'in_progress', startedAt: new Date() })
+          .where(and(
+            eq(userModuleProgress.userId, req.user.id),
+            eq(userModuleProgress.moduleId, moduleId)
+          ));
+      }
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error starting module:', error);
+      res.status(500).json({ message: "Failed to start module" });
+    }
+  });
+
+  // Complete learning module
+  app.post('/api/learning/modules/:moduleId/complete', isAuthenticated, async (req: any, res) => {
+    try {
+      const { userModuleProgress, userLearningStats, learningModules } = await import('@shared/schema');
+      const { eq, and } = await import('drizzle-orm');
+      const { moduleId } = req.params;
+      const { score } = req.body;
+
+      // Get module details for XP reward
+      const module = await db.select().from(learningModules).where(eq(learningModules.id, moduleId));
+      if (!module.length) {
+        return res.status(404).json({ message: "Module not found" });
+      }
+
+      // Update module progress
+      await db.update(userModuleProgress)
+        .set({ 
+          status: 'completed', 
+          score,
+          completedAt: new Date()
+        })
+        .where(and(
+          eq(userModuleProgress.userId, req.user.id),
+          eq(userModuleProgress.moduleId, moduleId)
+        ));
+
+      // Update user stats
+      const stats = await db.select().from(userLearningStats).where(eq(userLearningStats.userId, req.user.id));
+      if (stats.length) {
+        await db.update(userLearningStats)
+          .set({
+            totalXP: stats[0].totalXP + module[0].xpReward,
+            modulesCompleted: stats[0].modulesCompleted + 1,
+            lastActivityDate: new Date(),
+            updatedAt: new Date()
+          })
+          .where(eq(userLearningStats.userId, req.user.id));
+      }
+
+      res.json({ success: true, xpGained: module[0].xpReward });
+    } catch (error) {
+      console.error('Error completing module:', error);
+      res.status(500).json({ message: "Failed to complete module" });
+    }
+  });
+
   // FAQ import endpoint
   app.post('/api/admin/import-faq', async (req: any, res) => {
     try {

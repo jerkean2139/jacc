@@ -236,6 +236,15 @@ export default function Sidebar({
         </Button>
 
         <Button
+          onClick={() => window.location.href = '/learning'}
+          variant="outline"
+          className="w-full text-sm bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/30"
+        >
+          <Brain className="w-4 h-4 mr-2" />
+          Learning Path
+        </Button>
+
+        <Button
           onClick={() => {
             if (window.confirm('This will restart the interactive tutorial. Continue?')) {
               localStorage.removeItem('tutorial-completed');

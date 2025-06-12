@@ -41,6 +41,7 @@ import VendorIntelligenceDashboard from "@/pages/vendor-intelligence-dashboard";
 import ISOHubIntegration from "@/pages/iso-hub-integration";
 import ISOHub from "@/pages/iso-hub";
 import AdminChatMonitoring from "@/pages/admin-chat-monitoring";
+import LearningPathPage from "@/pages/learning-path";
 
 function Router() {
   const { user, isLoading } = useAuth();
@@ -87,6 +88,7 @@ function Router() {
           <Route path="/merchant-insights" component={MerchantInsights} />
           <Route path="/leaderboard" component={GamificationPage} />
           <Route path="/help" component={HelpPage} />
+          <Route path="/learning" component={LearningPathPage} />
           <Route path="/vendor-intelligence" component={VendorIntelligenceDashboard} />
           <Route path="/competitive-intelligence" component={lazy(() => import("@/pages/competitive-intelligence-dashboard"))} />
           {/* ISO Hub - Hidden from regular users, accessible only to dev admin */}

@@ -678,6 +678,106 @@ export const insertApiKeySchema = createInsertSchema(apiKeys).omit({
   lastUsed: true,
 });
 
+// Learning System Tables
+export const learningPaths = pgTable("learning_paths", {
+  id: varchar("id").primaryKey().notNull().$defaultFn(() => crypto.randomUUID()),
+  name: varchar("name").notNull(),
+  description: text("description").notNull(),
+  category: varchar("category").notNull(),
+  estimatedDuration: integer("estimated_duration").notNull(), // in hours
+  difficulty: varchar("difficulty").notNull(), // beginner, intermediate, advanced
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const learningModules = pgTable("learning_modules", {
+  id: varchar("id").primaryKey().notNull().$defaultFn(() => crypto.randomUUID()),
+  title: varchar("title").notNull(),
+  description: text("description").notNull(),
+  content: text("content").notNull(),
+  category: varchar("category").notNull(),
+  difficulty: varchar("difficulty").notNull(),
+  estimatedTime: integer("estimated_time").notNull(), // in minutes
+  xpReward: integer("xp_reward").notNull(),
+  prerequisites: jsonb("prerequisites").default([]), // array of module IDs
+  skills: jsonb("skills").default([]), // array of skill names
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const userSkills = pgTable("user_skills", {
+  id: varchar("id").primaryKey().notNull().$defaultFn(() => crypto.randomUUID()),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  skillName: varchar("skill_name").notNull(),
+  category: varchar("category").notNull(),
+  level: integer("level").default(1),
+  xp: integer("xp").default(0),
+  lastUpdated: timestamp("last_updated").defaultNow(),
+});
+
+export const learningAchievements = pgTable("learning_achievements", {
+  id: varchar("id").primaryKey().notNull().$defaultFn(() => crypto.randomUUID()),
+  title: varchar("title").notNull(),
+  description: text("description").notNull(),
+  icon: varchar("icon").notNull(),
+  xpReward: integer("xp_reward").notNull(),
+  rarity: varchar("rarity").notNull(), // common, uncommon, rare, epic, legendary
+  criteria: jsonb("criteria").notNull(), // achievement unlock criteria
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const userAchievements = pgTable("user_achievements", {
+  id: varchar("id").primaryKey().notNull().$defaultFn(() => crypto.randomUUID()),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  achievementId: varchar("achievement_id").notNull().references(() => learningAchievements.id),
+  unlockedAt: timestamp("unlocked_at").defaultNow(),
+});
+
+export const userModuleProgress = pgTable("user_module_progress", {
+  id: varchar("id").primaryKey().notNull().$defaultFn(() => crypto.randomUUID()),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  moduleId: varchar("module_id").notNull().references(() => learningModules.id),
+  status: varchar("status").notNull(), // not_started, in_progress, completed
+  score: integer("score"), // completion score (0-100)
+  timeSpent: integer("time_spent").default(0), // in minutes
+  startedAt: timestamp("started_at"),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const userPathProgress = pgTable("user_path_progress", {
+  id: varchar("id").primaryKey().notNull().$defaultFn(() => crypto.randomUUID()),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  pathId: varchar("path_id").notNull().references(() => learningPaths.id),
+  currentModuleIndex: integer("current_module_index").default(0),
+  completionRate: integer("completion_rate").default(0), // percentage
+  startedAt: timestamp("started_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
+});
+
+export const pathModules = pgTable("path_modules", {
+  id: varchar("id").primaryKey().notNull().$defaultFn(() => crypto.randomUUID()),
+  pathId: varchar("path_id").notNull().references(() => learningPaths.id),
+  moduleId: varchar("module_id").notNull().references(() => learningModules.id),
+  orderIndex: integer("order_index").notNull(),
+});
+
+export const userLearningStats = pgTable("user_learning_stats", {
+  id: varchar("id").primaryKey().notNull().$defaultFn(() => crypto.randomUUID()),
+  userId: varchar("user_id").notNull().references(() => users.id).unique(),
+  totalXP: integer("total_xp").default(0),
+  currentLevel: integer("current_level").default(1),
+  modulesCompleted: integer("modules_completed").default(0),
+  achievementsUnlocked: integer("achievements_unlocked").default(0),
+  totalTimeSpent: integer("total_time_spent").default(0), // in minutes
+  streak: integer("streak").default(0), // consecutive days
+  lastActivityDate: timestamp("last_activity_date"),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type InsertUser = z.infer<typeof insertUserSchema>;
