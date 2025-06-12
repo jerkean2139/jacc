@@ -9,7 +9,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { AlertTriangle, Brain, CheckCircle, MessageSquare, Settings, Target, FileText, Eye, Download, ExternalLink, Plus, Edit, Trash2, Save, X, Archive, BookOpen, Database, Upload, Search } from 'lucide-react';
+import { AlertTriangle, Brain, CheckCircle, MessageSquare, Settings, Target, FileText, Eye, Download, ExternalLink, Plus, Edit, Trash2, Save, X, Archive, BookOpen, Database, Upload, Search, ChevronDown, ChevronRight, Sliders } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Slider } from '@/components/ui/slider';
 import { apiRequest } from '@/lib/queryClient';
 
 interface TrainingFeedback {
@@ -103,8 +105,51 @@ export function AdminTrainingPage() {
     trainingData: true,
     autoVectorize: true
   });
+
+  // Accordion state for prompt templates
+  const [expandedPrompts, setExpandedPrompts] = useState<string[]>([]);
+  const [editingPromptValues, setEditingPromptValues] = useState<Record<string, Partial<PromptTemplate>>>({});
   
   const queryClient = useQueryClient();
+
+  // Helper functions for accordion management
+  const togglePromptExpansion = (promptId: string) => {
+    setExpandedPrompts(prev => 
+      prev.includes(promptId) 
+        ? prev.filter(id => id !== promptId)
+        : [...prev, promptId]
+    );
+  };
+
+  const updatePromptValue = (promptId: string, field: keyof PromptTemplate, value: any) => {
+    setEditingPromptValues(prev => ({
+      ...prev,
+      [promptId]: {
+        ...prev[promptId],
+        [field]: value
+      }
+    }));
+  };
+
+  // Fetch Q&A data from document center
+  const { data: qaData = [] } = useQuery({
+    queryKey: ['/api/admin/qa-data'],
+    retry: false,
+  });
+
+  // Update prompt template mutation
+  const updatePromptMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: Partial<PromptTemplate> }) => {
+      return apiRequest(`/api/admin/prompt-templates/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/prompt-templates'] });
+    }
+  });
 
   // Data fetching
   const { data: feedbackData = [] } = useQuery({
@@ -349,35 +394,213 @@ export function AdminTrainingPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {/* System Prompts */}
+                  {/* System Prompts & Chains - Accordion View */}
                   <div className="space-y-3">
                     <h4 className="font-medium">System Prompts & Chains</h4>
-                    {Array.isArray(promptTemplates) && promptTemplates.map((template: PromptTemplate) => (
-                      <div key={template.id} className="border rounded-lg p-3 bg-white dark:bg-gray-900">
-                        <div className="flex items-start justify-between mb-2">
-                          <div>
-                            <h5 className="font-medium text-sm">{template.name}</h5>
-                            <p className="text-xs text-gray-600 dark:text-gray-400">{template.description}</p>
+                    {Array.isArray(promptTemplates) && promptTemplates.map((template: PromptTemplate) => {
+                      const isExpanded = expandedPrompts.includes(template.id);
+                      const currentValues = editingPromptValues[template.id] || template;
+                      
+                      return (
+                        <Collapsible
+                          key={template.id}
+                          open={isExpanded}
+                          onOpenChange={() => togglePromptExpansion(template.id)}
+                        >
+                          <div className="border rounded-lg bg-white dark:bg-gray-900">
+                            <CollapsibleTrigger className="w-full p-3 text-left hover:bg-gray-50 dark:hover:bg-gray-800">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  {isExpanded ? (
+                                    <ChevronDown className="w-4 h-4 text-gray-500" />
+                                  ) : (
+                                    <ChevronRight className="w-4 h-4 text-gray-500" />
+                                  )}
+                                  <div>
+                                    <h5 className="font-medium text-sm">{template.name}</h5>
+                                    <p className="text-xs text-gray-600 dark:text-gray-400">{template.description}</p>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Badge variant={template.isActive ? "default" : "secondary"}>
+                                    {template.isActive ? "Active" : "Inactive"}
+                                  </Badge>
+                                  <Badge variant="outline" className="text-xs">
+                                    v{template.version}
+                                  </Badge>
+                                </div>
+                              </div>
+                            </CollapsibleTrigger>
+                            
+                            <CollapsibleContent className="border-t bg-gray-50 dark:bg-gray-800/50">
+                              <div className="p-4 space-y-4">
+                                {/* Prompt Template Content */}
+                                <div className="space-y-2">
+                                  <Label className="text-sm font-medium">Prompt Template</Label>
+                                  <Textarea
+                                    value={currentValues.template}
+                                    onChange={(e) => updatePromptValue(template.id, 'template', e.target.value)}
+                                    placeholder="Enter your prompt template..."
+                                    className="min-h-32 font-mono text-sm"
+                                  />
+                                </div>
+
+                                {/* Controls Grid */}
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                  {/* Temperature Control */}
+                                  <div className="space-y-2">
+                                    <Label className="text-sm font-medium flex items-center gap-2">
+                                      <Sliders className="w-3 h-3" />
+                                      Temperature: {currentValues.temperature}
+                                    </Label>
+                                    <Slider
+                                      value={[currentValues.temperature]}
+                                      onValueChange={(value) => updatePromptValue(template.id, 'temperature', value[0])}
+                                      max={2}
+                                      min={0}
+                                      step={0.1}
+                                      className="w-full"
+                                    />
+                                  </div>
+
+                                  {/* Max Tokens */}
+                                  <div className="space-y-2">
+                                    <Label className="text-sm font-medium">Max Tokens</Label>
+                                    <Input
+                                      type="number"
+                                      value={currentValues.maxTokens}
+                                      onChange={(e) => updatePromptValue(template.id, 'maxTokens', parseInt(e.target.value))}
+                                      min={1}
+                                      max={4000}
+                                    />
+                                  </div>
+
+                                  {/* Category */}
+                                  <div className="space-y-2">
+                                    <Label className="text-sm font-medium">Category</Label>
+                                    <Select 
+                                      value={currentValues.category}
+                                      onValueChange={(value) => updatePromptValue(template.id, 'category', value)}
+                                    >
+                                      <SelectTrigger>
+                                        <SelectValue />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="merchant_services">Merchant Services</SelectItem>
+                                        <SelectItem value="document_analysis">Document Analysis</SelectItem>
+                                        <SelectItem value="pricing_comparison">Pricing Comparison</SelectItem>
+                                        <SelectItem value="general_support">General Support</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+                                </div>
+
+                                {/* Additional Settings */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  <div className="space-y-2">
+                                    <Label className="text-sm font-medium">Name</Label>
+                                    <Input
+                                      value={currentValues.name}
+                                      onChange={(e) => updatePromptValue(template.id, 'name', e.target.value)}
+                                    />
+                                  </div>
+                                  <div className="space-y-2">
+                                    <Label className="text-sm font-medium">Description</Label>
+                                    <Input
+                                      value={currentValues.description}
+                                      onChange={(e) => updatePromptValue(template.id, 'description', e.target.value)}
+                                    />
+                                  </div>
+                                </div>
+
+                                {/* Action Buttons */}
+                                <div className="flex items-center justify-between pt-2 border-t">
+                                  <div className="flex items-center gap-2">
+                                    <input
+                                      type="checkbox"
+                                      id={`active-${template.id}`}
+                                      checked={currentValues.isActive}
+                                      onChange={(e) => updatePromptValue(template.id, 'isActive', e.target.checked)}
+                                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                    />
+                                    <Label htmlFor={`active-${template.id}`} className="text-sm">
+                                      Active
+                                    </Label>
+                                  </div>
+                                  <div className="flex gap-2">
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => {
+                                        setEditingPromptValues(prev => {
+                                          const { [template.id]: _, ...rest } = prev;
+                                          return rest;
+                                        });
+                                      }}
+                                    >
+                                      <X className="w-3 h-3 mr-1" />
+                                      Reset
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      onClick={() => {
+                                        updatePromptMutation.mutate({
+                                          id: template.id,
+                                          data: currentValues
+                                        });
+                                      }}
+                                      disabled={updatePromptMutation.isPending}
+                                    >
+                                      <Save className="w-3 h-3 mr-1" />
+                                      Save
+                                    </Button>
+                                  </div>
+                                </div>
+                              </div>
+                            </CollapsibleContent>
                           </div>
-                          <div className="flex items-center gap-1">
-                            <Badge variant={template.isActive ? "default" : "secondary"}>
-                              {template.isActive ? "Active" : "Inactive"}
-                            </Badge>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => setEditingPrompt(template)}
-                            >
-                              <Edit className="w-3 h-3" />
-                            </Button>
-                          </div>
-                        </div>
-                        <div className="text-xs text-gray-500 space-y-1">
-                          <div>Category: {template.category}</div>
-                          <div>Temperature: {template.temperature} | Max Tokens: {template.maxTokens}</div>
-                        </div>
+                        </Collapsible>
+                      );
+                    })}
+                  </div>
+
+                  {/* Q&A Knowledge Base from Document Center */}
+                  <div className="space-y-3">
+                    <h4 className="font-medium">Q&A Knowledge Base</h4>
+                    {Array.isArray(qaData) && qaData.length > 0 ? (
+                      <div className="space-y-2 max-h-96 overflow-y-auto">
+                        {qaData.map((qa: any, index: number) => (
+                          <Collapsible key={index}>
+                            <CollapsibleTrigger className="w-full text-left">
+                              <div className="border rounded-lg p-3 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <MessageSquare className="w-4 h-4 text-blue-600" />
+                                    <p className="font-medium text-sm">{qa.question}</p>
+                                  </div>
+                                  <ChevronRight className="w-4 h-4 text-gray-500" />
+                                </div>
+                              </div>
+                            </CollapsibleTrigger>
+                            <CollapsibleContent>
+                              <div className="ml-6 mt-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border-l-4 border-blue-500">
+                                <p className="text-sm text-gray-700 dark:text-gray-300">{qa.answer}</p>
+                                {qa.category && (
+                                  <Badge variant="outline" className="mt-2 text-xs">
+                                    {qa.category}
+                                  </Badge>
+                                )}
+                              </div>
+                            </CollapsibleContent>
+                          </Collapsible>
+                        ))}
                       </div>
-                    ))}
+                    ) : (
+                      <div className="text-center py-8">
+                        <MessageSquare className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-500">No Q&A data available from document center</p>
+                      </div>
+                    )}
                   </div>
 
                   {/* AI Training Feedback Summary */}

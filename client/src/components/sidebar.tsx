@@ -227,6 +227,15 @@ export default function Sidebar({
         </Button>
         
         <Button
+          onClick={() => window.location.href = '/pricing-comparison'}
+          variant="outline"
+          className="w-full text-sm bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/30"
+        >
+          <Calculator className="w-4 h-4 mr-2" />
+          Pricing Comparison
+        </Button>
+
+        <Button
           onClick={() => {
             if (window.confirm('This will restart the interactive tutorial. Continue?')) {
               localStorage.removeItem('tutorial-completed');

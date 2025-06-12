@@ -67,17 +67,17 @@ const businessTypes = [
   { value: 'other', label: 'Other' }
 ];
 
-// TracerPay pricing structure
+// TracerPay competitive pricing structure
 const tracerPayRates = {
-  restaurant: { rate: 2.49, monthlyFee: 15 },
-  retail: { rate: 2.39, monthlyFee: 15 },
-  ecommerce: { rate: 2.89, monthlyFee: 25 },
-  service: { rate: 2.59, monthlyFee: 15 },
-  hotel: { rate: 2.69, monthlyFee: 20 },
-  gas_station: { rate: 2.29, monthlyFee: 15 },
-  auto_repair: { rate: 2.49, monthlyFee: 15 },
-  healthcare: { rate: 2.79, monthlyFee: 20 },
-  other: { rate: 2.59, monthlyFee: 15 }
+  restaurant: { rate: 2.49, monthlyFee: 15, pciFee: 0, statementFee: 0 },
+  retail: { rate: 2.39, monthlyFee: 15, pciFee: 0, statementFee: 0 },
+  ecommerce: { rate: 2.89, monthlyFee: 25, pciFee: 0, statementFee: 0 },
+  service: { rate: 2.59, monthlyFee: 15, pciFee: 0, statementFee: 0 },
+  hotel: { rate: 2.69, monthlyFee: 20, pciFee: 0, statementFee: 0 },
+  gas_station: { rate: 2.29, monthlyFee: 15, pciFee: 0, statementFee: 0 },
+  auto_repair: { rate: 2.49, monthlyFee: 15, pciFee: 0, statementFee: 0 },
+  healthcare: { rate: 2.79, monthlyFee: 20, pciFee: 0, statementFee: 0 },
+  other: { rate: 2.59, monthlyFee: 15, pciFee: 0, statementFee: 0 }
 };
 
 export default function PricingComparison() {
