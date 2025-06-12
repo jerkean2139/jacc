@@ -204,6 +204,60 @@ export class PerplexitySearchService {
       throw new Error('Pricing data unavailable');
     }
   }
+
+  async searchWeb(query: string): Promise<ExternalSearchResult> {
+    try {
+      console.log(`🌐 Executing web search via Perplexity: "${query}"`);
+      
+      const response = await fetch(this.baseUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.PERPLEXITY_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'llama-3.1-sonar-small-128k-online',
+          messages: [
+            {
+              role: 'system',
+              content: 'Provide current, accurate information based on real-time web search. Focus on factual details including pricing, features, contact information, and recent updates. Cite sources when available.'
+            },
+            {
+              role: 'user',
+              content: query
+            }
+          ],
+          max_tokens: 1000,
+          temperature: 0.2,
+          top_p: 0.9,
+          search_recency_filter: 'month',
+          return_images: false,
+          return_related_questions: false,
+          stream: false
+        })
+      });
+      
+      if (!response.ok) {
+        console.error(`Perplexity API error: ${response.status} - ${response.statusText}`);
+        throw new Error(`Perplexity API error: ${response.status}`);
+      }
+      
+      const data: PerplexityResponse = await response.json();
+      console.log(`✅ Web search completed successfully - ${data.choices[0]?.message?.content?.length || 0} characters returned`);
+      
+      return {
+        content: data.choices[0]?.message?.content || 'No results found',
+        citations: data.citations || [],
+        confidence: this.calculateConfidence(data),
+        searchType: 'real-time',
+        timestamp: new Date()
+      };
+      
+    } catch (error) {
+      console.error('Web search error:', error);
+      throw new Error(`Web search failed: ${error.message}`);
+    }
+  }
 }
 
 export const perplexitySearchService = new PerplexitySearchService();
