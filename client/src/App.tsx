@@ -73,8 +73,9 @@ function Router() {
           </Route>
           <Route path="/" component={HomeStable} />
           <Route path="/chat/:chatId" component={HomeStable} />
-          <Route path="/calculator" component={ISOAmpCalculator} />
-          <Route path="/iso-amp-calculator" component={ISOAmpCalculator} />
+          {/* ISO AMP Calculator routes disabled - coming soon */}
+          {/* <Route path="/calculator" component={ISOAmpCalculator} /> */}
+          {/* <Route path="/iso-amp-calculator" component={ISOAmpCalculator} /> */}
           <Route path="/pricing-comparison" component={PricingComparison} />
 
           <Route path="/guide" component={UserGuide} />

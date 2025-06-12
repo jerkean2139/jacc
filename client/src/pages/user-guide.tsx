@@ -20,11 +20,20 @@ import {
   Shield,
   Zap,
   Target,
-  TrendingUp
+  TrendingUp,
+  ArrowLeft,
+  Home
 } from 'lucide-react';
+import { useLocation } from 'wouter';
 
 export default function UserGuide() {
   const [activeRole, setActiveRole] = useState('sales-agent');
+  const [location, navigate] = useLocation();
+
+  const handleGoBack = () => {
+    // Navigate back to home or previous page
+    navigate('/');
+  };
 
   const roles = {
     'sales-agent': {
@@ -49,6 +58,21 @@ export default function UserGuide() {
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto p-6">
+      {/* Breadcrumb Navigation */}
+      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleGoBack}
+          className="flex items-center gap-1 text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to Dashboard
+        </Button>
+        <span>/</span>
+        <span className="text-foreground font-medium">User Guide</span>
+      </div>
+
       <div className="text-center space-y-4">
         <div className="flex items-center justify-center gap-3">
           <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
