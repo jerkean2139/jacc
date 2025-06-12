@@ -165,28 +165,41 @@ export default function LearningPathPage() {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Learning Path</h1>
-          <p className="text-muted-foreground">
-            Develop your sales skills through gamified learning experiences
-          </p>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="text-right">
-            <div className="text-2xl font-bold text-blue-600">Level {currentLevel}</div>
-            <div className="text-sm text-gray-600">{totalXP} XP</div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
+      <div className="container mx-auto p-6 space-y-8">
+        {/* Header */}
+        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-8">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+            <div>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                Learning Path
+              </h1>
+              <p className="text-slate-600 dark:text-slate-300 text-lg mt-2">
+                Develop your sales skills through gamified learning experiences
+              </p>
+            </div>
+            <div className="flex items-center gap-6">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+                  Level {currentLevel}
+                </div>
+                <div className="text-sm text-slate-600 dark:text-slate-400">{totalXP} XP</div>
+              </div>
+              <div className="w-40">
+                <div className="flex items-center justify-between text-sm text-slate-600 dark:text-slate-400 mb-2">
+                  <span>Progress</span>
+                  <span>{Math.round(((1000 - xpForNextLevel) / 1000) * 100)}%</span>
+                </div>
+                <Progress value={(1000 - xpForNextLevel) / 10} className="h-3" />
+                <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 text-center">
+                  {xpForNextLevel} XP to next level
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="w-32">
-            <Progress value={(1000 - xpForNextLevel) / 10} className="h-2" />
-            <div className="text-xs text-gray-600 mt-1">{xpForNextLevel} XP to next level</div>
-          </div>
         </div>
-      </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="paths">Learning Paths</TabsTrigger>
@@ -517,6 +530,8 @@ export default function LearningPathPage() {
           </Card>
         </div>
       )}
+      </Tabs>
+      </div>
     </div>
   );
 }
