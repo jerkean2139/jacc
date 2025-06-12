@@ -189,6 +189,7 @@ export default function ISOAmpCalculator() {
 
   const [results, setResults] = useState<any>(null);
   const [equipmentResults, setEquipmentResults] = useState<any>(null);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const { toast } = useToast();
 
   // Fetch available processors from document center

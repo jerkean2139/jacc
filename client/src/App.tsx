@@ -27,6 +27,7 @@ import AIConfigurationPage from "@/pages/ai-configuration";
 import SimpleAdminLogin from "@/pages/simple-admin-login";
 import DevAdminPanel from "@/pages/dev-admin-panel";
 import ISOAmpCalculator from "@/pages/iso-amp-calculator";
+import PricingComparison from "@/pages/pricing-comparison";
 import PricingManagement from "@/pages/pricing-management";
 import PricingDemo from "@/pages/pricing-demo";
 import PromptCustomization from "@/pages/prompt-customization";
@@ -72,6 +73,7 @@ function Router() {
           <Route path="/chat/:chatId" component={HomeStable} />
           <Route path="/calculator" component={ISOAmpCalculator} />
           <Route path="/iso-amp-calculator" component={ISOAmpCalculator} />
+          <Route path="/pricing-comparison" component={PricingComparison} />
 
           <Route path="/guide" component={UserGuide} />
           {/* Documents only accessible to admin users */}
