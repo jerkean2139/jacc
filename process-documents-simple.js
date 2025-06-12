@@ -1,5 +1,5 @@
-import { db } from './server/db.js';
-import { documents, documentChunks } from './shared/schema.js';
+import { db } from './server/db.ts';
+import { documents, documentChunks } from './shared/schema.ts';
 import fs from 'fs';
 import path from 'path';
 
