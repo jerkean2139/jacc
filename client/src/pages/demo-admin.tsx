@@ -1,11 +1,18 @@
 import { useEffect, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { FileText, Search, Database, Clock, User, Settings } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { useToast } from '@/hooks/use-toast';
+import { FileText, Search, Database, Clock, User, Settings, Plus, Edit, Trash2, Upload, Download, Eye } from 'lucide-react';
 
 interface DocumentEntry {
   id: string;
@@ -29,6 +36,12 @@ interface DocumentEntry {
 export default function DemoAdmin() {
   const [user, setUser] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [editingDocument, setEditingDocument] = useState<DocumentEntry | null>(null);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Auto-login as demo admin
   useEffect(() => {
@@ -58,6 +71,108 @@ export default function DemoAdmin() {
     },
     enabled: !!user,
     retry: 1
+  });
+
+  // Upload document mutation
+  const uploadMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const res = await fetch('/api/admin/documents/upload', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include'
+      });
+      
+      if (!res.ok) {
+        throw new Error(`Upload failed: ${res.status}`);
+      }
+      
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/documents'] });
+      setUploadFile(null);
+      setIsAddDialogOpen(false);
+      toast({
+        title: "Success",
+        description: "Document uploaded successfully",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Upload Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Delete document mutation
+  const deleteMutation = useMutation({
+    mutationFn: async (documentId: string) => {
+      const res = await fetch(`/api/admin/documents/${documentId}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+      
+      if (!res.ok) {
+        throw new Error(`Delete failed: ${res.status}`);
+      }
+      
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/documents'] });
+      toast({
+        title: "Success",
+        description: "Document deleted successfully",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Delete Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Update document mutation
+  const updateMutation = useMutation({
+    mutationFn: async (updatedDoc: Partial<DocumentEntry> & { id: string }) => {
+      const res = await fetch(`/api/admin/documents/${updatedDoc.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedDoc),
+        credentials: 'include'
+      });
+      
+      if (!res.ok) {
+        throw new Error(`Update failed: ${res.status}`);
+      }
+      
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/documents'] });
+      setEditingDocument(null);
+      setIsEditDialogOpen(false);
+      toast({
+        title: "Success",
+        description: "Document updated successfully",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Update Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   });
 
   const filteredDocuments = documents.filter((doc: DocumentEntry) =>
@@ -203,6 +318,55 @@ export default function DemoAdmin() {
                     <Search className="h-4 w-4 mr-2" />
                     Search
                   </Button>
+                  <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Upload Document
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px]">
+                      <DialogHeader>
+                        <DialogTitle>Upload New Document</DialogTitle>
+                        <DialogDescription>
+                          Select a file to upload to the knowledge base
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="grid gap-4 py-4">
+                        <div className="grid gap-2">
+                          <Label htmlFor="file">File</Label>
+                          <Input
+                            id="file"
+                            type="file"
+                            onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
+                            accept=".pdf,.doc,.docx,.txt,.csv"
+                          />
+                        </div>
+                        {uploadFile && (
+                          <div className="text-sm text-gray-600">
+                            Selected: {uploadFile.name} ({formatFileSize(uploadFile.size)})
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex justify-end gap-3">
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            setIsAddDialogOpen(false);
+                            setUploadFile(null);
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          onClick={() => uploadFile && uploadMutation.mutate(uploadFile)}
+                          disabled={!uploadFile || uploadMutation.isPending}
+                        >
+                          {uploadMutation.isPending ? 'Uploading...' : 'Upload'}
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </CardHeader>
               
@@ -241,9 +405,52 @@ export default function DemoAdmin() {
                           <Badge variant="outline" className="text-xs">
                             {getDocumentCategory(doc.originalName)}
                           </Badge>
-                          <div className="text-right">
+                          <div className="text-right mr-3">
                             <p className="text-xs text-gray-500">{formatFileSize(doc.size)}</p>
                             <p className="text-xs text-gray-400">{formatDate(doc.createdAt)}</p>
+                          </div>
+                          
+                          {/* Action Buttons */}
+                          <div className="flex items-center gap-1">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => {
+                                setEditingDocument(doc);
+                                setIsEditDialogOpen(true);
+                              }}
+                            >
+                              <Edit className="h-3 w-3" />
+                            </Button>
+                            
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                >
+                                  <Trash2 className="h-3 w-3" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Delete Document</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Are you sure you want to delete "{doc.originalName}"? This action cannot be undone.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => deleteMutation.mutate(doc.id)}
+                                    className="bg-red-600 hover:bg-red-700"
+                                  >
+                                    Delete
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
                           </div>
                         </div>
                       </div>
@@ -259,6 +466,133 @@ export default function DemoAdmin() {
                 )}
               </CardContent>
             </Card>
+
+            {/* Edit Document Dialog */}
+            <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+              <DialogContent className="sm:max-w-[500px]">
+                <DialogHeader>
+                  <DialogTitle>Edit Document</DialogTitle>
+                  <DialogDescription>
+                    Update document properties and settings
+                  </DialogDescription>
+                </DialogHeader>
+                {editingDocument && (
+                  <div className="grid gap-4 py-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="originalName">Document Name</Label>
+                      <Input
+                        id="originalName"
+                        value={editingDocument.originalName}
+                        onChange={(e) => setEditingDocument({
+                          ...editingDocument,
+                          originalName: e.target.value
+                        })}
+                      />
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="grid gap-2">
+                        <Label>Public Access</Label>
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            checked={editingDocument.isPublic}
+                            onCheckedChange={(checked) => setEditingDocument({
+                              ...editingDocument,
+                              isPublic: checked
+                            })}
+                          />
+                          <span className="text-sm text-gray-600">
+                            {editingDocument.isPublic ? 'Public' : 'Private'}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <div className="grid gap-2">
+                        <Label>Favorite</Label>
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            checked={editingDocument.isFavorite}
+                            onCheckedChange={(checked) => setEditingDocument({
+                              ...editingDocument,
+                              isFavorite: checked
+                            })}
+                          />
+                          <span className="text-sm text-gray-600">
+                            {editingDocument.isFavorite ? 'Starred' : 'Normal'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="grid gap-2">
+                        <Label>Admin Only</Label>
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            checked={editingDocument.adminOnly}
+                            onCheckedChange={(checked) => setEditingDocument({
+                              ...editingDocument,
+                              adminOnly: checked
+                            })}
+                          />
+                          <span className="text-sm text-gray-600">
+                            {editingDocument.adminOnly ? 'Admin Only' : 'All Users'}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <div className="grid gap-2">
+                        <Label>Manager Only</Label>
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            checked={editingDocument.managerOnly}
+                            onCheckedChange={(checked) => setEditingDocument({
+                              ...editingDocument,
+                              managerOnly: checked
+                            })}
+                          />
+                          <span className="text-sm text-gray-600">
+                            {editingDocument.managerOnly ? 'Manager Only' : 'All Users'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-gray-50 p-3 rounded-lg">
+                      <h4 className="text-sm font-medium mb-2">Document Information</h4>
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <span className="text-gray-500">Size:</span> {formatFileSize(editingDocument.size)}
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Type:</span> {editingDocument.mimeType}
+                        </div>
+                        <div className="col-span-2">
+                          <span className="text-gray-500">ID:</span> {editingDocument.id}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                <div className="flex justify-end gap-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setIsEditDialogOpen(false);
+                      setEditingDocument(null);
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={() => editingDocument && updateMutation.mutate(editingDocument)}
+                    disabled={updateMutation.isPending}
+                  >
+                    {updateMutation.isPending ? 'Saving...' : 'Save Changes'}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
           </TabsContent>
 
           <TabsContent value="analytics">

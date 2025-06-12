@@ -19,6 +19,8 @@ const openai = new OpenAI({
 const PERPLEXITY_API_URL = 'https://api.perplexity.ai/chat/completions';
 const PERPLEXITY_API_KEY = process.env.PERPLEXITY_API_KEY;
 
+// Use existing upload configuration from routes.ts
+
 // Function to search web for industry articles using Perplexity
 async function searchWebForIndustryArticles(query: string): Promise<string> {
   try {
@@ -222,18 +224,18 @@ ${documentContext}${webContent ? `\n\nCURRENT INDUSTRY INTELLIGENCE:\n${webConte
   }
 }
 
-// Configure multer for file uploads
-const upload = multer({
+// Create upload configuration for admin document management
+const adminUpload = multer({
   dest: 'uploads/',
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB limit
   },
   fileFilter: (req, file, cb) => {
-    const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
+    const allowedTypes = ['application/pdf', 'text/plain', 'text/csv', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
     if (allowedTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error('Invalid file type. Only PDF, JPG, and PNG files are allowed.'));
+      cb(new Error('Invalid file type'), false);
     }
   }
 });
@@ -485,6 +487,84 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching admin documents:", error);
       res.status(500).json({ error: 'Failed to fetch documents' });
+    }
+  });
+
+  // Upload document endpoint
+  app.post('/api/admin/documents/upload', upload.single('file'), async (req: Request, res: Response) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: 'No file uploaded' });
+      }
+
+      const { db } = await import('./db.ts');
+      const { documents } = await import('../shared/schema.ts');
+      
+      const newDocument = {
+        id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+        name: req.file.filename,
+        originalName: req.file.originalname,
+        mimeType: req.file.mimetype,
+        size: req.file.size,
+        path: req.file.path,
+        userId: 'demo-admin',
+        isFavorite: false,
+        isPublic: false,
+        adminOnly: false,
+        managerOnly: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      await db.insert(documents).values(newDocument);
+      console.log(`Document uploaded: ${newDocument.originalName}`);
+      res.json({ success: true, document: newDocument });
+    } catch (error) {
+      console.error("Error uploading document:", error);
+      res.status(500).json({ error: 'Failed to upload document' });
+    }
+  });
+
+  // Update document endpoint
+  app.patch('/api/admin/documents/:id', async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const updates = req.body;
+      
+      const { db } = await import('./db.ts');
+      const { documents } = await import('../shared/schema.ts');
+      const { eq } = await import('drizzle-orm');
+      
+      await db.update(documents)
+        .set({ 
+          ...updates, 
+          updatedAt: new Date().toISOString() 
+        })
+        .where(eq(documents.id, id));
+      
+      console.log(`Document updated: ${id}`);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error updating document:", error);
+      res.status(500).json({ error: 'Failed to update document' });
+    }
+  });
+
+  // Delete document endpoint
+  app.delete('/api/admin/documents/:id', async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      
+      const { db } = await import('./db.ts');
+      const { documents } = await import('../shared/schema.ts');
+      const { eq } = await import('drizzle-orm');
+      
+      await db.delete(documents).where(eq(documents.id, id));
+      console.log(`Document deleted: ${id}`);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting document:", error);
+      res.status(500).json({ error: 'Failed to delete document' });
     }
   });
 
