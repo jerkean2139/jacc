@@ -255,7 +255,7 @@ export class PerplexitySearchService {
       
     } catch (error) {
       console.error('Web search error:', error);
-      throw new Error(`Web search failed: ${error.message}`);
+      throw new Error(`Web search failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 }

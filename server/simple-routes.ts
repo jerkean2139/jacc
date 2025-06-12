@@ -96,13 +96,24 @@ async function generateAIResponse(userMessage: string, chatHistory: any[], user:
       console.log("⚠️ Document search unavailable, using general knowledge");
     }
 
-    // Check if user is asking for industry intelligence, trends, or market insights
-    const needsWebSearch = /\b(industry|intelligence|trends|market|recent|current|latest|news|articles|updates|developments)\b/i.test(userMessage);
+    // Check if we need external web search for current information
+    const needsWebSearch = /\b(square|stripe|paypal|shopify|current|latest|rates|fees|pricing|2024|2025)\b/i.test(userMessage.toLowerCase()) || 
+                          documentContext.length === 0; // Use web search if no internal documents found
     
     let webContent = "";
     if (needsWebSearch) {
-      console.log("🌐 Fetching current industry articles for enhanced response...");
-      webContent = await searchWebForIndustryArticles(userMessage);
+      try {
+        console.log("🌐 Using web search for current information...");
+        const { perplexitySearchService } = await import('./perplexity-search');
+        const webResult = await perplexitySearchService.searchWeb(userMessage);
+        webContent = `\n\nCURRENT WEB INFORMATION:\n${webResult.content}\n`;
+        if (webResult.citations && webResult.citations.length > 0) {
+          webContent += `\nSources: ${webResult.citations.join(', ')}\n`;
+        }
+        console.log(`✅ Web search completed successfully`);
+      } catch (webError) {
+        console.log("⚠️ Web search unavailable:", webError instanceof Error ? webError.message : 'Unknown error');
+      }
     }
 
     // Tracer Co Card Knowledge Base - Agent Q&A Reference
