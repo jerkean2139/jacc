@@ -74,15 +74,23 @@ export default function Sidebar({
   const handleLogout = async () => {
     try {
       await fetch("/api/logout", {
-        method: "GET",
+        method: "POST",
         credentials: "include",
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
-      // Redirect to home page after logout
-      window.location.href = "/";
+      // Clear any local storage/session data
+      localStorage.clear();
+      sessionStorage.clear();
+      // Redirect to login page after logout
+      window.location.href = "/login";
     } catch (error) {
       console.error("Logout error:", error);
-      // Still redirect even if logout request fails
-      window.location.href = "/";
+      // Still clear data and redirect even if logout request fails
+      localStorage.clear();
+      sessionStorage.clear();
+      window.location.href = "/login";
     }
   };
 

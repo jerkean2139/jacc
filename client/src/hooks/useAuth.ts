@@ -1,17 +1,17 @@
+import { useQuery } from "@tanstack/react-query";
 import type { User } from "@shared/schema";
 
 export function useAuth() {
-  // Demo user for seamless experience
-  const demoUser = {
-    id: 'demo-user',
-    username: 'demo',
-    email: 'demo@example.com',
-    role: 'sales-agent'
-  };
+  const { data: user, isLoading, error } = useQuery({
+    queryKey: ["/api/user"],
+    retry: false,
+    refetchOnWindowFocus: true,
+    staleTime: 0, // Always refetch to ensure fresh auth state
+  });
 
   return {
-    user: demoUser,
-    isLoading: false,
-    isAuthenticated: true,
+    user,
+    isLoading,
+    isAuthenticated: !!user && !error,
   };
 }
