@@ -2340,13 +2340,13 @@ User Context: {userRole}`,
   // Get achievements
   app.get('/api/learning/achievements', isAuthenticated, async (req: any, res) => {
     try {
-      const { learningAchievements, userAchievements } = await import('@shared/schema');
+      const { learningAchievements, userLearningAchievements } = await import('@shared/schema');
       const { eq } = await import('drizzle-orm');
 
       const achievements = await db.select().from(learningAchievements).where(eq(learningAchievements.isActive, true));
       const userUnlocked = await db.select()
-        .from(userAchievements)
-        .where(eq(userAchievements.userId, req.user.id));
+        .from(userLearningAchievements)
+        .where(eq(userLearningAchievements.userId, req.user.id));
 
       const enrichedAchievements = achievements.map(achievement => {
         const unlocked = userUnlocked.find(u => u.achievementId === achievement.id);

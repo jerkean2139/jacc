@@ -729,7 +729,7 @@ export const learningAchievements = pgTable("learning_achievements", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const userAchievements = pgTable("user_achievements", {
+export const userLearningAchievements = pgTable("user_learning_achievements", {
   id: varchar("id").primaryKey().notNull().$defaultFn(() => crypto.randomUUID()),
   userId: varchar("user_id").notNull().references(() => users.id),
   achievementId: varchar("achievement_id").notNull().references(() => learningAchievements.id),
