@@ -2233,6 +2233,17 @@ User Context: {userRole}`,
     }
   });
 
+  // Get Q&A data from document center for admin training
+  app.get('/api/admin/qa-data', isAuthenticated, async (req: any, res) => {
+    try {
+      const qaData = await db.select().from(faqKnowledgeBase).where(eq(faqKnowledgeBase.isActive, true));
+      res.json(qaData);
+    } catch (error) {
+      console.error('Error fetching Q&A data:', error);
+      res.status(500).json({ message: "Failed to fetch Q&A data" });
+    }
+  });
+
   // FAQ import endpoint
   app.post('/api/admin/import-faq', async (req: any, res) => {
     try {
