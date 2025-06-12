@@ -959,6 +959,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin documents API route
+  app.get('/api/admin/documents', async (req: Request, res: Response) => {
+    try {
+      // Get all documents from the database
+      const allDocuments = await db.select().from(documents).orderBy(documents.createdAt);
+      res.json(allDocuments);
+    } catch (error) {
+      console.error("Error fetching documents:", error);
+      res.status(500).json({ message: "Failed to fetch documents" });
+    }
+  });
+
+  // Admin document permissions update route  
+  app.patch('/api/admin/documents/:id/permissions', async (req: Request, res: Response) => {
+    try {
+      const documentId = req.params.id;
+      const permissions = req.body;
+      
+      const [document] = await db
+        .update(documents)
+        .set(permissions)
+        .where(eq(documents.id, documentId))
+        .returning();
+        
+      res.json(document);
+    } catch (error) {
+      console.error("Error updating document permissions:", error);
+      res.status(500).json({ message: "Failed to update permissions" });
+    }
+  });
+
   // Register chat testing system routes
   registerChatTestingRoutes(app);
 
