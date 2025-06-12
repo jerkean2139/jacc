@@ -1,0 +1,77 @@
+[
+  {
+    "scenarioId": "square_rates_test",
+    "timestamp": "2025-06-12T16:34:45.706Z",
+    "userQuery": "What are Square processing rates for restaurants?",
+    "aiResponse": "Square offers a variety of processing rates for restaurants, depending on the specific plan and transaction type:\n\n1. **In-Person Transactions**:\n   - The standard processing fee is 1.6% per transaction.\n\n2. **Online Transactions**:\n   - The processing fee for online transactions is 2.9% + 30¢ per transaction.\n\n3. **MOTO (Manual Entry) Transactions**:\n   - The processing fee for manual entry transactions is 2.2% per transaction.\n\n4. **Custom Rates for High-Volume Businesses**:\n   - For businesses processing more than $250,000 annually, Square may offer custom pricing based on factors like processing volume, average ticket size, and the seller's history.\n\n5. **Square for Restaurants Plus Plan**:\n   - This plan starts at $69 per location per month and includes advanced features for restaurants. The processing fees remain the same as the standard rates.\n\n6. **Additional Fees**:\n   - There are no additional fees for online orders beyond the processing fees. However, there are additional costs for services like Square Payroll, Marketing, and Loyalty Programs.",
+    "responseTime": 12009,
+    "sourceTypes": [],
+    "qualityScore": 3,
+    "passedChecks": [
+      "Adequate response length",
+      "Confident response tone"
+    ],
+    "failedChecks": [
+      "Missing key information"
+    ],
+    "recommendations": [
+      "Improve knowledge base coverage for this topic"
+    ]
+  },
+  {
+    "scenarioId": "tracerpay_pos_test",
+    "timestamp": "2025-06-12T16:35:12.406Z",
+    "userQuery": "What POS systems does TracerPay recommend for restaurants?",
+    "aiResponse": "TracerPay, as a white-label processing solution of Tracer Co Card, recommends the following POS systems that are tailored specifically for restaurants:\n\n1. **Skytab**: A versatile POS system designed to streamline restaurant operations, providing features such as order management, payment processing, and customer tracking.\n\n2. **Clover**: A comprehensive system that offers a range of features including menu management, table tracking, payment processing, and customer management.\n\n3. **Tabit**: This POS system is built specifically for the restaurant industry, offering order management, tableside ordering, and payment processing capabilities. \n\n4. **HubWallet**: Via our partners Shift4 and MiCamp, the HubWallet system is also an excellent choice for restaurants, offering features like order management, payment processing, and loyalty program management.\n\nEach of these systems integrates seamlessly with TracerPay, which is powered by the Accept Blue payment processor. Remember, the best choice will depend on your specific needs, budget, and the size of your restaurant.",
+    "responseTime": 12987,
+    "sourceTypes": [
+      "internal_knowledge"
+    ],
+    "qualityScore": 9,
+    "passedChecks": [
+      "Contains expected keywords",
+      "Adequate response length",
+      "Confident response tone",
+      "Proper branding",
+      "Includes actionable information"
+    ],
+    "failedChecks": [],
+    "recommendations": []
+  },
+  {
+    "scenarioId": "square_rates_test",
+    "timestamp": "2025-06-12T16:35:20.497Z",
+    "userQuery": "What are Square processing rates for restaurants?",
+    "aiResponse": "According to the current web information, Square offers different processing rates for restaurants, depending on the type of transaction and the specific plan chosen:\n\n- For In-Person Transactions, the rate is 1.6% per transaction.\n- For Online Transactions, the rate is 2.9% + 30¢ per transaction.\n- For Manual Keyed Transactions (MOTO), the rate is 2.2% per transaction.\n\nAdditionally, for high-volume businesses processing more than $250,000 annually, Square may offer custom pricing based on factors like processing volume and average ticket size.\n\nSquare also has a Plus plan starting at $69 per location/month, which includes advanced features for restaurants, and a Premium plan for high-volume businesses with custom pricing available.",
+    "responseTime": 8529,
+    "sourceTypes": [],
+    "qualityScore": 3,
+    "passedChecks": [
+      "Adequate response length",
+      "Confident response tone"
+    ],
+    "failedChecks": [
+      "Missing key information"
+    ],
+    "recommendations": [
+      "Improve knowledge base coverage for this topic"
+    ]
+  },
+  {
+    "scenarioId": "clearent_support_test",
+    "timestamp": "2025-06-12T16:35:30.088Z",
+    "userQuery": "How do I contact Clearent support?",
+    "aiResponse": "To contact Clearent support, you have several options:\n\n1. **Email**: You can reach out to Stephanie Allen, the Clearent Representative, at `sallen@clearent.net` or contact her directly at 281.923.4202. Alternatively, you can also email the general customer support at `customersupport@clearent.com`.\n\n2. **Phone**: For general customer support, you can call 1.866.435.0666 Option 1.\n\n3. **Integration Support**: If you need specific integration support, you can contact Clearent's integration support team through their developer center.\n\nThese contact methods should help you reach the appropriate support team for your needs.",
+    "responseTime": 8589,
+    "sourceTypes": [],
+    "qualityScore": 8,
+    "passedChecks": [
+      "Contains expected keywords",
+      "Adequate response length",
+      "Confident response tone",
+      "Includes actionable information"
+    ],
+    "failedChecks": [],
+    "recommendations": []
+  }
+]

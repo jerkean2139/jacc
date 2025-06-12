@@ -1,0 +1,140 @@
+[
+  {
+    "id": "square_rates_test",
+    "title": "Square Processing Rates Query",
+    "description": "Test external web search for competitor pricing information",
+    "userQuery": "What are Square processing rates for restaurants?",
+    "expectedResponseType": "web_search",
+    "expectedKeywords": [
+      "2.6%",
+      "2.9%",
+      "card present",
+      "online payments"
+    ],
+    "category": "pricing",
+    "priority": "high",
+    "status": "needs_review",
+    "lastTested": "2025-06-12T16:35:20.497Z",
+    "aiResponse": "According to the current web information, Square offers different processing rates for restaurants, depending on the type of transaction and the specific plan chosen:\n\n- For In-Person Transactions, the rate is 1.6% per transaction.\n- For Online Transactions, the rate is 2.9% + 30¢ per transaction.\n- For Manual Keyed Transactions (MOTO), the rate is 2.2% per transaction.\n\nAdditionally, for high-volume businesses processing more than $250,000 annually, Square may offer custom pricing based on factors like processing volume and average ticket size.\n\nSquare also has a Plus plan starting at $69 per location/month, which includes advanced features for restaurants, and a Premium plan for high-volume businesses with custom pricing available.",
+    "responseQuality": 3,
+    "responseTime": 8529
+  },
+  {
+    "id": "tracerpay_pos_test",
+    "title": "TracerPay Restaurant POS Systems",
+    "description": "Test internal knowledge base for TracerPay POS recommendations",
+    "userQuery": "What POS systems does TracerPay recommend for restaurants?",
+    "expectedResponseType": "internal_knowledge",
+    "expectedKeywords": [
+      "Skytab",
+      "Clover",
+      "Tabit",
+      "HubWallet"
+    ],
+    "category": "pos_systems",
+    "priority": "high",
+    "status": "passed",
+    "lastTested": "2025-06-12T16:35:12.406Z",
+    "aiResponse": "TracerPay, as a white-label processing solution of Tracer Co Card, recommends the following POS systems that are tailored specifically for restaurants:\n\n1. **Skytab**: A versatile POS system designed to streamline restaurant operations, providing features such as order management, payment processing, and customer tracking.\n\n2. **Clover**: A comprehensive system that offers a range of features including menu management, table tracking, payment processing, and customer management.\n\n3. **Tabit**: This POS system is built specifically for the restaurant industry, offering order management, tableside ordering, and payment processing capabilities. \n\n4. **HubWallet**: Via our partners Shift4 and MiCamp, the HubWallet system is also an excellent choice for restaurants, offering features like order management, payment processing, and loyalty program management.\n\nEach of these systems integrates seamlessly with TracerPay, which is powered by the Accept Blue payment processor. Remember, the best choice will depend on your specific needs, budget, and the size of your restaurant.",
+    "responseQuality": 9,
+    "responseTime": 12987
+  },
+  {
+    "id": "clearent_support_test",
+    "title": "Clearent Support Contact",
+    "description": "Test internal knowledge for specific processor support information",
+    "userQuery": "How do I contact Clearent support?",
+    "expectedResponseType": "internal_knowledge",
+    "expectedKeywords": [
+      "866.435.0666",
+      "customersupport@clearent.com",
+      "Option 1"
+    ],
+    "category": "support",
+    "priority": "medium",
+    "status": "passed",
+    "lastTested": "2025-06-12T16:35:30.088Z",
+    "aiResponse": "To contact Clearent support, you have several options:\n\n1. **Email**: You can reach out to Stephanie Allen, the Clearent Representative, at `sallen@clearent.net` or contact her directly at 281.923.4202. Alternatively, you can also email the general customer support at `customersupport@clearent.com`.\n\n2. **Phone**: For general customer support, you can call 1.866.435.0666 Option 1.\n\n3. **Integration Support**: If you need specific integration support, you can contact Clearent's integration support team through their developer center.\n\nThese contact methods should help you reach the appropriate support team for your needs.",
+    "responseQuality": 8,
+    "responseTime": 8589
+  },
+  {
+    "id": "paypal_rates_test",
+    "title": "PayPal Processing Rates",
+    "description": "Test web search for non-Tracer processor information",
+    "userQuery": "What are current PayPal processing rates?",
+    "expectedResponseType": "web_search",
+    "expectedKeywords": [
+      "2.9%",
+      "3.5%",
+      "transaction fee"
+    ],
+    "category": "pricing",
+    "priority": "medium",
+    "status": "pending"
+  },
+  {
+    "id": "retail_pos_test",
+    "title": "Retail POS Recommendations",
+    "description": "Test internal knowledge for retail-specific POS systems",
+    "userQuery": "What POS systems are best for retail stores?",
+    "expectedResponseType": "internal_knowledge",
+    "expectedKeywords": [
+      "Quantic",
+      "Clover",
+      "HubWallet"
+    ],
+    "category": "pos_systems",
+    "priority": "medium",
+    "status": "pending"
+  },
+  {
+    "id": "industry_trends_test",
+    "title": "Payment Industry Trends",
+    "description": "Test hybrid response combining internal knowledge with current industry data",
+    "userQuery": "What are the latest trends in payment processing for 2025?",
+    "expectedResponseType": "hybrid",
+    "expectedKeywords": [
+      "contactless",
+      "mobile",
+      "security",
+      "trends"
+    ],
+    "category": "industry_info",
+    "priority": "low",
+    "status": "pending"
+  },
+  {
+    "id": "trx_services_test",
+    "title": "TRX Specialized Services",
+    "description": "Test internal knowledge for specific processor capabilities",
+    "userQuery": "What specialized services does TRX offer?",
+    "expectedResponseType": "internal_knowledge",
+    "expectedKeywords": [
+      "high risk",
+      "high tickets",
+      "ACH",
+      "QuickBooks",
+      "mobile"
+    ],
+    "category": "processors",
+    "priority": "medium",
+    "status": "pending"
+  },
+  {
+    "id": "gift_card_options_test",
+    "title": "Gift Card Processing Options",
+    "description": "Test internal knowledge for gift card solutions",
+    "userQuery": "What gift card options are available through Tracer Co Card?",
+    "expectedResponseType": "internal_knowledge",
+    "expectedKeywords": [
+      "Valutec",
+      "Factor4",
+      "Shift4",
+      "Quantic"
+    ],
+    "category": "processors",
+    "priority": "medium",
+    "status": "pending"
+  }
+]

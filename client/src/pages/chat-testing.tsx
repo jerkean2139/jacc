@@ -68,7 +68,7 @@ export default function ChatTesting() {
     refetchInterval: 30000, // Refresh every 30 seconds
   });
 
-  const summary: TestingSummary = dashboardData?.summary || {
+  const summary: TestingSummary = (dashboardData as any)?.summary || {
     totalScenarios: 0,
     passedScenarios: 0,
     failedScenarios: 0,
@@ -78,8 +78,8 @@ export default function ChatTesting() {
     lastTestRun: null
   };
 
-  const scenarios: TestScenario[] = dashboardData?.scenarios || [];
-  const recentResults: TestResult[] = dashboardData?.recentResults || [];
+  const scenarios: TestScenario[] = (dashboardData as any)?.scenarios || [];
+  const recentResults: TestResult[] = (dashboardData as any)?.recentResults || [];
 
   const runTestMutation = useMutation({
     mutationFn: async (scenarioId: string) => {
@@ -108,12 +108,12 @@ export default function ChatTesting() {
   });
 
   const handleRunTest = async (scenarioId: string) => {
-    setRunningTests(prev => new Set([...prev, scenarioId]));
+    setRunningTests(prev => new Set([...Array.from(prev), scenarioId]));
     try {
       await runTestMutation.mutateAsync(scenarioId);
     } finally {
       setRunningTests(prev => {
-        const newSet = new Set(prev);
+        const newSet = new Set(Array.from(prev));
         newSet.delete(scenarioId);
         return newSet;
       });
