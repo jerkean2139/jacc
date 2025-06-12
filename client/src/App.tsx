@@ -43,6 +43,7 @@ import ISOHub from "@/pages/iso-hub";
 import AdminChatMonitoring from "@/pages/admin-chat-monitoring";
 import LearningPathPage from "@/pages/learning-path";
 import ChatTesting from "@/pages/chat-testing";
+import DemoAdmin from "@/pages/demo-admin";
 
 function Router() {
   const { user, isLoading } = useAuth();
@@ -59,6 +60,7 @@ function Router() {
     <Switch>
       {!user ? (
         <>
+          <Route path="/demo-admin" component={DemoAdmin} />
           <Route path="/admin-login" component={SimpleAdminLogin} />
           <Route path="/login" component={LoginPage} />
           <Route path="/" component={LoginPage} />
