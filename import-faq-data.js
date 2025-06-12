@@ -1,115 +1,102 @@
-// Script to parse and import FAQ data from the spreadsheet
-import { db } from './server/db.js';
-import { faqKnowledgeBase } from './shared/schema.js';
 import fs from 'fs';
+import csv from 'csv-parser';
+import { db } from './server/db.ts';
+import { faqKnowledgeBase } from './shared/schema.ts';
 
-async function parseFaqData() {
-  console.log('Reading FAQ spreadsheet data...');
+async function importFAQData() {
+  const faqs = [];
   
-  const data = fs.readFileSync('./attached_assets/Pasted-REP-Questions-Tracer-C2FS-Answers-Date-Added-Date-Updated-What-POS-option-t-1748554154432.txt', 'utf8');
-  const lines = data.split('\n').filter(line => line.trim());
-  
-  const faqEntries = [];
-  
-  // Skip header line and process data
-  for (let i = 1; i < lines.length; i++) {
-    const line = lines[i].trim();
-    if (!line) continue;
-    
-    // Split by tab characters to separate question and answer
-    const parts = line.split('\t').map(part => part.trim());
-    if (parts.length < 2) continue;
-    
-    const question = parts[0];
-    const answer = parts[1];
-    
-    if (!question || !answer || question === 'REP Questions') continue;
-    
-    // Categorize based on keywords in the question
-    let category = 'general';
-    let tags = [];
-    
-    const lowerQuestion = question.toLowerCase();
-    
-    if (lowerQuestion.includes('pos') || lowerQuestion.includes('point of sale')) {
-      category = 'pos';
-      tags.push('pos', 'systems');
-    } else if (lowerQuestion.includes('integrate') || lowerQuestion.includes('integration')) {
-      category = 'integration';
-      tags.push('integration', 'software');
-    } else if (lowerQuestion.includes('support') || lowerQuestion.includes('customer') || lowerQuestion.includes('contact')) {
-      category = 'support';
-      tags.push('support', 'contact');
-    } else if (lowerQuestion.includes('fee') || lowerQuestion.includes('cost') || lowerQuestion.includes('price')) {
-      category = 'pricing';
-      tags.push('pricing', 'fees');
-    } else if (lowerQuestion.includes('gateway') || lowerQuestion.includes('payment')) {
-      category = 'gateway';
-      tags.push('gateway', 'payment');
-    } else if (lowerQuestion.includes('terminal') || lowerQuestion.includes('hardware')) {
-      category = 'hardware';
-      tags.push('hardware', 'terminal');
-    } else if (lowerQuestion.includes('restaurant') || lowerQuestion.includes('retail') || lowerQuestion.includes('salon')) {
-      category = 'industry';
-      tags.push('industry', 'vertical');
-    }
-    
-    // Extract processor/partner names for tags
-    const processors = ['tsys', 'clearent', 'trx', 'micamp', 'shift4', 'quantic', 'hubwallet'];
-    processors.forEach(processor => {
-      if (lowerQuestion.includes(processor) || answer.toLowerCase().includes(processor)) {
-        tags.push(processor);
-      }
-    });
-    
-    faqEntries.push({
-      question: question,
-      answer: answer,
-      category: category,
-      tags: tags,
-      priority: category === 'support' ? 3 : (category === 'pos' ? 2 : 1),
-      isActive: true
-    });
-  }
-  
-  console.log(`Parsed ${faqEntries.length} FAQ entries`);
-  return faqEntries;
+  // Read and parse CSV file
+  return new Promise((resolve, reject) => {
+    fs.createReadStream('./uploads/zenbot-knowledge-base.csv')
+      .pipe(csv())
+      .on('data', (row) => {
+        const question = row['REP Questions'];
+        const answer = row['Tracer - C2FS Answers'];
+        
+        if (question && answer && question.trim() && answer.trim()) {
+          // Categorize based on content
+          let category = 'general';
+          const questionLower = question.toLowerCase();
+          const answerLower = answer.toLowerCase();
+          
+          if (questionLower.includes('pos') || questionLower.includes('point of sale') || answerLower.includes('pos')) {
+            category = 'pos-systems';
+          } else if (questionLower.includes('fee') || questionLower.includes('cost') || questionLower.includes('price')) {
+            category = 'pricing-rates';
+          } else if (questionLower.includes('support') || questionLower.includes('contact') || answerLower.includes('support')) {
+            category = 'technical-support';
+          } else if (questionLower.includes('integration') || questionLower.includes('integrate')) {
+            category = 'integrations';
+          } else if (questionLower.includes('gateway') || questionLower.includes('payment') || questionLower.includes('processing')) {
+            category = 'payment-processing';
+          } else if (questionLower.includes('merchant') || questionLower.includes('business')) {
+            category = 'merchant-services';
+          }
+          
+          // Determine priority based on importance keywords
+          let priority = 2; // Default to medium
+          if (questionLower.includes('support') || questionLower.includes('contact') || questionLower.includes('number')) {
+            priority = 1; // High priority for support contacts
+          } else if (questionLower.includes('fee') || questionLower.includes('cost') || questionLower.includes('price')) {
+            priority = 1; // High priority for pricing
+          } else if (questionLower.includes('integration') || questionLower.includes('integrate')) {
+            priority = 1; // High priority for integrations
+          }
+          
+          const faq = {
+            id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+            question: question.trim(),
+            answer: answer.trim(),
+            category: category,
+            tags: [],
+            isActive: true,
+            priority: priority,
+            createdAt: new Date(),
+            updatedAt: new Date()
+          };
+          
+          faqs.push(faq);
+        }
+      })
+      .on('end', async () => {
+        try {
+          console.log(`Importing ${faqs.length} FAQ entries...`);
+          
+          // Import all FAQs into database
+          for (const faq of faqs) {
+            await db.insert(faqKnowledgeBase).values(faq);
+          }
+          
+          console.log(`✅ Successfully imported ${faqs.length} FAQ entries`);
+          console.log('Categories imported:');
+          
+          const categoryCount = {};
+          faqs.forEach(faq => {
+            categoryCount[faq.category] = (categoryCount[faq.category] || 0) + 1;
+          });
+          
+          Object.entries(categoryCount).forEach(([category, count]) => {
+            console.log(`  - ${category}: ${count} entries`);
+          });
+          
+          resolve(faqs);
+        } catch (error) {
+          console.error('Error importing FAQ data:', error);
+          reject(error);
+        }
+      })
+      .on('error', reject);
+  });
 }
 
-async function importFaqData() {
-  try {
-    const faqEntries = await parseFaqData();
-    
-    console.log('Importing FAQ entries into database...');
-    
-    // Clear existing data first
-    await db.delete(faqKnowledgeBase);
-    console.log('Cleared existing FAQ data');
-    
-    // Insert new data in batches
-    const batchSize = 50;
-    for (let i = 0; i < faqEntries.length; i += batchSize) {
-      const batch = faqEntries.slice(i, i + batchSize);
-      await db.insert(faqKnowledgeBase).values(batch);
-      console.log(`Imported batch ${Math.floor(i/batchSize) + 1}`);
-    }
-    
-    console.log(`✅ Successfully imported ${faqEntries.length} FAQ entries`);
-    
-    // Show some sample data
-    const sampleFaqs = await db.select().from(faqKnowledgeBase).limit(5);
-    console.log('\nSample imported FAQs:');
-    sampleFaqs.forEach((faq, index) => {
-      console.log(`${index + 1}. Q: ${faq.question.substring(0, 60)}...`);
-      console.log(`   A: ${faq.answer.substring(0, 60)}...`);
-      console.log(`   Category: ${faq.category}, Tags: [${faq.tags.join(', ')}]\n`);
-    });
-    
+// Run the import
+importFAQData()
+  .then(() => {
+    console.log('FAQ import completed successfully');
     process.exit(0);
-  } catch (error) {
-    console.error('❌ Error importing FAQ data:', error);
+  })
+  .catch((error) => {
+    console.error('FAQ import failed:', error);
     process.exit(1);
-  }
-}
-
-importFaqData();
+  });
