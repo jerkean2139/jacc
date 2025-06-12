@@ -626,8 +626,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Demo admin access for testing documents
   app.get('/api/auth/demo-admin', (req: Request, res: Response) => {
-    const crypto = require('crypto');
-    const sessionId = crypto.randomUUID();
+    const sessionId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     const user = { 
       id: 'demo-admin', 
       username: 'demo-admin', 
