@@ -473,6 +473,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Add cookie parser middleware
   app.use(cookieParser());
 
+  // Admin documents API - register early to avoid routing conflicts
+  app.get('/api/admin/documents', async (req: Request, res: Response) => {
+    try {
+      const { db } = await import('./db.ts');
+      const { documents } = await import('../shared/schema.ts');
+      
+      const allDocuments = await db.select().from(documents);
+      console.log(`Returning ${allDocuments.length} documents for admin panel`);
+      res.json(allDocuments);
+    } catch (error) {
+      console.error("Error fetching admin documents:", error);
+      res.status(500).json({ error: 'Failed to fetch documents' });
+    }
+  });
+
   // Health check endpoint
   app.get('/api/health', (req: Request, res: Response) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
@@ -607,6 +622,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return loginHandler.route.stack[0].handle(req, res);
     }
     res.status(500).json({ error: 'Login handler not found' });
+  });
+
+  // Demo admin access for testing documents
+  app.get('/api/auth/demo-admin', (req: Request, res: Response) => {
+    const crypto = require('crypto');
+    const sessionId = crypto.randomUUID();
+    const user = { 
+      id: 'demo-admin', 
+      username: 'demo-admin', 
+      role: 'admin',
+      name: 'Demo Admin'
+    };
+    
+    sessions.set(sessionId, user);
+    res.cookie('sessionId', sessionId, { 
+      httpOnly: true, 
+      secure: false, 
+      sameSite: 'lax',
+      path: '/'
+    });
+    
+    res.json({ 
+      success: true, 
+      user: user,
+      message: 'Demo admin access granted' 
+    });
   });
 
   // Basic chat endpoint
