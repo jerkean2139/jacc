@@ -594,15 +594,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { faqKnowledgeBase } = await import('../shared/schema.ts');
       
       const newFAQ = {
-        id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
         question: question || '',
         answer: answer || '',
         category: category || 'general',
         tags: tags || [],
         isActive: isActive !== undefined ? isActive : true,
-        priority: priority || 1,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        priority: priority || 1
       };
 
       await db.insert(faqKnowledgeBase).values(newFAQ);
@@ -627,7 +624,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await db.update(faqKnowledgeBase)
         .set({ 
           ...updates, 
-          updatedAt: new Date().toISOString() 
+          lastUpdated: new Date() 
         })
         .where(eq(faqKnowledgeBase.id, id));
       
