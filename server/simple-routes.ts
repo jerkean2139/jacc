@@ -19,7 +19,13 @@ const openai = new OpenAI({
 const PERPLEXITY_API_URL = 'https://api.perplexity.ai/chat/completions';
 const PERPLEXITY_API_KEY = process.env.PERPLEXITY_API_KEY;
 
-// Use existing upload configuration from routes.ts
+// Configure multer for file uploads
+const upload = multer({
+  dest: 'uploads/',
+  limits: {
+    fileSize: 50 * 1024 * 1024, // 50MB limit
+  }
+});
 
 // Function to search web for industry articles using Perplexity
 async function searchWebForIndustryArticles(query: string): Promise<string> {
@@ -653,6 +659,199 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: 'Failed to delete FAQ' });
     }
   });
+
+  // Folder management endpoints
+  
+  // Create new folder
+  app.post('/api/admin/folders', async (req: Request, res: Response) => {
+    try {
+      const { name } = req.body;
+      
+      const { db } = await import('./db.ts');
+      const { folders } = await import('../shared/schema.ts');
+      
+      const newFolder = {
+        name: name || 'New Folder',
+        userId: 'demo-admin',
+        vectorNamespace: `folder-${Date.now()}`,
+        folderType: 'custom',
+        priority: 50
+      };
+
+      const result = await db.insert(folders).values(newFolder).returning();
+      console.log(`Folder created: ${newFolder.name}`);
+      res.json({ success: true, folder: result[0] });
+    } catch (error) {
+      console.error("Error creating folder:", error);
+      res.status(500).json({ error: 'Failed to create folder' });
+    }
+  });
+
+  // Upload and process folder with multiple files
+  app.post('/api/admin/upload-folder', upload.array('files'), async (req: Request, res: Response) => {
+    try {
+      const files = req.files as Express.Multer.File[];
+      const filePaths = req.body.filePaths;
+      
+      if (!files || files.length === 0) {
+        return res.status(400).json({ error: 'No files provided' });
+      }
+
+      console.log(`Processing folder upload with ${files.length} files`);
+      
+      const { db } = await import('./db.ts');
+      const { documents, folders } = await import('../shared/schema.ts');
+      const path = await import('path');
+      const fs = await import('fs');
+      
+      // Create a folder for this upload if it doesn't exist
+      const folderName = path.dirname(filePaths[0]) || 'Uploaded Folder';
+      const folderResult = await db.insert(folders).values({
+        name: folderName,
+        userId: 'demo-admin',
+        vectorNamespace: `folder-${Date.now()}`,
+        folderType: 'uploaded',
+        priority: 50
+      }).returning();
+      
+      const folderId = folderResult[0].id;
+      let processedCount = 0;
+      const supportedTypes = ['.pdf', '.doc', '.docx', '.txt', '.csv', '.md'];
+      
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const relativePath = Array.isArray(filePaths) ? filePaths[i] : filePaths;
+        const fileExtension = path.extname(file.originalname).toLowerCase();
+        
+        // Only process supported file types
+        if (!supportedTypes.includes(fileExtension)) {
+          console.log(`Skipping unsupported file type: ${file.originalname}`);
+          continue;
+        }
+        
+        try {
+          // Create document entry
+          const documentEntry = {
+            name: file.originalname,
+            originalName: file.originalname,
+            mimeType: file.mimetype,
+            size: file.size,
+            path: file.path,
+            userId: 'demo-admin',
+            folderId: folderId,
+            isFavorite: false,
+            isPublic: true,
+            adminOnly: false,
+            managerOnly: false
+          };
+
+          await db.insert(documents).values(documentEntry);
+          
+          // Process document content for vector search
+          await processDocumentForSearch(file.path, file.originalname, documentEntry);
+          processedCount++;
+          
+          console.log(`Processed file ${i + 1}/${files.length}: ${file.originalname}`);
+        } catch (fileError) {
+          console.error(`Error processing file ${file.originalname}:`, fileError);
+        }
+      }
+      
+      console.log(`Successfully processed ${processedCount} files from folder upload`);
+      res.json({ 
+        success: true, 
+        processed: processedCount, 
+        total: files.length,
+        folder: folderResult[0]
+      });
+      
+    } catch (error) {
+      console.error("Error uploading folder:", error);
+      res.status(500).json({ error: 'Failed to upload folder' });
+    }
+  });
+
+  // Document processing function for vector search
+  async function processDocumentForSearch(filePath: string, fileName: string, documentEntry: any) {
+    try {
+      const fs = await import('fs');
+      const mammoth = await import('mammoth');
+      const pdfParse = await import('pdf-parse');
+      const path = await import('path');
+      
+      let textContent = '';
+      const fileExtension = path.extname(fileName).toLowerCase();
+      
+      // Extract text based on file type
+      if (fileExtension === '.pdf') {
+        const fileBuffer = fs.readFileSync(filePath);
+        const pdfData = await pdfParse.default(fileBuffer);
+        textContent = pdfData.text;
+      } else if (fileExtension === '.docx' || fileExtension === '.doc') {
+        const fileBuffer = fs.readFileSync(filePath);
+        const result = await mammoth.extractRawText({ buffer: fileBuffer });
+        textContent = result.value;
+      } else if (fileExtension === '.txt' || fileExtension === '.csv' || fileExtension === '.md') {
+        textContent = fs.readFileSync(filePath, 'utf-8');
+      }
+      
+      if (textContent.trim()) {
+        // Create searchable chunks
+        const chunks = createTextChunks(textContent, documentEntry);
+        
+        // Store in knowledge base (simplified for demo)
+        const { db } = await import('./db.ts');
+        const { knowledgeBase } = await import('../shared/schema.ts');
+        
+        for (const chunk of chunks) {
+          await db.insert(knowledgeBase).values({
+            content: chunk.content,
+            metadata: JSON.stringify({
+              source: fileName,
+              documentId: documentEntry.id || 'unknown',
+              chunkIndex: chunk.chunkIndex,
+              type: 'document'
+            }),
+            embedding: null // Would normally generate embeddings here
+          });
+        }
+        
+        console.log(`Created ${chunks.length} searchable chunks for ${fileName}`);
+      }
+    } catch (error) {
+      console.error(`Error processing document ${fileName} for search:`, error);
+    }
+  }
+
+  function createTextChunks(content: string, document: any, maxChunkSize: number = 1000) {
+    const chunks = [];
+    const words = content.split(/\s+/);
+    let currentChunk = '';
+    let chunkIndex = 0;
+    
+    for (const word of words) {
+      if ((currentChunk + ' ' + word).length > maxChunkSize && currentChunk.length > 0) {
+        chunks.push({
+          content: currentChunk.trim(),
+          chunkIndex: chunkIndex++,
+          source: document.originalName || document.name
+        });
+        currentChunk = word;
+      } else {
+        currentChunk += (currentChunk ? ' ' : '') + word;
+      }
+    }
+    
+    if (currentChunk.trim()) {
+      chunks.push({
+        content: currentChunk.trim(),
+        chunkIndex: chunkIndex++,
+        source: document.originalName || document.name
+      });
+    }
+    
+    return chunks;
+  }
 
   // Health check endpoint
   app.get('/api/health', (req: Request, res: Response) => {

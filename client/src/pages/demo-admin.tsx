@@ -12,7 +12,7 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
-import { FileText, Search, Database, Clock, User, Settings, Plus, Edit, Trash2, Upload, Download, Eye } from 'lucide-react';
+import { FileText, Search, Database, Clock, User, Settings, Plus, Edit, Trash2, Upload, Download, Eye, Folder, FolderPlus } from 'lucide-react';
 
 interface DocumentEntry {
   id: string;
@@ -55,7 +55,9 @@ export default function DemoAdmin() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isAddFAQDialogOpen, setIsAddFAQDialogOpen] = useState(false);
   const [isEditFAQDialogOpen, setIsEditFAQDialogOpen] = useState(false);
+  const [isAddFolderDialogOpen, setIsAddFolderDialogOpen] = useState(false);
   const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [folderName, setFolderName] = useState('');
   const [newFAQ, setNewFAQ] = useState<Partial<FAQEntry>>({
     question: '',
     answer: '',
@@ -322,6 +324,81 @@ export default function DemoAdmin() {
     }
   });
 
+  // Create folder mutation
+  const createFolderMutation = useMutation({
+    mutationFn: async (folderName: string) => {
+      const res = await fetch('/api/admin/folders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: folderName }),
+        credentials: 'include'
+      });
+      
+      if (!res.ok) {
+        throw new Error(`Create folder failed: ${res.status}`);
+      }
+      
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/documents'] });
+      setFolderName('');
+      setIsAddFolderDialogOpen(false);
+      toast({
+        title: "Success",
+        description: "Folder created successfully",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Create Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Upload folder mutation
+  const uploadFolderMutation = useMutation({
+    mutationFn: async (files: FileList) => {
+      const formData = new FormData();
+      
+      // Add all files from the folder
+      Array.from(files).forEach((file, index) => {
+        formData.append(`files`, file);
+        formData.append(`filePaths`, file.webkitRelativePath || file.name);
+      });
+      
+      const res = await fetch('/api/admin/upload-folder', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include'
+      });
+      
+      if (!res.ok) {
+        throw new Error(`Upload folder failed: ${res.status}`);
+      }
+      
+      return res.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/documents'] });
+      toast({
+        title: "Success",
+        description: `Folder uploaded successfully. ${data.processed} files processed and indexed.`,
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Upload Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
+
   const filteredDocuments = documents.filter((doc: DocumentEntry) =>
     doc.originalName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     doc.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -472,6 +549,78 @@ export default function DemoAdmin() {
                     <Search className="h-4 w-4 mr-2" />
                     Search
                   </Button>
+                  
+                  <Dialog open={isAddFolderDialogOpen} onOpenChange={setIsAddFolderDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline">
+                        <FolderPlus className="h-4 w-4 mr-2" />
+                        Add Folder
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px]">
+                      <DialogHeader>
+                        <DialogTitle>Create New Folder</DialogTitle>
+                        <DialogDescription>
+                          Create a new folder to organize your documents
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="grid gap-4 py-4">
+                        <div className="grid gap-2">
+                          <Label htmlFor="folderName">Folder Name</Label>
+                          <Input
+                            id="folderName"
+                            value={folderName}
+                            onChange={(e) => setFolderName(e.target.value)}
+                            placeholder="Enter folder name..."
+                          />
+                        </div>
+                      </div>
+                      <div className="flex justify-end gap-3">
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            setIsAddFolderDialogOpen(false);
+                            setFolderName('');
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          onClick={() => createFolderMutation.mutate(folderName)}
+                          disabled={!folderName.trim() || createFolderMutation.isPending}
+                        >
+                          {createFolderMutation.isPending ? 'Creating...' : 'Create Folder'}
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+
+                  <div className="relative">
+                    <input
+                      type="file"
+                      {...({ webkitdirectory: "" } as any)}
+                      multiple
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files.length > 0) {
+                          uploadFolderMutation.mutate(e.target.files);
+                          // Reset the input after upload
+                          e.target.value = '';
+                        }
+                      }}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                      id="folder-upload"
+                      accept=".pdf,.doc,.docx,.txt,.csv,.md"
+                    />
+                    <Button 
+                      variant="outline" 
+                      disabled={uploadFolderMutation.isPending}
+                      className="w-full"
+                    >
+                      <Folder className="h-4 w-4 mr-2" />
+                      {uploadFolderMutation.isPending ? 'Processing...' : 'Upload Folder'}
+                    </Button>
+                  </div>
+                  
                   <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                     <DialogTrigger asChild>
                       <Button>
