@@ -9,6 +9,7 @@ import { fromPath } from "pdf2pic";
 import OpenAI from "openai";
 import axios from "axios";
 
+
 // Initialize OpenAI client
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -959,34 +960,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Admin documents API route
-  app.get('/api/admin/documents', async (req: Request, res: Response) => {
-    try {
-      // Get all documents from the database
-      const allDocuments = await db.select().from(documents).orderBy(documents.createdAt);
-      res.json(allDocuments);
-    } catch (error) {
-      console.error("Error fetching documents:", error);
-      res.status(500).json({ message: "Failed to fetch documents" });
-    }
-  });
 
-  // Admin document permissions update route  
-  app.patch('/api/admin/documents/:id/permissions', async (req: Request, res: Response) => {
+
+  // Simple documents listing endpoint
+  app.get('/api/documents/count', async (req: Request, res: Response) => {
     try {
-      const documentId = req.params.id;
-      const permissions = req.body;
+      const { db } = await import('./db.ts');
+      const { documents } = await import('../shared/schema.ts');
       
-      const [document] = await db
-        .update(documents)
-        .set(permissions)
-        .where(eq(documents.id, documentId))
-        .returning();
-        
-      res.json(document);
+      const documentCount = await db.select().from(documents);
+      res.json({ 
+        total: documentCount.length,
+        recentDocuments: documentCount.slice(-10).map(doc => ({
+          name: doc.name,
+          originalName: doc.originalName,
+          size: doc.size,
+          createdAt: doc.createdAt
+        }))
+      });
     } catch (error) {
-      console.error("Error updating document permissions:", error);
-      res.status(500).json({ message: "Failed to update permissions" });
+      console.error("Error fetching document count:", error);
+      res.status(500).json({ error: 'Failed to fetch documents' });
     }
   });
 
