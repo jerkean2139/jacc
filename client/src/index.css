@@ -69,25 +69,25 @@
 .skip-link:focus { top: 6px; }
 
 :root {
-  --background: 8 86% 79%; /* Light coral/orange background */
-  --foreground: 356 100% 10%; /* Deep red-brown text */
-  --muted: 6 79% 67%; /* Muted orange */
-  --muted-foreground: 356 100% 10%; /* Deep red-brown for muted text */
-  --popover: 8 100% 99%; /* Almost white with orange tint */
-  --popover-foreground: 356 100% 10%; /* Deep red-brown */
-  --card: 8 100% 99%; /* Almost white with orange tint */
-  --card-foreground: 356 100% 10%; /* Deep red-brown */
-  --border: 6 79% 67%; /* Muted orange border */
-  --input: 6 79% 67%; /* Muted orange for inputs */
-  --primary: 5 100% 67%; /* Vibrant orange primary */
-  --primary-foreground: 8 100% 99%; /* Light text on primary */
-  --secondary: 8 100% 85%; /* Light orange secondary */
-  --secondary-foreground: 356 100% 10%; /* Deep red-brown on secondary */
-  --accent: 8 100% 85%; /* Light orange accent */
-  --accent-foreground: 356 100% 10%; /* Deep red-brown on accent */
-  --destructive: 0 84.2% 60.2%; /* Red for destructive actions */
-  --destructive-foreground: 60 9.1% 97.8%; /* Light text on destructive */
-  --ring: 5 100% 67%; /* Orange ring color */
+  --background: 210 20% 98%; /* Very light blue-gray background */
+  --foreground: 210 30% 20%; /* Dark blue-gray text */
+  --muted: 210 15% 94%; /* Light muted blue-gray */
+  --muted-foreground: 210 15% 50%; /* Medium blue-gray for muted text */
+  --popover: 0 0% 100%; /* Pure white */
+  --popover-foreground: 210 30% 20%; /* Dark blue-gray */
+  --card: 0 0% 100%; /* Pure white cards */
+  --card-foreground: 210 30% 20%; /* Dark blue-gray */
+  --border: 210 15% 90%; /* Light blue-gray border */
+  --input: 210 15% 96%; /* Very light blue-gray for inputs */
+  --primary: 220 100% 50%; /* Vibrant blue primary */
+  --primary-foreground: 0 0% 100%; /* White text on primary */
+  --secondary: 210 15% 96%; /* Light blue-gray secondary */
+  --secondary-foreground: 210 30% 20%; /* Dark blue-gray on secondary */
+  --accent: 210 15% 96%; /* Light blue-gray accent */
+  --accent-foreground: 210 30% 20%; /* Dark blue-gray on accent */
+  --destructive: 0 84% 60%; /* Red for destructive actions */
+  --destructive-foreground: 0 0% 100%; /* White text on destructive */
+  --ring: 220 100% 50%; /* Blue ring color */
   --radius: 0.5rem;
   
   /* ISO HUB Colors (from tracerpos.com) */
@@ -100,46 +100,46 @@
   --green-600: 142 76% 36%; /* #16A34A - Primary Green */
   
   /* Sidebar colors */
-  --sidebar-background: 0 0% 100%; /* #FFFFFF */
-  --sidebar-foreground: 215 25% 27%; /* #1E293B */
-  --sidebar-primary: 213 94% 68%; /* Navy blue */
-  --sidebar-primary-foreground: 0 0% 100%; /* #FFFFFF */
-  --sidebar-accent: 210 11% 96%; /* #F1F5F9 */
-  --sidebar-accent-foreground: 215 25% 27%; /* #1E293B */
-  --sidebar-border: 215 12% 84%; /* #CBD5E1 */
-  --sidebar-ring: 213 94% 68%; /* Navy blue */
+  --sidebar-background: 0 0% 100%; /* Pure white sidebar */
+  --sidebar-foreground: 210 30% 20%; /* Dark blue-gray text */
+  --sidebar-primary: 220 100% 50%; /* Vibrant blue */
+  --sidebar-primary-foreground: 0 0% 100%; /* White text */
+  --sidebar-accent: 210 15% 96%; /* Light blue-gray accent */
+  --sidebar-accent-foreground: 210 30% 20%; /* Dark blue-gray */
+  --sidebar-border: 210 15% 90%; /* Light blue-gray border */
+  --sidebar-ring: 220 100% 50%; /* Blue ring */
 }
 
 .dark {
-  --background: 354 100% 1%; /* Very dark red-brown */
-  --foreground: 8 100% 96%; /* Light orange-white */
-  --muted: 2 80% 29%; /* Dark muted orange */
-  --muted-foreground: 8 100% 96%; /* Light orange-white for muted text */
-  --popover: 360 97% 10%; /* Dark red popover */
-  --popover-foreground: 8 100% 96%; /* Light orange-white */
-  --card: 360 97% 10%; /* Dark red card */
-  --card-foreground: 8 100% 96%; /* Light orange-white */
-  --border: 2 80% 29%; /* Dark muted orange border */
-  --input: 2 80% 29%; /* Dark muted orange for inputs */
-  --primary: 4 73% 53%; /* Medium orange primary */
-  --primary-foreground: 8 100% 99%; /* Almost white */
-  --secondary: 2 80% 29%; /* Dark muted orange secondary */
-  --secondary-foreground: 8 100% 96%; /* Light orange-white */
-  --accent: 2 80% 29%; /* Dark muted orange accent */
-  --accent-foreground: 8 100% 96%; /* Light orange-white */
-  --destructive: 0 62.8% 30.6%; /* Dark red for destructive actions */
-  --destructive-foreground: 0 0% 98%; /* Light text on destructive */
-  --ring: 4 73% 53%; /* Orange ring color for dark mode */
+  --background: 210 30% 8%; /* Dark blue-gray background */
+  --foreground: 210 15% 95%; /* Light blue-gray text */
+  --muted: 210 25% 15%; /* Dark muted blue-gray */
+  --muted-foreground: 210 15% 70%; /* Medium blue-gray for muted text */
+  --popover: 210 30% 12%; /* Dark blue-gray popover */
+  --popover-foreground: 210 15% 95%; /* Light blue-gray */
+  --card: 210 30% 12%; /* Dark blue-gray card */
+  --card-foreground: 210 15% 95%; /* Light blue-gray */
+  --border: 210 25% 20%; /* Dark blue-gray border */
+  --input: 210 25% 15%; /* Dark blue-gray for inputs */
+  --primary: 220 100% 60%; /* Brighter blue primary for dark mode */
+  --primary-foreground: 0 0% 100%; /* White text on primary */
+  --secondary: 210 25% 15%; /* Dark blue-gray secondary */
+  --secondary-foreground: 210 15% 95%; /* Light blue-gray */
+  --accent: 210 25% 15%; /* Dark blue-gray accent */
+  --accent-foreground: 210 15% 95%; /* Light blue-gray */
+  --destructive: 0 84% 60%; /* Red for destructive actions */
+  --destructive-foreground: 0 0% 100%; /* White text on destructive */
+  --ring: 220 100% 60%; /* Blue ring color for dark mode */
   
   /* Sidebar colors for dark mode */
-  --sidebar-background: 215 28% 17%; /* #1E293B */
-  --sidebar-foreground: 210 11% 98%; /* #F8FAFC */
-  --sidebar-primary: 213 94% 68%; /* Navy blue */
-  --sidebar-primary-foreground: 0 0% 100%; /* #FFFFFF */
-  --sidebar-accent: 215 25% 21%; /* #334155 */
-  --sidebar-accent-foreground: 210 11% 98%; /* #F8FAFC */
-  --sidebar-border: 215 25% 27%; /* #475569 */
-  --sidebar-ring: 213 94% 68%; /* Navy blue */
+  --sidebar-background: 210 30% 12%; /* Dark blue-gray sidebar */
+  --sidebar-foreground: 210 15% 95%; /* Light blue-gray text */
+  --sidebar-primary: 220 100% 60%; /* Brighter blue for dark mode */
+  --sidebar-primary-foreground: 0 0% 100%; /* White text */
+  --sidebar-accent: 210 25% 15%; /* Dark blue-gray accent */
+  --sidebar-accent-foreground: 210 15% 95%; /* Light blue-gray */
+  --sidebar-border: 210 25% 20%; /* Dark blue-gray border */
+  --sidebar-ring: 220 100% 60%; /* Blue ring */
 }
 
 @layer base {
