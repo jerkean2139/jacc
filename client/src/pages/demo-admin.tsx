@@ -33,13 +33,37 @@ interface DocumentEntry {
   updatedAt: string;
 }
 
+interface FAQEntry {
+  id: string;
+  question: string;
+  answer: string;
+  category: string;
+  tags: string[];
+  isActive: boolean;
+  priority: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export default function DemoAdmin() {
   const [user, setUser] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [faqSearchTerm, setFaqSearchTerm] = useState('');
   const [editingDocument, setEditingDocument] = useState<DocumentEntry | null>(null);
+  const [editingFAQ, setEditingFAQ] = useState<FAQEntry | null>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isAddFAQDialogOpen, setIsAddFAQDialogOpen] = useState(false);
+  const [isEditFAQDialogOpen, setIsEditFAQDialogOpen] = useState(false);
   const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [newFAQ, setNewFAQ] = useState<Partial<FAQEntry>>({
+    question: '',
+    answer: '',
+    category: '',
+    tags: [],
+    isActive: true,
+    priority: 1
+  });
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -66,6 +90,22 @@ export default function DemoAdmin() {
       });
       if (!res.ok) {
         throw new Error(`Failed to fetch documents: ${res.status}`);
+      }
+      return res.json();
+    },
+    enabled: !!user,
+    retry: 1
+  });
+
+  // Fetch FAQ data
+  const { data: faqData = [], isLoading: faqLoading, error: faqError } = useQuery({
+    queryKey: ['/api/admin/faq'],
+    queryFn: async () => {
+      const res = await fetch('/api/admin/faq', {
+        credentials: 'include'
+      });
+      if (!res.ok) {
+        throw new Error(`Failed to fetch FAQ data: ${res.status}`);
       }
       return res.json();
     },
@@ -175,9 +215,122 @@ export default function DemoAdmin() {
     }
   });
 
+  // FAQ mutations
+  const createFAQMutation = useMutation({
+    mutationFn: async (faqData: Partial<FAQEntry>) => {
+      const res = await fetch('/api/admin/faq', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(faqData),
+        credentials: 'include'
+      });
+      
+      if (!res.ok) {
+        throw new Error(`Create FAQ failed: ${res.status}`);
+      }
+      
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/faq'] });
+      setNewFAQ({
+        question: '',
+        answer: '',
+        category: '',
+        tags: [],
+        isActive: true,
+        priority: 1
+      });
+      setIsAddFAQDialogOpen(false);
+      toast({
+        title: "Success",
+        description: "FAQ created successfully",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Create Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
+
+  const updateFAQMutation = useMutation({
+    mutationFn: async (updatedFAQ: Partial<FAQEntry> & { id: string }) => {
+      const res = await fetch(`/api/admin/faq/${updatedFAQ.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedFAQ),
+        credentials: 'include'
+      });
+      
+      if (!res.ok) {
+        throw new Error(`Update FAQ failed: ${res.status}`);
+      }
+      
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/faq'] });
+      setEditingFAQ(null);
+      setIsEditFAQDialogOpen(false);
+      toast({
+        title: "Success",
+        description: "FAQ updated successfully",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Update Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
+
+  const deleteFAQMutation = useMutation({
+    mutationFn: async (faqId: string) => {
+      const res = await fetch(`/api/admin/faq/${faqId}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+      
+      if (!res.ok) {
+        throw new Error(`Delete FAQ failed: ${res.status}`);
+      }
+      
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/faq'] });
+      toast({
+        title: "Success",
+        description: "FAQ deleted successfully",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Delete Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
+
   const filteredDocuments = documents.filter((doc: DocumentEntry) =>
     doc.originalName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     doc.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const filteredFAQs = faqData.filter((faq: FAQEntry) =>
+    faq.question.toLowerCase().includes(faqSearchTerm.toLowerCase()) ||
+    faq.answer.toLowerCase().includes(faqSearchTerm.toLowerCase()) ||
+    faq.category.toLowerCase().includes(faqSearchTerm.toLowerCase())
   );
 
   const formatFileSize = (bytes: number) => {
@@ -288,8 +441,9 @@ export default function DemoAdmin() {
 
         {/* Main Content */}
         <Tabs defaultValue="documents" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="documents">Document Manager</TabsTrigger>
+            <TabsTrigger value="faq">FAQ Manager</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
@@ -589,6 +743,393 @@ export default function DemoAdmin() {
                     disabled={updateMutation.isPending}
                   >
                     {updateMutation.isPending ? 'Saving...' : 'Save Changes'}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </TabsContent>
+
+          <TabsContent value="faq">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Database className="h-5 w-5" />
+                  FAQ Manager ({faqData.length} total)
+                </CardTitle>
+                <CardDescription>
+                  Manage frequently asked questions and knowledge base entries
+                </CardDescription>
+                
+                <div className="flex gap-4 mt-4">
+                  <div className="flex-1">
+                    <Input
+                      placeholder="Search FAQs..."
+                      value={faqSearchTerm}
+                      onChange={(e) => setFaqSearchTerm(e.target.value)}
+                      className="w-full"
+                    />
+                  </div>
+                  <Button variant="outline">
+                    <Search className="h-4 w-4 mr-2" />
+                    Search
+                  </Button>
+                  <Dialog open={isAddFAQDialogOpen} onOpenChange={setIsAddFAQDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add FAQ
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[600px]">
+                      <DialogHeader>
+                        <DialogTitle>Add New FAQ</DialogTitle>
+                        <DialogDescription>
+                          Create a new frequently asked question entry
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="grid gap-4 py-4">
+                        <div className="grid gap-2">
+                          <Label htmlFor="question">Question</Label>
+                          <Input
+                            id="question"
+                            value={newFAQ.question || ''}
+                            onChange={(e) => setNewFAQ({
+                              ...newFAQ,
+                              question: e.target.value
+                            })}
+                            placeholder="Enter the question..."
+                          />
+                        </div>
+                        
+                        <div className="grid gap-2">
+                          <Label htmlFor="answer">Answer</Label>
+                          <Textarea
+                            id="answer"
+                            value={newFAQ.answer || ''}
+                            onChange={(e) => setNewFAQ({
+                              ...newFAQ,
+                              answer: e.target.value
+                            })}
+                            placeholder="Enter the answer..."
+                            rows={4}
+                          />
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="grid gap-2">
+                            <Label htmlFor="category">Category</Label>
+                            <Select
+                              value={newFAQ.category || ''}
+                              onValueChange={(value) => setNewFAQ({
+                                ...newFAQ,
+                                category: value
+                              })}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select category" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="payment-processing">Payment Processing</SelectItem>
+                                <SelectItem value="merchant-services">Merchant Services</SelectItem>
+                                <SelectItem value="technical-support">Technical Support</SelectItem>
+                                <SelectItem value="account-management">Account Management</SelectItem>
+                                <SelectItem value="pricing-rates">Pricing & Rates</SelectItem>
+                                <SelectItem value="general">General</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          <div className="grid gap-2">
+                            <Label htmlFor="priority">Priority</Label>
+                            <Select
+                              value={newFAQ.priority?.toString() || '1'}
+                              onValueChange={(value) => setNewFAQ({
+                                ...newFAQ,
+                                priority: parseInt(value)
+                              })}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select priority" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="1">High</SelectItem>
+                                <SelectItem value="2">Medium</SelectItem>
+                                <SelectItem value="3">Low</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        
+                        <div className="grid gap-2">
+                          <Label>Status</Label>
+                          <div className="flex items-center space-x-2">
+                            <Switch
+                              checked={newFAQ.isActive ?? true}
+                              onCheckedChange={(checked) => setNewFAQ({
+                                ...newFAQ,
+                                isActive: checked
+                              })}
+                            />
+                            <span className="text-sm text-gray-600">
+                              {newFAQ.isActive ? 'Active' : 'Inactive'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex justify-end gap-3">
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            setIsAddFAQDialogOpen(false);
+                            setNewFAQ({
+                              question: '',
+                              answer: '',
+                              category: '',
+                              tags: [],
+                              isActive: true,
+                              priority: 1
+                            });
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          onClick={() => createFAQMutation.mutate(newFAQ)}
+                          disabled={!newFAQ.question || !newFAQ.answer || createFAQMutation.isPending}
+                        >
+                          {createFAQMutation.isPending ? 'Creating...' : 'Create FAQ'}
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              </CardHeader>
+              
+              <CardContent>
+                {faqLoading ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                    <p>Loading FAQ data...</p>
+                  </div>
+                ) : faqError ? (
+                  <div className="text-center py-8 text-red-600">
+                    <p>Error loading FAQ data: {faqError.message}</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3 max-h-96 overflow-y-auto">
+                    {filteredFAQs.map((faq: FAQEntry) => (
+                      <div
+                        key={faq.id}
+                        className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50"
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-2">
+                              <Badge variant={faq.isActive ? "default" : "secondary"}>
+                                {faq.isActive ? 'Active' : 'Inactive'}
+                              </Badge>
+                              <Badge variant="outline">{faq.category}</Badge>
+                              <Badge variant="outline">
+                                Priority {faq.priority === 1 ? 'High' : faq.priority === 2 ? 'Medium' : 'Low'}
+                              </Badge>
+                            </div>
+                            
+                            <h4 className="font-medium text-gray-900 mb-2">
+                              {faq.question}
+                            </h4>
+                            <p className="text-sm text-gray-600 line-clamp-2">
+                              {faq.answer}
+                            </p>
+                            
+                            <div className="mt-2 text-xs text-gray-400">
+                              Created: {formatDate(faq.createdAt)}
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center gap-1 ml-4">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => {
+                                setEditingFAQ(faq);
+                                setIsEditFAQDialogOpen(true);
+                              }}
+                            >
+                              <Edit className="h-3 w-3" />
+                            </Button>
+                            
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                >
+                                  <Trash2 className="h-3 w-3" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Delete FAQ</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Are you sure you want to delete this FAQ? This action cannot be undone.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => deleteFAQMutation.mutate(faq.id)}
+                                    className="bg-red-600 hover:bg-red-700"
+                                  >
+                                    Delete
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    
+                    {filteredFAQs.length === 0 && (
+                      <div className="text-center py-8 text-gray-500">
+                        <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                        <p>No FAQ entries found matching your search.</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Edit FAQ Dialog */}
+            <Dialog open={isEditFAQDialogOpen} onOpenChange={setIsEditFAQDialogOpen}>
+              <DialogContent className="sm:max-w-[600px]">
+                <DialogHeader>
+                  <DialogTitle>Edit FAQ</DialogTitle>
+                  <DialogDescription>
+                    Update FAQ information and settings
+                  </DialogDescription>
+                </DialogHeader>
+                {editingFAQ && (
+                  <div className="grid gap-4 py-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="editQuestion">Question</Label>
+                      <Input
+                        id="editQuestion"
+                        value={editingFAQ.question}
+                        onChange={(e) => setEditingFAQ({
+                          ...editingFAQ,
+                          question: e.target.value
+                        })}
+                      />
+                    </div>
+                    
+                    <div className="grid gap-2">
+                      <Label htmlFor="editAnswer">Answer</Label>
+                      <Textarea
+                        id="editAnswer"
+                        value={editingFAQ.answer}
+                        onChange={(e) => setEditingFAQ({
+                          ...editingFAQ,
+                          answer: e.target.value
+                        })}
+                        rows={4}
+                      />
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="grid gap-2">
+                        <Label>Category</Label>
+                        <Select
+                          value={editingFAQ.category}
+                          onValueChange={(value) => setEditingFAQ({
+                            ...editingFAQ,
+                            category: value
+                          })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="payment-processing">Payment Processing</SelectItem>
+                            <SelectItem value="merchant-services">Merchant Services</SelectItem>
+                            <SelectItem value="technical-support">Technical Support</SelectItem>
+                            <SelectItem value="account-management">Account Management</SelectItem>
+                            <SelectItem value="pricing-rates">Pricing & Rates</SelectItem>
+                            <SelectItem value="general">General</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div className="grid gap-2">
+                        <Label>Priority</Label>
+                        <Select
+                          value={editingFAQ.priority.toString()}
+                          onValueChange={(value) => setEditingFAQ({
+                            ...editingFAQ,
+                            priority: parseInt(value)
+                          })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="1">High</SelectItem>
+                            <SelectItem value="2">Medium</SelectItem>
+                            <SelectItem value="3">Low</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    
+                    <div className="grid gap-2">
+                      <Label>Status</Label>
+                      <div className="flex items-center space-x-2">
+                        <Switch
+                          checked={editingFAQ.isActive}
+                          onCheckedChange={(checked) => setEditingFAQ({
+                            ...editingFAQ,
+                            isActive: checked
+                          })}
+                        />
+                        <span className="text-sm text-gray-600">
+                          {editingFAQ.isActive ? 'Active' : 'Inactive'}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="bg-gray-50 p-3 rounded-lg">
+                      <h4 className="text-sm font-medium mb-2">FAQ Information</h4>
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <span className="text-gray-500">Created:</span> {formatDate(editingFAQ.createdAt)}
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Updated:</span> {formatDate(editingFAQ.updatedAt)}
+                        </div>
+                        <div className="col-span-2">
+                          <span className="text-gray-500">ID:</span> {editingFAQ.id}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                <div className="flex justify-end gap-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setIsEditFAQDialogOpen(false);
+                      setEditingFAQ(null);
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={() => editingFAQ && updateFAQMutation.mutate(editingFAQ)}
+                    disabled={updateFAQMutation.isPending}
+                  >
+                    {updateFAQMutation.isPending ? 'Saving...' : 'Save Changes'}
                   </Button>
                 </div>
               </DialogContent>

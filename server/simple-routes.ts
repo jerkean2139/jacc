@@ -568,6 +568,95 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // FAQ management endpoints
+  
+  // Get all FAQ entries
+  app.get('/api/admin/faq', async (req: Request, res: Response) => {
+    try {
+      const { db } = await import('./db.ts');
+      const { faqKnowledgeBase } = await import('../shared/schema.ts');
+      
+      const allFAQs = await db.select().from(faqKnowledgeBase).orderBy(faqKnowledgeBase.priority);
+      console.log(`Returning ${allFAQs.length} FAQ entries for admin panel`);
+      res.json(allFAQs);
+    } catch (error) {
+      console.error("Error fetching FAQ data:", error);
+      res.status(500).json({ error: 'Failed to fetch FAQ data' });
+    }
+  });
+
+  // Create new FAQ entry
+  app.post('/api/admin/faq', async (req: Request, res: Response) => {
+    try {
+      const { question, answer, category, tags, isActive, priority } = req.body;
+      
+      const { db } = await import('./db.ts');
+      const { faqKnowledgeBase } = await import('../shared/schema.ts');
+      
+      const newFAQ = {
+        id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+        question: question || '',
+        answer: answer || '',
+        category: category || 'general',
+        tags: tags || [],
+        isActive: isActive !== undefined ? isActive : true,
+        priority: priority || 1,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      await db.insert(faqKnowledgeBase).values(newFAQ);
+      console.log(`FAQ created: ${newFAQ.question}`);
+      res.json({ success: true, faq: newFAQ });
+    } catch (error) {
+      console.error("Error creating FAQ:", error);
+      res.status(500).json({ error: 'Failed to create FAQ' });
+    }
+  });
+
+  // Update FAQ entry
+  app.patch('/api/admin/faq/:id', async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const updates = req.body;
+      
+      const { db } = await import('./db.ts');
+      const { faqKnowledgeBase } = await import('../shared/schema.ts');
+      const { eq } = await import('drizzle-orm');
+      
+      await db.update(faqKnowledgeBase)
+        .set({ 
+          ...updates, 
+          updatedAt: new Date().toISOString() 
+        })
+        .where(eq(faqKnowledgeBase.id, id));
+      
+      console.log(`FAQ updated: ${id}`);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error updating FAQ:", error);
+      res.status(500).json({ error: 'Failed to update FAQ' });
+    }
+  });
+
+  // Delete FAQ entry
+  app.delete('/api/admin/faq/:id', async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      
+      const { db } = await import('./db.ts');
+      const { faqKnowledgeBase } = await import('../shared/schema.ts');
+      const { eq } = await import('drizzle-orm');
+      
+      await db.delete(faqKnowledgeBase).where(eq(faqKnowledgeBase.id, id));
+      console.log(`FAQ deleted: ${id}`);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting FAQ:", error);
+      res.status(500).json({ error: 'Failed to delete FAQ' });
+    }
+  });
+
   // Health check endpoint
   app.get('/api/health', (req: Request, res: Response) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
