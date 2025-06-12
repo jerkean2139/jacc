@@ -39,7 +39,12 @@ import {
   BarChart3,
   Trophy,
   Star,
-  Target
+  Target,
+  Plus,
+  Search,
+  Database,
+  Folder,
+  FolderPlus
 } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -634,7 +639,7 @@ export default function AdminPanel() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="users" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
             Users
@@ -642,6 +647,10 @@ export default function AdminPanel() {
           <TabsTrigger value="documents" className="flex items-center gap-2">
             <FileText className="h-4 w-4" />
             Documents
+          </TabsTrigger>
+          <TabsTrigger value="faq" className="flex items-center gap-2">
+            <MessageSquare className="h-4 w-4" />
+            FAQ
           </TabsTrigger>
           <TabsTrigger value="prompts" className="flex items-center gap-2">
             <MessageSquare className="h-4 w-4" />

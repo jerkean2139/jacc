@@ -139,9 +139,9 @@ export function AdminTrainingPage() {
     }));
   };
 
-  // Fetch Q&A data from document center
+  // Fetch FAQ data from the knowledge base
   const { data: qaData = [] } = useQuery({
-    queryKey: ['/api/admin/qa-data'],
+    queryKey: ['/api/admin/faq'],
     retry: false,
   });
 
