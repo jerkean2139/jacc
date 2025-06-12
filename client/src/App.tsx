@@ -42,6 +42,7 @@ import ISOHubIntegration from "@/pages/iso-hub-integration";
 import ISOHub from "@/pages/iso-hub";
 import AdminChatMonitoring from "@/pages/admin-chat-monitoring";
 import LearningPathPage from "@/pages/learning-path";
+import ChatTesting from "@/pages/chat-testing";
 
 function Router() {
   const { user, isLoading } = useAuth();
@@ -106,6 +107,7 @@ function Router() {
           <Route path="/admin/settings" component={AdminSettings} />
           <Route path="/admin/training" component={AdminTraining} />
           <Route path="/admin/ai-config" component={AIConfigurationPage} />
+          <Route path="/admin/chat-testing" component={ChatTesting} />
           <Route path="/login" component={Landing} />
         </>
       )}

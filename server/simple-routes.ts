@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import cookieParser from "cookie-parser";
 import multer from "multer";
 import fs from "fs";
+import { registerChatTestingRoutes } from './chat-testing-system';
 // PDF parsing and OCR will be imported dynamically
 import { fromPath } from "pdf2pic";
 import OpenAI from "openai";
@@ -957,6 +958,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: 'Failed to analyze statement: ' + (error as Error).message });
     }
   });
+
+  // Register chat testing system routes
+  registerChatTestingRoutes(app);
 
   console.log("✅ Simple routes registered successfully");
   
