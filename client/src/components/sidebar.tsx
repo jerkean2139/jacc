@@ -541,13 +541,16 @@ export default function Sidebar({
             Merchant Services
           </h4>
           <div className="space-y-1">
-            <a 
-              href="/iso-amp-calculator" 
-              className="flex items-center space-x-3 p-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg cursor-pointer transition-colors"
+            <div 
+              className="flex items-center space-x-3 p-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg cursor-not-allowed transition-colors relative group"
+              title="Coming Soon"
             >
-              <Calculator className="w-4 h-4 text-blue-500" />
-              <span className="text-sm text-slate-700 dark:text-slate-300">Rate Calculator</span>
-            </a>
+              <Calculator className="w-4 h-4 text-gray-400" />
+              <span className="text-sm text-gray-400">Rate Calculator</span>
+              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/75 rounded-lg">
+                <span className="text-white text-xs font-medium px-2 py-1 bg-black/90 rounded">Coming Soon</span>
+              </div>
+            </div>
             <a 
               href="/pricing-management" 
               className="flex items-center space-x-3 p-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg cursor-pointer transition-colors"
