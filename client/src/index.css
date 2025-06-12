@@ -69,25 +69,25 @@
 .skip-link:focus { top: 6px; }
 
 :root {
-  --background: 210 11% 98%; /* #F5F7FA */
-  --foreground: 215 25% 27%; /* #1E293B */
-  --muted: 210 11% 96%; /* #F1F5F9 */
-  --muted-foreground: 215 16% 47%; /* #64748B */
-  --popover: 0 0% 100%; /* #FFFFFF */
-  --popover-foreground: 215 25% 27%; /* #1E293B */
-  --card: 0 0% 100%; /* #FFFFFF */
-  --card-foreground: 215 25% 27%; /* #1E293B */
-  --border: 215 12% 84%; /* #CBD5E1 */
-  --input: 215 12% 84%; /* #CBD5E1 */
-  --primary: 213 94% 68%; /* Navy blue - #1E40AF adjusted for better visibility */
-  --primary-foreground: 0 0% 100%; /* #FFFFFF */
-  --secondary: 210 11% 96%; /* #F1F5F9 */
-  --secondary-foreground: 215 25% 27%; /* #1E293B */
-  --accent: 84 81% 44%; /* Neon olive green - #84CC16 */
-  --accent-foreground: 0 0% 100%; /* #FFFFFF */
-  --destructive: 0 84% 60%; /* #EF4444 */
-  --destructive-foreground: 0 0% 100%; /* #FFFFFF */
-  --ring: 213 94% 68%; /* Navy blue */
+  --background: 8 86% 79%; /* Light coral/orange background */
+  --foreground: 356 100% 10%; /* Deep red-brown text */
+  --muted: 6 79% 67%; /* Muted orange */
+  --muted-foreground: 356 100% 10%; /* Deep red-brown for muted text */
+  --popover: 8 100% 99%; /* Almost white with orange tint */
+  --popover-foreground: 356 100% 10%; /* Deep red-brown */
+  --card: 8 100% 99%; /* Almost white with orange tint */
+  --card-foreground: 356 100% 10%; /* Deep red-brown */
+  --border: 6 79% 67%; /* Muted orange border */
+  --input: 6 79% 67%; /* Muted orange for inputs */
+  --primary: 5 100% 67%; /* Vibrant orange primary */
+  --primary-foreground: 8 100% 99%; /* Light text on primary */
+  --secondary: 8 100% 85%; /* Light orange secondary */
+  --secondary-foreground: 356 100% 10%; /* Deep red-brown on secondary */
+  --accent: 8 100% 85%; /* Light orange accent */
+  --accent-foreground: 356 100% 10%; /* Deep red-brown on accent */
+  --destructive: 0 84.2% 60.2%; /* Red for destructive actions */
+  --destructive-foreground: 60 9.1% 97.8%; /* Light text on destructive */
+  --ring: 5 100% 67%; /* Orange ring color */
   --radius: 0.5rem;
   
   /* ISO HUB Colors (from tracerpos.com) */
@@ -111,25 +111,25 @@
 }
 
 .dark {
-  --background: 215 28% 17%; /* #1E293B */
-  --foreground: 210 11% 98%; /* #F8FAFC */
-  --muted: 215 25% 21%; /* #334155 */
-  --muted-foreground: 215 16% 65%; /* #94A3B8 */
-  --popover: 215 28% 17%; /* #1E293B */
-  --popover-foreground: 210 11% 98%; /* #F8FAFC */
-  --card: 215 28% 17%; /* #1E293B */
-  --card-foreground: 210 11% 98%; /* #F8FAFC */
-  --border: 215 25% 27%; /* #475569 */
-  --input: 215 25% 27%; /* #475569 */
-  --primary: 213 94% 68%; /* Navy blue - consistent in dark mode */
-  --primary-foreground: 0 0% 100%; /* #FFFFFF */
-  --secondary: 215 25% 21%; /* #334155 */
-  --secondary-foreground: 210 11% 98%; /* #F8FAFC */
-  --accent: 84 81% 44%; /* Neon olive green - consistent in dark mode */
-  --accent-foreground: 0 0% 100%; /* #FFFFFF */
-  --destructive: 0 84% 60%; /* #EF4444 */
-  --destructive-foreground: 0 0% 100%; /* #FFFFFF */
-  --ring: 213 94% 68%; /* Navy blue */
+  --background: 354 100% 1%; /* Very dark red-brown */
+  --foreground: 8 100% 96%; /* Light orange-white */
+  --muted: 2 80% 29%; /* Dark muted orange */
+  --muted-foreground: 8 100% 96%; /* Light orange-white for muted text */
+  --popover: 360 97% 10%; /* Dark red popover */
+  --popover-foreground: 8 100% 96%; /* Light orange-white */
+  --card: 360 97% 10%; /* Dark red card */
+  --card-foreground: 8 100% 96%; /* Light orange-white */
+  --border: 2 80% 29%; /* Dark muted orange border */
+  --input: 2 80% 29%; /* Dark muted orange for inputs */
+  --primary: 4 73% 53%; /* Medium orange primary */
+  --primary-foreground: 8 100% 99%; /* Almost white */
+  --secondary: 2 80% 29%; /* Dark muted orange secondary */
+  --secondary-foreground: 8 100% 96%; /* Light orange-white */
+  --accent: 2 80% 29%; /* Dark muted orange accent */
+  --accent-foreground: 8 100% 96%; /* Light orange-white */
+  --destructive: 0 62.8% 30.6%; /* Dark red for destructive actions */
+  --destructive-foreground: 0 0% 98%; /* Light text on destructive */
+  --ring: 4 73% 53%; /* Orange ring color for dark mode */
   
   /* Sidebar colors for dark mode */
   --sidebar-background: 215 28% 17%; /* #1E293B */

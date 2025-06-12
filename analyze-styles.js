@@ -1,4 +1,4 @@
-const https = require('https');
+import https from 'https';
 
 https.get('https://content-craft-ai-keanonbiz.replit.app/', (res) => {
   let html = '';
