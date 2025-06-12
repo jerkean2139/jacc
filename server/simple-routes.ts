@@ -491,7 +491,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Upload document endpoint
-  app.post('/api/admin/documents/upload', upload.single('file'), async (req: Request, res: Response) => {
+  app.post('/api/admin/documents/upload', adminUpload.single('file'), async (req: Request, res: Response) => {
     try {
       if (!req.file) {
         return res.status(400).json({ error: 'No file uploaded' });
@@ -972,7 +972,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Statement analysis endpoint with real PDF processing
-  app.post('/api/iso-amp/analyze-statement', upload.single('statement'), async (req: Request, res: Response) => {
+  app.post('/api/iso-amp/analyze-statement', adminUpload.single('statement'), async (req: Request, res: Response) => {
     try {
       if (!req.file) {
         return res.status(400).json({ error: 'No file uploaded' });
