@@ -399,7 +399,10 @@ export class ChatTestingSystem {
         ? recentResults.reduce((sum, r) => sum + r.responseTime, 0) / recentResults.length
         : 0,
       lastTestRun: recentResults.length > 0 
-        ? Math.max(...recentResults.map(r => r.timestamp.getTime()))
+        ? Math.max(...recentResults.map(r => {
+            const timestamp = r.timestamp instanceof Date ? r.timestamp : new Date(r.timestamp);
+            return timestamp.getTime();
+          }))
         : null
     };
   }
