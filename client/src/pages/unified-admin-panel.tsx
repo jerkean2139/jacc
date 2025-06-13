@@ -651,115 +651,265 @@ export function UnifiedAdminPanel() {
             </Button>
           </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>System Prompts & Chains</CardTitle>
-              <CardDescription>Configure AI behavior and response patterns</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ScrollArea className="h-[600px]">
-                <div className="space-y-3">
-                  {Array.isArray(promptTemplates) && promptTemplates.map((template: PromptTemplate) => {
-                    const isExpanded = expandedPrompts.includes(template.id);
-                    
-                    return (
-                      <Collapsible
-                        key={template.id}
-                        open={isExpanded}
-                        onOpenChange={() => {
-                          setExpandedPrompts(prev => 
-                            prev.includes(template.id) 
-                              ? prev.filter(id => id !== template.id)
-                              : [...prev, template.id]
-                          );
-                        }}
-                      >
-                        <div className="border rounded-lg bg-white dark:bg-gray-900">
-                          <CollapsibleTrigger className="w-full p-3 text-left hover:bg-gray-50 dark:hover:bg-gray-800">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                {isExpanded ? (
-                                  <ChevronDown className="w-4 h-4 text-gray-500" />
-                                ) : (
-                                  <ChevronRight className="w-4 h-4 text-gray-500" />
-                                )}
-                                <div>
-                                  <h5 className="font-medium text-sm">{template.name}</h5>
-                                  <p className="text-xs text-gray-600 dark:text-gray-400">{template.description}</p>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Main Prompts Section */}
+            <div className="lg:col-span-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle>System Prompts & Chains</CardTitle>
+                  <CardDescription>Configure AI behavior and response patterns with LLM chains</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ScrollArea className="h-[600px]">
+                    <div className="space-y-3">
+                      {Array.isArray(promptTemplates) && promptTemplates.length > 0 ? promptTemplates.map((template: PromptTemplate) => {
+                        const isExpanded = expandedPrompts.includes(template.id);
+                        
+                        return (
+                          <Collapsible
+                            key={template.id}
+                            open={isExpanded}
+                            onOpenChange={() => {
+                              setExpandedPrompts(prev => 
+                                prev.includes(template.id) 
+                                  ? prev.filter(id => id !== template.id)
+                                  : [...prev, template.id]
+                              );
+                            }}
+                          >
+                            <div className="border rounded-lg bg-white dark:bg-gray-900">
+                              <CollapsibleTrigger className="w-full p-3 text-left hover:bg-gray-50 dark:hover:bg-gray-800">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    {isExpanded ? (
+                                      <ChevronDown className="w-4 h-4 text-gray-500" />
+                                    ) : (
+                                      <ChevronRight className="w-4 h-4 text-gray-500" />
+                                    )}
+                                    <div>
+                                      <h5 className="font-medium text-sm">{template.name}</h5>
+                                      <p className="text-xs text-gray-600 dark:text-gray-400">{template.description}</p>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <Badge variant={template.isActive ? "default" : "secondary"}>
+                                      {template.isActive ? "Active" : "Inactive"}
+                                    </Badge>
+                                    <Badge variant="outline" className="text-xs">
+                                      {template.category}
+                                    </Badge>
+                                  </div>
                                 </div>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Badge variant={template.isActive ? "default" : "secondary"}>
-                                  {template.isActive ? "Active" : "Inactive"}
-                                </Badge>
-                                <Badge variant="outline" className="text-xs">
-                                  {template.category}
-                                </Badge>
-                              </div>
-                            </div>
-                          </CollapsibleTrigger>
-                          
-                          <CollapsibleContent className="border-t bg-gray-50 dark:bg-gray-800/50">
-                            <div className="p-4 space-y-4">
-                              <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                  <Label className="text-sm font-medium">Temperature</Label>
-                                  <div className="flex items-center gap-2 mt-1">
-                                    <span className="text-sm">{template.temperature}</span>
-                                    <div className="flex-1 h-2 bg-gray-200 rounded">
-                                      <div 
-                                        className="h-2 bg-blue-500 rounded" 
-                                        style={{ width: `${template.temperature * 100}%` }}
-                                      />
+                              </CollapsibleTrigger>
+                              
+                              <CollapsibleContent className="border-t bg-gray-50 dark:bg-gray-800/50">
+                                <div className="p-4 space-y-4">
+                                  {/* AI Configuration Controls */}
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="space-y-3">
+                                      <div>
+                                        <Label className="text-sm font-medium">Temperature</Label>
+                                        <div className="flex items-center gap-3 mt-2">
+                                          <span className="text-sm w-8">{template.temperature}</span>
+                                          <div className="flex-1">
+                                            <input
+                                              type="range"
+                                              min="0"
+                                              max="1"
+                                              step="0.1"
+                                              value={template.temperature}
+                                              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                                              readOnly
+                                            />
+                                          </div>
+                                          <span className="text-xs text-gray-500">Creativity</span>
+                                        </div>
+                                      </div>
+
+                                      <div>
+                                        <Label className="text-sm font-medium">Max Tokens</Label>
+                                        <div className="flex items-center gap-3 mt-2">
+                                          <Input 
+                                            type="number" 
+                                            value={template.maxTokens} 
+                                            readOnly 
+                                            className="w-20 text-sm" 
+                                          />
+                                          <span className="text-xs text-gray-500">Response length limit</span>
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    <div className="space-y-3">
+                                      <div>
+                                        <Label className="text-sm font-medium">Category</Label>
+                                        <Select value={template.category} disabled>
+                                          <SelectTrigger className="mt-2">
+                                            <SelectValue />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                            <SelectItem value="merchant_services">Merchant Services</SelectItem>
+                                            <SelectItem value="technical_support">Technical Support</SelectItem>
+                                            <SelectItem value="pricing">Pricing</SelectItem>
+                                            <SelectItem value="general">General</SelectItem>
+                                          </SelectContent>
+                                        </Select>
+                                      </div>
+
+                                      <div>
+                                        <Label className="text-sm font-medium">Version</Label>
+                                        <div className="flex items-center gap-2 mt-2">
+                                          <Badge variant="outline">v{template.version || 1}</Badge>
+                                          <span className="text-xs text-gray-500">Current version</span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  
+                                  <Separator />
+                                  
+                                  <div>
+                                    <Label className="text-sm font-medium">Prompt Template</Label>
+                                    <Textarea 
+                                      value={template.template} 
+                                      readOnly 
+                                      className="mt-2 min-h-[120px] font-mono text-xs" 
+                                      placeholder="Enter your prompt template here..."
+                                    />
+                                    <p className="text-xs text-gray-500 mt-1">
+                                      Use {`{query}`} for user input, {`{context}`} for retrieved documents
+                                    </p>
+                                  </div>
+
+                                  <Separator />
+
+                                  <div className="flex items-center justify-between pt-2">
+                                    <div className="flex items-center gap-4">
+                                      <div className="flex items-center gap-2">
+                                        <input
+                                          type="checkbox"
+                                          checked={template.isActive}
+                                          readOnly
+                                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                        />
+                                        <Label className="text-sm">Active</Label>
+                                      </div>
+                                      <Badge variant={template.isActive ? "default" : "secondary"} className="text-xs">
+                                        {template.isActive ? "Live" : "Draft"}
+                                      </Badge>
+                                    </div>
+                                    <div className="flex gap-2">
+                                      <Button size="sm" variant="outline">
+                                        <Edit className="w-3 h-3 mr-1" />
+                                        Edit
+                                      </Button>
+                                      <Button size="sm" variant="outline">
+                                        Test
+                                      </Button>
+                                      <Button size="sm">
+                                        <Save className="w-3 h-3 mr-1" />
+                                        Save
+                                      </Button>
                                     </div>
                                   </div>
                                 </div>
-                                <div>
-                                  <Label className="text-sm font-medium">Max Tokens</Label>
-                                  <p className="text-sm mt-1">{template.maxTokens}</p>
-                                </div>
-                              </div>
-                              
-                              <div>
-                                <Label className="text-sm font-medium">Template</Label>
-                                <Textarea 
-                                  value={template.template} 
-                                  readOnly 
-                                  className="mt-1 min-h-[100px]" 
-                                />
-                              </div>
-
-                              <div className="flex items-center justify-between pt-2 border-t">
-                                <div className="flex items-center gap-2">
-                                  <input
-                                    type="checkbox"
-                                    checked={template.isActive}
-                                    readOnly
-                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                  />
-                                  <Label className="text-sm">Active</Label>
-                                </div>
-                                <div className="flex gap-2">
-                                  <Button size="sm" variant="outline">
-                                    <Edit className="w-3 h-3 mr-1" />
-                                    Edit
-                                  </Button>
-                                  <Button size="sm">
-                                    <Save className="w-3 h-3 mr-1" />
-                                    Save
-                                  </Button>
-                                </div>
-                              </div>
+                              </CollapsibleContent>
                             </div>
-                          </CollapsibleContent>
+                          </Collapsible>
+                        );
+                      }) : (
+                        <div className="text-center py-8">
+                          <Brain className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                          <p className="text-gray-500">No prompt templates found</p>
+                          <Button className="mt-4" size="sm">
+                            <Plus className="w-4 h-4 mr-2" />
+                            Create First Prompt
+                          </Button>
                         </div>
-                      </Collapsible>
-                    );
-                  })}
-                </div>
-              </ScrollArea>
-            </CardContent>
-          </Card>
+                      )}
+                    </div>
+                  </ScrollArea>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Sidebar Controls */}
+            <div className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Quick Actions</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Button className="w-full justify-start" size="sm">
+                    <Plus className="w-4 h-4 mr-2" />
+                    New Prompt Template
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start" size="sm">
+                    <Settings className="w-4 h-4 mr-2" />
+                    Global AI Settings
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start" size="sm">
+                    <PlayCircle className="w-4 h-4 mr-2" />
+                    Test All Prompts
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Template Stats</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex justify-between text-sm">
+                    <span>Total Templates:</span>
+                    <span className="font-medium">{Array.isArray(promptTemplates) ? promptTemplates.length : 0}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span>Active:</span>
+                    <span className="font-medium text-green-600">
+                      {Array.isArray(promptTemplates) ? promptTemplates.filter((p: PromptTemplate) => p.isActive).length : 0}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span>Categories:</span>
+                    <span className="font-medium">
+                      {Array.isArray(promptTemplates) ? 
+                        new Set(promptTemplates.map((p: PromptTemplate) => p.category)).size : 0}
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>AI Model Config</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div>
+                    <Label className="text-sm font-medium">Default Model</Label>
+                    <Select defaultValue="gpt-4" disabled>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="gpt-4">GPT-4</SelectItem>
+                        <SelectItem value="gpt-3.5-turbo">GPT-3.5 Turbo</SelectItem>
+                        <SelectItem value="claude-3">Claude 3</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium">Rate Limit</Label>
+                    <p className="text-sm text-gray-600 mt-1">1000 requests/hour</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium">Fallback Model</Label>
+                    <p className="text-sm text-gray-600 mt-1">GPT-3.5 Turbo</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </TabsContent>
 
         {/* Chat Testing */}
