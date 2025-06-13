@@ -401,24 +401,33 @@ export function UnifiedAdminPanel() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left Side - Q&A Knowledge Base */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Left Side - Q&A Knowledge Base Entry Form */}
             <div className="space-y-4">
               <Card>
                 <CardHeader>
-                  <CardTitle>Q&A Knowledge Base</CardTitle>
-                  <CardDescription>Manage questions and answers for the AI knowledge base</CardDescription>
+                  <CardTitle>Add New Q&A Entry</CardTitle>
+                  <CardDescription>Create questions and answers for the AI knowledge base</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
+                    <div>
+                      <Label className="text-sm font-medium">Question/Title</Label>
+                      <Input 
+                        placeholder="What are the current processing rates for restaurants?"
+                        className="mt-1"
+                      />
+                    </div>
+
+                    <div>
+                      <Label className="text-sm font-medium">Answer/Content</Label>
+                      <Textarea 
+                        placeholder="Detailed answer with specific rates, terms, and guidance..."
+                        className="mt-1 min-h-[120px]"
+                      />
+                    </div>
+
                     <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label className="text-sm font-medium">Question/Title</Label>
-                        <Input 
-                          placeholder="What are the current processing rates for restaurants?"
-                          className="mt-1"
-                        />
-                      </div>
                       <div>
                         <Label className="text-sm font-medium">Category</Label>
                         <Select defaultValue="merchant_services">
@@ -435,17 +444,6 @@ export function UnifiedAdminPanel() {
                           </SelectContent>
                         </Select>
                       </div>
-                    </div>
-
-                    <div>
-                      <Label className="text-sm font-medium">Answer/Content</Label>
-                      <Textarea 
-                        placeholder="Detailed answer with specific rates, terms, and guidance..."
-                        className="mt-1 min-h-[100px]"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
                       <div>
                         <Label className="text-sm font-medium">Priority</Label>
                         <Select defaultValue="low">
@@ -459,12 +457,12 @@ export function UnifiedAdminPanel() {
                           </SelectContent>
                         </Select>
                       </div>
-                      <div className="flex items-end">
-                        <Button className="w-full">
-                          Add Q&A Entry
-                        </Button>
-                      </div>
                     </div>
+
+                    <Button className="w-full">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Q&A Entry
+                    </Button>
 
                     <Separator />
 
@@ -503,8 +501,8 @@ export function UnifiedAdminPanel() {
               </Card>
             </div>
 
-            {/* Center and Right - FAQ Entries Display */}
-            <div className="lg:col-span-2">
+            {/* Right Side - FAQ Entries Display */}
+            <div>
               <Card>
                 <CardHeader>
                   <CardTitle>FAQ Entries ({filteredFAQs.length})</CardTitle>
