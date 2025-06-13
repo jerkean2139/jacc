@@ -112,7 +112,8 @@ function Router() {
           <Route path="/admin/dashboard" component={AdminDashboard} />
           <Route path="/admin/chat-monitoring" component={AdminChatMonitoring} />
           <Route path="/admin/settings" component={AdminSettings} />
-          <Route path="/admin/training" component={AdminTraining} />
+          <Route path="/admin/training" component={AdminControlCenter} />
+          <Route path="/admin-training" component={AdminControlCenter} />
           <Route path="/admin/ai-config" component={AIConfigurationPage} />
           <Route path="/admin/chat-testing" component={ChatTesting} />
           <Route path="/login" component={Landing} />
