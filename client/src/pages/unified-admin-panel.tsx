@@ -233,11 +233,12 @@ export function UnifiedAdminPanel() {
       </div>
 
       <Tabs value={activeSection} onValueChange={setActiveSection} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="qa">Q&A Knowledge</TabsTrigger>
           <TabsTrigger value="documents">Document Center</TabsTrigger>
           <TabsTrigger value="prompts">AI Prompts</TabsTrigger>
+          <TabsTrigger value="training">Training & Feedback</TabsTrigger>
           <TabsTrigger value="testing">Chat Testing</TabsTrigger>
           <TabsTrigger value="monitoring">Live Monitoring</TabsTrigger>
         </TabsList>
@@ -695,6 +696,206 @@ export function UnifiedAdminPanel() {
               </CardContent>
             </Card>
           )}
+        </TabsContent>
+
+        {/* Training & Feedback */}
+        <TabsContent value="training" className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold">Training & Feedback System</h2>
+            <Button>
+              <PlayCircle className="h-4 w-4 mr-2" />
+              Run Training Session
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Left Side - Chat Emulator */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Chat Emulator</CardTitle>
+                <CardDescription>Test AI responses and provide feedback</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {/* Chat Interface */}
+                  <div className="border rounded-lg p-4 bg-gray-50 dark:bg-gray-800 min-h-[300px]">
+                    <div className="space-y-3">
+                      <div className="flex justify-start">
+                        <div className="bg-blue-100 dark:bg-blue-900 p-3 rounded-lg max-w-[80%]">
+                          <p className="text-sm">Hello! I'm JACC, your merchant services assistant. How can I help you today?</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex justify-end">
+                        <div className="bg-white dark:bg-gray-700 border p-3 rounded-lg max-w-[80%]">
+                          <p className="text-sm">What are the current processing rates for restaurants?</p>
+                        </div>
+                      </div>
+
+                      <div className="flex justify-start">
+                        <div className="bg-blue-100 dark:bg-blue-900 p-3 rounded-lg max-w-[80%]">
+                          <p className="text-sm">For restaurants, our current processing rates typically range from 2.6% to 3.5% depending on your monthly volume and transaction mix. Here's a breakdown:</p>
+                          <ul className="text-sm mt-2 space-y-1">
+                            <li>• Card Present (Swiped): 2.6% - 2.9%</li>
+                            <li>• Card Not Present (Online): 2.9% - 3.5%</li>
+                            <li>• Monthly fees: $25-$50</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Test Input */}
+                  <div className="space-y-2">
+                    <Label>Test Query</Label>
+                    <Textarea 
+                      placeholder="Enter your test question here..."
+                      className="min-h-[80px]"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <Button className="w-full">
+                      <PlayCircle className="w-4 h-4 mr-2" />
+                      Send Test Query
+                    </Button>
+                    <Button variant="outline" className="w-full">
+                      Clear Chat
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Right Side - Training Feedback */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Training Feedback Summary</CardTitle>
+                <CardDescription>Review and improve AI responses</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {/* Response Quality */}
+                  <div className="p-4 border rounded-lg bg-green-50 dark:bg-green-900/20">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-medium text-sm">Response Quality</span>
+                      <Badge variant="default">8.5/10</Badge>
+                    </div>
+                    <Progress value={85} className="h-2" />
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
+                      Good accuracy with specific rate information
+                    </p>
+                  </div>
+
+                  {/* Feedback Form */}
+                  <div className="space-y-3">
+                    <div>
+                      <Label className="text-sm font-medium">Feedback Type</Label>
+                      <Select defaultValue="positive">
+                        <SelectTrigger className="mt-1">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="positive">Positive Feedback</SelectItem>
+                          <SelectItem value="negative">Needs Improvement</SelectItem>
+                          <SelectItem value="correction">Factual Correction</SelectItem>
+                          <SelectItem value="enhancement">Enhancement Suggestion</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label className="text-sm font-medium">Quality Score (1-10)</Label>
+                      <div className="flex items-center gap-2 mt-1">
+                        <input
+                          type="range"
+                          min="1"
+                          max="10"
+                          defaultValue="8"
+                          className="flex-1"
+                        />
+                        <span className="text-sm w-8">8</span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label className="text-sm font-medium">Detailed Feedback</Label>
+                      <Textarea 
+                        placeholder="Provide specific feedback on accuracy, helpfulness, tone, etc..."
+                        className="mt-1 min-h-[100px]"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <Button variant="outline" className="w-full">
+                        Save Feedback
+                      </Button>
+                      <Button className="w-full">
+                        Submit & Train
+                      </Button>
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  {/* Recent Feedback */}
+                  <div>
+                    <h6 className="font-medium text-sm mb-3">Recent Training Sessions</h6>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                        <span className="text-sm">Processing rates query</span>
+                        <Badge variant="outline">8.5/10</Badge>
+                      </div>
+                      <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                        <span className="text-sm">POS integration question</span>
+                        <Badge variant="outline">7.2/10</Badge>
+                      </div>
+                      <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                        <span className="text-sm">Chargeback policy</span>
+                        <Badge variant="outline">9.1/10</Badge>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Training Analytics */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Training Sessions</CardTitle>
+                <BookOpen className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">127</div>
+                <p className="text-xs text-muted-foreground">+12 this week</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Average Quality</CardTitle>
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">8.3/10</div>
+                <p className="text-xs text-muted-foreground">+0.2 improvement</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Model Updates</CardTitle>
+                <Settings className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">3</div>
+                <p className="text-xs text-muted-foreground">This month</p>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
 
         {/* AI Prompts */}
