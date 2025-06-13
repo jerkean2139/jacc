@@ -74,13 +74,14 @@ interface ChatMonitoringData {
 }
 
 export function UnifiedAdminPanel() {
-  const [activeSection, setActiveSection] = useState('overview');
+  const [activeSection, setActiveSection] = useState('qa');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [viewMode, setViewMode] = useState<'list' | 'folder'>('list');
   const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
   const [runningTests, setRunningTests] = useState<Set<string>>(new Set());
   const [expandedPrompts, setExpandedPrompts] = useState<string[]>([]);
+  const [componentKey] = useState(Date.now()); // Force fresh render
 
   const queryClient = useQueryClient();
 

@@ -45,6 +45,7 @@ import LearningPathPage from "@/pages/learning-path";
 import ChatTesting from "@/pages/chat-testing";
 import DemoAdmin from "@/pages/demo-admin";
 import UnifiedAdminPanel from "@/pages/unified-admin-panel";
+import AdminControlCenter from "@/pages/admin-control-center";
 
 function Router() {
   const { user, isLoading } = useAuth();
@@ -104,9 +105,10 @@ function Router() {
             </>
           )}
           <Route path="/dev-admin" component={DevAdminPanel} />
-          <Route path="/admin" component={UnifiedAdminPanel} />
-          <Route path="/admin-panel" component={UnifiedAdminPanel} />
+          <Route path="/admin" component={AdminControlCenter} />
+          <Route path="/admin-panel" component={AdminControlCenter} />
           <Route path="/admin/unified" component={UnifiedAdminPanel} />
+          <Route path="/admin-new" component={AdminControlCenter} />
           <Route path="/admin/dashboard" component={AdminDashboard} />
           <Route path="/admin/chat-monitoring" component={AdminChatMonitoring} />
           <Route path="/admin/settings" component={AdminSettings} />
