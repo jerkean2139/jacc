@@ -315,19 +315,19 @@ export function AdminControlCenter() {
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="text-sm font-medium">Total First Interactions</span>
-                    <Badge variant="secondary">47</Badge>
+                    <Badge variant="secondary">{(trainingAnalytics as any)?.totalInteractions || 0}</Badge>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm font-medium">Average Satisfaction</span>
-                    <Badge variant="secondary">4.2/5</Badge>
+                    <Badge variant="secondary">{(trainingAnalytics as any)?.averageSatisfaction || 0}/5</Badge>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm font-medium">Flagged for Review</span>
-                    <Badge variant="destructive">7</Badge>
+                    <Badge variant="destructive">{(trainingAnalytics as any)?.flaggedForReview || 0}</Badge>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm font-medium">Response Time</span>
-                    <Badge variant="outline">2.1s avg</Badge>
+                    <Badge variant="outline">{(trainingAnalytics as any)?.averageResponseTime || 0}ms avg</Badge>
                   </div>
                 </div>
 
@@ -372,20 +372,18 @@ export function AdminControlCenter() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {[
-                    { category: 'Pricing Inquiries', count: 15, color: 'bg-green-500' },
-                    { category: 'Onboarding', count: 12, color: 'bg-blue-500' },
-                    { category: 'Technical Support', count: 11, color: 'bg-yellow-500' },
-                    { category: 'Product Inquiry', count: 9, color: 'bg-purple-500' }
-                  ].map(item => (
-                    <div key={item.category} className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className={`w-3 h-3 rounded-full ${item.color}`}></div>
-                        <span className="text-sm">{item.category}</span>
+                  {Object.entries((trainingAnalytics as any)?.categoryBreakdown || {}).map(([category, count], index) => {
+                    const colors = ['bg-green-500', 'bg-blue-500', 'bg-yellow-500', 'bg-purple-500'];
+                    return (
+                      <div key={category} className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className={`w-3 h-3 rounded-full ${colors[index % colors.length]}`}></div>
+                          <span className="text-sm">{category.replace('_', ' ')}</span>
+                        </div>
+                        <Badge variant="outline">{count as number}</Badge>
                       </div>
-                      <Badge variant="outline">{item.count}</Badge>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
 
                 <Separator className="my-4" />
@@ -471,55 +469,25 @@ export function AdminControlCenter() {
             <CardContent>
               <ScrollArea className="h-[400px]">
                 <div className="space-y-4">
-                  {[
-                    {
-                      id: 1,
-                      userMessage: "What are the current processing rates for restaurants?",
-                      aiResponse: "Restaurant processing rates typically range from 2.3% to 3.5% for card-present transactions, depending on your monthly volume and average ticket size. For a typical restaurant processing $50,000 monthly with a $25 average ticket, you'd expect rates around 2.6-2.9%. Would you like me to analyze specific rate structures or compare processors?",
-                      quality: "good",
-                      satisfaction: 4,
-                      category: "pricing",
-                      responseTime: 2400,
-                      timestamp: "2 hours ago"
-                    },
-                    {
-                      id: 2,
-                      userMessage: "I need help setting up a new merchant account for my coffee shop",
-                      aiResponse: "I'd be happy to help you set up a merchant account for your coffee shop! To provide the best recommendations, I'll need some information: What's your expected monthly processing volume? What's your average transaction amount? Do you need in-person, online, or both payment capabilities?",
-                      quality: "excellent",
-                      satisfaction: 5,
-                      category: "onboarding",
-                      responseTime: 1800,
-                      timestamp: "1 day ago"
-                    },
-                    {
-                      id: 3,
-                      userMessage: "My POS system keeps declining cards, what should I do?",
-                      aiResponse: "Card declines can be frustrating. Let's troubleshoot this step by step. First, can you tell me: What type of POS system are you using? Are you seeing specific error codes? Is this happening with all cards or just certain types?",
-                      quality: "good",
-                      satisfaction: 4,
-                      category: "technical_support",
-                      responseTime: 2100,
-                      timestamp: "1 day ago"
-                    }
-                  ].map(interaction => (
-                    <div key={interaction.id} className="border rounded-lg p-4 bg-gray-50 dark:bg-gray-800">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                          <Badge variant="outline">{interaction.category}</Badge>
-                          <Badge variant={interaction.quality === 'excellent' ? 'default' : interaction.quality === 'good' ? 'secondary' : 'destructive'}>
-                            {interaction.quality}
-                          </Badge>
-                          <div className="flex items-center gap-1">
-                            {Array.from({ length: 5 }).map((_, i) => (
-                              <div
-                                key={i}
-                                className={`w-3 h-3 rounded-full ${
-                                  i < interaction.satisfaction ? 'bg-yellow-400' : 'bg-gray-300'
-                                }`}
-                              />
-                            ))}
-                          </div>
+                  {Array.isArray(trainingInteractions) && trainingInteractions.length > 0 ? (
+                    trainingInteractions.slice(0, 10).map((interaction: any) => (
+                      <div key={interaction.id} className="border rounded-lg p-4 bg-gray-50 dark:bg-gray-800">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline">{interaction.trainingCategory || 'general'}</Badge>
+                            <Badge variant={interaction.responseQuality === 'excellent' ? 'default' : interaction.responseQuality === 'good' ? 'secondary' : 'destructive'}>
+                              {interaction.responseQuality || 'good'}
+                            </Badge>
+                            <div className="flex items-center gap-1">
+                              {Array.from({ length: 5 }).map((_, i) => (
+                                <div
+                                  key={i}
+                                  className={`w-3 h-3 rounded-full ${
+                                    i < (interaction.userSatisfaction || 3) ? 'bg-yellow-400' : 'bg-gray-300'
+                                  }`}
+                                />
+                              ))}
+                            </div>
                         </div>
                         <div className="flex items-center gap-2 text-sm text-gray-500">
                           <Timer className="w-4 h-4" />
@@ -531,30 +499,41 @@ export function AdminControlCenter() {
                         <div>
                           <h6 className="font-medium text-sm mb-1 text-blue-600">User's First Message:</h6>
                           <p className="text-sm bg-blue-50 dark:bg-blue-900/20 p-2 rounded border-l-4 border-blue-500">
-                            {interaction.userMessage}
+                            {interaction.userFirstMessage || 'No message recorded'}
                           </p>
                         </div>
 
                         <div>
                           <h6 className="font-medium text-sm mb-1 text-green-600">JACC's First Response:</h6>
                           <p className="text-sm bg-green-50 dark:bg-green-900/20 p-2 rounded border-l-4 border-green-500">
-                            {interaction.aiResponse}
+                            {interaction.aiFirstResponse || 'No response recorded'}
                           </p>
                         </div>
 
                         <div className="flex justify-end gap-2">
-                          <Button size="sm" variant="ghost">
-                            <Edit className="w-3 h-3 mr-1" />
-                            Review
+                          <Button size="sm" variant="outline">
+                            <ThumbsUp className="w-4 h-4 mr-1" />
+                            Good Response
+                          </Button>
+                          <Button size="sm" variant="outline">
+                            <ThumbsDown className="w-4 h-4 mr-1" />
+                            Needs Improvement
                           </Button>
                           <Button size="sm" variant="ghost">
-                            <BookOpen className="w-3 h-3 mr-1" />
+                            <Star className="w-3 h-3 mr-1" />
                             Use for Training
                           </Button>
                         </div>
                       </div>
                     </div>
-                  ))}
+                  ))
+                ) : (
+                  <div className="text-center py-8">
+                    <MessageSquare className="w-12 h-12 mx-auto text-gray-400 mb-3" />
+                    <p className="text-gray-500">No training interactions recorded yet</p>
+                    <p className="text-sm text-gray-400">Start chatting with JACC to see training data here</p>
+                  </div>
+                )}
                 </div>
               </ScrollArea>
             </CardContent>
