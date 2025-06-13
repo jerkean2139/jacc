@@ -323,6 +323,63 @@ export const chatRatings = pgTable("chat_ratings", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Training data collection for first interactions
+export const trainingInteractions = pgTable("training_interactions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  chatId: uuid("chat_id").notNull().references(() => chats.id, { onDelete: "cascade" }),
+  userFirstMessage: text("user_first_message").notNull(),
+  aiFirstResponse: text("ai_first_response").notNull(),
+  responseQuality: varchar("response_quality"), // poor, good, excellent
+  userSatisfaction: integer("user_satisfaction"), // 1-5 rating
+  adminNotes: text("admin_notes"),
+  trainingCategory: varchar("training_category"), // onboarding, product_inquiry, technical_support, pricing
+  isFirstEverChat: boolean("is_first_ever_chat").default(false),
+  responseTime: integer("response_time_ms"),
+  documentsUsed: text("documents_used").array(),
+  promptsTriggered: text("prompts_triggered").array(),
+  flaggedForReview: boolean("flagged_for_review").default(false),
+  reviewedBy: varchar("reviewed_by").references(() => users.id),
+  reviewedAt: timestamp("reviewed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// AI prompt templates for admin management
+export const promptTemplates = pgTable("prompt_templates", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  category: varchar("category", { length: 100 }).notNull(), // system, user_facing, training, marketing
+  template: text("template").notNull(),
+  temperature: decimal("temperature", { precision: 3, scale: 2 }).default("0.70"),
+  maxTokens: integer("max_tokens").default(1500),
+  isActive: boolean("is_active").default(true),
+  usageCount: integer("usage_count").default(0),
+  successRate: decimal("success_rate", { precision: 5, scale: 2 }).default("0.00"),
+  lastUsed: timestamp("last_used"),
+  createdBy: varchar("created_by").references(() => users.id),
+  updatedBy: varchar("updated_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Knowledge base Q&A entries
+export const knowledgeBase = pgTable("knowledge_base", {
+  id: serial("id").primaryKey(),
+  question: text("question").notNull(),
+  answer: text("answer").notNull(),
+  category: varchar("category", { length: 100 }).notNull(),
+  priority: integer("priority").default(1), // 1=high, 2=medium, 3=low
+  isActive: boolean("is_active").default(true),
+  tags: text("tags").array(),
+  searchCount: integer("search_count").default(0),
+  effectiveness: decimal("effectiveness", { precision: 3, scale: 2 }).default("0.00"),
+  createdBy: varchar("created_by").references(() => users.id),
+  updatedBy: varchar("updated_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Daily usage tracking for streaks and engagement
 export const dailyUsage = pgTable("daily_usage", {
   id: uuid("id").primaryKey().defaultRandom(),

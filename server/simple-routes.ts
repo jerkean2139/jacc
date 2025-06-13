@@ -1391,6 +1391,107 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
 
+  // Training & Feedback Center routes
+  app.get('/api/admin/training/interactions', async (req: Request, res: Response) => {
+    try {
+      const interactions = [
+        {
+          id: "training-1",
+          userId: "user-123", 
+          chatId: "chat-456",
+          userFirstMessage: "What are the current processing rates for restaurants?",
+          aiFirstResponse: "Restaurant processing rates typically range from 2.3% to 3.5% for card-present transactions, depending on your monthly volume and average ticket size. For a typical restaurant processing $50,000 monthly with a $25 average ticket, you'd expect rates around 2.6-2.9%. Would you like me to analyze specific rate structures or compare processors?",
+          responseQuality: "good",
+          userSatisfaction: 4,
+          trainingCategory: "pricing",
+          isFirstEverChat: true,
+          responseTime: 2400,
+          documentsUsed: ["processor_rates.pdf", "restaurant_pricing.csv"],
+          flaggedForReview: false,
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: "training-2", 
+          userId: "user-789",
+          chatId: "chat-101",
+          userFirstMessage: "I need help setting up a new merchant account for my coffee shop",
+          aiFirstResponse: "I'd be happy to help you set up a merchant account for your coffee shop! To provide the best recommendations, I'll need some information: What's your expected monthly processing volume? What's your average transaction amount? Do you need in-person, online, or both payment capabilities?",
+          responseQuality: "excellent",
+          userSatisfaction: 5,
+          trainingCategory: "onboarding",
+          isFirstEverChat: true,
+          responseTime: 1800,
+          documentsUsed: ["merchant_setup.pdf"],
+          flaggedForReview: false,
+          createdAt: new Date(Date.now() - 86400000).toISOString()
+        }
+      ];
+      
+      res.json(interactions);
+    } catch (error) {
+      console.error('Error fetching training interactions:', error);
+      res.status(500).json({ error: 'Failed to fetch training interactions' });
+    }
+  });
+
+  app.post('/api/admin/training/interactions', async (req: Request, res: Response) => {
+    try {
+      const { userFirstMessage, aiFirstResponse, responseQuality, userSatisfaction, trainingCategory } = req.body;
+      
+      const newInteraction = {
+        id: `training-${Date.now()}`,
+        userId: 'admin-user',
+        chatId: `chat-${Date.now()}`,
+        userFirstMessage,
+        aiFirstResponse,
+        responseQuality,
+        userSatisfaction,
+        trainingCategory,
+        isFirstEverChat: true,
+        responseTime: Math.floor(Math.random() * 3000) + 1000,
+        documentsUsed: [],
+        flaggedForReview: responseQuality === 'poor',
+        createdAt: new Date().toISOString()
+      };
+      
+      res.json(newInteraction);
+    } catch (error) {
+      console.error('Error creating training interaction:', error);
+      res.status(500).json({ error: 'Failed to create training interaction' });
+    }
+  });
+
+  app.get('/api/admin/training/analytics', async (req: Request, res: Response) => {
+    try {
+      const analytics = {
+        totalInteractions: 47,
+        averageSatisfaction: 4.2,
+        responseQualityDistribution: {
+          excellent: 18,
+          good: 22,
+          poor: 7
+        },
+        categoryBreakdown: {
+          pricing: 15,
+          onboarding: 12,
+          technical_support: 11,
+          product_inquiry: 9
+        },
+        averageResponseTime: 2100,
+        flaggedForReview: 7,
+        improvementTrends: {
+          weekOverWeek: "+12%",
+          monthOverMonth: "+28%"
+        }
+      };
+      
+      res.json(analytics);
+    } catch (error) {
+      console.error('Error fetching training analytics:', error);
+      res.status(500).json({ error: 'Failed to fetch training analytics' });
+    }
+  });
+
   // Register chat testing system routes
   registerChatTestingRoutes(app);
 

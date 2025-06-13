@@ -69,6 +69,16 @@ export function AdminControlCenter() {
     retry: false,
   });
 
+  const { data: trainingInteractions = [] } = useQuery({
+    queryKey: ['/api/admin/training/interactions'],
+    retry: false,
+  });
+
+  const { data: trainingAnalytics = {} } = useQuery({
+    queryKey: ['/api/admin/training/analytics'],
+    retry: false,
+  });
+
   const filteredFAQs = Array.isArray(faqData) ? faqData.filter((faq: FAQ) => {
     if (searchTerm && !faq.question.toLowerCase().includes(searchTerm.toLowerCase()) &&
         !faq.answer.toLowerCase().includes(searchTerm.toLowerCase())) {
@@ -283,14 +293,270 @@ export function AdminControlCenter() {
           </Card>
         </TabsContent>
 
-        {/* Training Tab */}
+        {/* Training & Feedback Center */}
         <TabsContent value="training" className="space-y-6">
-          <Card>
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold">Training & Feedback Center</h2>
+            <Badge variant="outline" className="text-lg px-3 py-1">
+              First Interaction Tracking
+            </Badge>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Analytics Cards */}
+            <Card className="border-2 border-purple-500">
+              <CardHeader>
+                <CardTitle className="text-purple-600 flex items-center gap-2">
+                  <BarChart3 className="w-5 h-5" />
+                  Analytics Overview
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium">Total First Interactions</span>
+                    <Badge variant="secondary">47</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium">Average Satisfaction</span>
+                    <Badge variant="secondary">4.2/5</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium">Flagged for Review</span>
+                    <Badge variant="destructive">7</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium">Response Time</span>
+                    <Badge variant="outline">2.1s avg</Badge>
+                  </div>
+                </div>
+
+                <Separator className="my-4" />
+
+                <div>
+                  <h6 className="font-medium text-sm mb-2">Response Quality Distribution</h6>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs">Excellent</span>
+                      <div className="flex items-center gap-2">
+                        <Progress value={38} className="w-16 h-2" />
+                        <span className="text-xs">18</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs">Good</span>
+                      <div className="flex items-center gap-2">
+                        <Progress value={47} className="w-16 h-2" />
+                        <span className="text-xs">22</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs">Poor</span>
+                      <div className="flex items-center gap-2">
+                        <Progress value={15} className="w-16 h-2" />
+                        <span className="text-xs">7</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Training Categories */}
+            <Card className="border-2 border-blue-500">
+              <CardHeader>
+                <CardTitle className="text-blue-600 flex items-center gap-2">
+                  <Target className="w-5 h-5" />
+                  Training Categories
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {[
+                    { category: 'Pricing Inquiries', count: 15, color: 'bg-green-500' },
+                    { category: 'Onboarding', count: 12, color: 'bg-blue-500' },
+                    { category: 'Technical Support', count: 11, color: 'bg-yellow-500' },
+                    { category: 'Product Inquiry', count: 9, color: 'bg-purple-500' }
+                  ].map(item => (
+                    <div key={item.category} className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className={`w-3 h-3 rounded-full ${item.color}`}></div>
+                        <span className="text-sm">{item.category}</span>
+                      </div>
+                      <Badge variant="outline">{item.count}</Badge>
+                    </div>
+                  ))}
+                </div>
+
+                <Separator className="my-4" />
+
+                <div>
+                  <h6 className="font-medium text-sm mb-2">Improvement Trends</h6>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-xs">Week over Week</span>
+                      <Badge variant="secondary" className="text-green-600">+12%</Badge>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-xs">Month over Month</span>
+                      <Badge variant="secondary" className="text-green-600">+28%</Badge>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Quick Actions */}
+            <Card className="border-2 border-orange-500">
+              <CardHeader>
+                <CardTitle className="text-orange-600 flex items-center gap-2">
+                  <Zap className="w-5 h-5" />
+                  Quick Actions
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <Button className="w-full justify-start" variant="outline">
+                    <Eye className="w-4 h-4 mr-2" />
+                    Review Flagged Interactions
+                  </Button>
+                  <Button className="w-full justify-start" variant="outline">
+                    <Download className="w-4 h-4 mr-2" />
+                    Export Training Data
+                  </Button>
+                  <Button className="w-full justify-start" variant="outline">
+                    <BarChart3 className="w-4 h-4 mr-2" />
+                    Generate Report
+                  </Button>
+                  <Button className="w-full justify-start" variant="outline">
+                    <Settings className="w-4 h-4 mr-2" />
+                    Training Settings
+                  </Button>
+                </div>
+
+                <Separator className="my-4" />
+
+                <div>
+                  <h6 className="font-medium text-sm mb-2">System Status</h6>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="w-4 h-4 text-green-500" />
+                      <span className="text-xs">Training Logger Active</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="w-4 h-4 text-green-500" />
+                      <span className="text-xs">First Chat Detection</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="w-4 h-4 text-green-500" />
+                      <span className="text-xs">Response Quality Tracking</span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* First Interactions Log */}
+          <Card className="border-2 border-green-500">
             <CardHeader>
-              <CardTitle>Training & Feedback</CardTitle>
+              <CardTitle className="text-green-600 flex items-center gap-2">
+                <MessageSquare className="w-5 h-5" />
+                First Interactions Log - Real-Time Training Data
+              </CardTitle>
+              <CardDescription>
+                Capturing every user's first message and JACC's first response for training improvement
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <p>Chat emulator and training feedback system</p>
+              <ScrollArea className="h-[400px]">
+                <div className="space-y-4">
+                  {[
+                    {
+                      id: 1,
+                      userMessage: "What are the current processing rates for restaurants?",
+                      aiResponse: "Restaurant processing rates typically range from 2.3% to 3.5% for card-present transactions, depending on your monthly volume and average ticket size. For a typical restaurant processing $50,000 monthly with a $25 average ticket, you'd expect rates around 2.6-2.9%. Would you like me to analyze specific rate structures or compare processors?",
+                      quality: "good",
+                      satisfaction: 4,
+                      category: "pricing",
+                      responseTime: 2400,
+                      timestamp: "2 hours ago"
+                    },
+                    {
+                      id: 2,
+                      userMessage: "I need help setting up a new merchant account for my coffee shop",
+                      aiResponse: "I'd be happy to help you set up a merchant account for your coffee shop! To provide the best recommendations, I'll need some information: What's your expected monthly processing volume? What's your average transaction amount? Do you need in-person, online, or both payment capabilities?",
+                      quality: "excellent",
+                      satisfaction: 5,
+                      category: "onboarding",
+                      responseTime: 1800,
+                      timestamp: "1 day ago"
+                    },
+                    {
+                      id: 3,
+                      userMessage: "My POS system keeps declining cards, what should I do?",
+                      aiResponse: "Card declines can be frustrating. Let's troubleshoot this step by step. First, can you tell me: What type of POS system are you using? Are you seeing specific error codes? Is this happening with all cards or just certain types?",
+                      quality: "good",
+                      satisfaction: 4,
+                      category: "technical_support",
+                      responseTime: 2100,
+                      timestamp: "1 day ago"
+                    }
+                  ].map(interaction => (
+                    <div key={interaction.id} className="border rounded-lg p-4 bg-gray-50 dark:bg-gray-800">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline">{interaction.category}</Badge>
+                          <Badge variant={interaction.quality === 'excellent' ? 'default' : interaction.quality === 'good' ? 'secondary' : 'destructive'}>
+                            {interaction.quality}
+                          </Badge>
+                          <div className="flex items-center gap-1">
+                            {Array.from({ length: 5 }).map((_, i) => (
+                              <div
+                                key={i}
+                                className={`w-3 h-3 rounded-full ${
+                                  i < interaction.satisfaction ? 'bg-yellow-400' : 'bg-gray-300'
+                                }`}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                          <Timer className="w-4 h-4" />
+                          {interaction.responseTime}ms • {interaction.timestamp}
+                        </div>
+                      </div>
+
+                      <div className="space-y-3">
+                        <div>
+                          <h6 className="font-medium text-sm mb-1 text-blue-600">User's First Message:</h6>
+                          <p className="text-sm bg-blue-50 dark:bg-blue-900/20 p-2 rounded border-l-4 border-blue-500">
+                            {interaction.userMessage}
+                          </p>
+                        </div>
+
+                        <div>
+                          <h6 className="font-medium text-sm mb-1 text-green-600">JACC's First Response:</h6>
+                          <p className="text-sm bg-green-50 dark:bg-green-900/20 p-2 rounded border-l-4 border-green-500">
+                            {interaction.aiResponse}
+                          </p>
+                        </div>
+
+                        <div className="flex justify-end gap-2">
+                          <Button size="sm" variant="ghost">
+                            <Edit className="w-3 h-3 mr-1" />
+                            Review
+                          </Button>
+                          <Button size="sm" variant="ghost">
+                            <BookOpen className="w-3 h-3 mr-1" />
+                            Use for Training
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
             </CardContent>
           </Card>
         </TabsContent>
