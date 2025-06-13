@@ -401,6 +401,108 @@ export function UnifiedAdminPanel() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Left Side - Q&A Knowledge Base */}
+            <div className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Q&A Knowledge Base</CardTitle>
+                  <CardDescription>Manage questions and answers for the AI knowledge base</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label className="text-sm font-medium">Question/Title</Label>
+                        <Input 
+                          placeholder="What are the current processing rates for restaurants?"
+                          className="mt-1"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium">Category</Label>
+                        <Select defaultValue="merchant_services">
+                          <SelectTrigger className="mt-1">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="merchant_services">Merchant Services</SelectItem>
+                            <SelectItem value="pos_systems">POS Systems</SelectItem>
+                            <SelectItem value="technical_support">Technical Support</SelectItem>
+                            <SelectItem value="integrations">Integrations</SelectItem>
+                            <SelectItem value="pricing">Pricing & Rates</SelectItem>
+                            <SelectItem value="general">General</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label className="text-sm font-medium">Answer/Content</Label>
+                      <Textarea 
+                        placeholder="Detailed answer with specific rates, terms, and guidance..."
+                        className="mt-1 min-h-[100px]"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label className="text-sm font-medium">Priority</Label>
+                        <Select defaultValue="low">
+                          <SelectTrigger className="mt-1">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="high">High</SelectItem>
+                            <SelectItem value="medium">Medium</SelectItem>
+                            <SelectItem value="low">Low</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex items-end">
+                        <Button className="w-full">
+                          Add Q&A Entry
+                        </Button>
+                      </div>
+                    </div>
+
+                    <Separator />
+
+                    <div>
+                      <h6 className="font-medium text-sm mb-2">Existing Q&A Entries</h6>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        {filteredFAQs.length > 0 ? `${filteredFAQs.length} entries found` : 'No knowledge base entries found.'}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Categories</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {['POS Systems', 'Technical Support', 'Integrations', 'Pricing & Rates', 'General', 'Payment Processing'].map(category => {
+                      const count = faqData.filter((f: FAQ) => f.category === category).length;
+                      return (
+                        <Button
+                          key={category}
+                          variant="ghost"
+                          className="w-full justify-between"
+                          size="sm"
+                        >
+                          <span>{category}</span>
+                          <Badge variant="outline">{count}</Badge>
+                        </Button>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Center and Right - FAQ Entries Display */}
             <div className="lg:col-span-2">
               <Card>
                 <CardHeader>
@@ -447,52 +549,6 @@ export function UnifiedAdminPanel() {
                       ))}
                     </div>
                   </ScrollArea>
-                </CardContent>
-              </Card>
-            </div>
-
-            <div className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Categories</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    {['POS Systems', 'Technical Support', 'Integrations', 'Pricing & Rates', 'General', 'Payment Processing'].map(category => {
-                      const count = faqData.filter((f: FAQ) => f.category === category).length;
-                      return (
-                        <Button
-                          key={category}
-                          variant="ghost"
-                          className="w-full justify-between"
-                          size="sm"
-                        >
-                          <span>{category}</span>
-                          <Badge variant="outline">{count}</Badge>
-                        </Button>
-                      );
-                    })}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Quick Stats</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-sm">Total FAQs:</span>
-                    <span className="font-medium">{faqData.length}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm">Active:</span>
-                    <span className="font-medium">{faqData.filter((f: FAQ) => f.isActive).length}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm">Categories:</span>
-                    <span className="font-medium">6</span>
-                  </div>
                 </CardContent>
               </Card>
             </div>
