@@ -382,9 +382,10 @@ export class ChatTestingSystem {
 
   getTestingSummary() {
     const scenarios = Array.from(this.testScenarios.values());
-    const recentResults = this.testResults.filter(r => 
-      Date.now() - r.timestamp.getTime() < 24 * 60 * 60 * 1000
-    );
+    const recentResults = this.testResults.filter(r => {
+      const timestamp = r.timestamp instanceof Date ? r.timestamp : new Date(r.timestamp);
+      return Date.now() - timestamp.getTime() < 24 * 60 * 60 * 1000;
+    });
 
     return {
       totalScenarios: scenarios.length,

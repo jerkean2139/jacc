@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { AlertTriangle, Brain, CheckCircle, MessageSquare, Settings, Target, FileText, Eye, Download, ExternalLink, Plus, Edit, Trash2, Save, X, Archive, BookOpen, Database, Upload, Search, ChevronDown, ChevronRight, Sliders } from 'lucide-react';
+import { AlertTriangle, Brain, CheckCircle, MessageSquare, Settings, Target, FileText, Eye, Download, ExternalLink, Plus, Edit, Trash2, Save, X, Archive, BookOpen, Database, Upload, Search, ChevronDown, ChevronRight, Sliders, Folder, FolderOpen } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Slider } from '@/components/ui/slider';
 import { apiRequest } from '@/lib/queryClient';
@@ -105,6 +105,8 @@ export function AdminTrainingPage() {
   const [selectedDocuments, setSelectedDocuments] = useState<string[]>([]);
   const [documentFilter, setDocumentFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [viewMode, setViewMode] = useState<'list' | 'folder'>('list');
+  const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
   const [documentPermissions, setDocumentPermissions] = useState({
     viewAll: true,
     adminOnly: false,
@@ -177,6 +179,11 @@ export function AdminTrainingPage() {
 
   const { data: documentsData = [] } = useQuery({
     queryKey: ['/api/admin/documents'],
+    retry: false,
+  });
+
+  const { data: foldersData = [] } = useQuery({
+    queryKey: ['/api/folders'],
     retry: false,
   });
 
@@ -784,7 +791,7 @@ export function AdminTrainingPage() {
               {/* Document List */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <h4 className="font-medium">Uploaded Documents</h4>
+                  <h4 className="font-medium">Document & Folder Management</h4>
                   <div className="flex gap-2">
                     <Input
                       placeholder="Search documents..."
@@ -798,17 +805,146 @@ export function AdminTrainingPage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">All</SelectItem>
-                        <SelectItem value="vectorized">Vectorized</SelectItem>
-                        <SelectItem value="pending">Pending</SelectItem>
-                        <SelectItem value="active">Active</SelectItem>
+                        <SelectItem value="pdf">PDFs</SelectItem>
+                        <SelectItem value="csv">CSVs</SelectItem>
+                        <SelectItem value="text">Text Files</SelectItem>
+                        <SelectItem value="recent">Recent</SelectItem>
                       </SelectContent>
                     </Select>
+                    <Button
+                      variant={viewMode === 'folder' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setViewMode(viewMode === 'folder' ? 'list' : 'folder')}
+                    >
+                      {viewMode === 'folder' ? 'List View' : 'Folder View'}
+                    </Button>
                   </div>
                 </div>
 
+                {/* Folder View */}
+                {viewMode === 'folder' && (
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+                    {/* Folders Column */}
+                    <div className="space-y-2">
+                      <h5 className="font-medium text-sm text-gray-700 dark:text-gray-300">Folders</h5>
+                      <div className="space-y-1 max-h-64 overflow-y-auto">
+                        <Button
+                          variant={selectedFolder === null ? 'default' : 'ghost'}
+                          size="sm"
+                          className="w-full justify-start"
+                          onClick={() => setSelectedFolder(null)}
+                        >
+                          <FolderOpen className="w-4 h-4 mr-2" />
+                          All Documents ({documentsData.length})
+                        </Button>
+                        {Array.isArray(foldersData) && foldersData.map((folder: any) => {
+                          const folderDocCount = documentsData.filter((doc: any) => doc.folderId === folder.id).length;
+                          return (
+                            <Button
+                              key={folder.id}
+                              variant={selectedFolder === folder.id ? 'default' : 'ghost'}
+                              size="sm"
+                              className="w-full justify-start"
+                              onClick={() => setSelectedFolder(folder.id)}
+                            >
+                              <Folder className="w-4 h-4 mr-2" />
+                              {folder.name} ({folderDocCount})
+                            </Button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Document Categories */}
+                    <div className="space-y-2">
+                      <h5 className="font-medium text-sm text-gray-700 dark:text-gray-300">By File Type</h5>
+                      <div className="space-y-1">
+                        {[
+                          { type: 'pdf', label: 'PDF Documents', icon: FileText },
+                          { type: 'csv', label: 'CSV Files', icon: Database },
+                          { type: 'text', label: 'Text Files', icon: FileText },
+                          { type: 'image', label: 'Images', icon: FileText }
+                        ].map(({ type, label, icon: Icon }) => {
+                          const count = documentsData.filter((doc: any) => 
+                            doc.mimeType?.includes(type) || doc.originalName?.toLowerCase().includes(`.${type}`)
+                          ).length;
+                          return (
+                            <Button
+                              key={type}
+                              variant="ghost"
+                              size="sm"
+                              className="w-full justify-between"
+                              onClick={() => setDocumentFilter(type)}
+                            >
+                              <div className="flex items-center">
+                                <Icon className="w-4 h-4 mr-2" />
+                                {label}
+                              </div>
+                              <Badge variant="outline">{count}</Badge>
+                            </Button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Quick Stats */}
+                    <div className="space-y-2">
+                      <h5 className="font-medium text-sm text-gray-700 dark:text-gray-300">Quick Stats</h5>
+                      <div className="space-y-2">
+                        <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded text-sm">
+                          <div className="flex justify-between">
+                            <span>Total Documents:</span>
+                            <span className="font-medium">{documentsData.length}</span>
+                          </div>
+                        </div>
+                        <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded text-sm">
+                          <div className="flex justify-between">
+                            <span>Total Folders:</span>
+                            <span className="font-medium">{foldersData.length}</span>
+                          </div>
+                        </div>
+                        <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded text-sm">
+                          <div className="flex justify-between">
+                            <span>Total Size:</span>
+                            <span className="font-medium">
+                              {(documentsData.reduce((sum: number, doc: any) => sum + (doc.size || 0), 0) / 1024 / 1024).toFixed(1)} MB
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div className="space-y-2 max-h-96 overflow-y-auto">
                   {Array.isArray(documentsData) && documentsData.length > 0 ? (
-                    documentsData.map((doc: DocumentEntry) => (
+                    documentsData
+                      .filter((doc: any) => {
+                        // Filter by folder selection
+                        if (selectedFolder !== null && doc.folderId !== selectedFolder) {
+                          return false;
+                        }
+                        
+                        // Filter by document type
+                        if (documentFilter !== 'all') {
+                          if (documentFilter === 'pdf' && !doc.mimeType?.includes('pdf')) return false;
+                          if (documentFilter === 'csv' && !doc.mimeType?.includes('csv')) return false;
+                          if (documentFilter === 'text' && !doc.mimeType?.includes('text')) return false;
+                          if (documentFilter === 'recent') {
+                            const weekAgo = new Date();
+                            weekAgo.setDate(weekAgo.getDate() - 7);
+                            if (new Date(doc.createdAt) < weekAgo) return false;
+                          }
+                        }
+                        
+                        // Filter by search term
+                        if (searchTerm && !doc.originalName?.toLowerCase().includes(searchTerm.toLowerCase())) {
+                          return false;
+                        }
+                        
+                        return true;
+                      })
+                      .map((doc: any) => (
                       <div key={doc.id} className="border rounded-lg p-3 bg-white dark:bg-gray-900">
                         <div className="flex items-start justify-between">
                           <div className="flex-1 min-w-0">
