@@ -58,6 +58,13 @@ export function AdminControlCenter() {
   const [newFaqAnswer, setNewFaqAnswer] = useState('');
   const [newFaqCategory, setNewFaqCategory] = useState('general');
   const [showAddFaq, setShowAddFaq] = useState(false);
+  const [showCreatePrompt, setShowCreatePrompt] = useState(false);
+  const [newPromptName, setNewPromptName] = useState('');
+  const [newPromptDescription, setNewPromptDescription] = useState('');
+  const [newPromptTemplate, setNewPromptTemplate] = useState('');
+  const [newPromptCategory, setNewPromptCategory] = useState('system');
+  const [newPromptTemperature, setNewPromptTemperature] = useState(0.7);
+  const [newPromptMaxTokens, setNewPromptMaxTokens] = useState(1000);
   const queryClient = useQueryClient();
 
   // Data fetching
@@ -190,6 +197,46 @@ export function AdminControlCenter() {
   const categories = Array.isArray(faqData) ? 
     [...new Set(faqData.map((faq: FAQ) => faq.category))] : [];
 
+  // Prompt template functions
+  const handleCreatePrompt = async () => {
+    if (!newPromptName.trim() || !newPromptTemplate.trim()) {
+      alert('Please fill in name and template fields');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/admin/prompt-templates', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          name: newPromptName,
+          description: newPromptDescription,
+          template: newPromptTemplate,
+          category: newPromptCategory,
+          temperature: newPromptTemperature,
+          maxTokens: newPromptMaxTokens,
+          isActive: true
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create prompt template');
+      }
+
+      setNewPromptName('');
+      setNewPromptDescription('');
+      setNewPromptTemplate('');
+      setShowCreatePrompt(false);
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/prompt-templates'] });
+    } catch (error) {
+      console.error('Error creating prompt:', error);
+      alert('Failed to create prompt template');
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-6 max-w-7xl">
       <div className="mb-6">
@@ -282,20 +329,22 @@ export function AdminControlCenter() {
                       </div>
                     </div>
 
-                    <Button className="w-full bg-blue-600 hover:bg-blue-700">
+                      <div className="flex gap-2">
+                        <Button onClick={handleAddFaq} className="flex-1 bg-blue-600 hover:bg-blue-700">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add Q&A Entry
+                        </Button>
+                        <Button onClick={() => setShowAddFaq(false)} variant="outline">
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <Button onClick={() => setShowAddFaq(true)} className="w-full bg-blue-600 hover:bg-blue-700">
                       <Plus className="w-4 h-4 mr-2" />
                       Add Q&A Entry
                     </Button>
-
-                    <Separator />
-
-                    <div>
-                      <h6 className="font-medium text-sm mb-2">Existing Q&A Entries</h6>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        {filteredFAQs.length > 0 ? `${filteredFAQs.length} entries found` : 'No knowledge base entries found.'}
-                      </p>
-                    </div>
-                  </div>
+                  )}
                 </CardContent>
               </Card>
 
@@ -324,11 +373,11 @@ export function AdminControlCenter() {
               </Card>
             </div>
 
-            {/* RIGHT SIDE - FAQ Entries Display */}
+            {/* FAQ Entries Display */}
             <div>
               <Card className="border-2 border-green-500">
                 <CardHeader>
-                  <CardTitle className="text-green-600">⭐ FAQ Entries Display (RIGHT SIDE) - {filteredFAQs.length} entries</CardTitle>
+                  <CardTitle className="text-green-600">FAQ Entries - {filteredFAQs.length} entries</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ScrollArea className="h-[600px]">
@@ -872,7 +921,10 @@ export function AdminControlCenter() {
         <TabsContent value="prompts" className="space-y-6">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold">AI Prompt Management</h2>
-            <Button className="bg-purple-600 hover:bg-purple-700">
+            <Button 
+              className="bg-purple-600 hover:bg-purple-700"
+              onClick={() => setShowCreatePrompt(true)}
+            >
               <Plus className="w-4 h-4 mr-2" />
               Create Prompt Template
             </Button>
@@ -886,59 +938,236 @@ export function AdminControlCenter() {
                 <CardDescription>Design custom prompts for specific use cases</CardDescription>
               </CardHeader>
               <CardContent>
+                {showCreatePrompt ? (
+                  <div className="space-y-4">
+                    <div>
+                      <Label className="text-sm font-medium">Template Name</Label>
+                      <Input 
+                        placeholder="e.g., Merchant Analysis Assistant"
+                        className="mt-1"
+                        value={newPromptName}
+                        onChange={(e) => setNewPromptName(e.target.value)}
+                      />
+                    </div>
+
+                    <div>
+                      <Label className="text-sm font-medium">Description</Label>
+                      <Input 
+                        placeholder="What this prompt template is used for"
+                        className="mt-1"
+                        value={newPromptDescription}
+                        onChange={(e) => setNewPromptDescription(e.target.value)}
+                      />
+                    </div>
+
+                    <div>
+                      <Label className="text-sm font-medium">Prompt Template</Label>
+                      <Textarea 
+                        placeholder="You are an expert merchant services advisor. Help analyze {merchant_type} businesses..."
+                        className="mt-1 min-h-[120px]"
+                        value={newPromptTemplate}
+                        onChange={(e) => setNewPromptTemplate(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label className="text-sm font-medium">Category</Label>
+                        <Select value={newPromptCategory} onValueChange={setNewPromptCategory}>
+                          <SelectTrigger className="mt-1">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="system">System Prompt</SelectItem>
+                            <SelectItem value="admin">Admin Prompt</SelectItem>
+                            <SelectItem value="assistant">Assistant Prompt</SelectItem>
+                            <SelectItem value="analysis">Analysis Prompt</SelectItem>
+                            <SelectItem value="customer">Customer Service</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div>
+                        <Label className="text-sm font-medium">Temperature</Label>
+                        <Input 
+                          type="number"
+                          min="0"
+                          max="2"
+                          step="0.1"
+                          className="mt-1"
+                          value={newPromptTemperature}
+                          onChange={(e) => setNewPromptTemperature(parseFloat(e.target.value))}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label className="text-sm font-medium">Max Tokens</Label>
+                      <Input 
+                        type="number"
+                        min="100"
+                        max="4000"
+                        step="100"
+                        className="mt-1"
+                        value={newPromptMaxTokens}
+                        onChange={(e) => setNewPromptMaxTokens(parseInt(e.target.value))}
+                      />
+                    </div>
+
+                    <div className="flex gap-2">
+                      <Button onClick={handleCreatePrompt} className="flex-1 bg-purple-600 hover:bg-purple-700">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Create Template
+                      </Button>
+                      <Button onClick={() => setShowCreatePrompt(false)} variant="outline">
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <Button onClick={() => setShowCreatePrompt(true)} className="bg-purple-600 hover:bg-purple-700">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Start Creating Template
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* AI Controls & System Prompts */}
+            <Card className="border-2 border-orange-500">
+              <CardHeader>
+                <CardTitle className="text-orange-600">⚙️ AI Agent Controls</CardTitle>
+                <CardDescription>Fine-tune AI behavior and system prompts</CardDescription>
+              </CardHeader>
+              <CardContent>
                 <div className="space-y-4">
                   <div>
-                    <Label className="text-sm font-medium">Template Name</Label>
-                    <Input 
-                      placeholder="e.g., Merchant Analysis Assistant"
-                      className="mt-1"
-                    />
-                  </div>
-
-                  <div>
-                    <Label className="text-sm font-medium">Description</Label>
-                    <Input 
-                      placeholder="What this prompt template is used for"
-                      className="mt-1"
-                    />
-                  </div>
-
-                  <div>
-                    <Label className="text-sm font-medium">Prompt Template</Label>
-                    <Textarea 
-                      placeholder="You are an expert merchant services advisor. Your role is to analyze {merchant_data} and provide insights on {analysis_type}. Focus on {key_metrics} and ensure your response includes {required_sections}."
-                      className="mt-1 min-h-[120px] font-mono text-sm"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label className="text-sm font-medium">Category</Label>
-                      <Select defaultValue="merchant_analysis">
-                        <SelectTrigger className="mt-1">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="merchant_analysis">Merchant Analysis</SelectItem>
-                          <SelectItem value="pricing_comparison">Pricing Comparison</SelectItem>
-                          <SelectItem value="technical_support">Technical Support</SelectItem>
-                          <SelectItem value="sales_coaching">Sales Coaching</SelectItem>
-                          <SelectItem value="document_analysis">Document Analysis</SelectItem>
-                          <SelectItem value="general_assistant">General Assistant</SelectItem>
-                        </SelectContent>
-                      </Select>
+                    <Label className="text-sm font-medium">Global Temperature</Label>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Input 
+                        type="range"
+                        min="0"
+                        max="2"
+                        step="0.1"
+                        className="flex-1"
+                        defaultValue="0.7"
+                      />
+                      <span className="text-sm font-mono w-8">0.7</span>
                     </div>
-                    <div>
-                      <Label className="text-sm font-medium">Temperature</Label>
-                      <Select defaultValue="0.7">
-                        <SelectTrigger className="mt-1">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="0.1">0.1 (Very Focused)</SelectItem>
-                          <SelectItem value="0.3">0.3 (Focused)</SelectItem>
-                          <SelectItem value="0.5">0.5 (Balanced)</SelectItem>
-                          <SelectItem value="0.7">0.7 (Creative)</SelectItem>
+                    <p className="text-xs text-gray-500 mt-1">Controls randomness (0=focused, 2=creative)</p>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium">Response Length</Label>
+                    <Select defaultValue="medium">
+                      <SelectTrigger className="mt-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="short">Short (500 tokens)</SelectItem>
+                        <SelectItem value="medium">Medium (1000 tokens)</SelectItem>
+                        <SelectItem value="long">Long (2000 tokens)</SelectItem>
+                        <SelectItem value="detailed">Detailed (4000 tokens)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium">Top-p (Nucleus Sampling)</Label>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Input 
+                        type="range"
+                        min="0.1"
+                        max="1"
+                        step="0.1"
+                        className="flex-1"
+                        defaultValue="0.9"
+                      />
+                      <span className="text-sm font-mono w-8">0.9</span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium">Frequency Penalty</Label>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Input 
+                        type="range"
+                        min="0"
+                        max="2"
+                        step="0.1"
+                        className="flex-1"
+                        defaultValue="0.5"
+                      />
+                      <span className="text-sm font-mono w-8">0.5</span>
+                    </div>
+                  </div>
+
+                  <Button className="w-full bg-orange-600 hover:bg-orange-700">
+                    <Save className="w-4 h-4 mr-2" />
+                    Save AI Settings
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* System Prompts Management */}
+          <Card>
+            <CardHeader>
+              <CardTitle>System & Admin Prompts</CardTitle>
+              <CardDescription>Manage core AI prompts that control system behavior</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ScrollArea className="h-[400px]">
+                <div className="space-y-3">
+                  {Array.isArray(promptTemplates) && promptTemplates.length > 0 ? (
+                    promptTemplates.map((template: PromptTemplate) => (
+                      <Card key={template.id} className="border">
+                        <CardHeader className="pb-2">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <CardTitle className="text-sm">{template.name}</CardTitle>
+                              <CardDescription className="text-xs">{template.description}</CardDescription>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline">{template.category}</Badge>
+                              <Button size="sm" variant="ghost">
+                                <Edit className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          </div>
+                        </CardHeader>
+                        <CardContent className="pt-0">
+                          <div className="text-xs text-gray-600 bg-gray-50 p-2 rounded border">
+                            {template.template.length > 150 ? 
+                              `${template.template.substring(0, 150)}...` : 
+                              template.template
+                            }
+                          </div>
+                          <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
+                            <span>Temp: {template.temperature}</span>
+                            <span>Tokens: {template.maxTokens}</span>
+                            <span className={`${template.isActive ? 'text-green-600' : 'text-red-600'}`}>
+                              {template.isActive ? 'Active' : 'Inactive'}
+                            </span>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      <MessageSquare className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                      <p>No prompt templates found</p>
+                      <p className="text-sm">Create your first template above</p>
+                    </div>
+                  )}
+                </div>
+              </ScrollArea>
+            </CardContent>
+          </Card>
+        </TabsContent>
                           <SelectItem value="0.9">0.9 (Very Creative)</SelectItem>
                         </SelectContent>
                       </Select>
