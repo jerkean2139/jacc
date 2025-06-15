@@ -507,26 +507,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       for (const file of files) {
         const newDocument = {
-          id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
           name: file.filename,
           originalName: file.originalname,
           mimeType: file.mimetype,
           size: file.size,
           path: file.path,
           userId: 'admin-user',
-          folderId: folderId || 'general',
-          permissions: permissions || 'admin',
+          folderId: null, // Will be set to UUID later if needed
           isFavorite: false,
-          isPublic: false,
+          isPublic: permissions !== 'admin',
           adminOnly: permissions === 'admin',
-          managerOnly: permissions === 'client-admin',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          managerOnly: permissions === 'client-admin'
         };
 
-        // Insert document into database
-        await db.insert(documents).values(newDocument);
-        uploadedDocuments.push(newDocument);
+        // Insert document into database and get the inserted record
+        const [insertedDoc] = await db.insert(documents).values(newDocument).returning();
+        uploadedDocuments.push(insertedDoc);
         
         // Process document for indexing
         try {
@@ -541,19 +537,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
 
           if (content.length > 0) {
-            const chunks = createTextChunks(content, newDocument);
+            const chunks = createTextChunks(content, insertedDoc);
             
             for (const chunk of chunks) {
               await db.insert(documentChunks).values({
-                id: Math.random().toString(36).substring(2, 15),
-                documentId: newDocument.id,
+                documentId: insertedDoc.id,
                 content: chunk.content,
-                chunkIndex: chunk.chunkIndex,
-                createdAt: new Date().toISOString()
+                chunkIndex: chunk.chunkIndex
               });
             }
             
-            console.log(`Document processed and indexed: ${newDocument.originalName} (${chunks.length} chunks created)`);
+            console.log(`Document processed and indexed: ${insertedDoc.originalName} (${chunks.length} chunks created)`);
           }
         } catch (processingError) {
           console.warn(`Document uploaded but processing failed: ${processingError}`);
