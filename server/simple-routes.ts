@@ -595,7 +595,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Scan for duplicate documents endpoint
+  // Comprehensive document integrity scan endpoint
   app.post('/api/admin/documents/scan-duplicates', async (req: Request, res: Response) => {
     try {
       const { db } = await import('./db.ts');
@@ -607,11 +607,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const hashMap = new Map();
       const duplicateGroups = [];
       const missingFiles = [];
+      const validFiles = [];
+      
+      console.log(`\n=== DOCUMENT INTEGRITY ANALYSIS ===`);
+      console.log(`Total database records: ${allDocs.length}`);
       
       // Process each document to calculate hash and find duplicates
       for (const doc of allDocs) {
         try {
           if (fs.existsSync(doc.path)) {
+            validFiles.push(doc);
             const fileBuffer = fs.readFileSync(doc.path);
             const fileHash = crypto.createHash('sha256').update(fileBuffer).digest('hex');
             
@@ -636,15 +641,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         } catch (error) {
           console.warn(`Error processing document ${doc.id}:`, error.message);
+          missingFiles.push(doc);
         }
       }
+      
+      const trueDuplicates = duplicateGroups.reduce((sum, group) => sum + group.duplicates.length, 0);
+      const uniqueFiles = validFiles.length - trueDuplicates;
+      
+      console.log(`Valid files found: ${validFiles.length}`);
+      console.log(`Missing files: ${missingFiles.length}`);
+      console.log(`True duplicates: ${trueDuplicates}`);
+      console.log(`Unique valid documents: ${uniqueFiles}`);
+      console.log(`=====================================\n`);
       
       res.json({ 
         success: true, 
         duplicateGroups: duplicateGroups,
         missingFiles: missingFiles,
-        totalDuplicates: duplicateGroups.reduce((sum, group) => sum + group.duplicates.length, 0) + missingFiles.length,
-        totalProcessed: allDocs.length
+        validFiles: validFiles.length,
+        totalDuplicates: trueDuplicates,
+        totalMissing: missingFiles.length,
+        totalProcessed: allDocs.length,
+        uniqueDocuments: uniqueFiles,
+        integrityIssue: missingFiles.length > (allDocs.length * 0.1), // Flag if >10% missing
+        summary: {
+          originalExpected: 115,
+          databaseRecords: allDocs.length,
+          physicalFiles: validFiles.length,
+          missingFiles: missingFiles.length,
+          trueDuplicates: trueDuplicates,
+          uniqueValid: uniqueFiles
+        }
       });
     } catch (error) {
       console.error("Error scanning duplicates:", error);
@@ -652,34 +679,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Remove duplicate documents endpoint
+  // Comprehensive document cleanup endpoint
   app.post('/api/admin/documents/remove-duplicates', async (req: Request, res: Response) => {
     try {
       const { db } = await import('./db.ts');
-      const { documents } = await import('../shared/schema.ts');
+      const { documents, documentChunks } = await import('../shared/schema.ts');
+      const { eq } = await import('drizzle-orm');
       const crypto = await import('crypto');
       
       // Get all documents
       const allDocs = await db.select().from(documents);
       const hashMap = new Map();
-      const duplicatesToRemove = [];
+      const phantomRecords = [];
+      const trueDuplicates = [];
+      const validDocuments = [];
       
-      // Process each document to calculate hash and find duplicates
+      console.log(`\n=== DOCUMENT CLEANUP OPERATION ===`);
+      console.log(`Processing ${allDocs.length} database records...`);
+      
+      // Process each document
       for (const doc of allDocs) {
         try {
           if (fs.existsSync(doc.path)) {
+            validDocuments.push(doc);
             const fileBuffer = fs.readFileSync(doc.path);
             const fileHash = crypto.createHash('sha256').update(fileBuffer).digest('hex');
             
             if (hashMap.has(fileHash)) {
-              // This is a duplicate
-              duplicatesToRemove.push(doc.id);
-              console.log(`Duplicate found: ${doc.originalName} (${doc.id})`);
+              // True duplicate file content
+              trueDuplicates.push(doc.id);
+              console.log(`True duplicate: ${doc.originalName} (${doc.id})`);
             } else {
-              // First occurrence of this hash
+              // First occurrence of this hash - keep it
               hashMap.set(fileHash, doc.id);
               
-              // Update the document with content hash if missing
+              // Update content hash if missing
               if (!doc.contentHash) {
                 await db.update(documents)
                   .set({ contentHash: fileHash })
@@ -687,31 +721,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
               }
             }
           } else {
-            // File doesn't exist, mark for removal
-            duplicatesToRemove.push(doc.id);
-            console.log(`Missing file: ${doc.originalName} (${doc.id})`);
+            // Phantom record - database entry with no file
+            phantomRecords.push(doc.id);
+            console.log(`Phantom record: ${doc.originalName} (${doc.id}) - no file exists`);
           }
         } catch (error) {
           console.warn(`Error processing document ${doc.id}:`, error.message);
+          phantomRecords.push(doc.id);
         }
       }
       
-      // Remove duplicates from database
+      const toRemove = [...phantomRecords, ...trueDuplicates];
+      
+      // Remove phantom records and true duplicates
       let removedCount = 0;
-      for (const docId of duplicatesToRemove) {
+      for (const docId of toRemove) {
+        // Remove associated document chunks first
+        await db.delete(documentChunks).where(eq(documentChunks.documentId, docId));
+        // Remove document record
         await db.delete(documents).where(eq(documents.id, docId));
         removedCount++;
       }
       
+      const remainingValid = validDocuments.length - trueDuplicates.length;
+      
+      console.log(`Removed ${phantomRecords.length} phantom records`);
+      console.log(`Removed ${trueDuplicates.length} true duplicates`);
+      console.log(`Preserved ${remainingValid} unique valid documents`);
+      console.log(`===================================\n`);
+      
       res.json({ 
         success: true, 
-        duplicatesRemoved: removedCount,
+        phantomRecordsRemoved: phantomRecords.length,
+        duplicatesRemoved: trueDuplicates.length,
+        totalRemoved: removedCount,
+        validDocumentsRemaining: remainingValid,
         totalProcessed: allDocs.length,
-        message: `Removed ${removedCount} duplicate documents`
+        message: `Cleanup complete: Removed ${phantomRecords.length} phantom records and ${trueDuplicates.length} duplicates. ${remainingValid} valid documents remain.`
       });
     } catch (error) {
-      console.error("Error removing duplicates:", error);
-      res.status(500).json({ error: 'Failed to remove duplicates' });
+      console.error("Error during cleanup:", error);
+      res.status(500).json({ error: 'Failed to cleanup documents' });
     }
   });
 
