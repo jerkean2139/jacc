@@ -1257,32 +1257,52 @@ export default function AdminControlCenter() {
           
           {duplicatePreview && (
             <div className="space-y-4">
-              <div className="grid grid-cols-3 gap-4 text-sm">
+              <div className="grid grid-cols-4 gap-4 text-sm">
                 <div className="text-center p-3 bg-blue-50 rounded">
                   <div className="font-semibold text-lg">{duplicatePreview.totalProcessed}</div>
-                  <div className="text-gray-600">Total Documents</div>
+                  <div className="text-gray-600">Database Records</div>
+                </div>
+                <div className="text-center p-3 bg-green-50 rounded">
+                  <div className="font-semibold text-lg">{duplicatePreview.validFiles || 0}</div>
+                  <div className="text-gray-600">Valid Files</div>
+                </div>
+                <div className="text-center p-3 bg-orange-50 rounded">
+                  <div className="font-semibold text-lg">{duplicatePreview.missingFiles?.length || 0}</div>
+                  <div className="text-gray-600">Phantom Records</div>
                 </div>
                 <div className="text-center p-3 bg-yellow-50 rounded">
                   <div className="font-semibold text-lg">{duplicatePreview.duplicateGroups?.length || 0}</div>
-                  <div className="text-gray-600">Duplicate Groups</div>
-                </div>
-                <div className="text-center p-3 bg-red-50 rounded">
-                  <div className="font-semibold text-lg">{duplicatePreview.totalDuplicates}</div>
-                  <div className="text-gray-600">Files to Remove</div>
+                  <div className="text-gray-600">True Duplicates</div>
                 </div>
               </div>
 
-              {duplicatePreview.totalDuplicates === 0 ? (
+              {duplicatePreview.missingFiles?.length > 0 && (
+                <div className="p-4 bg-orange-50 border border-orange-200 rounded">
+                  <div className="flex items-center gap-2 mb-2">
+                    <AlertTriangle className="w-5 h-5 text-orange-600" />
+                    <div className="font-semibold text-orange-800">Data Integrity Issue Detected</div>
+                  </div>
+                  <p className="text-orange-700 text-sm">
+                    Found {duplicatePreview.missingFiles.length} phantom database records with no corresponding files. 
+                    These are leftover entries from failed uploads or file system cleanup. 
+                    From your original 115 documents, you currently have {duplicatePreview.validFiles} valid files.
+                  </p>
+                </div>
+              )}
+
+              {duplicatePreview.missingFiles?.length === 0 && duplicatePreview.duplicateGroups?.length === 0 ? (
                 <div className="text-center py-8">
                   <CheckCircle className="w-16 h-16 mx-auto mb-4 text-green-500" />
-                  <h3 className="text-lg font-semibold mb-2">No Duplicates Found!</h3>
-                  <p className="text-gray-600">Your document library is clean. No duplicate files were detected.</p>
+                  <h3 className="text-lg font-semibold mb-2">No Issues Found!</h3>
+                  <p className="text-gray-600">Your document library is clean. No phantom records or duplicates detected.</p>
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <h4 className="font-semibold">Duplicate Groups:</h4>
-                  <ScrollArea className="h-[400px]">
-                    <div className="space-y-4">
+                  {duplicatePreview.duplicateGroups?.length > 0 && (
+                    <div>
+                      <h4 className="font-semibold">True Duplicate Groups:</h4>
+                      <ScrollArea className="h-[400px]">
+                        <div className="space-y-4">
                       {duplicatePreview.duplicateGroups?.map((group, index) => (
                         <Card key={index} className="border">
                           <CardHeader className="pb-2">
@@ -1315,39 +1335,48 @@ export default function AdminControlCenter() {
                             </div>
                           </CardContent>
                         </Card>
-                      ))}
-                      
-                      {duplicatePreview.missingFiles?.length > 0 && (
-                        <Card className="border border-orange-200">
-                          <CardHeader className="pb-2">
-                            <div className="flex items-center gap-2">
-                              <AlertTriangle className="w-4 h-4 text-orange-500" />
-                              <div className="font-medium">Missing Files</div>
-                              <Badge variant="outline" className="bg-orange-50">
-                                {duplicatePreview.missingFiles.length} file{duplicatePreview.missingFiles.length > 1 ? 's' : ''}
-                              </Badge>
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              Database records without corresponding files
-                            </div>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="space-y-2">
-                              {duplicatePreview.missingFiles.map((missing) => (
-                                <div key={missing.id} className="flex items-center justify-between p-2 bg-orange-50 rounded text-sm">
-                                  <div>
-                                    <div className="font-medium">{missing.originalName}</div>
-                                    <div className="text-gray-500">Path: {missing.path}</div>
-                                  </div>
-                                  <Trash2 className="w-4 h-4 text-orange-500" />
-                                </div>
-                              ))}
-                            </div>
-                          </CardContent>
-                        </Card>
-                      )}
+                          ))}
+                        </div>
+                      </ScrollArea>
                     </div>
-                  </ScrollArea>
+                  )}
+                  
+                  {duplicatePreview.missingFiles?.length > 0 && (
+                    <Card className="border border-orange-200">
+                      <CardHeader className="pb-2">
+                        <div className="flex items-center gap-2">
+                          <AlertTriangle className="w-4 h-4 text-orange-500" />
+                          <div className="font-medium">Phantom Records (No Files)</div>
+                          <Badge variant="outline" className="bg-orange-50">
+                            {duplicatePreview.missingFiles.length} record{duplicatePreview.missingFiles.length > 1 ? 's' : ''}
+                          </Badge>
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          Database entries without corresponding files - these will be removed
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <ScrollArea className="h-[200px]">
+                          <div className="space-y-2">
+                            {duplicatePreview.missingFiles.slice(0, 10).map((missing) => (
+                              <div key={missing.id} className="flex items-center justify-between p-2 bg-orange-50 rounded text-sm">
+                                <div>
+                                  <div className="font-medium">{missing.originalName}</div>
+                                  <div className="text-gray-500">Path: {missing.path}</div>
+                                </div>
+                                <Trash2 className="w-4 h-4 text-orange-500" />
+                              </div>
+                            ))}
+                            {duplicatePreview.missingFiles.length > 10 && (
+                              <div className="text-center text-gray-500 text-sm py-2">
+                                ... and {duplicatePreview.missingFiles.length - 10} more phantom records
+                              </div>
+                            )}
+                          </div>
+                        </ScrollArea>
+                      </CardContent>
+                    </Card>
+                  )}
                 </div>
               )}
             </div>
