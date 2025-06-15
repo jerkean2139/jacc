@@ -512,16 +512,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         filePath = path.join(process.cwd(), filePath);
       }
       
-      console.log(`Checking file: ${filePath}`);
-      console.log(`Document path from DB: ${document.path}`);
-      console.log(`File exists: ${fs.existsSync(filePath)}`);
-      
       if (!fs.existsSync(filePath)) {
-        return res.status(404).json({ 
-          message: "File not found on disk",
-          path: filePath,
-          dbPath: document.path
-        });
+        return res.status(404).json({ message: "File not found on disk" });
       }
       
       // Set headers for inline viewing
