@@ -23,7 +23,14 @@ const PERPLEXITY_API_KEY = process.env.PERPLEXITY_API_KEY;
 const upload = multer({
   dest: 'uploads/',
   limits: {
-    fileSize: 50 * 1024 * 1024, // 50MB limit
+    fileSize: 100 * 1024 * 1024, // 100MB limit
+  }
+});
+
+const adminUpload = multer({
+  dest: 'uploads/',
+  limits: {
+    fileSize: 100 * 1024 * 1024, // 100MB limit
   }
 });
 
@@ -232,21 +239,7 @@ ${documentContext}${webContent ? `\n\nCURRENT INDUSTRY INTELLIGENCE:\n${webConte
   }
 }
 
-// Create upload configuration for admin document management
-const adminUpload = multer({
-  dest: 'uploads/',
-  limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB limit
-  },
-  fileFilter: (req, file, cb) => {
-    const allowedTypes = ['application/pdf', 'text/plain', 'text/csv', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-    if (allowedTypes.includes(file.mimetype)) {
-      cb(null, true);
-    } else {
-      cb(new Error('Invalid file type'), false);
-    }
-  }
-});
+
 
 // Function to extract text from PDF
 async function extractPDFText(filePath: string): Promise<string> {

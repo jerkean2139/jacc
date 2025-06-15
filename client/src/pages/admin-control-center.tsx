@@ -54,6 +54,10 @@ export function AdminControlCenter() {
   const [activeSection, setActiveSection] = useState('qa');
   const [searchTerm, setSearchTerm] = useState('');
   const [uploadingFiles, setUploadingFiles] = useState(false);
+  const [newFaqQuestion, setNewFaqQuestion] = useState('');
+  const [newFaqAnswer, setNewFaqAnswer] = useState('');
+  const [newFaqCategory, setNewFaqCategory] = useState('general');
+  const [showAddFaq, setShowAddFaq] = useState(false);
   const queryClient = useQueryClient();
 
   // Data fetching
@@ -90,14 +94,17 @@ export function AdminControlCenter() {
     return true;
   }) : [];
 
-  // Upload function
+  // Upload function with folder/permission dialog
   const handleDocumentUpload = async (files: FileList) => {
     setUploadingFiles(true);
     try {
+      // For now, upload with default settings - we'll add dialog in next step
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         const formData = new FormData();
         formData.append('file', file);
+        formData.append('folderId', 'knowledge_base');
+        formData.append('permissions', 'public');
 
         const response = await fetch('/api/admin/documents/upload', {
           method: 'POST',
@@ -106,15 +113,16 @@ export function AdminControlCenter() {
         });
 
         if (!response.ok) {
-          throw new Error(`Failed to upload ${file.name}`);
+          const errorData = await response.json();
+          throw new Error(errorData.error || `Failed to upload ${file.name}`);
         }
       }
 
-      // Refresh documents list
       queryClient.invalidateQueries({ queryKey: ['/api/admin/documents'] });
-      console.log('Documents uploaded successfully');
+      console.log('Documents uploaded and processed successfully');
     } catch (error) {
       console.error('Upload error:', error);
+      alert(`Upload failed: ${error.message}`);
     } finally {
       setUploadingFiles(false);
     }
@@ -135,19 +143,59 @@ export function AdminControlCenter() {
       const result = await response.json();
       console.log(`Processed ${result.processedCount} documents`);
       
-      // Refresh documents list
       queryClient.invalidateQueries({ queryKey: ['/api/admin/documents'] });
     } catch (error) {
       console.error('Processing error:', error);
     }
   };
 
+  // FAQ functions
+  const handleAddFaq = async () => {
+    if (!newFaqQuestion.trim() || !newFaqAnswer.trim()) {
+      alert('Please fill in both question and answer fields');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/admin/faq', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          question: newFaqQuestion,
+          answer: newFaqAnswer,
+          category: newFaqCategory,
+          priority: 1,
+          isActive: true
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to add FAQ');
+      }
+
+      setNewFaqQuestion('');
+      setNewFaqAnswer('');
+      setShowAddFaq(false);
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/faq'] });
+    } catch (error) {
+      console.error('Error adding FAQ:', error);
+      alert('Failed to add FAQ');
+    }
+  };
+
+  // Get unique categories from FAQ data
+  const categories = Array.isArray(faqData) ? 
+    [...new Set(faqData.map((faq: FAQ) => faq.category))] : [];
+
   return (
     <div className="container mx-auto px-4 py-6 max-w-7xl">
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-red-600">UPDATED Admin Control Center</h1>
         <p className="text-gray-600 dark:text-gray-400 mt-2">
-          Complete system management with reorganized Q&A layout
+          Complete system management
         </p>
       </div>
 
@@ -172,44 +220,49 @@ export function AdminControlCenter() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* LEFT SIDE - Q&A Entry Form */}
+            {/* Q&A Entry Form */}
             <div className="space-y-4">
               <Card className="border-2 border-blue-500">
                 <CardHeader>
-                  <CardTitle className="text-blue-600">⭐ Add New Q&A Entry (LEFT SIDE)</CardTitle>
+                  <CardTitle className="text-blue-600">Add New Q&A Entry</CardTitle>
                   <CardDescription>Create questions and answers for the AI knowledge base</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    <div>
-                      <Label className="text-sm font-medium">Question/Title</Label>
-                      <Input 
-                        placeholder="What are the current processing rates for restaurants?"
-                        className="mt-1"
-                      />
-                    </div>
-
-                    <div>
-                      <Label className="text-sm font-medium">Answer/Content</Label>
-                      <Textarea 
-                        placeholder="Detailed answer with specific rates, terms, and guidance..."
-                        className="mt-1 min-h-[120px]"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
+                  {showAddFaq ? (
+                    <div className="space-y-4">
                       <div>
-                        <Label className="text-sm font-medium">Category</Label>
-                        <Select defaultValue="merchant_services">
-                          <SelectTrigger className="mt-1">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="merchant_services">Merchant Services</SelectItem>
-                            <SelectItem value="pos_systems">POS Systems</SelectItem>
-                            <SelectItem value="technical_support">Technical Support</SelectItem>
-                            <SelectItem value="integrations">Integrations</SelectItem>
-                            <SelectItem value="pricing">Pricing & Rates</SelectItem>
+                        <Label className="text-sm font-medium">Question/Title</Label>
+                        <Input 
+                          placeholder="What are the current processing rates for restaurants?"
+                          className="mt-1"
+                          value={newFaqQuestion}
+                          onChange={(e) => setNewFaqQuestion(e.target.value)}
+                        />
+                      </div>
+
+                      <div>
+                        <Label className="text-sm font-medium">Answer/Content</Label>
+                        <Textarea 
+                          placeholder="Detailed answer with specific rates, terms, and guidance..."
+                          className="mt-1 min-h-[120px]"
+                          value={newFaqAnswer}
+                          onChange={(e) => setNewFaqAnswer(e.target.value)}
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label className="text-sm font-medium">Category</Label>
+                          <Select value={newFaqCategory} onValueChange={setNewFaqCategory}>
+                            <SelectTrigger className="mt-1">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="merchant_services">Merchant Services</SelectItem>
+                              <SelectItem value="pos_systems">POS Systems</SelectItem>
+                              <SelectItem value="technical_support">Technical Support</SelectItem>
+                              <SelectItem value="integrations">Integrations</SelectItem>
+                              <SelectItem value="pricing">Pricing & Rates</SelectItem>
                             <SelectItem value="general">General</SelectItem>
                           </SelectContent>
                         </Select>
