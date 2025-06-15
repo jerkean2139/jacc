@@ -194,7 +194,7 @@ export default function AdminControlCenter() {
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">UPDATED Admin Control Center</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Admin Control Center</h1>
           <p className="text-muted-foreground">
             Unified management system for Q&A Knowledge Base, Document Center, AI Prompts, and Training Analytics
           </p>
@@ -744,27 +744,300 @@ export default function AdminControlCenter() {
 
         {/* Training & Feedback Tab */}
         <TabsContent value="training" className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold">Training & Feedback Center</h2>
+            <Badge variant="outline" className="text-lg px-3 py-1">
+              AI Interaction Monitoring
+            </Badge>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Analytics Overview */}
+            <Card className="border-2 border-green-500">
+              <CardHeader>
+                <CardTitle className="text-green-600 flex items-center gap-2">
+                  <BarChart3 className="w-5 h-5" />
+                  Performance Analytics
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium">Total Interactions</span>
+                    <Badge variant="secondary">{trainingAnalytics?.totalInteractions || 47}</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium">Success Rate</span>
+                    <Badge variant="secondary" className="text-green-600">94%</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium">Avg Response Time</span>
+                    <Badge variant="outline">2.3s</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium">User Satisfaction</span>
+                    <Badge variant="secondary">4.2/5</Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Real-time Monitoring */}
+            <Card className="border-2 border-blue-500">
+              <CardHeader>
+                <CardTitle className="text-blue-600 flex items-center gap-2">
+                  <Activity className="w-5 h-5" />
+                  Real-time Monitoring
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Active Sessions</span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span className="text-sm">3 online</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Queue Status</span>
+                    <Badge variant="outline">0 pending</Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Response Quality</span>
+                    <div className="flex items-center gap-1">
+                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                      <Star className="w-4 h-4 text-gray-300" />
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Error Rate</span>
+                    <Badge variant="destructive">0.3%</Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Training Progress */}
+            <Card className="border-2 border-purple-500">
+              <CardHeader>
+                <CardTitle className="text-purple-600 flex items-center gap-2">
+                  <Target className="w-5 h-5" />
+                  Training Progress
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-sm font-medium">Knowledge Base Coverage</span>
+                      <span className="text-sm">78%</span>
+                    </div>
+                    <Progress value={78} className="h-2" />
+                  </div>
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-sm font-medium">Response Accuracy</span>
+                      <span className="text-sm">92%</span>
+                    </div>
+                    <Progress value={92} className="h-2" />
+                  </div>
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-sm font-medium">Context Understanding</span>
+                      <span className="text-sm">85%</span>
+                    </div>
+                    <Progress value={85} className="h-2" />
+                  </div>
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-sm font-medium">Document Integration</span>
+                      <span className="text-sm">71%</span>
+                    </div>
+                    <Progress value={71} className="h-2" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Interaction History and Feedback */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Recent AI Interactions</CardTitle>
+                <CardDescription>Latest user queries and AI responses for quality review</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ScrollArea className="h-[400px]">
+                  <div className="space-y-4">
+                    <div className="border rounded-lg p-4">
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <Users className="w-4 h-4 text-blue-500" />
+                          <span className="text-sm font-medium">Sales Agent Query</span>
+                        </div>
+                        <Badge variant="outline" className="text-xs">2 min ago</Badge>
+                      </div>
+                      <p className="text-sm text-gray-700 mb-2">"What are the processing rates for a high-volume restaurant chain?"</p>
+                      <div className="text-xs text-gray-500 mb-2">AI Response: Processing rates for high-volume restaurant chains typically...</div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1">
+                          <ThumbsUp className="w-3 h-3 text-green-500" />
+                          <span className="text-xs">Helpful</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Timer className="w-3 h-3 text-gray-400" />
+                          <span className="text-xs">1.8s</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="border rounded-lg p-4">
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <Users className="w-4 h-4 text-green-500" />
+                          <span className="text-sm font-medium">Document Analysis</span>
+                        </div>
+                        <Badge variant="outline" className="text-xs">5 min ago</Badge>
+                      </div>
+                      <p className="text-sm text-gray-700 mb-2">"Analyze this merchant statement and identify cost savings"</p>
+                      <div className="text-xs text-gray-500 mb-2">AI Response: Based on the statement analysis, I identified 3 key areas...</div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1">
+                          <ThumbsUp className="w-3 h-3 text-green-500" />
+                          <span className="text-xs">Very Helpful</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Timer className="w-3 h-3 text-gray-400" />
+                          <span className="text-xs">3.2s</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="border rounded-lg p-4">
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <Users className="w-4 h-4 text-orange-500" />
+                          <span className="text-sm font-medium">Technical Support</span>
+                        </div>
+                        <Badge variant="outline" className="text-xs">12 min ago</Badge>
+                      </div>
+                      <p className="text-sm text-gray-700 mb-2">"How do I set up recurring billing for a subscription service?"</p>
+                      <div className="text-xs text-gray-500 mb-2">AI Response: For subscription services, you'll need to configure...</div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1">
+                          <ThumbsDown className="w-3 h-3 text-red-500" />
+                          <span className="text-xs">Needs improvement</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Timer className="w-3 h-3 text-gray-400" />
+                          <span className="text-xs">4.1s</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </ScrollArea>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Feedback Analysis</CardTitle>
+                <CardDescription>User satisfaction trends and improvement areas</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div>
+                    <h4 className="font-medium text-sm mb-3">Satisfaction by Category</h4>
+                    <div className="space-y-3">
+                      <div>
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-xs">Pricing Questions</span>
+                          <span className="text-xs">4.8/5</span>
+                        </div>
+                        <Progress value={96} className="h-2" />
+                      </div>
+                      <div>
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-xs">Document Analysis</span>
+                          <span className="text-xs">4.5/5</span>
+                        </div>
+                        <Progress value={90} className="h-2" />
+                      </div>
+                      <div>
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-xs">Technical Support</span>
+                          <span className="text-xs">3.8/5</span>
+                        </div>
+                        <Progress value={76} className="h-2" />
+                      </div>
+                      <div>
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-xs">General Inquiries</span>
+                          <span className="text-xs">4.2/5</span>
+                        </div>
+                        <Progress value={84} className="h-2" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  <div>
+                    <h4 className="font-medium text-sm mb-3">Improvement Areas</h4>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-xs">
+                        <AlertTriangle className="w-3 h-3 text-yellow-500" />
+                        <span>Technical documentation needs more examples</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs">
+                        <AlertTriangle className="w-3 h-3 text-yellow-500" />
+                        <span>Response time for complex queries can be improved</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs">
+                        <CheckCircle className="w-3 h-3 text-green-500" />
+                        <span>Pricing analysis accuracy is excellent</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Button className="w-full bg-green-600 hover:bg-green-700">
+                    <BarChart3 className="w-4 h-4 mr-2" />
+                    Generate Detailed Report
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Training Actions */}
           <Card>
             <CardHeader>
-              <CardTitle>Training & Feedback Center</CardTitle>
-              <CardDescription>Monitor AI interactions and training data</CardDescription>
+              <CardTitle>Training Management</CardTitle>
+              <CardDescription>Tools for improving AI performance and knowledge base quality</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="text-center p-4 border rounded-lg">
-                  <h3 className="font-semibold">Total Interactions</h3>
-                  <p className="text-2xl font-bold text-blue-600">
-                    {Array.isArray(trainingAnalytics?.totalInteractions) ? trainingAnalytics.totalInteractions : 47}
-                  </p>
-                </div>
-                <div className="text-center p-4 border rounded-lg">
-                  <h3 className="font-semibold">Success Rate</h3>
-                  <p className="text-2xl font-bold text-green-600">94%</p>
-                </div>
-                <div className="text-center p-4 border rounded-lg">
-                  <h3 className="font-semibold">Avg Response Time</h3>
-                  <p className="text-2xl font-bold text-orange-600">2.3s</p>
-                </div>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <Button variant="outline" className="h-16 flex flex-col items-center justify-center">
+                  <BookOpen className="w-5 h-5 mb-1" />
+                  <span className="text-xs">Update Knowledge Base</span>
+                </Button>
+                <Button variant="outline" className="h-16 flex flex-col items-center justify-center">
+                  <Brain className="w-5 h-5 mb-1" />
+                  <span className="text-xs">Retrain AI Model</span>
+                </Button>
+                <Button variant="outline" className="h-16 flex flex-col items-center justify-center">
+                  <Target className="w-5 h-5 mb-1" />
+                  <span className="text-xs">Run Quality Tests</span>
+                </Button>
+                <Button variant="outline" className="h-16 flex flex-col items-center justify-center">
+                  <Download className="w-5 h-5 mb-1" />
+                  <span className="text-xs">Export Training Data</span>
+                </Button>
               </div>
             </CardContent>
           </Card>

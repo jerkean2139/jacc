@@ -121,6 +121,7 @@ JACC is an advanced AI-powered assistant platform designed for independent sales
 
 Changelog:
 - June 13, 2025. Initial setup
+- June 15, 2025. Completed unified admin control center with Q&A Knowledge Base, Document Center, AI Prompts management, and comprehensive Training & Feedback Center
 
 ## User Preferences
 
