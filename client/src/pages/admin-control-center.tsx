@@ -346,33 +346,266 @@ export function AdminControlCenter() {
               </CardContent>
             </Card>
 
-            {/* Quick Actions */}
+            {/* Document Permissions & Roles */}
             <Card>
               <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
+                <CardTitle>Document Permissions</CardTitle>
+                <CardDescription>Manage access controls and user roles</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-2">
-                  <Button variant="outline" className="w-full justify-start">
-                    <Search className="w-4 h-4 mr-2" />
-                    Search Documents
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <FolderOpen className="w-4 h-4 mr-2" />
-                    Browse by Category
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <Activity className="w-4 h-4 mr-2" />
-                    Processing Status
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <Download className="w-4 h-4 mr-2" />
-                    Export Knowledge Base
+                <div className="space-y-4">
+                  <div>
+                    <Label className="text-sm font-medium">Default Access Level</Label>
+                    <Select defaultValue="sales-agent">
+                      <SelectTrigger className="mt-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="public">Public (All Users)</SelectItem>
+                        <SelectItem value="sales-agent">Sales Agents</SelectItem>
+                        <SelectItem value="client-admin">Client Admins</SelectItem>
+                        <SelectItem value="dev-admin">Dev Admins Only</SelectItem>
+                        <SelectItem value="restricted">Restricted Access</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <Separator />
+
+                  <div>
+                    <h6 className="font-medium text-sm mb-2">Role Permissions</h6>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between p-2 border rounded">
+                        <div className="flex items-center gap-2">
+                          <Users className="w-4 h-4 text-blue-500" />
+                          <span className="text-sm">Sales Agents</span>
+                        </div>
+                        <Badge variant="outline" className="text-xs">View Only</Badge>
+                      </div>
+                      <div className="flex items-center justify-between p-2 border rounded">
+                        <div className="flex items-center gap-2">
+                          <Users className="w-4 h-4 text-green-500" />
+                          <span className="text-sm">Client Admins</span>
+                        </div>
+                        <Badge variant="outline" className="text-xs">View + Upload</Badge>
+                      </div>
+                      <div className="flex items-center justify-between p-2 border rounded">
+                        <div className="flex items-center gap-2">
+                          <Users className="w-4 h-4 text-purple-500" />
+                          <span className="text-sm">Dev Admins</span>
+                        </div>
+                        <Badge variant="outline" className="text-xs">Full Control</Badge>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Button variant="outline" className="w-full">
+                    <Settings className="w-4 h-4 mr-2" />
+                    Manage Permissions
                   </Button>
                 </div>
               </CardContent>
             </Card>
           </div>
+
+          {/* Global Permissions Management */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Global Document Permissions Management</CardTitle>
+              <CardDescription>Configure role-based access controls and user permissions across all documents</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Role Configuration */}
+                <div className="space-y-4">
+                  <h6 className="font-medium">Role-Based Access Control</h6>
+                  
+                  <div className="space-y-3">
+                    <div className="p-3 border rounded-lg">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <Users className="w-4 h-4 text-blue-500" />
+                          <span className="font-medium text-sm">Sales Agents</span>
+                        </div>
+                        <Button size="sm" variant="ghost">
+                          <Edit className="w-3 h-3" />
+                        </Button>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div className="flex items-center gap-1">
+                          <CheckCircle className="w-3 h-3 text-green-500" />
+                          <span>View Documents</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <CheckCircle className="w-3 h-3 text-green-500" />
+                          <span>Download Files</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <XCircle className="w-3 h-3 text-red-500" />
+                          <span>Upload Documents</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <XCircle className="w-3 h-3 text-red-500" />
+                          <span>Delete Documents</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-3 border rounded-lg">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <Users className="w-4 h-4 text-green-500" />
+                          <span className="font-medium text-sm">Client Admins</span>
+                        </div>
+                        <Button size="sm" variant="ghost">
+                          <Edit className="w-3 h-3" />
+                        </Button>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div className="flex items-center gap-1">
+                          <CheckCircle className="w-3 h-3 text-green-500" />
+                          <span>View Documents</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <CheckCircle className="w-3 h-3 text-green-500" />
+                          <span>Upload Documents</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <CheckCircle className="w-3 h-3 text-green-500" />
+                          <span>Manage Categories</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <XCircle className="w-3 h-3 text-red-500" />
+                          <span>System Settings</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-3 border rounded-lg">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <Users className="w-4 h-4 text-purple-500" />
+                          <span className="font-medium text-sm">Dev Admins</span>
+                        </div>
+                        <Button size="sm" variant="ghost">
+                          <Edit className="w-3 h-3" />
+                        </Button>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div className="flex items-center gap-1">
+                          <CheckCircle className="w-3 h-3 text-green-500" />
+                          <span>Full Control</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <CheckCircle className="w-3 h-3 text-green-500" />
+                          <span>User Management</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <CheckCircle className="w-3 h-3 text-green-500" />
+                          <span>System Configuration</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <CheckCircle className="w-3 h-3 text-green-500" />
+                          <span>Access Logs</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* User Management */}
+                <div className="space-y-4">
+                  <h6 className="font-medium">User Access Management</h6>
+                  
+                  <div className="space-y-3">
+                    <div>
+                      <Label className="text-sm font-medium">Add User Permission</Label>
+                      <div className="flex gap-2 mt-1">
+                        <Input 
+                          placeholder="user@company.com"
+                          className="flex-1"
+                        />
+                        <Select defaultValue="sales-agent">
+                          <SelectTrigger className="w-32">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="sales-agent">Sales Agent</SelectItem>
+                            <SelectItem value="client-admin">Client Admin</SelectItem>
+                            <SelectItem value="dev-admin">Dev Admin</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Button size="sm">
+                          <Plus className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label className="text-sm font-medium">Current Users</Label>
+                      <ScrollArea className="h-40 mt-2">
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between p-2 border rounded text-sm">
+                            <div>
+                              <p className="font-medium">admin@jacc.com</p>
+                              <p className="text-xs text-gray-500">Dev Admin</p>
+                            </div>
+                            <div className="flex gap-1">
+                              <Button size="sm" variant="ghost">
+                                <Edit className="w-3 h-3" />
+                              </Button>
+                              <Button size="sm" variant="ghost">
+                                <Trash2 className="w-3 h-3 text-red-500" />
+                              </Button>
+                            </div>
+                          </div>
+                          <div className="flex items-center justify-between p-2 border rounded text-sm">
+                            <div>
+                              <p className="font-medium">sales@tracerpay.com</p>
+                              <p className="text-xs text-gray-500">Sales Agent</p>
+                            </div>
+                            <div className="flex gap-1">
+                              <Button size="sm" variant="ghost">
+                                <Edit className="w-3 h-3" />
+                              </Button>
+                              <Button size="sm" variant="ghost">
+                                <Trash2 className="w-3 h-3 text-red-500" />
+                              </Button>
+                            </div>
+                          </div>
+                          <div className="flex items-center justify-between p-2 border rounded text-sm">
+                            <div>
+                              <p className="font-medium">manager@tracerpay.com</p>
+                              <p className="text-xs text-gray-500">Client Admin</p>
+                            </div>
+                            <div className="flex gap-1">
+                              <Button size="sm" variant="ghost">
+                                <Edit className="w-3 h-3" />
+                              </Button>
+                              <Button size="sm" variant="ghost">
+                                <Trash2 className="w-3 h-3 text-red-500" />
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </ScrollArea>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <Button className="flex-1 bg-green-600 hover:bg-green-700">
+                        <Save className="w-3 h-3 mr-1" />
+                        Save Changes
+                      </Button>
+                      <Button variant="outline">
+                        <Activity className="w-3 h-3 mr-1" />
+                        Audit Log
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Document List */}
           <Card>
@@ -385,31 +618,112 @@ export function AdminControlCenter() {
                 <div className="space-y-2">
                   {Array.isArray(documentsData) && documentsData.length > 0 ? (
                     documentsData.slice(0, 10).map((doc: DocumentEntry) => (
-                      <div key={doc.id} className="flex items-center justify-between p-3 border rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <FileText className="w-5 h-5 text-blue-500" />
-                          <div>
-                            <p className="font-medium text-sm">{doc.originalName || doc.name}</p>
-                            <p className="text-xs text-gray-500">
-                              {doc.mimeType} • {Math.round((doc.size || 0) / 1024)} KB • 
-                              {new Date(doc.createdAt).toLocaleDateString()}
-                            </p>
+                      <Collapsible key={doc.id}>
+                        <div className="flex items-center justify-between p-3 border rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <FileText className="w-5 h-5 text-blue-500" />
+                            <div>
+                              <p className="font-medium text-sm">{doc.originalName || doc.name}</p>
+                              <p className="text-xs text-gray-500">
+                                {doc.mimeType} • {Math.round((doc.size || 0) / 1024)} KB • 
+                                {new Date(doc.createdAt).toLocaleDateString()}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="text-xs">
+                              {doc.mimeType?.includes('pdf') ? 'PDF' : 
+                               doc.mimeType?.includes('text') ? 'TXT' : 
+                               doc.mimeType?.includes('csv') ? 'CSV' : 'DOC'}
+                            </Badge>
+                            <Badge variant="secondary" className="text-xs">
+                              Sales Agents
+                            </Badge>
+                            <CollapsibleTrigger asChild>
+                              <Button size="sm" variant="ghost">
+                                <Settings className="w-3 h-3" />
+                              </Button>
+                            </CollapsibleTrigger>
+                            <Button size="sm" variant="ghost">
+                              <Eye className="w-3 h-3" />
+                            </Button>
+                            <Button size="sm" variant="ghost">
+                              <Download className="w-3 h-3" />
+                            </Button>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Badge variant="outline" className="text-xs">
-                            {doc.mimeType?.includes('pdf') ? 'PDF' : 
-                             doc.mimeType?.includes('text') ? 'TXT' : 
-                             doc.mimeType?.includes('csv') ? 'CSV' : 'DOC'}
-                          </Badge>
-                          <Button size="sm" variant="ghost">
-                            <Eye className="w-3 h-3" />
-                          </Button>
-                          <Button size="sm" variant="ghost">
-                            <Download className="w-3 h-3" />
-                          </Button>
-                        </div>
-                      </div>
+                        
+                        <CollapsibleContent className="px-3 pb-3">
+                          <div className="mt-3 p-4 border rounded-lg bg-gray-50 dark:bg-gray-800 space-y-4">
+                            <div>
+                              <Label className="text-sm font-medium">Document Access Level</Label>
+                              <Select defaultValue="sales-agent">
+                                <SelectTrigger className="mt-1">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="public">Public (All Users)</SelectItem>
+                                  <SelectItem value="sales-agent">Sales Agents</SelectItem>
+                                  <SelectItem value="client-admin">Client Admins</SelectItem>
+                                  <SelectItem value="dev-admin">Dev Admins Only</SelectItem>
+                                  <SelectItem value="restricted">Restricted Access</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+
+                            <div>
+                              <Label className="text-sm font-medium">Specific User Access</Label>
+                              <div className="mt-2 space-y-2">
+                                <div className="flex items-center gap-2">
+                                  <Input 
+                                    placeholder="Enter username or email"
+                                    className="flex-1"
+                                  />
+                                  <Select defaultValue="view">
+                                    <SelectTrigger className="w-32">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="view">View Only</SelectItem>
+                                      <SelectItem value="download">View + Download</SelectItem>
+                                      <SelectItem value="edit">Edit Access</SelectItem>
+                                      <SelectItem value="admin">Full Control</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                  <Button size="sm" variant="outline">
+                                    <Plus className="w-3 h-3" />
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div>
+                              <Label className="text-sm font-medium">Current Permissions</Label>
+                              <div className="mt-2 space-y-1">
+                                <div className="flex items-center justify-between text-xs">
+                                  <span>admin@jacc.com</span>
+                                  <Badge variant="outline">Full Control</Badge>
+                                </div>
+                                <div className="flex items-center justify-between text-xs">
+                                  <span>sales-team@jacc.com</span>
+                                  <Badge variant="outline">View + Download</Badge>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                              <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+                                <Save className="w-3 h-3 mr-1" />
+                                Update Permissions
+                              </Button>
+                              <Button size="sm" variant="outline">
+                                <Activity className="w-3 h-3 mr-1" />
+                                View Access Log
+                              </Button>
+                            </div>
+                          </div>
+                        </CollapsibleContent>
+                      </Collapsible>
                     ))
                   ) : (
                     <div className="text-center py-8 text-gray-500">
