@@ -491,6 +491,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Document viewing endpoints for admin panel
+  app.get('/api/documents/:id/view', async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const { db } = await import('./db.ts');
+      const { documents } = await import('../shared/schema.ts');
+      const { eq } = await import('drizzle-orm');
+      
+      const [document] = await db.select().from(documents).where(eq(documents.id, id));
+      if (!document) {
+        return res.status(404).json({ message: "Document not found" });
+      }
+      
+      const fs = await import('fs');
+      const path = await import('path');
+      const filePath = path.join(process.cwd(), document.path);
+      
+      if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ message: "File not found on disk" });
+      }
+      
+      // Set headers for inline viewing
+      res.setHeader('Content-Type', document.mimeType || 'application/pdf');
+      res.setHeader('Content-Disposition', `inline; filename="${document.originalName}"`);
+      res.setHeader('Cache-Control', 'public, max-age=31536000');
+      
+      const fileStream = fs.createReadStream(filePath);
+      fileStream.pipe(res);
+    } catch (error) {
+      console.error("Error viewing document:", error);
+      res.status(500).json({ message: "Failed to view document" });
+    }
+  });
+
+  app.get('/api/documents/:id/download', async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const { db } = await import('./db.ts');
+      const { documents } = await import('../shared/schema.ts');
+      const { eq } = await import('drizzle-orm');
+      
+      const [document] = await db.select().from(documents).where(eq(documents.id, id));
+      if (!document) {
+        return res.status(404).json({ message: "Document not found" });
+      }
+      
+      const fs = await import('fs');
+      const path = await import('path');
+      const filePath = path.join(process.cwd(), document.path);
+      
+      if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ message: "File not found on disk" });
+      }
+      
+      res.setHeader('Content-Type', document.mimeType || 'application/octet-stream');
+      res.setHeader('Content-Disposition', `attachment; filename="${document.originalName}"`);
+      
+      const fileStream = fs.createReadStream(filePath);
+      fileStream.pipe(res);
+    } catch (error) {
+      console.error("Error downloading document:", error);
+      res.status(500).json({ message: "Failed to download document" });
+    }
+  });
+
+  app.get('/api/documents/:id', async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const { db } = await import('./db.ts');
+      const { documents } = await import('../shared/schema.ts');
+      const { eq } = await import('drizzle-orm');
+      
+      const [document] = await db.select().from(documents).where(eq(documents.id, id));
+      if (!document) {
+        return res.status(404).json({ message: "Document not found" });
+      }
+      
+      res.json(document);
+    } catch (error) {
+      console.error("Error fetching document:", error);
+      res.status(500).json({ message: "Failed to fetch document" });
+    }
+  });
+
   // Upload document endpoint with processing
   app.post('/api/admin/documents/upload', adminUpload.array('files'), async (req: Request, res: Response) => {
     try {
