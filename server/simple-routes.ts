@@ -512,26 +512,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { documents, documentChunks, users } = await import('../shared/schema.ts');
       const { eq } = await import('drizzle-orm');
       
-      // Ensure admin user exists with proper UUID format
-      const adminUserId = 'admin-uuid-12345';
-      const existingUser = await db.select().from(users).where(eq(users.id, adminUserId)).limit(1);
-      if (existingUser.length === 0) {
-        try {
-          await db.insert(users).values({
-            id: adminUserId,
-            username: 'admin',
-            email: 'admin@jacc.com',
-            passwordHash: '$2b$10$placeholder.hash.for.admin.user',
-            firstName: 'Admin',
-            lastName: 'User',
-            role: 'dev-admin',
-            isActive: true
-          });
-          console.log('Created admin user for document uploads');
-        } catch (userError) {
-          console.log('Admin user may already exist or creation failed:', userError.message);
-        }
-      }
+      // Use existing admin user from database
+      const adminUserId = 'dev-admin-001';
       
       const uploadedDocuments = [];
 
