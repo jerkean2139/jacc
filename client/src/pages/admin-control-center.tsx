@@ -641,7 +641,7 @@ export default function AdminControlCenter() {
 
                 <Button 
                   className="w-full bg-green-600 hover:bg-green-700"
-                  disabled={!selectedFolder || !selectedPermissions || !selectedFiles || selectedFiles.length === 0}
+                  disabled={!selectedPermissions || !selectedFiles || selectedFiles.length === 0}
                   onClick={handleDocumentUpload}
                 >
                   <Upload className="w-4 h-4 mr-2" />
