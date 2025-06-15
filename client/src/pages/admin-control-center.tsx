@@ -19,6 +19,7 @@ import {
   ThumbsDown, Star, Copy
 } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 
@@ -79,6 +80,8 @@ export default function AdminControlCenter() {
   // Document management states
   const [documentSearchTerm, setDocumentSearchTerm] = useState('');
   const [documentFilter, setDocumentFilter] = useState('all');
+  const [duplicatePreview, setDuplicatePreview] = useState(null);
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
   const [showDocumentDetails, setShowDocumentDetails] = useState(false);
 
   // Fetch data
@@ -239,12 +242,24 @@ export default function AdminControlCenter() {
     }
   };
 
+  const scanDuplicatesMutation = useMutation({
+    mutationFn: () => apiRequest('/api/admin/documents/scan-duplicates', {
+      method: 'POST',
+    }),
+    onSuccess: (data) => {
+      setDuplicatePreview(data);
+      setShowDuplicateModal(true);
+    },
+  });
+
   const removeDuplicatesMutation = useMutation({
     mutationFn: () => apiRequest('/api/admin/documents/remove-duplicates', {
       method: 'POST',
     }),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/documents'] });
+      setShowDuplicateModal(false);
+      setDuplicatePreview(null);
       toast({ 
         title: 'Duplicates removed successfully', 
         description: `Removed ${data.duplicatesRemoved} duplicate documents`
@@ -253,9 +268,11 @@ export default function AdminControlCenter() {
   });
 
   const handleRemoveDuplicates = () => {
-    if (confirm('Are you sure you want to remove duplicate documents? This will permanently delete files with identical content.')) {
-      removeDuplicatesMutation.mutate();
-    }
+    scanDuplicatesMutation.mutate();
+  };
+
+  const confirmRemoveDuplicates = () => {
+    removeDuplicatesMutation.mutate();
   };
 
   const filteredFAQs = Array.isArray(faqData) ? faqData.filter((faq: FAQ) => {

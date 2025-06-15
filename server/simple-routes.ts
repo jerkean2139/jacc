@@ -595,6 +595,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Scan for duplicate documents endpoint
+  app.post('/api/admin/documents/scan-duplicates', async (req: Request, res: Response) => {
+    try {
+      const { db } = await import('./db.ts');
+      const { documents } = await import('../shared/schema.ts');
+      const crypto = await import('crypto');
+      
+      // Get all documents
+      const allDocs = await db.select().from(documents);
+      const hashMap = new Map();
+      const duplicateGroups = [];
+      const missingFiles = [];
+      
+      // Process each document to calculate hash and find duplicates
+      for (const doc of allDocs) {
+        try {
+          if (fs.existsSync(doc.path)) {
+            const fileBuffer = fs.readFileSync(doc.path);
+            const fileHash = crypto.createHash('sha256').update(fileBuffer).digest('hex');
+            
+            if (hashMap.has(fileHash)) {
+              // Find existing group or create new one
+              let group = duplicateGroups.find(g => g.hash === fileHash);
+              if (!group) {
+                const original = hashMap.get(fileHash);
+                group = {
+                  hash: fileHash,
+                  original: original,
+                  duplicates: []
+                };
+                duplicateGroups.push(group);
+              }
+              group.duplicates.push(doc);
+            } else {
+              hashMap.set(fileHash, doc);
+            }
+          } else {
+            missingFiles.push(doc);
+          }
+        } catch (error) {
+          console.warn(`Error processing document ${doc.id}:`, error.message);
+        }
+      }
+      
+      res.json({ 
+        success: true, 
+        duplicateGroups: duplicateGroups,
+        missingFiles: missingFiles,
+        totalDuplicates: duplicateGroups.reduce((sum, group) => sum + group.duplicates.length, 0) + missingFiles.length,
+        totalProcessed: allDocs.length
+      });
+    } catch (error) {
+      console.error("Error scanning duplicates:", error);
+      res.status(500).json({ error: 'Failed to scan duplicates' });
+    }
+  });
+
   // Remove duplicate documents endpoint
   app.post('/api/admin/documents/remove-duplicates', async (req: Request, res: Response) => {
     try {
