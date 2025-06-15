@@ -195,7 +195,7 @@ export default function AdminControlCenter() {
   const handleEditDocument = (document: DocumentEntry) => {
     setEditingDocument(document);
     setEditDocumentName(document.name);
-    setEditDocumentFolder(document.folderId || '');
+    setEditDocumentFolder(document.folderId || 'no-folder');
     // Determine permissions based on document flags
     if (document.isPublic) {
       setEditDocumentPermissions('public');
@@ -217,7 +217,7 @@ export default function AdminControlCenter() {
 
     const updateData = {
       name: editDocumentName,
-      folderId: editDocumentFolder || null,
+      folderId: editDocumentFolder === 'no-folder' ? null : editDocumentFolder,
       isPublic: editDocumentPermissions === 'public',
       adminOnly: editDocumentPermissions === 'admin',
       managerOnly: editDocumentPermissions === 'manager'
@@ -1566,7 +1566,7 @@ export default function AdminControlCenter() {
                     <SelectValue placeholder="Select folder" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">No Folder (General)</SelectItem>
+                    <SelectItem value="no-folder">No Folder (General)</SelectItem>
                     {foldersData?.map((folder: any) => (
                       <SelectItem key={folder.id} value={folder.id}>
                         {folder.name}
