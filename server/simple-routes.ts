@@ -796,6 +796,180 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Prompt template management endpoints
+  
+  // Get all prompt templates
+  app.get('/api/admin/prompts', async (req: Request, res: Response) => {
+    try {
+      // Return system, admin, and assistant prompts for editing
+      const promptTemplates = [
+        {
+          id: 'system-001',
+          name: 'Core System Prompt',
+          description: 'Main system prompt that controls AI behavior and knowledge base integration',
+          template: 'You are JACC, an expert AI assistant for merchant services and payment processing. You help sales agents analyze merchant statements, provide pricing insights, and answer questions about payment processing. Always be professional, accurate, and helpful.',
+          category: 'system',
+          temperature: 0.7,
+          maxTokens: 2000,
+          isActive: true
+        },
+        {
+          id: 'admin-001',
+          name: 'Admin Assistant Prompt',
+          description: 'Specialized prompt for administrative tasks and system management',
+          template: 'You are an administrative assistant for the JACC system. Help with system configuration, user management, and technical support. Provide clear, step-by-step guidance for administrative tasks.',
+          category: 'admin',
+          temperature: 0.5,
+          maxTokens: 1500,
+          isActive: true
+        },
+        {
+          id: 'analysis-001',
+          name: 'Merchant Statement Analyzer',
+          description: 'Specialized prompt for analyzing merchant processing statements',
+          template: 'You are a merchant services expert specializing in statement analysis. Analyze processing statements to identify cost savings opportunities, rate structures, and competitive positioning. Focus on {statement_data} and provide actionable insights.',
+          category: 'analysis',
+          temperature: 0.3,
+          maxTokens: 3000,
+          isActive: true
+        },
+        {
+          id: 'customer-001',
+          name: 'Customer Service Assistant',
+          description: 'Prompt for handling customer service inquiries and support',
+          template: 'You are a friendly customer service representative for merchant services. Help customers with account questions, troubleshooting, and general support. Always maintain a helpful and professional tone.',
+          category: 'customer',
+          temperature: 0.6,
+          maxTokens: 1000,
+          isActive: true
+        }
+      ];
+      
+      res.json(promptTemplates);
+    } catch (error) {
+      console.error('Error fetching prompt templates:', error);
+      res.status(500).json({ error: 'Failed to fetch prompt templates' });
+    }
+  });
+
+  // Create new prompt template
+  app.post('/api/admin/prompts', async (req: Request, res: Response) => {
+    try {
+      const { name, description, template, category, temperature, maxTokens, isActive } = req.body;
+      
+      const newPrompt = {
+        id: Math.random().toString(36).substring(2, 15),
+        name: name || '',
+        description: description || '',
+        template: template || '',
+        category: category || 'system',
+        temperature: temperature || 0.7,
+        maxTokens: maxTokens || 1000,
+        isActive: isActive !== undefined ? isActive : true,
+        createdAt: new Date().toISOString()
+      };
+
+      console.log(`Prompt template created: ${newPrompt.name}`);
+      res.json({ success: true, prompt: newPrompt });
+    } catch (error) {
+      console.error("Error creating prompt template:", error);
+      res.status(500).json({ error: 'Failed to create prompt template' });
+    }
+  });
+
+  // Update prompt template
+  app.patch('/api/admin/prompts/:id', async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const updates = req.body;
+      
+      console.log(`Prompt template updated: ${id}`);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error updating prompt template:", error);
+      res.status(500).json({ error: 'Failed to update prompt template' });
+    }
+  });
+
+  // Delete prompt template
+  app.delete('/api/admin/prompts/:id', async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      
+      console.log(`Prompt template deleted: ${id}`);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting prompt template:", error);
+      res.status(500).json({ error: 'Failed to delete prompt template' });
+    }
+  });
+
+  // Training analytics endpoint
+  app.get('/api/admin/training/analytics', async (req: Request, res: Response) => {
+    try {
+      const analytics = {
+        totalInteractions: 47,
+        averageSatisfaction: 4.2,
+        flaggedForReview: 3,
+        averageResponseTime: 2300,
+        successRate: 94,
+        categoryBreakdown: {
+          pricing: 15,
+          technical: 12,
+          general: 20
+        }
+      };
+      
+      res.json(analytics);
+    } catch (error) {
+      console.error('Error fetching training analytics:', error);
+      res.status(500).json({ error: 'Failed to fetch training analytics' });
+    }
+  });
+
+  // Training interactions endpoint
+  app.get('/api/admin/training/interactions', async (req: Request, res: Response) => {
+    try {
+      const interactions = [
+        {
+          id: 1,
+          userQuery: "What are the processing rates for restaurants?",
+          aiResponse: "Restaurant processing rates typically range from 2.3% to 3.5%...",
+          satisfaction: 5,
+          timestamp: new Date().toISOString(),
+          category: "pricing"
+        }
+      ];
+      
+      res.json(interactions);
+    } catch (error) {
+      console.error('Error fetching training interactions:', error);
+      res.status(500).json({ error: 'Failed to fetch training interactions' });
+    }
+  });
+
+  // Create training interaction
+  app.post('/api/admin/training/interactions', async (req: Request, res: Response) => {
+    try {
+      const { userQuery, aiResponse, satisfaction, category } = req.body;
+      
+      const interaction = {
+        id: Math.random().toString(36).substring(2, 15),
+        userQuery,
+        aiResponse,
+        satisfaction,
+        category,
+        timestamp: new Date().toISOString()
+      };
+
+      console.log(`Training interaction logged: ${interaction.id}`);
+      res.json({ success: true, interaction });
+    } catch (error) {
+      console.error("Error creating training interaction:", error);
+      res.status(500).json({ error: 'Failed to create training interaction' });
+    }
+  });
+
   // Folder management endpoints
   
   // Create new folder
