@@ -321,18 +321,6 @@ export default function AdminControlCenter() {
     }
   };
 
-  const handleSaveDocumentEdit = () => {
-    if (!editingDocument) return;
-    
-    editDocumentMutation.mutate({
-      id: editingDocument.id,
-      data: {
-        originalName: editDocumentName,
-        folderId: editDocumentFolder || null,
-      }
-    });
-  };
-
   const handleBulkDelete = () => {
     if (confirm('Are you sure you want to delete all filtered documents? This action cannot be undone.')) {
       const documentIds = filteredDocuments.map(doc => doc.id);
