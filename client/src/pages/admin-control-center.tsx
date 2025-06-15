@@ -16,7 +16,7 @@ import {
   AlertTriangle, Clock, TrendingUp, Zap, Globe, Search, FileText, Eye, Download,
   Edit, Trash2, Save, Plus, Folder, FolderOpen, Upload, Users, Activity,
   BarChart3, Timer, ChevronDown, ChevronRight, Target, BookOpen, ThumbsUp,
-  ThumbsDown, Star
+  ThumbsDown, Star, Copy
 } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useToast } from '@/hooks/use-toast';
@@ -563,6 +563,15 @@ export default function AdminControlCenter() {
                   <CardDescription>Search, filter, and manage all {Array.isArray(documentsData) ? documentsData.length : 0} documents</CardDescription>
                 </div>
                 <div className="flex items-center gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={handleRemoveDuplicates}
+                    disabled={!Array.isArray(documentsData) || documentsData.length === 0}
+                  >
+                    <Copy className="w-4 h-4 mr-1" />
+                    Remove Duplicates
+                  </Button>
                   <Button 
                     variant="destructive" 
                     size="sm"

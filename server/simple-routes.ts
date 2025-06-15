@@ -516,8 +516,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const adminUserId = 'dev-admin-001';
       
       const uploadedDocuments = [];
+      const crypto = await import('crypto');
 
       for (const file of files) {
+        // Calculate file hash for duplicate detection
+        const fileBuffer = fs.readFileSync(file.path);
+        const fileHash = crypto.createHash('sha256').update(fileBuffer).digest('hex');
+        
+        // Check for existing document with same hash
+        const existingDoc = await db.select().from(documents).where(eq(documents.contentHash, fileHash)).limit(1);
+        
+        if (existingDoc.length > 0) {
+          console.log(`Duplicate detected: ${file.originalname} already exists as ${existingDoc[0].originalName}`);
+          continue; // Skip duplicate file
+        }
         const newDocument = {
           name: file.filename,
           originalName: file.originalname,
@@ -527,6 +539,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           userId: adminUserId,
           folderId: null, // Will be set to UUID later if needed
           isFavorite: false,
+          contentHash: fileHash,
           isPublic: permissions !== 'admin',
           adminOnly: permissions === 'admin',
           managerOnly: permissions === 'client-admin'
@@ -566,12 +579,82 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      res.json({ success: true, documents: uploadedDocuments, count: uploadedDocuments.length });
+      const duplicatesSkipped = files.length - uploadedDocuments.length;
+      res.json({ 
+        success: true, 
+        documents: uploadedDocuments, 
+        count: uploadedDocuments.length,
+        duplicatesSkipped: duplicatesSkipped,
+        message: duplicatesSkipped > 0 ? `${duplicatesSkipped} duplicate file(s) were skipped` : undefined
+      });
     } catch (error) {
       console.error("Error uploading document:", error);
       console.error("Error details:", error.message);
       console.error("Error stack:", error.stack);
       res.status(500).json({ error: 'Failed to upload document', details: error.message });
+    }
+  });
+
+  // Remove duplicate documents endpoint
+  app.post('/api/admin/documents/remove-duplicates', async (req: Request, res: Response) => {
+    try {
+      const { db } = await import('./db.ts');
+      const { documents } = await import('../shared/schema.ts');
+      const crypto = await import('crypto');
+      
+      // Get all documents
+      const allDocs = await db.select().from(documents);
+      const hashMap = new Map();
+      const duplicatesToRemove = [];
+      
+      // Process each document to calculate hash and find duplicates
+      for (const doc of allDocs) {
+        try {
+          if (fs.existsSync(doc.path)) {
+            const fileBuffer = fs.readFileSync(doc.path);
+            const fileHash = crypto.createHash('sha256').update(fileBuffer).digest('hex');
+            
+            if (hashMap.has(fileHash)) {
+              // This is a duplicate
+              duplicatesToRemove.push(doc.id);
+              console.log(`Duplicate found: ${doc.originalName} (${doc.id})`);
+            } else {
+              // First occurrence of this hash
+              hashMap.set(fileHash, doc.id);
+              
+              // Update the document with content hash if missing
+              if (!doc.contentHash) {
+                await db.update(documents)
+                  .set({ contentHash: fileHash })
+                  .where(eq(documents.id, doc.id));
+              }
+            }
+          } else {
+            // File doesn't exist, mark for removal
+            duplicatesToRemove.push(doc.id);
+            console.log(`Missing file: ${doc.originalName} (${doc.id})`);
+          }
+        } catch (error) {
+          console.warn(`Error processing document ${doc.id}:`, error.message);
+        }
+      }
+      
+      // Remove duplicates from database
+      let removedCount = 0;
+      for (const docId of duplicatesToRemove) {
+        await db.delete(documents).where(eq(documents.id, docId));
+        removedCount++;
+      }
+      
+      res.json({ 
+        success: true, 
+        duplicatesRemoved: removedCount,
+        totalProcessed: allDocs.length,
+        message: `Removed ${removedCount} duplicate documents`
+      });
+    } catch (error) {
+      console.error("Error removing duplicates:", error);
+      res.status(500).json({ error: 'Failed to remove duplicates' });
     }
   });
 
