@@ -1224,6 +1224,131 @@ export default function AdminControlCenter() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Duplicate Preview Modal */}
+      <Dialog open={showDuplicateModal} onOpenChange={setShowDuplicateModal}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Duplicate Documents Found</DialogTitle>
+            <DialogDescription>
+              Review the duplicates found before removing them. This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {duplicatePreview && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-3 gap-4 text-sm">
+                <div className="text-center p-3 bg-blue-50 rounded">
+                  <div className="font-semibold text-lg">{duplicatePreview.totalProcessed}</div>
+                  <div className="text-gray-600">Total Documents</div>
+                </div>
+                <div className="text-center p-3 bg-yellow-50 rounded">
+                  <div className="font-semibold text-lg">{duplicatePreview.duplicateGroups?.length || 0}</div>
+                  <div className="text-gray-600">Duplicate Groups</div>
+                </div>
+                <div className="text-center p-3 bg-red-50 rounded">
+                  <div className="font-semibold text-lg">{duplicatePreview.totalDuplicates}</div>
+                  <div className="text-gray-600">Files to Remove</div>
+                </div>
+              </div>
+
+              {duplicatePreview.totalDuplicates === 0 ? (
+                <div className="text-center py-8">
+                  <CheckCircle className="w-16 h-16 mx-auto mb-4 text-green-500" />
+                  <h3 className="text-lg font-semibold mb-2">No Duplicates Found!</h3>
+                  <p className="text-gray-600">Your document library is clean. No duplicate files were detected.</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <h4 className="font-semibold">Duplicate Groups:</h4>
+                  <ScrollArea className="h-[400px]">
+                    <div className="space-y-4">
+                      {duplicatePreview.duplicateGroups?.map((group, index) => (
+                        <Card key={index} className="border">
+                          <CardHeader className="pb-2">
+                            <div className="flex items-center justify-between">
+                              <div className="font-medium">
+                                Original: {group.original.originalName}
+                              </div>
+                              <Badge variant="outline">
+                                {group.duplicates.length} duplicate{group.duplicates.length > 1 ? 's' : ''}
+                              </Badge>
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              {new Date(group.original.createdAt).toLocaleDateString()} • {Math.round(group.original.size / 1024)} KB
+                            </div>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="space-y-2">
+                              <div className="text-sm font-medium text-red-600">Duplicates to be removed:</div>
+                              {group.duplicates.map((duplicate) => (
+                                <div key={duplicate.id} className="flex items-center justify-between p-2 bg-red-50 rounded text-sm">
+                                  <div>
+                                    <div className="font-medium">{duplicate.originalName}</div>
+                                    <div className="text-gray-500">
+                                      {new Date(duplicate.createdAt).toLocaleDateString()} • {Math.round(duplicate.size / 1024)} KB
+                                    </div>
+                                  </div>
+                                  <Trash2 className="w-4 h-4 text-red-500" />
+                                </div>
+                              ))}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                      
+                      {duplicatePreview.missingFiles?.length > 0 && (
+                        <Card className="border border-orange-200">
+                          <CardHeader className="pb-2">
+                            <div className="flex items-center gap-2">
+                              <AlertTriangle className="w-4 h-4 text-orange-500" />
+                              <div className="font-medium">Missing Files</div>
+                              <Badge variant="outline" className="bg-orange-50">
+                                {duplicatePreview.missingFiles.length} file{duplicatePreview.missingFiles.length > 1 ? 's' : ''}
+                              </Badge>
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              Database records without corresponding files
+                            </div>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="space-y-2">
+                              {duplicatePreview.missingFiles.map((missing) => (
+                                <div key={missing.id} className="flex items-center justify-between p-2 bg-orange-50 rounded text-sm">
+                                  <div>
+                                    <div className="font-medium">{missing.originalName}</div>
+                                    <div className="text-gray-500">Path: {missing.path}</div>
+                                  </div>
+                                  <Trash2 className="w-4 h-4 text-orange-500" />
+                                </div>
+                              ))}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      )}
+                    </div>
+                  </ScrollArea>
+                </div>
+              )}
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDuplicateModal(false)}>
+              Cancel
+            </Button>
+            {duplicatePreview?.totalDuplicates > 0 && (
+              <Button 
+                variant="destructive" 
+                onClick={confirmRemoveDuplicates}
+                disabled={removeDuplicatesMutation.isPending}
+              >
+                {removeDuplicatesMutation.isPending ? 'Removing...' : `Remove ${duplicatePreview.totalDuplicates} Duplicates`}
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
