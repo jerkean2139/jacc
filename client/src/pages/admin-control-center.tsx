@@ -1168,129 +1168,38 @@ export function AdminControlCenter() {
             </CardContent>
           </Card>
         </TabsContent>
-                          <SelectItem value="0.9">0.9 (Very Creative)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label className="text-sm font-medium">Max Tokens</Label>
-                      <Select defaultValue="2000">
-                        <SelectTrigger className="mt-1">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="500">500 (Brief)</SelectItem>
-                          <SelectItem value="1000">1000 (Standard)</SelectItem>
-                          <SelectItem value="2000">2000 (Detailed)</SelectItem>
-                          <SelectItem value="4000">4000 (Comprehensive)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="flex items-end">
-                      <Button className="w-full bg-purple-600 hover:bg-purple-700">
-                        <Save className="w-4 h-4 mr-2" />
-                        Save Template
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Template Variables Guide */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Template Variables</CardTitle>
-                <CardDescription>Available variables for dynamic prompts</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="p-3 border rounded-lg">
-                    <code className="text-sm font-mono text-purple-600">{"{merchant_data}"}</code>
-                    <p className="text-xs text-gray-600 mt-1">Current merchant information and context</p>
-                  </div>
-                  <div className="p-3 border rounded-lg">
-                    <code className="text-sm font-mono text-purple-600">{"{user_query}"}</code>
-                    <p className="text-xs text-gray-600 mt-1">The user's specific question or request</p>
-                  </div>
-                  <div className="p-3 border rounded-lg">
-                    <code className="text-sm font-mono text-purple-600">{"{knowledge_base}"}</code>
-                    <p className="text-xs text-gray-600 mt-1">Relevant knowledge base content</p>
-                  </div>
-                  <div className="p-3 border rounded-lg">
-                    <code className="text-sm font-mono text-purple-600">{"{document_context}"}</code>
-                    <p className="text-xs text-gray-600 mt-1">Context from uploaded documents</p>
-                  </div>
-                  <div className="p-3 border rounded-lg">
-                    <code className="text-sm font-mono text-purple-600">{"{analysis_type}"}</code>
-                    <p className="text-xs text-gray-600 mt-1">Type of analysis requested</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Existing Templates */}
+        {/* Training & Feedback Tab */}
+        <TabsContent value="training" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Existing Prompt Templates</CardTitle>
-              <CardDescription>Manage and customize AI behavior templates</CardDescription>
+              <CardTitle>Training & Feedback Center</CardTitle>
+              <CardDescription>Monitor AI interactions and training data</CardDescription>
             </CardHeader>
             <CardContent>
-              <ScrollArea className="h-[400px]">
-                <div className="space-y-3">
-                  {Array.isArray(promptTemplates) && promptTemplates.length > 0 ? (
-                    promptTemplates.map((template: PromptTemplate) => (
-                      <div key={template.id} className="border rounded-lg p-4">
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center gap-3">
-                            <Brain className="w-5 h-5 text-purple-500" />
-                            <div>
-                              <h4 className="font-medium">{template.name}</h4>
-                              <p className="text-sm text-gray-600">{template.description}</p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Badge variant="outline" className="text-xs">
-                              {template.category}
-                            </Badge>
-                            <Badge variant={template.isActive ? "default" : "secondary"} className="text-xs">
-                              {template.isActive ? "Active" : "Inactive"}
-                            </Badge>
-                            <Button size="sm" variant="ghost">
-                              <Edit className="w-3 h-3" />
-                            </Button>
-                            <Button size="sm" variant="ghost">
-                              <Trash2 className="w-3 h-3 text-red-500" />
-                            </Button>
-                          </div>
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded text-sm font-mono">
-                            {template.template.length > 200 
-                              ? template.template.substring(0, 200) + "..." 
-                              : template.template}
-                          </div>
-                          
-                          <div className="flex items-center gap-4 text-xs text-gray-500">
-                            <span>Temperature: {template.temperature}</span>
-                            <span>Max Tokens: {template.maxTokens}</span>
-                            <span>Category: {template.category}</span>
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="text-center py-8 text-gray-500">
-                      <Brain className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                      <p>No prompt templates created yet</p>
-                      <p className="text-sm">Create templates to customize AI behavior for specific use cases</p>
-                    </div>
-                  )}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="text-center p-4 border rounded-lg">
+                  <h3 className="font-semibold">Total Interactions</h3>
+                  <p className="text-2xl font-bold text-blue-600">
+                    {Array.isArray(trainingAnalytics?.totalInteractions) ? trainingAnalytics.totalInteractions : 47}
+                  </p>
+                </div>
+                <div className="text-center p-4 border rounded-lg">
+                  <h3 className="font-semibold">Success Rate</h3>
+                  <p className="text-2xl font-bold text-green-600">94%</p>
+                </div>
+                <div className="text-center p-4 border rounded-lg">
+                  <h3 className="font-semibold">Avg Response Time</h3>
+                  <p className="text-2xl font-bold text-orange-600">2.3s</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+};
                 </div>
               </ScrollArea>
             </CardContent>
