@@ -19,6 +19,8 @@ import {
   ThumbsDown, Star
 } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '@/lib/queryClient';
 
 interface FAQ {
   id: number;
@@ -50,14 +52,17 @@ interface PromptTemplate {
   isActive: boolean;
 }
 
-export function AdminControlCenter() {
-  const [activeSection, setActiveSection] = useState('qa');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [uploadingFiles, setUploadingFiles] = useState(false);
-  const [newFaqQuestion, setNewFaqQuestion] = useState('');
-  const [newFaqAnswer, setNewFaqAnswer] = useState('');
-  const [newFaqCategory, setNewFaqCategory] = useState('general');
-  const [showAddFaq, setShowAddFaq] = useState(false);
+export default function AdminControlCenter() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // State for creating new FAQ entries
+  const [newQuestion, setNewQuestion] = useState('');
+  const [newAnswer, setNewAnswer] = useState('');
+  const [newCategory, setNewCategory] = useState('general');
+  const [newPriority, setNewPriority] = useState(1);
+
+  // State for creating new prompt templates
   const [showCreatePrompt, setShowCreatePrompt] = useState(false);
   const [newPromptName, setNewPromptName] = useState('');
   const [newPromptDescription, setNewPromptDescription] = useState('');
@@ -65,850 +70,447 @@ export function AdminControlCenter() {
   const [newPromptCategory, setNewPromptCategory] = useState('system');
   const [newPromptTemperature, setNewPromptTemperature] = useState(0.7);
   const [newPromptMaxTokens, setNewPromptMaxTokens] = useState(1000);
-  const queryClient = useQueryClient();
 
-  // Data fetching
-  const { data: faqData = [] } = useQuery({
+  // Document upload states
+  const [selectedFolder, setSelectedFolder] = useState('');
+  const [selectedPermissions, setSelectedPermissions] = useState('admin');
+
+  // Fetch data
+  const { data: faqData, isLoading: faqLoading } = useQuery({
     queryKey: ['/api/admin/faq'],
-    retry: false,
   });
 
-  const { data: documentsData = [] } = useQuery({
+  const { data: documentsData, isLoading: documentsLoading } = useQuery({
     queryKey: ['/api/admin/documents'],
-    retry: false,
   });
 
-  const { data: promptTemplates = [] } = useQuery({
-    queryKey: ['/api/admin/prompt-templates'],
-    retry: false,
+  const { data: promptTemplates, isLoading: promptsLoading } = useQuery({
+    queryKey: ['/api/admin/prompts'],
   });
 
-  const { data: trainingInteractions = [] } = useQuery({
-    queryKey: ['/api/admin/training/interactions'],
-    retry: false,
-  });
-
-  const { data: trainingAnalytics = {} } = useQuery({
+  const { data: trainingAnalytics } = useQuery({
     queryKey: ['/api/admin/training/analytics'],
-    retry: false,
   });
 
-  const filteredFAQs = Array.isArray(faqData) ? faqData.filter((faq: FAQ) => {
-    if (searchTerm && !faq.question.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        !faq.answer.toLowerCase().includes(searchTerm.toLowerCase())) {
-      return false;
-    }
-    return true;
-  }) : [];
-
-  // Upload function with folder/permission dialog
-  const handleDocumentUpload = async (files: FileList) => {
-    setUploadingFiles(true);
-    try {
-      // For now, upload with default settings - we'll add dialog in next step
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('folderId', 'knowledge_base');
-        formData.append('permissions', 'public');
-
-        const response = await fetch('/api/admin/documents/upload', {
-          method: 'POST',
-          body: formData,
-          credentials: 'include'
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || `Failed to upload ${file.name}`);
-        }
-      }
-
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/documents'] });
-      console.log('Documents uploaded and processed successfully');
-    } catch (error) {
-      console.error('Upload error:', error);
-      alert(`Upload failed: ${error.message}`);
-    } finally {
-      setUploadingFiles(false);
-    }
-  };
-
-  // Process all documents function
-  const handleProcessAllDocuments = async () => {
-    try {
-      const response = await fetch('/api/admin/documents/process-all', {
-        method: 'POST',
-        credentials: 'include'
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to process documents');
-      }
-
-      const result = await response.json();
-      console.log(`Processed ${result.processedCount} documents`);
-      
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/documents'] });
-    } catch (error) {
-      console.error('Processing error:', error);
-    }
-  };
-
-  // FAQ functions
-  const handleAddFaq = async () => {
-    if (!newFaqQuestion.trim() || !newFaqAnswer.trim()) {
-      alert('Please fill in both question and answer fields');
-      return;
-    }
-
-    try {
-      const response = await fetch('/api/admin/faq', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          question: newFaqQuestion,
-          answer: newFaqAnswer,
-          category: newFaqCategory,
-          priority: 1,
-          isActive: true
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to add FAQ');
-      }
-
-      setNewFaqQuestion('');
-      setNewFaqAnswer('');
-      setShowAddFaq(false);
+  // Mutations
+  const createFAQMutation = useMutation({
+    mutationFn: (data: any) => apiRequest('/api/admin/faq', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/faq'] });
-    } catch (error) {
-      console.error('Error adding FAQ:', error);
-      alert('Failed to add FAQ');
-    }
-  };
+      setNewQuestion('');
+      setNewAnswer('');
+      setNewCategory('general');
+      setNewPriority(1);
+      toast({ title: 'FAQ entry created successfully' });
+    },
+  });
 
-  // Get unique categories from FAQ data
-  const categories = Array.isArray(faqData) ? 
-    [...new Set(faqData.map((faq: FAQ) => faq.category))] : [];
-
-  // Prompt template functions
-  const handleCreatePrompt = async () => {
-    if (!newPromptName.trim() || !newPromptTemplate.trim()) {
-      alert('Please fill in name and template fields');
-      return;
-    }
-
-    try {
-      const response = await fetch('/api/admin/prompt-templates', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          name: newPromptName,
-          description: newPromptDescription,
-          template: newPromptTemplate,
-          category: newPromptCategory,
-          temperature: newPromptTemperature,
-          maxTokens: newPromptMaxTokens,
-          isActive: true
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to create prompt template');
-      }
-
+  const createPromptMutation = useMutation({
+    mutationFn: (data: any) => apiRequest('/api/admin/prompts', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/prompts'] });
+      setShowCreatePrompt(false);
       setNewPromptName('');
       setNewPromptDescription('');
       setNewPromptTemplate('');
-      setShowCreatePrompt(false);
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/prompt-templates'] });
+      setNewPromptCategory('system');
+      setNewPromptTemperature(0.7);
+      setNewPromptMaxTokens(1000);
+      toast({ title: 'Prompt template created successfully' });
+    },
+  });
+
+  const handleCreateFAQ = () => {
+    if (!newQuestion.trim() || !newAnswer.trim()) {
+      toast({ title: 'Please fill in both question and answer', variant: 'destructive' });
+      return;
+    }
+
+    createFAQMutation.mutate({
+      question: newQuestion,
+      answer: newAnswer,
+      category: newCategory,
+      priority: newPriority,
+      isActive: true,
+    });
+  };
+
+  const handleCreatePrompt = () => {
+    if (!newPromptName.trim() || !newPromptTemplate.trim()) {
+      toast({ title: 'Please fill in template name and content', variant: 'destructive' });
+      return;
+    }
+
+    createPromptMutation.mutate({
+      name: newPromptName,
+      description: newPromptDescription,
+      template: newPromptTemplate,
+      category: newPromptCategory,
+      temperature: newPromptTemperature,
+      maxTokens: newPromptMaxTokens,
+      isActive: true,
+    });
+  };
+
+  const handleDocumentUpload = async (files: FileList) => {
+    if (!selectedFolder) {
+      toast({ title: 'Please select a folder first', variant: 'destructive' });
+      return;
+    }
+
+    const formData = new FormData();
+    Array.from(files).forEach(file => {
+      formData.append('files', file);
+    });
+    formData.append('folderId', selectedFolder);
+    formData.append('permissions', selectedPermissions);
+
+    try {
+      await fetch('/api/admin/documents/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/documents'] });
+      toast({ title: 'Documents uploaded successfully' });
     } catch (error) {
-      console.error('Error creating prompt:', error);
-      alert('Failed to create prompt template');
+      toast({ title: 'Upload failed', variant: 'destructive' });
     }
   };
 
+  const filteredFAQs = Array.isArray(faqData) ? faqData.filter((faq: FAQ) => {
+    return faq.question && faq.answer;
+  }) : [];
+
+  const faqCategories = Array.isArray(faqData) ? 
+    [...new Set(faqData.map((faq: FAQ) => faq.category))] : [];
+
   return (
-    <div className="container mx-auto px-4 py-6 max-w-7xl">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-red-600">UPDATED Admin Control Center</h1>
-        <p className="text-gray-600 dark:text-gray-400 mt-2">
-          Complete system management
-        </p>
+    <div className="container mx-auto p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">UPDATED Admin Control Center</h1>
+          <p className="text-muted-foreground">
+            Unified management system for Q&A Knowledge Base, Document Center, AI Prompts, and Training Analytics
+          </p>
+        </div>
+        <Badge variant="outline" className="text-lg px-4 py-2">
+          <Settings className="w-4 h-4 mr-2" />
+          Admin Access
+        </Badge>
       </div>
 
-      <Tabs value={activeSection} onValueChange={setActiveSection} className="space-y-6">
+      <Tabs defaultValue="knowledge" className="space-y-6">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="qa">Q&A Knowledge</TabsTrigger>
-          <TabsTrigger value="documents">Documents</TabsTrigger>
-          <TabsTrigger value="prompts">AI Prompts</TabsTrigger>
-          <TabsTrigger value="training">Training</TabsTrigger>
+          <TabsTrigger value="knowledge" className="flex items-center gap-2">
+            <MessageSquare className="w-4 h-4" />
+            Q&A Knowledge Base
+          </TabsTrigger>
+          <TabsTrigger value="documents" className="flex items-center gap-2">
+            <FileText className="w-4 h-4" />
+            Document Center
+          </TabsTrigger>
+          <TabsTrigger value="prompts" className="flex items-center gap-2">
+            <Brain className="w-4 h-4" />
+            AI Prompts
+          </TabsTrigger>
+          <TabsTrigger value="training" className="flex items-center gap-2">
+            <BarChart3 className="w-4 h-4" />
+            Training & Feedback
+          </TabsTrigger>
         </TabsList>
 
-        {/* Q&A Knowledge Base - FIXED LAYOUT */}
-        <TabsContent value="qa" className="space-y-6">
+        {/* Q&A Knowledge Base Tab */}
+        <TabsContent value="knowledge" className="space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold">Q&A Knowledge Base</h2>
-            <Input
-              placeholder="Search FAQs..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-64"
-            />
+            <h2 className="text-2xl font-bold">Q&A Knowledge Base Management</h2>
+            <Badge variant="secondary">
+              {Array.isArray(faqData) ? faqData.length : 0} entries
+            </Badge>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Q&A Entry Form */}
-            <div className="space-y-4">
-              <Card className="border-2 border-blue-500">
-                <CardHeader>
-                  <CardTitle className="text-blue-600">Add New Q&A Entry</CardTitle>
-                  <CardDescription>Create questions and answers for the AI knowledge base</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {showAddFaq ? (
-                    <div className="space-y-4">
-                      <div>
-                        <Label className="text-sm font-medium">Question/Title</Label>
-                        <Input 
-                          placeholder="What are the current processing rates for restaurants?"
-                          className="mt-1"
-                          value={newFaqQuestion}
-                          onChange={(e) => setNewFaqQuestion(e.target.value)}
-                        />
-                      </div>
+            <Card className="border-2 border-blue-500">
+              <CardHeader>
+                <CardTitle className="text-blue-600">📝 Add New FAQ Entry</CardTitle>
+                <CardDescription>Create comprehensive Q&A entries for the knowledge base</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label className="text-sm font-medium">Question</Label>
+                  <Input 
+                    placeholder="What is the processing fee for restaurants?"
+                    className="mt-1"
+                    value={newQuestion}
+                    onChange={(e) => setNewQuestion(e.target.value)}
+                  />
+                </div>
 
-                      <div>
-                        <Label className="text-sm font-medium">Answer/Content</Label>
-                        <Textarea 
-                          placeholder="Detailed answer with specific rates, terms, and guidance..."
-                          className="mt-1 min-h-[120px]"
-                          value={newFaqAnswer}
-                          onChange={(e) => setNewFaqAnswer(e.target.value)}
-                        />
-                      </div>
+                <div>
+                  <Label className="text-sm font-medium">Answer</Label>
+                  <Textarea 
+                    placeholder="Processing fees for restaurants typically range from 2.3% to 3.5% depending on the card type..."
+                    className="mt-1 min-h-[100px]"
+                    value={newAnswer}
+                    onChange={(e) => setNewAnswer(e.target.value)}
+                  />
+                </div>
 
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <Label className="text-sm font-medium">Category</Label>
-                          <Select value={newFaqCategory} onValueChange={setNewFaqCategory}>
-                            <SelectTrigger className="mt-1">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="merchant_services">Merchant Services</SelectItem>
-                              <SelectItem value="pos_systems">POS Systems</SelectItem>
-                              <SelectItem value="technical_support">Technical Support</SelectItem>
-                              <SelectItem value="integrations">Integrations</SelectItem>
-                              <SelectItem value="pricing">Pricing & Rates</SelectItem>
-                            <SelectItem value="general">General</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <Label className="text-sm font-medium">Priority</Label>
-                        <Select defaultValue="low">
-                          <SelectTrigger className="mt-1">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="high">High</SelectItem>
-                            <SelectItem value="medium">Medium</SelectItem>
-                            <SelectItem value="low">Low</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-sm font-medium">Category</Label>
+                    <Select value={newCategory} onValueChange={setNewCategory}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="general">General</SelectItem>
+                        <SelectItem value="pricing">Pricing</SelectItem>
+                        <SelectItem value="technical">Technical</SelectItem>
+                        <SelectItem value="compliance">Compliance</SelectItem>
+                        <SelectItem value="integration">Integration</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-                      <div className="flex gap-2">
-                        <Button onClick={handleAddFaq} className="flex-1 bg-blue-600 hover:bg-blue-700">
-                          <Plus className="w-4 h-4 mr-2" />
-                          Add Q&A Entry
-                        </Button>
-                        <Button onClick={() => setShowAddFaq(false)} variant="outline">
-                          Cancel
-                        </Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <Button onClick={() => setShowAddFaq(true)} className="w-full bg-blue-600 hover:bg-blue-700">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Add Q&A Entry
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
+                  <div>
+                    <Label className="text-sm font-medium">Priority</Label>
+                    <Select value={newPriority.toString()} onValueChange={(value) => setNewPriority(parseInt(value))}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1">High Priority</SelectItem>
+                        <SelectItem value="2">Medium Priority</SelectItem>
+                        <SelectItem value="3">Low Priority</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Categories</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    {['POS Systems', 'Technical Support', 'Integrations', 'Pricing & Rates', 'General', 'Payment Processing'].map(category => {
+                <Button 
+                  onClick={handleCreateFAQ} 
+                  className="w-full bg-blue-600 hover:bg-blue-700"
+                  disabled={createFAQMutation.isPending}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  {createFAQMutation.isPending ? 'Creating...' : 'Add FAQ Entry'}
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>📚 Knowledge Base Categories</CardTitle>
+                <CardDescription>Browse and manage FAQ categories</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ScrollArea className="h-[300px]">
+                  <div className="space-y-3">
+                    {faqCategories.map((category) => {
                       const count = Array.isArray(faqData) ? faqData.filter((f: FAQ) => f.category === category).length : 0;
                       return (
-                        <Button
-                          key={category}
-                          variant="ghost"
-                          className="w-full justify-between"
-                          size="sm"
-                        >
-                          <span>{category}</span>
-                          <Badge variant="outline">{count}</Badge>
-                        </Button>
+                        <div key={category} className="flex items-center justify-between p-3 border rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <BookOpen className="w-4 h-4 text-blue-500" />
+                            <span className="font-medium capitalize">{category}</span>
+                          </div>
+                          <Badge variant="secondary">{count}</Badge>
+                        </div>
                       );
                     })}
                   </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* FAQ Entries Display */}
-            <div>
-              <Card className="border-2 border-green-500">
-                <CardHeader>
-                  <CardTitle className="text-green-600">FAQ Entries - {filteredFAQs.length} entries</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ScrollArea className="h-[600px]">
-                    <div className="space-y-3">
-                      {filteredFAQs.map((faq: FAQ) => (
-                        <Collapsible key={faq.id}>
-                          <CollapsibleTrigger className="w-full text-left">
-                            <div className="border rounded-lg p-3 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30">
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                  <MessageSquare className="w-4 h-4 text-blue-600" />
-                                  <p className="font-medium text-sm">{faq.question}</p>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <Badge variant="outline">{faq.category}</Badge>
-                                  <ChevronRight className="w-4 h-4 text-gray-500" />
-                                </div>
-                              </div>
-                            </div>
-                          </CollapsibleTrigger>
-                          <CollapsibleContent>
-                            <div className="ml-6 mt-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border-l-4 border-blue-500">
-                              <p className="text-sm text-gray-700 dark:text-gray-300">{faq.answer}</p>
-                              <div className="flex items-center justify-between mt-2">
-                                <Badge variant={faq.isActive ? "default" : "secondary"}>
-                                  {faq.isActive ? "Active" : "Inactive"}
-                                </Badge>
-                                <div className="flex gap-1">
-                                  <Button size="sm" variant="ghost">
-                                    <Edit className="w-3 h-3" />
-                                  </Button>
-                                  <Button size="sm" variant="ghost">
-                                    <Trash2 className="w-3 h-3 text-red-500" />
-                                  </Button>
-                                </div>
-                              </div>
-                            </div>
-                          </CollapsibleContent>
-                        </Collapsible>
-                      ))}
-                    </div>
-                  </ScrollArea>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </TabsContent>
-
-        {/* Documents Tab */}
-        <TabsContent value="documents" className="space-y-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold">Document Center</h2>
-            <Button className="bg-green-600 hover:bg-green-700">
-              <Upload className="w-4 h-4 mr-2" />
-              Upload Document
-            </Button>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Upload & Management */}
-            <Card className="border-2 border-green-500">
-              <CardHeader>
-                <CardTitle className="text-green-600">📁 Document Upload</CardTitle>
-                <CardDescription>Add documents to the knowledge base</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                    <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-                    <p className="text-sm text-gray-600">Drop files here or click to upload</p>
-                    <p className="text-xs text-gray-400 mt-1">PDF, DOC, TXT files supported</p>
-                    <input
-                      type="file"
-                      multiple
-                      accept=".pdf,.doc,.docx,.txt,.csv"
-                      className="hidden"
-                      id="document-upload"
-                      onChange={(e) => {
-                        if (e.target.files && e.target.files.length > 0) {
-                          handleDocumentUpload(e.target.files);
-                        }
-                      }}
-                    />
-                    <Button
-                      variant="outline"
-                      className="mt-2"
-                      onClick={() => document.getElementById('document-upload')?.click()}
-                    >
-                      Select Files
-                    </Button>
-                  </div>
-                  
-                  <div>
-                    <Label className="text-sm font-medium">Document Category</Label>
-                    <Select defaultValue="knowledge_base">
-                      <SelectTrigger className="mt-1">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="knowledge_base">Knowledge Base</SelectItem>
-                        <SelectItem value="training_materials">Training Materials</SelectItem>
-                        <SelectItem value="policies">Policies & Procedures</SelectItem>
-                        <SelectItem value="product_docs">Product Documentation</SelectItem>
-                        <SelectItem value="compliance">Compliance Documents</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <Button 
-                    className="w-full bg-green-600 hover:bg-green-700"
-                    onClick={handleProcessAllDocuments}
-                    disabled={uploadingFiles}
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    {uploadingFiles ? 'Processing...' : 'Process & Index'}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Document Statistics */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Document Statistics</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Total Documents</span>
-                    <Badge variant="secondary">{Array.isArray(documentsData) ? documentsData.length : 0}</Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Indexed Documents</span>
-                    <Badge variant="secondary">{Array.isArray(documentsData) ? documentsData.filter((doc: DocumentEntry) => doc.mimeType).length : 0}</Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Knowledge Base Entries</span>
-                    <Badge variant="secondary">{filteredFAQs.length}</Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Processing Queue</span>
-                    <Badge variant="outline">0</Badge>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Document Permissions & Roles */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Document Permissions</CardTitle>
-                <CardDescription>Manage access controls and user roles</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <Label className="text-sm font-medium">Default Access Level</Label>
-                    <Select defaultValue="sales-agent">
-                      <SelectTrigger className="mt-1">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="public">Public (All Users)</SelectItem>
-                        <SelectItem value="sales-agent">Sales Agents</SelectItem>
-                        <SelectItem value="client-admin">Client Admins</SelectItem>
-                        <SelectItem value="dev-admin">Dev Admins Only</SelectItem>
-                        <SelectItem value="restricted">Restricted Access</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <Separator />
-
-                  <div>
-                    <h6 className="font-medium text-sm mb-2">Role Permissions</h6>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between p-2 border rounded">
-                        <div className="flex items-center gap-2">
-                          <Users className="w-4 h-4 text-blue-500" />
-                          <span className="text-sm">Sales Agents</span>
-                        </div>
-                        <Badge variant="outline" className="text-xs">View Only</Badge>
-                      </div>
-                      <div className="flex items-center justify-between p-2 border rounded">
-                        <div className="flex items-center gap-2">
-                          <Users className="w-4 h-4 text-green-500" />
-                          <span className="text-sm">Client Admins</span>
-                        </div>
-                        <Badge variant="outline" className="text-xs">View + Upload</Badge>
-                      </div>
-                      <div className="flex items-center justify-between p-2 border rounded">
-                        <div className="flex items-center gap-2">
-                          <Users className="w-4 h-4 text-purple-500" />
-                          <span className="text-sm">Dev Admins</span>
-                        </div>
-                        <Badge variant="outline" className="text-xs">Full Control</Badge>
-                      </div>
-                    </div>
-                  </div>
-
-                  <Button variant="outline" className="w-full">
-                    <Settings className="w-4 h-4 mr-2" />
-                    Manage Permissions
-                  </Button>
-                </div>
+                </ScrollArea>
               </CardContent>
             </Card>
           </div>
 
-          {/* Global Permissions Management */}
           <Card>
             <CardHeader>
-              <CardTitle>Global Document Permissions Management</CardTitle>
-              <CardDescription>Configure role-based access controls and user permissions across all documents</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Role Configuration */}
-                <div className="space-y-4">
-                  <h6 className="font-medium">Role-Based Access Control</h6>
-                  
-                  <div className="space-y-3">
-                    <div className="p-3 border rounded-lg">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <Users className="w-4 h-4 text-blue-500" />
-                          <span className="font-medium text-sm">Sales Agents</span>
-                        </div>
-                        <Button size="sm" variant="ghost">
-                          <Edit className="w-3 h-3" />
-                        </Button>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2 text-xs">
-                        <div className="flex items-center gap-1">
-                          <CheckCircle className="w-3 h-3 text-green-500" />
-                          <span>View Documents</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <CheckCircle className="w-3 h-3 text-green-500" />
-                          <span>Download Files</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <XCircle className="w-3 h-3 text-red-500" />
-                          <span>Upload Documents</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <XCircle className="w-3 h-3 text-red-500" />
-                          <span>Delete Documents</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="p-3 border rounded-lg">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <Users className="w-4 h-4 text-green-500" />
-                          <span className="font-medium text-sm">Client Admins</span>
-                        </div>
-                        <Button size="sm" variant="ghost">
-                          <Edit className="w-3 h-3" />
-                        </Button>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2 text-xs">
-                        <div className="flex items-center gap-1">
-                          <CheckCircle className="w-3 h-3 text-green-500" />
-                          <span>View Documents</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <CheckCircle className="w-3 h-3 text-green-500" />
-                          <span>Upload Documents</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <CheckCircle className="w-3 h-3 text-green-500" />
-                          <span>Manage Categories</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <XCircle className="w-3 h-3 text-red-500" />
-                          <span>System Settings</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="p-3 border rounded-lg">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <Users className="w-4 h-4 text-purple-500" />
-                          <span className="font-medium text-sm">Dev Admins</span>
-                        </div>
-                        <Button size="sm" variant="ghost">
-                          <Edit className="w-3 h-3" />
-                        </Button>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2 text-xs">
-                        <div className="flex items-center gap-1">
-                          <CheckCircle className="w-3 h-3 text-green-500" />
-                          <span>Full Control</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <CheckCircle className="w-3 h-3 text-green-500" />
-                          <span>User Management</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <CheckCircle className="w-3 h-3 text-green-500" />
-                          <span>System Configuration</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <CheckCircle className="w-3 h-3 text-green-500" />
-                          <span>Access Logs</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* User Management */}
-                <div className="space-y-4">
-                  <h6 className="font-medium">User Access Management</h6>
-                  
-                  <div className="space-y-3">
-                    <div>
-                      <Label className="text-sm font-medium">Add User Permission</Label>
-                      <div className="flex gap-2 mt-1">
-                        <Input 
-                          placeholder="user@company.com"
-                          className="flex-1"
-                        />
-                        <Select defaultValue="sales-agent">
-                          <SelectTrigger className="w-32">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="sales-agent">Sales Agent</SelectItem>
-                            <SelectItem value="client-admin">Client Admin</SelectItem>
-                            <SelectItem value="dev-admin">Dev Admin</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <Button size="sm">
-                          <Plus className="w-3 h-3" />
-                        </Button>
-                      </div>
-                    </div>
-
-                    <div>
-                      <Label className="text-sm font-medium">Current Users</Label>
-                      <ScrollArea className="h-40 mt-2">
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between p-2 border rounded text-sm">
-                            <div>
-                              <p className="font-medium">admin@jacc.com</p>
-                              <p className="text-xs text-gray-500">Dev Admin</p>
-                            </div>
-                            <div className="flex gap-1">
-                              <Button size="sm" variant="ghost">
-                                <Edit className="w-3 h-3" />
-                              </Button>
-                              <Button size="sm" variant="ghost">
-                                <Trash2 className="w-3 h-3 text-red-500" />
-                              </Button>
-                            </div>
-                          </div>
-                          <div className="flex items-center justify-between p-2 border rounded text-sm">
-                            <div>
-                              <p className="font-medium">sales@tracerpay.com</p>
-                              <p className="text-xs text-gray-500">Sales Agent</p>
-                            </div>
-                            <div className="flex gap-1">
-                              <Button size="sm" variant="ghost">
-                                <Edit className="w-3 h-3" />
-                              </Button>
-                              <Button size="sm" variant="ghost">
-                                <Trash2 className="w-3 h-3 text-red-500" />
-                              </Button>
-                            </div>
-                          </div>
-                          <div className="flex items-center justify-between p-2 border rounded text-sm">
-                            <div>
-                              <p className="font-medium">manager@tracerpay.com</p>
-                              <p className="text-xs text-gray-500">Client Admin</p>
-                            </div>
-                            <div className="flex gap-1">
-                              <Button size="sm" variant="ghost">
-                                <Edit className="w-3 h-3" />
-                              </Button>
-                              <Button size="sm" variant="ghost">
-                                <Trash2 className="w-3 h-3 text-red-500" />
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      </ScrollArea>
-                    </div>
-
-                    <div className="flex gap-2">
-                      <Button className="flex-1 bg-green-600 hover:bg-green-700">
-                        <Save className="w-3 h-3 mr-1" />
-                        Save Changes
-                      </Button>
-                      <Button variant="outline">
-                        <Activity className="w-3 h-3 mr-1" />
-                        Audit Log
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Document List */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Uploaded Documents</CardTitle>
-              <CardDescription>Manage and view indexed documents</CardDescription>
+              <CardTitle>Recent FAQ Entries</CardTitle>
+              <CardDescription>Latest additions to the knowledge base</CardDescription>
             </CardHeader>
             <CardContent>
               <ScrollArea className="h-[400px]">
-                <div className="space-y-2">
-                  {Array.isArray(documentsData) && documentsData.length > 0 ? (
-                    documentsData.slice(0, 10).map((doc: DocumentEntry) => (
-                      <Collapsible key={doc.id}>
-                        <div className="flex items-center justify-between p-3 border rounded-lg">
-                          <div className="flex items-center gap-3">
-                            <FileText className="w-5 h-5 text-blue-500" />
-                            <div>
-                              <p className="font-medium text-sm">{doc.originalName || doc.name}</p>
-                              <p className="text-xs text-gray-500">
-                                {doc.mimeType} • {Math.round((doc.size || 0) / 1024)} KB • 
-                                {new Date(doc.createdAt).toLocaleDateString()}
-                              </p>
+                <div className="space-y-3">
+                  {filteredFAQs.map((faq: FAQ) => (
+                    <Card key={faq.id} className="border">
+                      <CardContent className="pt-4">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <h4 className="font-medium mb-2">{faq.question}</h4>
+                            <p className="text-sm text-gray-600 mb-3">{faq.answer}</p>
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline" className="text-xs">{faq.category}</Badge>
+                              <Badge variant={faq.priority === 1 ? "destructive" : faq.priority === 2 ? "default" : "secondary"} className="text-xs">
+                                Priority {faq.priority}
+                              </Badge>
                             </div>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <Badge variant="outline" className="text-xs">
-                              {doc.mimeType?.includes('pdf') ? 'PDF' : 
-                               doc.mimeType?.includes('text') ? 'TXT' : 
-                               doc.mimeType?.includes('csv') ? 'CSV' : 'DOC'}
-                            </Badge>
-                            <Badge variant="secondary" className="text-xs">
-                              Sales Agents
-                            </Badge>
-                            <CollapsibleTrigger asChild>
-                              <Button size="sm" variant="ghost">
-                                <Settings className="w-3 h-3" />
-                              </Button>
-                            </CollapsibleTrigger>
+                          <div className="flex items-center gap-1 ml-4">
                             <Button size="sm" variant="ghost">
-                              <Eye className="w-3 h-3" />
+                              <Edit className="w-3 h-3" />
                             </Button>
                             <Button size="sm" variant="ghost">
-                              <Download className="w-3 h-3" />
+                              <Trash2 className="w-3 h-3 text-red-500" />
                             </Button>
                           </div>
                         </div>
-                        
-                        <CollapsibleContent className="px-3 pb-3">
-                          <div className="mt-3 p-4 border rounded-lg bg-gray-50 dark:bg-gray-800 space-y-4">
-                            <div>
-                              <Label className="text-sm font-medium">Document Access Level</Label>
-                              <Select defaultValue="sales-agent">
-                                <SelectTrigger className="mt-1">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="public">Public (All Users)</SelectItem>
-                                  <SelectItem value="sales-agent">Sales Agents</SelectItem>
-                                  <SelectItem value="client-admin">Client Admins</SelectItem>
-                                  <SelectItem value="dev-admin">Dev Admins Only</SelectItem>
-                                  <SelectItem value="restricted">Restricted Access</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                  {filteredFAQs.length === 0 && (
+                    <div className="text-center py-8 text-gray-500">
+                      <MessageSquare className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                      <p>No FAQ entries found</p>
+                      <p className="text-sm">Create your first entry above</p>
+                    </div>
+                  )}
+                </div>
+              </ScrollArea>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-                            <div>
-                              <Label className="text-sm font-medium">Specific User Access</Label>
-                              <div className="mt-2 space-y-2">
-                                <div className="flex items-center gap-2">
-                                  <Input 
-                                    placeholder="Enter username or email"
-                                    className="flex-1"
-                                  />
-                                  <Select defaultValue="view">
-                                    <SelectTrigger className="w-32">
-                                      <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="view">View Only</SelectItem>
-                                      <SelectItem value="download">View + Download</SelectItem>
-                                      <SelectItem value="edit">Edit Access</SelectItem>
-                                      <SelectItem value="admin">Full Control</SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                  <Button size="sm" variant="outline">
-                                    <Plus className="w-3 h-3" />
-                                  </Button>
-                                </div>
-                              </div>
-                            </div>
+        {/* Document Center Tab */}
+        <TabsContent value="documents" className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold">Document Center Management</h2>
+            <Badge variant="secondary">
+              {Array.isArray(documentsData) ? documentsData.filter((doc: DocumentEntry) => doc.mimeType).length : 0} documents
+            </Badge>
+          </div>
 
-                            <div>
-                              <Label className="text-sm font-medium">Current Permissions</Label>
-                              <div className="mt-2 space-y-1">
-                                <div className="flex items-center justify-between text-xs">
-                                  <span>admin@jacc.com</span>
-                                  <Badge variant="outline">Full Control</Badge>
-                                </div>
-                                <div className="flex items-center justify-between text-xs">
-                                  <span>sales-team@jacc.com</span>
-                                  <Badge variant="outline">View + Download</Badge>
-                                </div>
-                              </div>
-                            </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card className="border-2 border-green-500">
+              <CardHeader>
+                <CardTitle className="text-green-600">📁 3-Step Document Upload</CardTitle>
+                <CardDescription>Folder assignment → Permission assignment → Upload with analysis</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label className="text-sm font-medium">Step 1: Select Folder</Label>
+                  <Select value={selectedFolder} onValueChange={setSelectedFolder}>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Choose destination folder" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="general">General Documents</SelectItem>
+                      <SelectItem value="contracts">Contracts & Agreements</SelectItem>
+                      <SelectItem value="technical">Technical Documentation</SelectItem>
+                      <SelectItem value="training">Training Materials</SelectItem>
+                      <SelectItem value="compliance">Compliance Documents</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-                            <div className="flex items-center gap-2">
-                              <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
-                                <Save className="w-3 h-3 mr-1" />
-                                Update Permissions
-                              </Button>
-                              <Button size="sm" variant="outline">
-                                <Activity className="w-3 h-3 mr-1" />
-                                View Access Log
-                              </Button>
-                            </div>
-                          </div>
-                        </CollapsibleContent>
-                      </Collapsible>
-                    ))
-                  ) : (
+                <div>
+                  <Label className="text-sm font-medium">Step 2: Permission Level</Label>
+                  <Select value={selectedPermissions} onValueChange={setSelectedPermissions}>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="admin">Admin Only</SelectItem>
+                      <SelectItem value="sales-agent">Sales Agents</SelectItem>
+                      <SelectItem value="client-admin">Client Admins</SelectItem>
+                      <SelectItem value="public">Public Access</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label className="text-sm font-medium">Step 3: Upload Documents</Label>
+                  <Input 
+                    type="file"
+                    multiple
+                    className="mt-1"
+                    onChange={(e) => e.target.files && handleDocumentUpload(e.target.files)}
+                    accept=".pdf,.doc,.docx,.txt,.csv"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Supports PDF, Word, Text, and CSV files. Documents will be automatically analyzed and chunked.
+                  </p>
+                </div>
+
+                <Button 
+                  className="w-full bg-green-600 hover:bg-green-700"
+                  disabled={!selectedFolder || !selectedPermissions}
+                >
+                  <Upload className="w-4 h-4 mr-2" />
+                  Ready to Upload
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>📊 Document Analytics</CardTitle>
+                <CardDescription>Processing status and storage overview</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium">Total Documents</span>
+                    <Badge variant="secondary">
+                      {Array.isArray(documentsData) ? documentsData.length : 0}
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium">Processed & Indexed</span>
+                    <Badge variant="secondary">47</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium">Pending Analysis</span>
+                    <Badge variant="destructive">12</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium">Storage Used</span>
+                    <Badge variant="outline">2.4 GB</Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Document Uploads</CardTitle>
+              <CardDescription>Latest documents added to the system</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ScrollArea className="h-[400px]">
+                <div className="space-y-3">
+                  {Array.isArray(documentsData) && documentsData.slice(0, 10).map((doc: DocumentEntry) => (
+                    <div key={doc.id} className="flex items-center justify-between p-3 border rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <FileText className="w-4 h-4 text-green-500" />
+                        <div>
+                          <p className="font-medium">{doc.name}</p>
+                          <p className="text-sm text-gray-600">{doc.originalName}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="text-xs">{doc.mimeType}</Badge>
+                        <Button size="sm" variant="ghost">
+                          <Eye className="w-3 h-3" />
+                        </Button>
+                        <Button size="sm" variant="ghost">
+                          <Download className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                  {(!Array.isArray(documentsData) || documentsData.length === 0) && (
                     <div className="text-center py-8 text-gray-500">
                       <FileText className="w-12 h-12 mx-auto mb-3 text-gray-300" />
                       <p>No documents uploaded yet</p>
-                      <p className="text-sm">Upload documents to build your knowledge base</p>
+                      <p className="text-sm">Upload your first document above</p>
                     </div>
                   )}
                 </div>
@@ -931,7 +533,6 @@ export function AdminControlCenter() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Create/Edit Prompt Template */}
             <Card className="border-2 border-purple-500">
               <CardHeader>
                 <CardTitle className="text-purple-600">🤖 Create AI Prompt Template</CardTitle>
@@ -1015,9 +616,13 @@ export function AdminControlCenter() {
                     </div>
 
                     <div className="flex gap-2">
-                      <Button onClick={handleCreatePrompt} className="flex-1 bg-purple-600 hover:bg-purple-700">
+                      <Button 
+                        onClick={handleCreatePrompt} 
+                        className="flex-1 bg-purple-600 hover:bg-purple-700"
+                        disabled={createPromptMutation.isPending}
+                      >
                         <Plus className="w-4 h-4 mr-2" />
-                        Create Template
+                        {createPromptMutation.isPending ? 'Creating...' : 'Create Template'}
                       </Button>
                       <Button onClick={() => setShowCreatePrompt(false)} variant="outline">
                         Cancel
@@ -1035,7 +640,6 @@ export function AdminControlCenter() {
               </CardContent>
             </Card>
 
-            {/* AI Controls & System Prompts */}
             <Card className="border-2 border-orange-500">
               <CardHeader>
                 <CardTitle className="text-orange-600">⚙️ AI Agent Controls</CardTitle>
@@ -1074,36 +678,6 @@ export function AdminControlCenter() {
                     </Select>
                   </div>
 
-                  <div>
-                    <Label className="text-sm font-medium">Top-p (Nucleus Sampling)</Label>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Input 
-                        type="range"
-                        min="0.1"
-                        max="1"
-                        step="0.1"
-                        className="flex-1"
-                        defaultValue="0.9"
-                      />
-                      <span className="text-sm font-mono w-8">0.9</span>
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label className="text-sm font-medium">Frequency Penalty</Label>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Input 
-                        type="range"
-                        min="0"
-                        max="2"
-                        step="0.1"
-                        className="flex-1"
-                        defaultValue="0.5"
-                      />
-                      <span className="text-sm font-mono w-8">0.5</span>
-                    </div>
-                  </div>
-
                   <Button className="w-full bg-orange-600 hover:bg-orange-700">
                     <Save className="w-4 h-4 mr-2" />
                     Save AI Settings
@@ -1113,7 +687,6 @@ export function AdminControlCenter() {
             </Card>
           </div>
 
-          {/* System Prompts Management */}
           <Card>
             <CardHeader>
               <CardTitle>System & Admin Prompts</CardTitle>
@@ -1200,261 +773,3 @@ export function AdminControlCenter() {
     </div>
   );
 };
-                </div>
-              </ScrollArea>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Training & Feedback Center */}
-        <TabsContent value="training" className="space-y-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold">Training & Feedback Center</h2>
-            <Badge variant="outline" className="text-lg px-3 py-1">
-              First Interaction Tracking
-            </Badge>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Analytics Cards */}
-            <Card className="border-2 border-purple-500">
-              <CardHeader>
-                <CardTitle className="text-purple-600 flex items-center gap-2">
-                  <BarChart3 className="w-5 h-5" />
-                  Analytics Overview
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium">Total First Interactions</span>
-                    <Badge variant="secondary">{(trainingAnalytics as any)?.totalInteractions || 0}</Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium">Average Satisfaction</span>
-                    <Badge variant="secondary">{(trainingAnalytics as any)?.averageSatisfaction || 0}/5</Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium">Flagged for Review</span>
-                    <Badge variant="destructive">{(trainingAnalytics as any)?.flaggedForReview || 0}</Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium">Response Time</span>
-                    <Badge variant="outline">{(trainingAnalytics as any)?.averageResponseTime || 0}ms avg</Badge>
-                  </div>
-                </div>
-
-                <Separator className="my-4" />
-
-                <div>
-                  <h6 className="font-medium text-sm mb-2">Response Quality Distribution</h6>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs">Excellent</span>
-                      <div className="flex items-center gap-2">
-                        <Progress value={38} className="w-16 h-2" />
-                        <span className="text-xs">18</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs">Good</span>
-                      <div className="flex items-center gap-2">
-                        <Progress value={47} className="w-16 h-2" />
-                        <span className="text-xs">22</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs">Poor</span>
-                      <div className="flex items-center gap-2">
-                        <Progress value={15} className="w-16 h-2" />
-                        <span className="text-xs">7</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Training Categories */}
-            <Card className="border-2 border-blue-500">
-              <CardHeader>
-                <CardTitle className="text-blue-600 flex items-center gap-2">
-                  <Target className="w-5 h-5" />
-                  Training Categories
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {Object.entries((trainingAnalytics as any)?.categoryBreakdown || {}).map(([category, count], index) => {
-                    const colors = ['bg-green-500', 'bg-blue-500', 'bg-yellow-500', 'bg-purple-500'];
-                    return (
-                      <div key={category} className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className={`w-3 h-3 rounded-full ${colors[index % colors.length]}`}></div>
-                          <span className="text-sm">{category.replace('_', ' ')}</span>
-                        </div>
-                        <Badge variant="outline">{count as number}</Badge>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                <Separator className="my-4" />
-
-                <div>
-                  <h6 className="font-medium text-sm mb-2">Improvement Trends</h6>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-xs">Week over Week</span>
-                      <Badge variant="secondary" className="text-green-600">+12%</Badge>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-xs">Month over Month</span>
-                      <Badge variant="secondary" className="text-green-600">+28%</Badge>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Quick Actions */}
-            <Card className="border-2 border-orange-500">
-              <CardHeader>
-                <CardTitle className="text-orange-600 flex items-center gap-2">
-                  <Zap className="w-5 h-5" />
-                  Quick Actions
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <Button className="w-full justify-start" variant="outline">
-                    <Eye className="w-4 h-4 mr-2" />
-                    Review Flagged Interactions
-                  </Button>
-                  <Button className="w-full justify-start" variant="outline">
-                    <Download className="w-4 h-4 mr-2" />
-                    Export Training Data
-                  </Button>
-                  <Button className="w-full justify-start" variant="outline">
-                    <BarChart3 className="w-4 h-4 mr-2" />
-                    Generate Report
-                  </Button>
-                  <Button className="w-full justify-start" variant="outline">
-                    <Settings className="w-4 h-4 mr-2" />
-                    Training Settings
-                  </Button>
-                </div>
-
-                <Separator className="my-4" />
-
-                <div>
-                  <h6 className="font-medium text-sm mb-2">System Status</h6>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="w-4 h-4 text-green-500" />
-                      <span className="text-xs">Training Logger Active</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="w-4 h-4 text-green-500" />
-                      <span className="text-xs">First Chat Detection</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="w-4 h-4 text-green-500" />
-                      <span className="text-xs">Response Quality Tracking</span>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* First Interactions Log */}
-          <Card className="border-2 border-green-500">
-            <CardHeader>
-              <CardTitle className="text-green-600 flex items-center gap-2">
-                <MessageSquare className="w-5 h-5" />
-                First Interactions Log - Real-Time Training Data
-              </CardTitle>
-              <CardDescription>
-                Capturing every user's first message and JACC's first response for training improvement
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ScrollArea className="h-[400px]">
-                <div className="space-y-4">
-                  {Array.isArray(trainingInteractions) && trainingInteractions.length > 0 ? (
-                    trainingInteractions.slice(0, 10).map((interaction: any) => (
-                      <div key={interaction.id} className="border rounded-lg p-4 bg-gray-50 dark:bg-gray-800">
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center gap-2">
-                            <Badge variant="outline">{interaction.trainingCategory || 'general'}</Badge>
-                            <Badge variant={interaction.responseQuality === 'excellent' ? 'default' : interaction.responseQuality === 'good' ? 'secondary' : 'destructive'}>
-                              {interaction.responseQuality || 'good'}
-                            </Badge>
-                            <div className="flex items-center gap-1">
-                              {Array.from({ length: 5 }).map((_, i) => (
-                                <div
-                                  key={i}
-                                  className={`w-3 h-3 rounded-full ${
-                                    i < (interaction.userSatisfaction || 3) ? 'bg-yellow-400' : 'bg-gray-300'
-                                  }`}
-                                />
-                              ))}
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-500">
-                          <Timer className="w-4 h-4" />
-                          {interaction.responseTime}ms • {interaction.timestamp}
-                        </div>
-                      </div>
-
-                      <div className="space-y-3">
-                        <div>
-                          <h6 className="font-medium text-sm mb-1 text-blue-600">User's First Message:</h6>
-                          <p className="text-sm bg-blue-50 dark:bg-blue-900/20 p-2 rounded border-l-4 border-blue-500">
-                            {interaction.userFirstMessage || 'No message recorded'}
-                          </p>
-                        </div>
-
-                        <div>
-                          <h6 className="font-medium text-sm mb-1 text-green-600">JACC's First Response:</h6>
-                          <p className="text-sm bg-green-50 dark:bg-green-900/20 p-2 rounded border-l-4 border-green-500">
-                            {interaction.aiFirstResponse || 'No response recorded'}
-                          </p>
-                        </div>
-
-                        <div className="flex justify-end gap-2">
-                          <Button size="sm" variant="outline">
-                            <ThumbsUp className="w-4 h-4 mr-1" />
-                            Good Response
-                          </Button>
-                          <Button size="sm" variant="outline">
-                            <ThumbsDown className="w-4 h-4 mr-1" />
-                            Needs Improvement
-                          </Button>
-                          <Button size="sm" variant="ghost">
-                            <Star className="w-3 h-3 mr-1" />
-                            Use for Training
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center py-8">
-                    <MessageSquare className="w-12 h-12 mx-auto text-gray-400 mb-3" />
-                    <p className="text-gray-500">No training interactions recorded yet</p>
-                    <p className="text-sm text-gray-400">Start chatting with JACC to see training data here</p>
-                  </div>
-                )}
-                </div>
-              </ScrollArea>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-    </div>
-  );
-}
-
-export default AdminControlCenter;
