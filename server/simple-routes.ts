@@ -494,14 +494,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Upload document endpoint with processing
   app.post('/api/admin/documents/upload', adminUpload.array('files'), async (req: Request, res: Response) => {
     try {
+      console.log('Upload request received:', {
+        files: req.files ? req.files.length : 0,
+        body: req.body
+      });
+
       const files = req.files as Express.Multer.File[];
       if (!files || files.length === 0) {
+        console.log('No files in request');
         return res.status(400).json({ error: 'No files uploaded' });
       }
 
       const { folderId, permissions } = req.body;
+      console.log('Processing upload with:', { folderId, permissions });
+
       const { db } = await import('./db.ts');
-      const { documents, documentChunks } = await import('../shared/schema.ts');
+      const { documents, documentChunks, users } = await import('../shared/schema.ts');
+      const { eq } = await import('drizzle-orm');
+      
+      // Ensure admin user exists with proper UUID format
+      const adminUserId = 'admin-uuid-12345';
+      const existingUser = await db.select().from(users).where(eq(users.id, adminUserId)).limit(1);
+      if (existingUser.length === 0) {
+        try {
+          await db.insert(users).values({
+            id: adminUserId,
+            username: 'admin',
+            email: 'admin@jacc.com',
+            passwordHash: '$2b$10$placeholder.hash.for.admin.user',
+            firstName: 'Admin',
+            lastName: 'User',
+            role: 'dev-admin',
+            isActive: true
+          });
+          console.log('Created admin user for document uploads');
+        } catch (userError) {
+          console.log('Admin user may already exist or creation failed:', userError.message);
+        }
+      }
       
       const uploadedDocuments = [];
 
@@ -512,7 +542,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           mimeType: file.mimetype,
           size: file.size,
           path: file.path,
-          userId: 'admin-user',
+          userId: adminUserId,
           folderId: null, // Will be set to UUID later if needed
           isFavorite: false,
           isPublic: permissions !== 'admin',
@@ -557,7 +587,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true, documents: uploadedDocuments, count: uploadedDocuments.length });
     } catch (error) {
       console.error("Error uploading document:", error);
-      res.status(500).json({ error: 'Failed to upload document' });
+      console.error("Error details:", error.message);
+      console.error("Error stack:", error.stack);
+      res.status(500).json({ error: 'Failed to upload document', details: error.message });
     }
   });
 
