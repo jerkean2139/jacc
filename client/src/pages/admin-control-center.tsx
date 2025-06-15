@@ -247,8 +247,17 @@ export default function AdminControlCenter() {
       method: 'POST',
     }),
     onSuccess: (data) => {
+      console.log('Scan duplicates success:', data);
       setDuplicatePreview(data);
       setShowDuplicateModal(true);
+    },
+    onError: (error) => {
+      console.error('Scan duplicates error:', error);
+      toast({ 
+        title: 'Scan failed', 
+        description: 'Unable to scan for duplicates. Please try again.',
+        variant: 'destructive' 
+      });
     },
   });
 
@@ -268,6 +277,7 @@ export default function AdminControlCenter() {
   });
 
   const handleRemoveDuplicates = () => {
+    console.log('Remove duplicates button clicked');
     scanDuplicatesMutation.mutate();
   };
 
@@ -602,8 +612,12 @@ export default function AdminControlCenter() {
                   <Button 
                     variant="outline" 
                     size="sm"
-                    onClick={handleRemoveDuplicates}
-                    disabled={!Array.isArray(documentsData) || documentsData.length === 0 || scanDuplicatesMutation.isPending}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      console.log('Button clicked, documentsData:', documentsData?.length);
+                      handleRemoveDuplicates();
+                    }}
+                    disabled={scanDuplicatesMutation.isPending}
                   >
                     <Copy className="w-4 h-4 mr-1" />
                     {scanDuplicatesMutation.isPending ? 'Scanning...' : 'Remove Duplicates'}
