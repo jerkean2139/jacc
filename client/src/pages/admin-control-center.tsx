@@ -74,6 +74,12 @@ export default function AdminControlCenter() {
   // Document upload states
   const [selectedFolder, setSelectedFolder] = useState('');
   const [selectedPermissions, setSelectedPermissions] = useState('admin');
+  const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
+  
+  // Document management states
+  const [documentSearchTerm, setDocumentSearchTerm] = useState('');
+  const [documentFilter, setDocumentFilter] = useState('all');
+  const [showDocumentDetails, setShowDocumentDetails] = useState(false);
 
   // Fetch data
   const { data: faqData, isLoading: faqLoading } = useQuery({
@@ -158,28 +164,78 @@ export default function AdminControlCenter() {
     });
   };
 
-  const handleDocumentUpload = async (files: FileList) => {
+  const handleDocumentUpload = async () => {
     if (!selectedFolder) {
       toast({ title: 'Please select a folder first', variant: 'destructive' });
       return;
     }
 
+    if (!selectedFiles || selectedFiles.length === 0) {
+      toast({ title: 'Please select files to upload', variant: 'destructive' });
+      return;
+    }
+
     const formData = new FormData();
-    Array.from(files).forEach(file => {
+    Array.from(selectedFiles).forEach(file => {
       formData.append('files', file);
     });
     formData.append('folderId', selectedFolder);
     formData.append('permissions', selectedPermissions);
 
     try {
-      await fetch('/api/admin/documents/upload', {
+      const response = await fetch('/api/admin/documents/upload', {
         method: 'POST',
         body: formData,
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/documents'] });
-      toast({ title: 'Documents uploaded successfully' });
+
+      if (response.ok) {
+        queryClient.invalidateQueries({ queryKey: ['/api/admin/documents'] });
+        toast({ title: 'Documents uploaded and processed successfully' });
+        setSelectedFiles(null);
+        setSelectedFolder('');
+        setSelectedPermissions('admin');
+      } else {
+        const error = await response.json();
+        toast({ title: error.message || 'Upload failed', variant: 'destructive' });
+      }
     } catch (error) {
+      console.error('Upload error:', error);
       toast({ title: 'Upload failed', variant: 'destructive' });
+    }
+  };
+
+  // Document management mutations
+  const deleteDocumentMutation = useMutation({
+    mutationFn: (documentId: string) => apiRequest(`/api/admin/documents/${documentId}`, {
+      method: 'DELETE',
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/documents'] });
+      toast({ title: 'Document deleted successfully' });
+    },
+  });
+
+  const bulkDeleteMutation = useMutation({
+    mutationFn: (documentIds: string[]) => apiRequest('/api/admin/documents/bulk-delete', {
+      method: 'POST',
+      body: JSON.stringify({ documentIds }),
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/documents'] });
+      toast({ title: 'Documents deleted successfully' });
+    },
+  });
+
+  const handleDeleteDocument = (documentId: string) => {
+    if (confirm('Are you sure you want to delete this document?')) {
+      deleteDocumentMutation.mutate(documentId);
+    }
+  };
+
+  const handleBulkDelete = () => {
+    if (confirm('Are you sure you want to delete all filtered documents? This action cannot be undone.')) {
+      const documentIds = filteredDocuments.map(doc => doc.id);
+      bulkDeleteMutation.mutate(documentIds);
     }
   };
 
@@ -189,6 +245,21 @@ export default function AdminControlCenter() {
 
   const faqCategories = Array.isArray(faqData) ? 
     [...new Set(faqData.map((faq: FAQ) => faq.category))] : [];
+
+  // Filter documents based on search and filter criteria
+  const filteredDocuments = Array.isArray(documentsData) ? documentsData.filter((doc: DocumentEntry) => {
+    const matchesSearch = documentSearchTerm === '' || 
+      doc.originalName.toLowerCase().includes(documentSearchTerm.toLowerCase()) ||
+      doc.name.toLowerCase().includes(documentSearchTerm.toLowerCase());
+    
+    const matchesFilter = documentFilter === 'all' || 
+      (documentFilter === 'pdf' && doc.mimeType === 'application/pdf') ||
+      (documentFilter === 'text' && doc.mimeType.includes('text/')) ||
+      (documentFilter === 'csv' && doc.mimeType.includes('csv')) ||
+      (documentFilter === 'recent' && new Date(doc.createdAt) > new Date(Date.now() - 24 * 60 * 60 * 1000));
+    
+    return matchesSearch && matchesFilter;
+  }) : [];
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -430,20 +501,26 @@ export default function AdminControlCenter() {
                     type="file"
                     multiple
                     className="mt-1"
-                    onChange={(e) => e.target.files && handleDocumentUpload(e.target.files)}
+                    onChange={(e) => setSelectedFiles(e.target.files)}
                     accept=".pdf,.doc,.docx,.txt,.csv"
                   />
                   <p className="text-xs text-gray-500 mt-1">
                     Supports PDF, Word, Text, and CSV files. Documents will be automatically analyzed and chunked.
                   </p>
+                  {selectedFiles && selectedFiles.length > 0 && (
+                    <div className="mt-2 text-sm text-green-600">
+                      {selectedFiles.length} file(s) selected
+                    </div>
+                  )}
                 </div>
 
                 <Button 
                   className="w-full bg-green-600 hover:bg-green-700"
-                  disabled={!selectedFolder || !selectedPermissions}
+                  disabled={!selectedFolder || !selectedPermissions || !selectedFiles || selectedFiles.length === 0}
+                  onClick={handleDocumentUpload}
                 >
                   <Upload className="w-4 h-4 mr-2" />
-                  Ready to Upload
+                  Upload {selectedFiles ? selectedFiles.length : 0} Document(s)
                 </Button>
               </CardContent>
             </Card>

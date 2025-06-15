@@ -492,69 +492,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Upload document endpoint with processing
-  app.post('/api/admin/documents/upload', adminUpload.single('file'), async (req: Request, res: Response) => {
+  app.post('/api/admin/documents/upload', adminUpload.array('files'), async (req: Request, res: Response) => {
     try {
-      if (!req.file) {
-        return res.status(400).json({ error: 'No file uploaded' });
+      const files = req.files as Express.Multer.File[];
+      if (!files || files.length === 0) {
+        return res.status(400).json({ error: 'No files uploaded' });
       }
 
+      const { folderId, permissions } = req.body;
       const { db } = await import('./db.ts');
       const { documents, documentChunks } = await import('../shared/schema.ts');
       
-      const newDocument = {
-        id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
-        name: req.file.filename,
-        originalName: req.file.originalname,
-        mimeType: req.file.mimetype,
-        size: req.file.size,
-        path: req.file.path,
-        userId: 'admin-user',
-        isFavorite: false,
-        isPublic: false,
-        adminOnly: false,
-        managerOnly: false,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
+      const uploadedDocuments = [];
 
-      // Insert document into database
-      await db.insert(documents).values(newDocument);
-      
-      // Process document for indexing
-      try {
-        let content = '';
+      for (const file of files) {
+        const newDocument = {
+          id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+          name: file.filename,
+          originalName: file.originalname,
+          mimeType: file.mimetype,
+          size: file.size,
+          path: file.path,
+          userId: 'admin-user',
+          folderId: folderId || 'general',
+          permissions: permissions || 'admin',
+          isFavorite: false,
+          isPublic: false,
+          adminOnly: permissions === 'admin',
+          managerOnly: permissions === 'client-admin',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+
+        // Insert document into database
+        await db.insert(documents).values(newDocument);
+        uploadedDocuments.push(newDocument);
         
-        if (req.file.mimetype === 'text/plain' || req.file.mimetype === 'text/csv') {
-          content = fs.readFileSync(req.file.path, 'utf8');
-        } else if (req.file.mimetype === 'application/pdf') {
-          // For PDFs, create meaningful content based on filename for now
-          content = `PDF document: ${req.file.originalname}. This document contains information relevant to merchant services and payment processing.`;
-        } else {
-          content = `Document: ${req.file.originalname}. File type: ${req.file.mimetype}`;
-        }
-
-        // Create text chunks for indexing
-        if (content.length > 0) {
-          const chunks = createTextChunks(content, newDocument);
+        // Process document for indexing
+        try {
+          let content = '';
           
-          // Insert chunks into database
-          for (const chunk of chunks) {
-            await db.insert(documentChunks).values({
-              id: Math.random().toString(36).substring(2, 15),
-              documentId: newDocument.id,
-              content: chunk.content,
-              chunkIndex: chunk.chunkIndex,
-              createdAt: new Date().toISOString()
-            });
+          if (file.mimetype === 'text/plain' || file.mimetype === 'text/csv') {
+            content = fs.readFileSync(file.path, 'utf8');
+          } else if (file.mimetype === 'application/pdf') {
+            content = `PDF document: ${file.originalname}. This document contains information relevant to merchant services and payment processing.`;
+          } else {
+            content = `Document: ${file.originalname}. File type: ${file.mimetype}`;
           }
-          
-          console.log(`Document processed and indexed: ${newDocument.originalName} (${chunks.length} chunks created)`);
+
+          if (content.length > 0) {
+            const chunks = createTextChunks(content, newDocument);
+            
+            for (const chunk of chunks) {
+              await db.insert(documentChunks).values({
+                id: Math.random().toString(36).substring(2, 15),
+                documentId: newDocument.id,
+                content: chunk.content,
+                chunkIndex: chunk.chunkIndex,
+                createdAt: new Date().toISOString()
+              });
+            }
+            
+            console.log(`Document processed and indexed: ${newDocument.originalName} (${chunks.length} chunks created)`);
+          }
+        } catch (processingError) {
+          console.warn(`Document uploaded but processing failed: ${processingError}`);
         }
-      } catch (processingError) {
-        console.warn(`Document uploaded but processing failed: ${processingError}`);
       }
 
-      res.json({ success: true, document: newDocument });
+      res.json({ success: true, documents: uploadedDocuments, count: uploadedDocuments.length });
     } catch (error) {
       console.error("Error uploading document:", error);
       res.status(500).json({ error: 'Failed to upload document' });
@@ -698,15 +704,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       
       const { db } = await import('./db.ts');
-      const { documents } = await import('../shared/schema.ts');
+      const { documents, documentChunks } = await import('../shared/schema.ts');
       const { eq } = await import('drizzle-orm');
       
+      // Delete document chunks first
+      await db.delete(documentChunks).where(eq(documentChunks.documentId, id));
+      // Delete document
       await db.delete(documents).where(eq(documents.id, id));
-      console.log(`Document deleted: ${id}`);
+      
+      console.log(`Document and chunks deleted: ${id}`);
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting document:", error);
       res.status(500).json({ error: 'Failed to delete document' });
+    }
+  });
+
+  // Bulk delete documents endpoint
+  app.post('/api/admin/documents/bulk-delete', async (req: Request, res: Response) => {
+    try {
+      const { documentIds } = req.body;
+      
+      if (!Array.isArray(documentIds) || documentIds.length === 0) {
+        return res.status(400).json({ error: 'No document IDs provided' });
+      }
+
+      const { db } = await import('./db.ts');
+      const { documents, documentChunks } = await import('../shared/schema.ts');
+      const { inArray } = await import('drizzle-orm');
+      
+      // Delete document chunks first
+      await db.delete(documentChunks).where(inArray(documentChunks.documentId, documentIds));
+      // Delete documents
+      await db.delete(documents).where(inArray(documents.id, documentIds));
+      
+      console.log(`Bulk deleted ${documentIds.length} documents and their chunks`);
+      res.json({ success: true, deletedCount: documentIds.length });
+    } catch (error) {
+      console.error("Error bulk deleting documents:", error);
+      res.status(500).json({ error: 'Failed to delete documents' });
     }
   });
 
