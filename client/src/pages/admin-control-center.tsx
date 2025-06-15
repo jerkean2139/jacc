@@ -549,19 +549,63 @@ export default function AdminControlCenter() {
 
                 <div>
                   <Label className="text-sm font-medium">Step 3: Upload Documents</Label>
-                  <Input 
-                    type="file"
-                    multiple
-                    className="mt-1"
-                    onChange={(e) => setSelectedFiles(e.target.files)}
-                    accept=".pdf,.doc,.docx,.txt,.csv"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Supports PDF, Word, Text, and CSV files. Documents will be automatically analyzed and chunked.
+                  <div className="space-y-3 mt-2">
+                    <div>
+                      <Label htmlFor="file-upload" className="text-sm text-gray-700">
+                        Individual Files
+                      </Label>
+                      <Input 
+                        id="file-upload"
+                        type="file"
+                        multiple
+                        className="mt-1"
+                        onChange={(e) => setSelectedFiles(e.target.files)}
+                        accept=".pdf,.doc,.docx,.txt,.csv,.md"
+                      />
+                    </div>
+                    
+                    <div className="text-center text-gray-400">
+                      OR
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="folder-upload" className="text-sm text-gray-700">
+                        Entire Folder
+                      </Label>
+                      <Input
+                        id="folder-upload"
+                        type="file"
+                        /* @ts-ignore */
+                        webkitdirectory=""
+                        directory=""
+                        multiple
+                        className="mt-1"
+                        onChange={(e) => setSelectedFiles(e.target.files)}
+                        accept=".pdf,.doc,.docx,.txt,.csv,.md"
+                      />
+                    </div>
+                  </div>
+                  
+                  <p className="text-xs text-gray-500 mt-2">
+                    Supports PDF, Word, Text, CSV, and Markdown files. Documents will be organized by folder structure.
                   </p>
+                  
                   {selectedFiles && selectedFiles.length > 0 && (
-                    <div className="mt-2 text-sm text-green-600">
-                      {selectedFiles.length} file(s) selected
+                    <div className="mt-2 p-2 bg-green-50 rounded border">
+                      {selectedFiles[0].webkitRelativePath ? (
+                        <div>
+                          <div className="text-sm font-medium text-green-700">
+                            Folder: {selectedFiles[0].webkitRelativePath.split('/')[0]}
+                          </div>
+                          <div className="text-xs text-green-600">
+                            {selectedFiles.length} files selected from folder structure
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-sm text-green-600">
+                          {selectedFiles.length} individual file(s) selected
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
