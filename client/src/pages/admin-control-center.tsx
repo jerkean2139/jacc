@@ -603,10 +603,10 @@ export default function AdminControlCenter() {
                     variant="outline" 
                     size="sm"
                     onClick={handleRemoveDuplicates}
-                    disabled={!Array.isArray(documentsData) || documentsData.length === 0}
+                    disabled={!Array.isArray(documentsData) || documentsData.length === 0 || scanDuplicatesMutation.isPending}
                   >
                     <Copy className="w-4 h-4 mr-1" />
-                    Remove Duplicates
+                    {scanDuplicatesMutation.isPending ? 'Scanning...' : 'Remove Duplicates'}
                   </Button>
                   <Button 
                     variant="destructive" 
