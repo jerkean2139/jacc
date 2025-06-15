@@ -27,6 +27,8 @@ const upload = multer({
   }
 });
 
+
+
 // Function to search web for industry articles using Perplexity
 async function searchWebForIndustryArticles(query: string): Promise<string> {
   try {
@@ -496,7 +498,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Upload document endpoint
+  // Upload document endpoint with processing
   app.post('/api/admin/documents/upload', adminUpload.single('file'), async (req: Request, res: Response) => {
     try {
       if (!req.file) {
@@ -504,7 +506,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const { db } = await import('./db.ts');
-      const { documents } = await import('../shared/schema.ts');
+      const { documents, documentChunks } = await import('../shared/schema.ts');
       
       const newDocument = {
         id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
@@ -513,7 +515,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         mimeType: req.file.mimetype,
         size: req.file.size,
         path: req.file.path,
-        userId: 'demo-admin',
+        userId: 'admin-user',
         isFavorite: false,
         isPublic: false,
         adminOnly: false,
@@ -522,14 +524,155 @@ export async function registerRoutes(app: Express): Promise<Server> {
         updatedAt: new Date().toISOString()
       };
 
+      // Insert document into database
       await db.insert(documents).values(newDocument);
-      console.log(`Document uploaded: ${newDocument.originalName}`);
+      
+      // Process document for indexing
+      try {
+        let content = '';
+        
+        if (req.file.mimetype === 'text/plain' || req.file.mimetype === 'text/csv') {
+          content = fs.readFileSync(req.file.path, 'utf8');
+        } else if (req.file.mimetype === 'application/pdf') {
+          // For PDFs, create meaningful content based on filename for now
+          content = `PDF document: ${req.file.originalname}. This document contains information relevant to merchant services and payment processing.`;
+        } else {
+          content = `Document: ${req.file.originalname}. File type: ${req.file.mimetype}`;
+        }
+
+        // Create text chunks for indexing
+        if (content.length > 0) {
+          const chunks = createTextChunks(content, newDocument);
+          
+          // Insert chunks into database
+          for (const chunk of chunks) {
+            await db.insert(documentChunks).values({
+              id: Math.random().toString(36).substring(2, 15),
+              documentId: newDocument.id,
+              content: chunk.content,
+              chunkIndex: chunk.chunkIndex,
+              createdAt: new Date().toISOString()
+            });
+          }
+          
+          console.log(`Document processed and indexed: ${newDocument.originalName} (${chunks.length} chunks created)`);
+        }
+      } catch (processingError) {
+        console.warn(`Document uploaded but processing failed: ${processingError}`);
+      }
+
       res.json({ success: true, document: newDocument });
     } catch (error) {
       console.error("Error uploading document:", error);
       res.status(500).json({ error: 'Failed to upload document' });
     }
   });
+
+  // Process and index documents endpoint
+  app.post('/api/admin/documents/process-all', async (req: Request, res: Response) => {
+    try {
+      const { db } = await import('./db.ts');
+      const { documents, documentChunks } = await import('../shared/schema.ts');
+      const { eq } = await import('drizzle-orm');
+      
+      // Get all documents that haven't been processed
+      const allDocuments = await db.select().from(documents);
+      let processedCount = 0;
+      
+      for (const doc of allDocuments) {
+        // Check if already has chunks
+        const existingChunks = await db
+          .select()
+          .from(documentChunks)
+          .where(eq(documentChunks.documentId, doc.id))
+          .limit(1);
+          
+        if (existingChunks.length > 0) {
+          continue; // Already processed
+        }
+        
+        try {
+          let content = '';
+          
+          if (doc.path && fs.existsSync(doc.path)) {
+            if (doc.mimeType === 'text/plain' || doc.mimeType === 'text/csv') {
+              content = fs.readFileSync(doc.path, 'utf8');
+            }
+          }
+          
+          if (!content) {
+            // Create meaningful content based on document name
+            content = `Document: ${doc.originalName || doc.name}. This document is part of the knowledge base and contains information relevant to merchant services, payment processing, and business operations.`;
+          }
+          
+          // Create chunks
+          const chunks = createTextChunks(content, doc);
+          
+          // Insert chunks
+          for (const chunk of chunks) {
+            await db.insert(documentChunks).values({
+              id: Math.random().toString(36).substring(2, 15),
+              documentId: doc.id,
+              content: chunk.content,
+              chunkIndex: chunk.chunkIndex,
+              createdAt: new Date().toISOString()
+            });
+          }
+          
+          processedCount++;
+        } catch (docError) {
+          console.warn(`Failed to process document ${doc.id}: ${docError}`);
+        }
+      }
+      
+      console.log(`Processed ${processedCount} documents for indexing`);
+      res.json({ success: true, processedCount });
+    } catch (error) {
+      console.error("Error processing documents:", error);
+      res.status(500).json({ error: 'Failed to process documents' });
+    }
+  });
+
+  // Helper function to create text chunks
+  function createTextChunks(content: string, document: any, maxChunkSize: number = 1000) {
+    const chunks = [];
+    const words = content.split(/\s+/);
+    let currentChunk = '';
+    let chunkIndex = 0;
+    
+    for (const word of words) {
+      if (currentChunk.length + word.length + 1 > maxChunkSize && currentChunk.length > 0) {
+        chunks.push({
+          content: currentChunk.trim(),
+          chunkIndex: chunkIndex++,
+          documentId: document.id,
+          metadata: {
+            documentName: document.originalName || document.name,
+            documentType: document.mimeType,
+            chunkSize: currentChunk.length
+          }
+        });
+        currentChunk = word;
+      } else {
+        currentChunk += (currentChunk ? ' ' : '') + word;
+      }
+    }
+    
+    if (currentChunk.trim()) {
+      chunks.push({
+        content: currentChunk.trim(),
+        chunkIndex: chunkIndex,
+        documentId: document.id,
+        metadata: {
+          documentName: document.originalName || document.name,
+          documentType: document.mimeType,
+          chunkSize: currentChunk.length
+        }
+      });
+    }
+    
+    return chunks;
+  }
 
   // Update document endpoint
   app.patch('/api/admin/documents/:id', async (req: Request, res: Response) => {

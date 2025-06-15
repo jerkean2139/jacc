@@ -53,6 +53,8 @@ interface PromptTemplate {
 export function AdminControlCenter() {
   const [activeSection, setActiveSection] = useState('qa');
   const [searchTerm, setSearchTerm] = useState('');
+  const [uploadingFiles, setUploadingFiles] = useState(false);
+  const queryClient = useQueryClient();
 
   // Data fetching
   const { data: faqData = [] } = useQuery({
@@ -87,6 +89,58 @@ export function AdminControlCenter() {
     }
     return true;
   }) : [];
+
+  // Upload function
+  const handleDocumentUpload = async (files: FileList) => {
+    setUploadingFiles(true);
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await fetch('/api/admin/documents/upload', {
+          method: 'POST',
+          body: formData,
+          credentials: 'include'
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to upload ${file.name}`);
+        }
+      }
+
+      // Refresh documents list
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/documents'] });
+      console.log('Documents uploaded successfully');
+    } catch (error) {
+      console.error('Upload error:', error);
+    } finally {
+      setUploadingFiles(false);
+    }
+  };
+
+  // Process all documents function
+  const handleProcessAllDocuments = async () => {
+    try {
+      const response = await fetch('/api/admin/documents/process-all', {
+        method: 'POST',
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to process documents');
+      }
+
+      const result = await response.json();
+      console.log(`Processed ${result.processedCount} documents`);
+      
+      // Refresh documents list
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/documents'] });
+    } catch (error) {
+      console.error('Processing error:', error);
+    }
+  };
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-7xl">
@@ -293,6 +347,25 @@ export function AdminControlCenter() {
                     <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
                     <p className="text-sm text-gray-600">Drop files here or click to upload</p>
                     <p className="text-xs text-gray-400 mt-1">PDF, DOC, TXT files supported</p>
+                    <input
+                      type="file"
+                      multiple
+                      accept=".pdf,.doc,.docx,.txt,.csv"
+                      className="hidden"
+                      id="document-upload"
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files.length > 0) {
+                          handleDocumentUpload(e.target.files);
+                        }
+                      }}
+                    />
+                    <Button
+                      variant="outline"
+                      className="mt-2"
+                      onClick={() => document.getElementById('document-upload')?.click()}
+                    >
+                      Select Files
+                    </Button>
                   </div>
                   
                   <div>
@@ -311,9 +384,13 @@ export function AdminControlCenter() {
                     </Select>
                   </div>
 
-                  <Button className="w-full bg-green-600 hover:bg-green-700">
+                  <Button 
+                    className="w-full bg-green-600 hover:bg-green-700"
+                    onClick={handleProcessAllDocuments}
+                    disabled={uploadingFiles}
+                  >
                     <Plus className="w-4 h-4 mr-2" />
-                    Process & Index
+                    {uploadingFiles ? 'Processing...' : 'Process & Index'}
                   </Button>
                 </div>
               </CardContent>
