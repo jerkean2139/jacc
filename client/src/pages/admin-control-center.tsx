@@ -101,6 +101,10 @@ export default function AdminControlCenter() {
     queryKey: ['/api/admin/training/analytics'],
   });
 
+  const { data: foldersData } = useQuery({
+    queryKey: ['/api/folders'],
+  });
+
   // Mutations
   const createFAQMutation = useMutation({
     mutationFn: (data: any) => apiRequest('/api/admin/faq', {
