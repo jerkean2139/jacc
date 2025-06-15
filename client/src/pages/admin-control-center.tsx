@@ -179,21 +179,41 @@ export default function AdminControlCenter() {
     }
 
     const formData = new FormData();
+    const filePaths: string[] = [];
+    
     Array.from(selectedFiles).forEach(file => {
       formData.append('files', file);
+      // Preserve folder structure for folder uploads
+      filePaths.push(file.webkitRelativePath || file.name);
     });
+    
     formData.append('folderId', selectedFolder);
     formData.append('permissions', selectedPermissions);
+    formData.append('filePaths', JSON.stringify(filePaths));
+    
+    // Check if this is a folder upload
+    const isFolder = selectedFiles[0]?.webkitRelativePath ? true : false;
+    formData.append('isFolder', isFolder.toString());
 
     try {
-      const response = await fetch('/api/admin/documents/upload', {
+      const endpoint = isFolder ? '/api/admin/upload-folder' : '/api/admin/documents/upload';
+      const response = await fetch(endpoint, {
         method: 'POST',
         body: formData,
       });
 
       if (response.ok) {
+        const result = await response.json();
         queryClient.invalidateQueries({ queryKey: ['/api/admin/documents'] });
-        toast({ title: 'Documents uploaded and processed successfully' });
+        queryClient.invalidateQueries({ queryKey: ['/api/folders'] });
+        
+        if (isFolder) {
+          const folderName = selectedFiles[0].webkitRelativePath.split('/')[0];
+          toast({ title: `Successfully uploaded folder "${folderName}" with ${result.processedCount || selectedFiles.length} documents` });
+        } else {
+          toast({ title: `Successfully uploaded ${selectedFiles.length} documents` });
+        }
+        
         setSelectedFiles(null);
         setSelectedFolder('');
         setSelectedPermissions('admin');

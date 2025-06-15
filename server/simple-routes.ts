@@ -1231,40 +1231,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Upload and process folder with multiple files
+  // Enhanced folder upload with proper structure preservation
   app.post('/api/admin/upload-folder', upload.array('files'), async (req: Request, res: Response) => {
     try {
       const files = req.files as Express.Multer.File[];
-      const filePaths = req.body.filePaths;
+      const filePathsStr = req.body.filePaths;
+      const targetFolderId = req.body.folderId;
+      const permissions = req.body.permissions || 'admin';
       
       if (!files || files.length === 0) {
         return res.status(400).json({ error: 'No files provided' });
       }
 
+      const filePaths = JSON.parse(filePathsStr);
       console.log(`Processing folder upload with ${files.length} files`);
       
       const { db } = await import('./db.ts');
       const { documents, folders } = await import('../shared/schema.ts');
       const path = await import('path');
-      const fs = await import('fs');
       
-      // Create a folder for this upload if it doesn't exist
-      const folderName = path.dirname(filePaths[0]) || 'Uploaded Folder';
-      const folderResult = await db.insert(folders).values({
-        name: folderName,
-        userId: 'demo-admin',
-        vectorNamespace: `folder-${Date.now()}`,
-        folderType: 'uploaded',
-        priority: 50
-      }).returning();
+      // Extract root folder name from first file's path
+      const rootFolderName = filePaths[0].split('/')[0] || 'Uploaded Folder';
       
-      const folderId = folderResult[0].id;
+      // Create or find the root folder
+      let rootFolderId = targetFolderId;
+      if (!targetFolderId || targetFolderId === '') {
+        const folderResult = await db.insert(folders).values({
+          name: rootFolderName,
+          userId: 'admin-user',
+          vectorNamespace: `folder-${Date.now()}`,
+          folderType: 'uploaded',
+          priority: 50
+        }).returning();
+        rootFolderId = folderResult[0].id;
+      }
+      
+      // Track created subfolders to avoid duplicates
+      const createdFolders = new Map<string, string>();
+      createdFolders.set('', rootFolderId); // Root folder
+      
       let processedCount = 0;
       const supportedTypes = ['.pdf', '.doc', '.docx', '.txt', '.csv', '.md'];
       
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
-        const relativePath = Array.isArray(filePaths) ? filePaths[i] : filePaths;
+        const relativePath = filePaths[i];
         const fileExtension = path.extname(file.originalname).toLowerCase();
         
         // Only process supported file types
@@ -1274,44 +1285,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         
         try {
-          // Create document entry
+          // Determine folder structure
+          const pathParts = relativePath.split('/');
+          const fileName = pathParts[pathParts.length - 1];
+          const folderPath = pathParts.slice(0, -1).join('/');
+          
+          // Create nested folders if needed
+          let currentFolderId = rootFolderId;
+          if (folderPath && folderPath !== rootFolderName) {
+            const subPath = folderPath.substring(rootFolderName.length + 1);
+            if (subPath && !createdFolders.has(subPath)) {
+              const subFolderName = pathParts[pathParts.length - 2] || 'Subfolder';
+              const subFolderResult = await db.insert(folders).values({
+                name: subFolderName,
+                userId: 'admin-user',
+                vectorNamespace: `subfolder-${Date.now()}-${i}`,
+                folderType: 'uploaded',
+                priority: 50
+              }).returning();
+              createdFolders.set(subPath, subFolderResult[0].id);
+              currentFolderId = subFolderResult[0].id;
+            } else if (subPath) {
+              currentFolderId = createdFolders.get(subPath) || rootFolderId;
+            }
+          }
+          
+          // Create document entry with proper permissions
           const documentEntry = {
-            name: file.originalname,
-            originalName: file.originalname,
+            name: fileName,
+            originalName: fileName,
             mimeType: file.mimetype,
             size: file.size,
             path: file.path,
-            userId: 'demo-admin',
-            folderId: folderId,
+            userId: 'admin-user',
+            folderId: currentFolderId,
             isFavorite: false,
-            isPublic: true,
-            adminOnly: false,
-            managerOnly: false
+            isPublic: permissions === 'public',
+            adminOnly: permissions === 'admin',
+            managerOnly: permissions === 'manager'
           };
 
           await db.insert(documents).values(documentEntry);
-          
-          // Process document content for vector search
-          await processDocumentForSearch(file.path, file.originalname, documentEntry);
           processedCount++;
           
-          console.log(`Processed file ${i + 1}/${files.length}: ${file.originalname}`);
+          console.log(`Processed file ${i + 1}/${files.length}: ${fileName} in folder ${currentFolderId}`);
         } catch (fileError) {
           console.error(`Error processing file ${file.originalname}:`, fileError);
         }
       }
       
-      console.log(`Successfully processed ${processedCount} files from folder upload`);
       res.json({ 
         success: true, 
-        processed: processedCount, 
-        total: files.length,
-        folder: folderResult[0]
+        processedCount,
+        rootFolderId,
+        subFoldersCreated: createdFolders.size - 1,
+        message: `Successfully uploaded folder "${rootFolderName}" with ${processedCount} documents and ${createdFolders.size - 1} subfolders`
       });
-      
     } catch (error) {
-      console.error("Error uploading folder:", error);
-      res.status(500).json({ error: 'Failed to upload folder' });
+      console.error("Error processing folder upload:", error);
+      res.status(500).json({ error: 'Failed to process folder upload' });
     }
   });
 
