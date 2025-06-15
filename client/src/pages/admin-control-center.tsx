@@ -168,11 +168,6 @@ export default function AdminControlCenter() {
   };
 
   const handleDocumentUpload = async () => {
-    if (!selectedFolder) {
-      toast({ title: 'Please select a folder first', variant: 'destructive' });
-      return;
-    }
-
     if (!selectedFiles || selectedFiles.length === 0) {
       toast({ title: 'Please select files to upload', variant: 'destructive' });
       return;
@@ -187,7 +182,13 @@ export default function AdminControlCenter() {
       filePaths.push(file.webkitRelativePath || file.name);
     });
     
-    formData.append('folderId', selectedFolder);
+    // Handle folder selection - create new folder if needed
+    let targetFolderId = selectedFolder;
+    if (selectedFolder === 'new-folder' || !selectedFolder) {
+      targetFolderId = ''; // Let backend create new folder
+    }
+    
+    formData.append('folderId', targetFolderId);
     formData.append('permissions', selectedPermissions);
     formData.append('filePaths', JSON.stringify(filePaths));
     
@@ -209,7 +210,10 @@ export default function AdminControlCenter() {
         
         if (isFolder) {
           const folderName = selectedFiles[0].webkitRelativePath.split('/')[0];
-          toast({ title: `Successfully uploaded folder "${folderName}" with ${result.processedCount || selectedFiles.length} documents` });
+          toast({ 
+            title: `Folder Upload Complete`, 
+            description: `"${folderName}" uploaded with ${result.processedCount} documents. ${result.subFoldersCreated || 0} subfolders created.`
+          });
         } else {
           toast({ title: `Successfully uploaded ${selectedFiles.length} documents` });
         }
@@ -543,11 +547,12 @@ export default function AdminControlCenter() {
                       <SelectValue placeholder="Choose destination folder" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="general">General Documents</SelectItem>
-                      <SelectItem value="contracts">Contracts & Agreements</SelectItem>
-                      <SelectItem value="technical">Technical Documentation</SelectItem>
-                      <SelectItem value="training">Training Materials</SelectItem>
-                      <SelectItem value="compliance">Compliance Documents</SelectItem>
+                      {foldersData?.map((folder: any) => (
+                        <SelectItem key={folder.id} value={folder.id}>
+                          {folder.name}
+                        </SelectItem>
+                      ))}
+                      <SelectItem value="new-folder">+ Create New Folder</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

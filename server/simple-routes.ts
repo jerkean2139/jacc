@@ -1206,6 +1206,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Folder management endpoints
   
+  // Get all folders
+  app.get('/api/folders', async (req: Request, res: Response) => {
+    try {
+      const { db } = await import('./db.ts');
+      const { folders } = await import('../shared/schema.ts');
+      
+      let allFolders = await db.select().from(folders).orderBy(folders.name);
+      
+      // Ensure we have at least one default folder
+      if (allFolders.length === 0) {
+        const defaultFolder = await db.insert(folders).values({
+          name: 'General Documents',
+          userId: 'admin-user',
+          vectorNamespace: 'default-general',
+          folderType: 'default',
+          priority: 100
+        }).returning();
+        allFolders = [defaultFolder[0]];
+      }
+      
+      res.json(allFolders);
+    } catch (error) {
+      console.error("Error fetching folders:", error);
+      res.status(500).json({ error: 'Failed to fetch folders' });
+    }
+  });
+
   // Create new folder
   app.post('/api/admin/folders', async (req: Request, res: Response) => {
     try {
@@ -1216,7 +1243,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const newFolder = {
         name: name || 'New Folder',
-        userId: 'demo-admin',
+        userId: 'admin-user',
         vectorNamespace: `folder-${Date.now()}`,
         folderType: 'custom',
         priority: 50
