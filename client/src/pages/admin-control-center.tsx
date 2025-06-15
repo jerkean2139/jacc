@@ -321,6 +321,18 @@ export default function AdminControlCenter() {
     }
   };
 
+  const handleSaveDocumentEdit = () => {
+    if (!editingDocument) return;
+    
+    editDocumentMutation.mutate({
+      id: editingDocument.id,
+      data: {
+        originalName: editDocumentName,
+        folderId: editDocumentFolder || null,
+      }
+    });
+  };
+
   const handleBulkDelete = () => {
     if (confirm('Are you sure you want to delete all filtered documents? This action cannot be undone.')) {
       const documentIds = filteredDocuments.map(doc => doc.id);
@@ -823,7 +835,12 @@ export default function AdminControlCenter() {
                         <Button size="sm" variant="ghost" title="Download">
                           <Download className="w-3 h-3" />
                         </Button>
-                        <Button size="sm" variant="ghost" title="Edit">
+                        <Button 
+                          size="sm" 
+                          variant="ghost" 
+                          title="Edit"
+                          onClick={() => handleEditDocument(doc)}
+                        >
                           <Edit className="w-3 h-3" />
                         </Button>
                         <Button 
@@ -1526,6 +1543,82 @@ export default function AdminControlCenter() {
                 {removeDuplicatesMutation.isPending ? 'Removing...' : `Remove ${duplicatePreview.totalDuplicates} Duplicates`}
               </Button>
             )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Document Edit Modal */}
+      <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit Document</DialogTitle>
+            <DialogDescription>
+              Update document name and folder assignment
+            </DialogDescription>
+          </DialogHeader>
+          
+          {editingDocument && (
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="document-name">Document Name</Label>
+                <Input
+                  id="document-name"
+                  value={editDocumentName}
+                  onChange={(e) => setEditDocumentName(e.target.value)}
+                  placeholder="Enter document name"
+                />
+              </div>
+              
+              <div className="grid gap-2">
+                <Label htmlFor="document-folder">Folder Assignment</Label>
+                <Select value={editDocumentFolder} onValueChange={setEditDocumentFolder}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select folder" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">No Folder (General)</SelectItem>
+                    {foldersData?.map((folder: any) => (
+                      <SelectItem key={folder.id} value={folder.id}>
+                        {folder.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <h4 className="text-sm font-medium mb-2">Document Information</h4>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-gray-500">Size:</span> {Math.round(editingDocument.size / 1024)} KB
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Type:</span> {editingDocument.mimeType}
+                  </div>
+                  <div className="col-span-2">
+                    <span className="text-gray-500">ID:</span> {editingDocument.id}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowEditModal(false);
+                setEditingDocument(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSaveDocumentEdit}
+              disabled={editDocumentMutation.isPending}
+            >
+              {editDocumentMutation.isPending ? 'Saving...' : 'Save Changes'}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
