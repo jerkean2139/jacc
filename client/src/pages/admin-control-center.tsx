@@ -239,6 +239,25 @@ export default function AdminControlCenter() {
     }
   };
 
+  const removeDuplicatesMutation = useMutation({
+    mutationFn: () => apiRequest('/api/admin/documents/remove-duplicates', {
+      method: 'POST',
+    }),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/documents'] });
+      toast({ 
+        title: 'Duplicates removed successfully', 
+        description: `Removed ${data.duplicatesRemoved} duplicate documents`
+      });
+    },
+  });
+
+  const handleRemoveDuplicates = () => {
+    if (confirm('Are you sure you want to remove duplicate documents? This will permanently delete files with identical content.')) {
+      removeDuplicatesMutation.mutate();
+    }
+  };
+
   const filteredFAQs = Array.isArray(faqData) ? faqData.filter((faq: FAQ) => {
     return faq.question && faq.answer;
   }) : [];
