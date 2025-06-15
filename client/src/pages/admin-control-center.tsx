@@ -83,6 +83,13 @@ export default function AdminControlCenter() {
   const [duplicatePreview, setDuplicatePreview] = useState(null);
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
   const [showDocumentDetails, setShowDocumentDetails] = useState(false);
+  
+  // Document edit states
+  const [editingDocument, setEditingDocument] = useState<DocumentEntry | null>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editDocumentName, setEditDocumentName] = useState('');
+  const [editDocumentFolder, setEditDocumentFolder] = useState('');
+  const [editDocumentPermissions, setEditDocumentPermissions] = useState('admin');
 
   // Fetch data
   const { data: faqData, isLoading: faqLoading } = useQuery({
@@ -139,6 +146,20 @@ export default function AdminControlCenter() {
     },
   });
 
+  const editDocumentMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: any }) => 
+      apiRequest(`/api/documents/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/documents'] });
+      setShowEditModal(false);
+      setEditingDocument(null);
+      toast({ title: 'Document updated successfully' });
+    },
+  });
+
   const handleCreateFAQ = () => {
     if (!newQuestion.trim() || !newAnswer.trim()) {
       toast({ title: 'Please fill in both question and answer', variant: 'destructive' });
@@ -168,6 +189,43 @@ export default function AdminControlCenter() {
       temperature: newPromptTemperature,
       maxTokens: newPromptMaxTokens,
       isActive: true,
+    });
+  };
+
+  const handleEditDocument = (document: DocumentEntry) => {
+    setEditingDocument(document);
+    setEditDocumentName(document.name);
+    setEditDocumentFolder(document.folderId || '');
+    // Determine permissions based on document flags
+    if (document.isPublic) {
+      setEditDocumentPermissions('public');
+    } else if (document.adminOnly) {
+      setEditDocumentPermissions('admin');
+    } else if (document.managerOnly) {
+      setEditDocumentPermissions('manager');
+    } else {
+      setEditDocumentPermissions('admin');
+    }
+    setShowEditModal(true);
+  };
+
+  const handleSaveDocumentEdit = () => {
+    if (!editingDocument || !editDocumentName.trim()) {
+      toast({ title: 'Please provide a document name', variant: 'destructive' });
+      return;
+    }
+
+    const updateData = {
+      name: editDocumentName,
+      folderId: editDocumentFolder || null,
+      isPublic: editDocumentPermissions === 'public',
+      adminOnly: editDocumentPermissions === 'admin',
+      managerOnly: editDocumentPermissions === 'manager'
+    };
+
+    editDocumentMutation.mutate({
+      id: editingDocument.id,
+      data: updateData
     });
   };
 

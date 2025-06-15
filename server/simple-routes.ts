@@ -583,6 +583,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Document edit endpoint
+  app.put('/api/documents/:id', async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const { name, folderId, isPublic, adminOnly, managerOnly } = req.body;
+      const { db } = await import('./db.ts');
+      const { documents } = await import('../shared/schema.ts');
+      const { eq } = await import('drizzle-orm');
+      
+      const [document] = await db.select().from(documents).where(eq(documents.id, id));
+      if (!document) {
+        return res.status(404).json({ message: "Document not found" });
+      }
+      
+      const updateData: any = {};
+      if (name !== undefined) updateData.name = name;
+      if (folderId !== undefined) updateData.folderId = folderId;
+      if (isPublic !== undefined) updateData.isPublic = isPublic;
+      if (adminOnly !== undefined) updateData.adminOnly = adminOnly;
+      if (managerOnly !== undefined) updateData.managerOnly = managerOnly;
+      
+      const [updatedDocument] = await db
+        .update(documents)
+        .set(updateData)
+        .where(eq(documents.id, id))
+        .returning();
+      
+      res.json(updatedDocument);
+    } catch (error) {
+      console.error("Error updating document:", error);
+      res.status(500).json({ message: "Failed to update document" });
+    }
+  });
+
   // Upload document endpoint with processing
   app.post('/api/admin/documents/upload', adminUpload.array('files'), async (req: Request, res: Response) => {
     try {
