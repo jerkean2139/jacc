@@ -1280,6 +1280,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Extract root folder name from first file's path
       const rootFolderName = filePaths[0].split('/')[0] || 'Uploaded Folder';
       
+      // Ensure admin user exists
+      const { users } = await import('../shared/schema.ts');
+      const { eq } = await import('drizzle-orm');
+      
+      try {
+        const existingUser = await db.select().from(users).where(eq(users.id, 'admin-user'));
+        if (existingUser.length === 0) {
+          await db.insert(users).values({
+            id: 'admin-user',
+            username: 'admin',
+            email: 'admin@jacc.app',
+            passwordHash: '$2b$10$dummy.hash.for.admin.user.placeholder',
+            role: 'dev-admin',
+            isActive: true
+          });
+          console.log('Created admin user for folder upload');
+        }
+      } catch (userError) {
+        console.warn('Admin user may already exist:', userError.message);
+      }
+
       // Create or find the root folder
       let rootFolderId = targetFolderId;
       if (!targetFolderId || targetFolderId === '') {
@@ -1322,16 +1343,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (folderPath && folderPath !== rootFolderName) {
             const subPath = folderPath.substring(rootFolderName.length + 1);
             if (subPath && !createdFolders.has(subPath)) {
-              const subFolderName = pathParts[pathParts.length - 2] || 'Subfolder';
-              const subFolderResult = await db.insert(folders).values({
-                name: subFolderName,
-                userId: 'admin-user',
-                vectorNamespace: `subfolder-${Date.now()}-${i}`,
-                folderType: 'uploaded',
-                priority: 50
-              }).returning();
-              createdFolders.set(subPath, subFolderResult[0].id);
-              currentFolderId = subFolderResult[0].id;
+              try {
+                const subFolderName = pathParts[pathParts.length - 2] || 'Subfolder';
+                const subFolderResult = await db.insert(folders).values({
+                  name: subFolderName,
+                  userId: 'admin-user',
+                  vectorNamespace: `subfolder-${Date.now()}-${i}`,
+                  folderType: 'uploaded',
+                  priority: 50
+                }).returning();
+                createdFolders.set(subPath, subFolderResult[0].id);
+                currentFolderId = subFolderResult[0].id;
+              } catch (subFolderError) {
+                console.warn(`Failed to create subfolder ${subPath}:`, subFolderError);
+                currentFolderId = rootFolderId; // Fall back to root folder
+              }
             } else if (subPath) {
               currentFolderId = createdFolders.get(subPath) || rootFolderId;
             }
