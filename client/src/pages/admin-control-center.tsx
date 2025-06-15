@@ -557,37 +557,96 @@ export default function AdminControlCenter() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Recent Document Uploads</CardTitle>
-              <CardDescription>Latest documents added to the system</CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Document Management</CardTitle>
+                  <CardDescription>Search, filter, and manage all {Array.isArray(documentsData) ? documentsData.length : 0} documents</CardDescription>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button 
+                    variant="destructive" 
+                    size="sm"
+                    onClick={handleBulkDelete}
+                    disabled={filteredDocuments.length === 0}
+                  >
+                    <Trash2 className="w-4 h-4 mr-1" />
+                    Delete Filtered ({filteredDocuments.length})
+                  </Button>
+                  <Badge variant="secondary">{filteredDocuments.length} of {Array.isArray(documentsData) ? documentsData.length : 0} shown</Badge>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-4 mt-4">
+                <div className="flex-1">
+                  <Input
+                    placeholder="Search documents by name..."
+                    value={documentSearchTerm}
+                    onChange={(e) => setDocumentSearchTerm(e.target.value)}
+                    className="w-full"
+                  />
+                </div>
+                <Select value={documentFilter} onValueChange={setDocumentFilter}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Documents</SelectItem>
+                    <SelectItem value="pdf">PDF Files</SelectItem>
+                    <SelectItem value="text">Text Files</SelectItem>
+                    <SelectItem value="csv">CSV Files</SelectItem>
+                    <SelectItem value="recent">Recent (24h)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </CardHeader>
             <CardContent>
-              <ScrollArea className="h-[400px]">
+              <ScrollArea className="h-[500px]">
                 <div className="space-y-3">
-                  {Array.isArray(documentsData) && documentsData.slice(0, 10).map((doc: DocumentEntry) => (
-                    <div key={doc.id} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div className="flex items-center gap-3">
+                  {filteredDocuments.map((doc: DocumentEntry) => (
+                    <div key={doc.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50">
+                      <div className="flex items-center gap-3 flex-1">
                         <FileText className="w-4 h-4 text-green-500" />
-                        <div>
-                          <p className="font-medium">{doc.name}</p>
-                          <p className="text-sm text-gray-600">{doc.originalName}</p>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium truncate">{doc.originalName}</p>
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <span>{doc.mimeType}</span>
+                            <span>•</span>
+                            <span>{Math.round(doc.size / 1024)} KB</span>
+                            <span>•</span>
+                            <span>{new Date(doc.createdAt).toLocaleDateString()}</span>
+                          </div>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="text-xs">{doc.mimeType}</Badge>
-                        <Button size="sm" variant="ghost">
+                        <Badge variant="outline" className="text-xs">
+                          {doc.folderId || 'general'}
+                        </Badge>
+                        <Button size="sm" variant="ghost" title="View Document">
                           <Eye className="w-3 h-3" />
                         </Button>
-                        <Button size="sm" variant="ghost">
+                        <Button size="sm" variant="ghost" title="Download">
                           <Download className="w-3 h-3" />
+                        </Button>
+                        <Button size="sm" variant="ghost" title="Edit">
+                          <Edit className="w-3 h-3" />
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="ghost" 
+                          title="Delete"
+                          onClick={() => handleDeleteDocument(doc.id)}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <Trash2 className="w-3 h-3" />
                         </Button>
                       </div>
                     </div>
                   ))}
-                  {(!Array.isArray(documentsData) || documentsData.length === 0) && (
+                  {filteredDocuments.length === 0 && (
                     <div className="text-center py-8 text-gray-500">
                       <FileText className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                      <p>No documents uploaded yet</p>
-                      <p className="text-sm">Upload your first document above</p>
+                      <p>No documents match your search criteria</p>
+                      <p className="text-sm">Try adjusting your search or filter</p>
                     </div>
                   )}
                 </div>
