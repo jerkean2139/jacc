@@ -757,17 +757,19 @@ export default function AdminControlCenter() {
                     disabled={scanDuplicatesMutation.isPending}
                   >
                     <Copy className="w-4 h-4 mr-1" />
-                    {scanDuplicatesMutation.isPending ? 'Scanning...' : 'Remove Duplicates'}
+                    {scanDuplicatesMutation.isPending ? 'Scanning...' : 'Clean Duplicates'}
                   </Button>
-                  <Button 
-                    variant="destructive" 
-                    size="sm"
-                    onClick={handleBulkDelete}
-                    disabled={filteredDocuments.length === 0}
-                  >
-                    <Trash2 className="w-4 h-4 mr-1" />
-                    Delete Filtered ({filteredDocuments.length})
-                  </Button>
+                  {filteredDocuments.length < (Array.isArray(documentsData) ? documentsData.length : 0) && (
+                    <Button 
+                      variant="destructive" 
+                      size="sm"
+                      onClick={handleBulkDelete}
+                      disabled={filteredDocuments.length === 0}
+                    >
+                      <Trash2 className="w-4 h-4 mr-1" />
+                      Delete Filtered ({filteredDocuments.length})
+                    </Button>
+                  )}
                   <Badge variant="secondary">{filteredDocuments.length} of {Array.isArray(documentsData) ? documentsData.length : 0} shown</Badge>
                 </div>
               </div>

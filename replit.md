@@ -123,6 +123,7 @@ Changelog:
 - June 13, 2025. Initial setup
 - June 15, 2025. Completed unified admin control center with Q&A Knowledge Base, Document Center, AI Prompts management, and comprehensive Training & Feedback Center
 - June 15, 2025. Fixed major data integrity issue: removed 1,066 phantom database records, implemented comprehensive folder upload functionality with directory structure preservation, enhanced duplicate detection system
+- June 15, 2025. Completed document edit functionality with folder assignment modal, improved admin interface by removing redundant buttons and making bulk actions contextual
 
 ## User Preferences
 
