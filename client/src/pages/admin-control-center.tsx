@@ -243,9 +243,12 @@ export default function AdminControlCenter() {
   };
 
   const scanDuplicatesMutation = useMutation({
-    mutationFn: () => apiRequest('/api/admin/documents/scan-duplicates', {
+    mutationFn: () => fetch('/api/admin/documents/scan-duplicates', {
       method: 'POST',
-    }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }).then(res => res.json()),
     onSuccess: (data) => {
       console.log('Scan duplicates success:', data);
       setDuplicatePreview(data);
@@ -262,9 +265,12 @@ export default function AdminControlCenter() {
   });
 
   const removeDuplicatesMutation = useMutation({
-    mutationFn: () => apiRequest('/api/admin/documents/remove-duplicates', {
+    mutationFn: () => fetch('/api/admin/documents/remove-duplicates', {
       method: 'POST',
-    }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }).then(res => res.json()),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/documents'] });
       setShowDuplicateModal(false);
