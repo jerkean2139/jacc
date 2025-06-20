@@ -73,7 +73,7 @@ export default function AdminControlCenter() {
   const [newPromptMaxTokens, setNewPromptMaxTokens] = useState(1000);
 
   // Document upload states
-  const [selectedFolder, setSelectedFolder] = useState('');
+  const [uploadSelectedFolder, setUploadSelectedFolder] = useState('');
   const [selectedPermissions, setSelectedPermissions] = useState('admin');
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
   
@@ -90,6 +90,11 @@ export default function AdminControlCenter() {
   const [editDocumentName, setEditDocumentName] = useState('');
   const [editDocumentFolder, setEditDocumentFolder] = useState('');
   const [editDocumentPermissions, setEditDocumentPermissions] = useState('admin');
+  
+  // Documents integration states
+  const [integratedDocumentsData, setIntegratedDocumentsData] = useState<any>(null);
+  const [documentSearchQuery, setDocumentSearchQuery] = useState('');
+  const [expandedFolders, setExpandedFolders] = useState<string[]>([]);
 
   // FAQ edit states
   const [editingFAQ, setEditingFAQ] = useState<FAQ | null>(null);
