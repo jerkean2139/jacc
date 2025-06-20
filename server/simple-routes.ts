@@ -2341,6 +2341,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // AI Simulator endpoints for testing and training
+  app.post('/api/admin/ai-simulator/test', async (req, res) => {
+    try {
+      const { query } = req.body;
+      
+      if (!query) {
+        return res.status(400).json({ error: 'Query is required' });
+      }
+
+      // Import AI services for testing
+      const { generateResponse } = await import('./enhanced-ai');
+      
+      // Generate AI response using the same system as live chat
+      const response = await generateResponse(query, [], {
+        includeContext: true,
+        useEnhancedSearch: true
+      });
+
+      res.json({ 
+        response: response.content,
+        sources: response.sources || [],
+        processingTime: response.processingTime || 0
+      });
+    } catch (error) {
+      console.error('Error testing AI query:', error);
+      res.status(500).json({ error: 'Failed to test AI query' });
+    }
+  });
+
+  app.post('/api/admin/ai-simulator/train', async (req, res) => {
+    try {
+      const { query, originalResponse, correctedResponse } = req.body;
+      
+      if (!query || !correctedResponse) {
+        return res.status(400).json({ error: 'Query and corrected response are required' });
+      }
+
+      // Store training correction in FAQ knowledge base for future reference
+      await db.insert(faqKnowledgeBase).values({
+        category: 'training_corrections',
+        question: query,
+        answer: correctedResponse,
+        priority: 10, // High priority for training corrections
+        isActive: true,
+        tags: ['admin_correction', 'ai_training'],
+        source: 'ai_simulator',
+        effectiveness: 'high',
+        lastReviewed: new Date(),
+        reviewNotes: `Admin correction - Original AI response was: ${originalResponse.substring(0, 200)}...`
+      });
+
+      // Log the training interaction for analytics
+      console.log('AI Training Correction Applied:', {
+        query: query.substring(0, 100),
+        correctionApplied: true,
+        timestamp: new Date().toISOString()
+      });
+
+      res.json({ 
+        success: true, 
+        message: 'Training correction saved successfully',
+        appliedToKnowledgeBase: true
+      });
+    } catch (error) {
+      console.error('Error saving training correction:', error);
+      res.status(500).json({ error: 'Failed to save training correction' });
+    }
+  });
+
   // Register chat testing system routes
   registerChatTestingRoutes(app);
 

@@ -117,7 +117,7 @@ export default function AdminControlCenter() {
   const [aiResponse, setAiResponse] = useState('');
   const [correctedResponse, setCorrectedResponse] = useState('');
   const [isTestingAI, setIsTestingAI] = useState(false);
-  const [showCorrectInterface, setShowCorrectInterface] = useState(false);
+  const [showCorrectInterface, setShowCorrectInterface] = useState<boolean | 'correct'>(false);
   const [simulatorHistory, setSimulatorHistory] = useState<Array<{
     id: string;
     query: string;
@@ -694,7 +694,7 @@ export default function AdminControlCenter() {
       </div>
 
       <Tabs defaultValue="knowledge" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="knowledge" className="flex items-center gap-2">
             <MessageSquare className="w-4 h-4" />
             Q&A Knowledge Base
@@ -1694,6 +1694,229 @@ export default function AdminControlCenter() {
                   <Download className="w-5 h-5 mb-1" />
                   <span className="text-xs">Export Training Data</span>
                 </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* AI Simulator Tab */}
+        <TabsContent value="simulator" className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold">AI Simulator & Training</h2>
+            <Badge variant="outline" className="text-lg px-3 py-1">
+              <Target className="w-4 h-4 mr-2" />
+              Live Testing & Training
+            </Badge>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Test Interface */}
+            <Card className="border-2 border-blue-500">
+              <CardHeader>
+                <CardTitle className="text-blue-600 flex items-center gap-2">
+                  <MessageSquare className="w-5 h-5" />
+                  Test AI Query
+                </CardTitle>
+                <CardDescription>
+                  Enter a query to test how the AI responds. You can then correct the response to improve the system.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="test-query">Test Query</Label>
+                  <Textarea
+                    id="test-query"
+                    placeholder="Enter a merchant services question to test the AI response..."
+                    value={testQuery}
+                    onChange={(e) => setTestQuery(e.target.value)}
+                    className="min-h-[100px]"
+                  />
+                </div>
+                
+                <Button 
+                  onClick={testAIQuery} 
+                  disabled={isTestingAI || !testQuery.trim()}
+                  className="w-full"
+                >
+                  {isTestingAI ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
+                      Testing AI...
+                    </>
+                  ) : (
+                    <>
+                      <Target className="w-4 h-4 mr-2" />
+                      Test AI Response
+                    </>
+                  )}
+                </Button>
+
+                {aiResponse && (
+                  <div className="mt-4 space-y-4">
+                    <div className="border rounded-lg p-4 bg-gray-50">
+                      <Label className="text-sm font-semibold text-gray-700">AI Response:</Label>
+                      <p className="mt-2 text-sm whitespace-pre-wrap">{aiResponse}</p>
+                    </div>
+
+                    {showCorrectInterface && (
+                      <div className="space-y-4 p-4 border-2 border-yellow-200 rounded-lg bg-yellow-50">
+                        <div className="flex items-center gap-2">
+                          <AlertTriangle className="w-4 h-4 text-yellow-600" />
+                          <Label className="font-semibold">Is this response accurate?</Label>
+                        </div>
+                        
+                        <div className="flex gap-2">
+                          <Button onClick={markResponseGood} variant="outline" className="flex-1">
+                            <ThumbsUp className="w-4 h-4 mr-2" />
+                            Response is Good
+                          </Button>
+                          <Button 
+                            onClick={() => setShowCorrectInterface('correct')} 
+                            variant="outline" 
+                            className="flex-1"
+                          >
+                            <Edit className="w-4 h-4 mr-2" />
+                            Needs Correction
+                          </Button>
+                        </div>
+
+                        {showCorrectInterface === 'correct' && (
+                          <div className="space-y-3">
+                            <Label htmlFor="corrected-response">Provide Corrected Response:</Label>
+                            <Textarea
+                              id="corrected-response"
+                              placeholder="Enter the correct response to train the AI..."
+                              value={correctedResponse}
+                              onChange={(e) => setCorrectedResponse(e.target.value)}
+                              className="min-h-[120px]"
+                            />
+                            <Button 
+                              onClick={submitCorrection} 
+                              className="w-full"
+                              disabled={!correctedResponse.trim()}
+                            >
+                              <Brain className="w-4 h-4 mr-2" />
+                              Submit Training Correction
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Training History */}
+            <Card className="border-2 border-green-500">
+              <CardHeader>
+                <CardTitle className="text-green-600 flex items-center gap-2">
+                  <BarChart3 className="w-5 h-5" />
+                  Training History
+                </CardTitle>
+                <CardDescription>
+                  Recent test queries and training corrections that have improved the AI.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ScrollArea className="h-[500px]">
+                  {simulatorHistory.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500">
+                      <Target className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                      <p>No test queries yet</p>
+                      <p className="text-sm">Test AI responses to build training history</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {simulatorHistory.map((entry) => (
+                        <div 
+                          key={entry.id} 
+                          className={`border rounded-lg p-4 ${
+                            entry.wasCorrected ? 'bg-orange-50 border-orange-200' : 'bg-green-50 border-green-200'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              {entry.wasCorrected ? (
+                                <Edit className="w-4 h-4 text-orange-600" />
+                              ) : (
+                                <ThumbsUp className="w-4 h-4 text-green-600" />
+                              )}
+                              <span className="text-sm font-medium">
+                                {entry.wasCorrected ? 'Training Correction' : 'Approved Response'}
+                              </span>
+                            </div>
+                            <span className="text-xs text-gray-500">
+                              {new Date(entry.timestamp).toLocaleTimeString()}
+                            </span>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <div>
+                              <Label className="text-xs font-semibold text-gray-600">Query:</Label>
+                              <p className="text-sm">{entry.query}</p>
+                            </div>
+                            
+                            {entry.wasCorrected && entry.correctedResponse && (
+                              <div>
+                                <Label className="text-xs font-semibold text-green-600">Training Update:</Label>
+                                <p className="text-sm">{entry.correctedResponse}</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </ScrollArea>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Training Impact Summary */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Training Impact</CardTitle>
+              <CardDescription>
+                How administrator corrections and feedback improve the AI's performance over time.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="text-center p-4 bg-blue-50 rounded-lg">
+                  <div className="text-2xl font-bold text-blue-600">{simulatorHistory.length}</div>
+                  <div className="text-sm text-gray-600">Total Tests</div>
+                </div>
+                <div className="text-center p-4 bg-orange-50 rounded-lg">
+                  <div className="text-2xl font-bold text-orange-600">
+                    {simulatorHistory.filter(h => h.wasCorrected).length}
+                  </div>
+                  <div className="text-sm text-gray-600">Corrections Made</div>
+                </div>
+                <div className="text-center p-4 bg-green-50 rounded-lg">
+                  <div className="text-2xl font-bold text-green-600">
+                    {simulatorHistory.filter(h => !h.wasCorrected).length}
+                  </div>
+                  <div className="text-sm text-gray-600">Approved Responses</div>
+                </div>
+                <div className="text-center p-4 bg-purple-50 rounded-lg">
+                  <div className="text-2xl font-bold text-purple-600">
+                    {simulatorHistory.length > 0 ? 
+                      Math.round((simulatorHistory.filter(h => !h.wasCorrected).length / simulatorHistory.length) * 100) : 0}%
+                  </div>
+                  <div className="text-sm text-gray-600">Accuracy Rate</div>
+                </div>
+              </div>
+              
+              <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <Brain className="w-5 h-5 text-blue-600" />
+                  <span className="font-semibold text-blue-800">How Training Works</span>
+                </div>
+                <p className="text-blue-700 text-sm">
+                  When you correct an AI response, the system automatically updates the knowledge base with your improved answer 
+                  and adjusts the AI's prompts to provide more accurate responses to similar queries in the future.
+                </p>
               </div>
             </CardContent>
           </Card>
