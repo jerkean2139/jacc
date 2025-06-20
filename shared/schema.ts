@@ -658,6 +658,7 @@ export const chatsRelations = relations(chats, ({ one, many }) => ({
   user: one(users, { fields: [chats.userId], references: [users.id] }),
   folder: one(folders, { fields: [chats.folderId], references: [folders.id] }),
   messages: many(messages),
+  review: one(chatReviews, { fields: [chats.id], references: [chatReviews.chatId] }),
 }));
 
 export const messagesRelations = relations(messages, ({ one }) => ({
@@ -671,6 +672,17 @@ export const documentsRelations = relations(documents, ({ one }) => ({
 
 export const favoritesRelations = relations(favorites, ({ one }) => ({
   user: one(users, { fields: [favorites.userId], references: [users.id] }),
+}));
+
+export const chatReviewsRelations = relations(chatReviews, ({ one }) => ({
+  chat: one(chats, { fields: [chatReviews.chatId], references: [chats.id] }),
+  reviewer: one(users, { fields: [chatReviews.reviewedBy], references: [users.id] }),
+}));
+
+export const messageCorrectionsRelations = relations(messageCorrections, ({ one }) => ({
+  message: one(messages, { fields: [messageCorrections.messageId], references: [messages.id] }),
+  chat: one(chats, { fields: [messageCorrections.chatId], references: [chats.id] }),
+  corrector: one(users, { fields: [messageCorrections.correctedBy], references: [users.id] }),
 }));
 
 // Insert schemas
@@ -716,6 +728,17 @@ export const insertApiKeySchema = createInsertSchema(apiKeys).omit({
   id: true,
   createdAt: true,
   lastUsed: true,
+});
+
+export const insertChatReviewSchema = createInsertSchema(chatReviews).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertMessageCorrectionSchema = createInsertSchema(messageCorrections).omit({
+  id: true,
+  createdAt: true,
 });
 
 // Learning System Tables
@@ -1058,6 +1081,33 @@ export const systemAnalytics = pgTable("system_analytics", {
   metric: varchar("metric").notNull(), // daily_users, document_uploads, ai_requests, etc
   value: real("value").notNull(),
   metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Chat Review Status for Admin Review Center
+export const chatReviews = pgTable("chat_reviews", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  chatId: uuid("chat_id").notNull().references(() => chats.id, { onDelete: "cascade" }),
+  reviewedBy: varchar("reviewed_by").references(() => users.id, { onDelete: "set null" }),
+  reviewStatus: varchar("review_status").notNull().default("pending"), // pending, approved, needs_correction, skipped
+  reviewNotes: text("review_notes"),
+  correctionsMade: integer("corrections_made").default(0),
+  totalMessages: integer("total_messages").default(0),
+  lastReviewedAt: timestamp("last_reviewed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Message Corrections for tracking admin improvements
+export const messageCorrections = pgTable("message_corrections", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  messageId: uuid("message_id").notNull().references(() => messages.id, { onDelete: "cascade" }),
+  chatId: uuid("chat_id").notNull().references(() => chats.id, { onDelete: "cascade" }),
+  originalResponse: text("original_response").notNull(),
+  correctedResponse: text("corrected_response").notNull(),
+  correctionReason: text("correction_reason"),
+  correctedBy: varchar("corrected_by").notNull().references(() => users.id, { onDelete: "cascade" }),
+  improvementType: varchar("improvement_type").notNull(), // accuracy, completeness, tone, factual_error
   createdAt: timestamp("created_at").defaultNow(),
 });
 
