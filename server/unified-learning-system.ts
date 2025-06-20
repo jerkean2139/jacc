@@ -74,12 +74,12 @@ export class UnifiedLearningSystem {
       await db.insert(faqKnowledgeBase).values({
         question: interaction.query,
         answer: finalResponse,
+        category: 'ai_training',
+        tags: [`learning_${interaction.source}`, 'ai_corrected'],
         priority: this.calculatePriority(interaction),
         isActive: true,
-        source: `learning_${interaction.source}`,
-        effectiveness: this.calculateEffectiveness(interaction),
-        lastReviewed: new Date(),
-        reviewNotes: this.generateReviewNotes(interaction)
+        lastUpdated: new Date(),
+        createdAt: new Date()
       });
     } catch (error) {
       console.error('Error adding to knowledge base:', error);

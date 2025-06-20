@@ -1864,24 +1864,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
 
-      // Add to knowledge base for future reference
-      const { db } = await import('./db');
-      const { faqKnowledgeBase } = await import('../shared/schema');
-      
-      await db.insert(faqKnowledgeBase).values({
-        question: originalQuery,
-        answer: correctedResponse,
-        category: 'admin_training',
-        tags: ['admin_corrected', 'ai_training'],
-        isActive: true,
-        priority: 5, // High priority for admin corrections
-        createdBy: user.id
-      });
-
       res.json({
         success: true,
         message: 'Training correction stored successfully',
-        query,
+        originalQuery,
         correctedResponse,
         timestamp: new Date().toISOString()
       });
