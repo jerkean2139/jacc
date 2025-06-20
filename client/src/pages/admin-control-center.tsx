@@ -91,6 +91,17 @@ export default function AdminControlCenter() {
   const [editDocumentFolder, setEditDocumentFolder] = useState('');
   const [editDocumentPermissions, setEditDocumentPermissions] = useState('admin');
 
+  // FAQ edit states
+  const [editingFAQ, setEditingFAQ] = useState<FAQ | null>(null);
+  const [showEditFAQModal, setShowEditFAQModal] = useState(false);
+  const [editFAQQuestion, setEditFAQQuestion] = useState('');
+  const [editFAQAnswer, setEditFAQAnswer] = useState('');
+  const [editFAQCategory, setEditFAQCategory] = useState('general');
+  const [editFAQPriority, setEditFAQPriority] = useState(1);
+
+  // Knowledge base accordion states
+  const [openKnowledgeCategories, setOpenKnowledgeCategories] = useState<string[]>([]);
+
   // Fetch data
   const { data: faqData, isLoading: faqLoading } = useQuery({
     queryKey: ['/api/admin/faq'],
@@ -160,6 +171,31 @@ export default function AdminControlCenter() {
     },
   });
 
+  const editFAQMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: any }) => 
+      apiRequest(`/api/admin/faq/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/faq'] });
+      setShowEditFAQModal(false);
+      setEditingFAQ(null);
+      toast({ title: 'FAQ updated successfully' });
+    },
+  });
+
+  const deleteFAQMutation = useMutation({
+    mutationFn: (id: number) => 
+      apiRequest(`/api/admin/faq/${id}`, {
+        method: 'DELETE',
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/faq'] });
+      toast({ title: 'FAQ deleted successfully' });
+    },
+  });
+
   const handleCreateFAQ = () => {
     if (!newQuestion.trim() || !newAnswer.trim()) {
       toast({ title: 'Please fill in both question and answer', variant: 'destructive' });
@@ -190,6 +226,47 @@ export default function AdminControlCenter() {
       maxTokens: newPromptMaxTokens,
       isActive: true,
     });
+  };
+
+  const handleEditFAQ = (faq: FAQ) => {
+    setEditingFAQ(faq);
+    setEditFAQQuestion(faq.question);
+    setEditFAQAnswer(faq.answer);
+    setEditFAQCategory(faq.category);
+    setEditFAQPriority(faq.priority);
+    setShowEditFAQModal(true);
+  };
+
+  const handleUpdateFAQ = () => {
+    if (!editFAQQuestion.trim() || !editFAQAnswer.trim() || !editingFAQ) {
+      toast({ title: 'Please fill in both question and answer', variant: 'destructive' });
+      return;
+    }
+
+    editFAQMutation.mutate({
+      id: editingFAQ.id,
+      data: {
+        question: editFAQQuestion,
+        answer: editFAQAnswer,
+        category: editFAQCategory,
+        priority: editFAQPriority,
+        isActive: true,
+      },
+    });
+  };
+
+  const handleDeleteFAQ = (faqId: number) => {
+    if (confirm('Are you sure you want to delete this FAQ entry?')) {
+      deleteFAQMutation.mutate(faqId);
+    }
+  };
+
+  const toggleKnowledgeCategory = (category: string) => {
+    setOpenKnowledgeCategories(prev => 
+      prev.includes(category) 
+        ? prev.filter(c => c !== category)
+        : [...prev, category]
+    );
   };
 
   const handleEditDocument = (document: DocumentEntry) => {
@@ -523,14 +600,40 @@ export default function AdminControlCenter() {
                   <div className="space-y-3">
                     {faqCategories.map((category) => {
                       const count = Array.isArray(faqData) ? faqData.filter((f: FAQ) => f.category === category).length : 0;
+                      const categoryFAQs = Array.isArray(faqData) ? faqData.filter((f: FAQ) => f.category === category) : [];
+                      const isOpen = openKnowledgeCategories.includes(category);
+                      
                       return (
-                        <div key={category} className="flex items-center justify-between p-3 border rounded-lg">
-                          <div className="flex items-center gap-3">
-                            <BookOpen className="w-4 h-4 text-blue-500" />
-                            <span className="font-medium capitalize">{category}</span>
-                          </div>
-                          <Badge variant="secondary">{count}</Badge>
-                        </div>
+                        <Collapsible key={category} open={isOpen} onOpenChange={() => toggleKnowledgeCategory(category)}>
+                          <CollapsibleTrigger asChild>
+                            <div className="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                              <div className="flex items-center gap-3">
+                                {isOpen ? <ChevronDown className="w-4 h-4 text-blue-500" /> : <ChevronRight className="w-4 h-4 text-blue-500" />}
+                                <BookOpen className="w-4 h-4 text-blue-500" />
+                                <span className="font-medium capitalize">{category}</span>
+                              </div>
+                              <Badge variant="secondary">{count}</Badge>
+                            </div>
+                          </CollapsibleTrigger>
+                          <CollapsibleContent className="mt-2 ml-6 space-y-2">
+                            {categoryFAQs.map((faq: FAQ) => (
+                              <div key={faq.id} className="p-2 bg-gray-50 rounded text-sm">
+                                <div className="font-medium text-gray-800">{faq.question}</div>
+                                <div className="text-gray-600 mt-1">{faq.answer.length > 100 ? faq.answer.substring(0, 100) + '...' : faq.answer}</div>
+                                <div className="flex items-center gap-2 mt-2">
+                                  <Button size="sm" variant="ghost" onClick={() => handleEditFAQ(faq)}>
+                                    <Edit className="w-3 h-3 mr-1" />
+                                    Edit
+                                  </Button>
+                                  <Button size="sm" variant="ghost" onClick={() => handleDeleteFAQ(faq.id)}>
+                                    <Trash2 className="w-3 h-3 mr-1 text-red-500" />
+                                    Delete
+                                  </Button>
+                                </div>
+                              </div>
+                            ))}
+                          </CollapsibleContent>
+                        </Collapsible>
                       );
                     })}
                   </div>
@@ -562,10 +665,10 @@ export default function AdminControlCenter() {
                             </div>
                           </div>
                           <div className="flex items-center gap-1 ml-4">
-                            <Button size="sm" variant="ghost">
+                            <Button size="sm" variant="ghost" onClick={() => handleEditFAQ(faq)}>
                               <Edit className="w-3 h-3" />
                             </Button>
-                            <Button size="sm" variant="ghost">
+                            <Button size="sm" variant="ghost" onClick={() => handleDeleteFAQ(faq.id)}>
                               <Trash2 className="w-3 h-3 text-red-500" />
                             </Button>
                           </div>
