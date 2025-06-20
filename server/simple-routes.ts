@@ -1784,6 +1784,108 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // AI Simulator Test Query Endpoint
+  app.post('/api/admin/ai-simulator/test', async (req: Request, res: Response) => {
+    try {
+      const { query } = req.body;
+      const sessionId = req.cookies?.sessionId;
+      const user = sessions.get(sessionId);
+      
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ error: 'Admin access required' });
+      }
+
+      // Import AI service and generate response
+      const { enhancedAIService } = await import('./enhanced-ai');
+      const aiResponse = await enhancedAIService.generateStandardResponse(
+        query,
+        [],
+        user.id
+      );
+
+      // Capture interaction for unified learning system
+      const { unifiedLearningSystem } = await import('./unified-learning-system');
+      await unifiedLearningSystem.captureInteraction({
+        query,
+        response: aiResponse.message,
+        source: 'admin_test',
+        userId: user.id,
+        sessionId: sessionId,
+        metadata: {
+          processingTime: Date.now() - Date.now(),
+          sourcesUsed: aiResponse.sources?.map(s => s.name) || [],
+          confidence: aiResponse.sources?.length ? 0.9 : 0.6
+        }
+      });
+
+      res.json({
+        query,
+        response: aiResponse.message,
+        sources: aiResponse.sources || [],
+        reasoning: aiResponse.reasoning || 'No specific reasoning available',
+        timestamp: new Date().toISOString(),
+        testMode: true
+      });
+    } catch (error) {
+      console.error('AI Simulator test error:', error);
+      res.status(500).json({ error: 'AI test failed' });
+    }
+  });
+
+  // AI Simulator Training Correction Endpoint
+  app.post('/api/admin/ai-simulator/train', async (req: Request, res: Response) => {
+    try {
+      const { query, originalResponse, correctedResponse, notes } = req.body;
+      const sessionId = req.cookies?.sessionId;
+      const user = sessions.get(sessionId);
+      
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ error: 'Admin access required' });
+      }
+
+      // Capture training correction for unified learning system
+      const { unifiedLearningSystem } = await import('./unified-learning-system');
+      await unifiedLearningSystem.captureInteraction({
+        query,
+        response: originalResponse,
+        source: 'admin_correction',
+        userId: user.id,
+        sessionId: sessionId,
+        wasCorrect: false,
+        correctedResponse,
+        metadata: {
+          adminNotes: notes,
+          correctionTimestamp: new Date().toISOString()
+        }
+      });
+
+      // Add to knowledge base for future reference
+      const { db } = await import('./db');
+      const { faqKnowledgeBase } = await import('../shared/schema');
+      
+      await db.insert(faqKnowledgeBase).values({
+        question: query,
+        answer: correctedResponse,
+        category: 'admin_training',
+        tags: ['admin_corrected', 'ai_training'],
+        isActive: true,
+        priority: 5, // High priority for admin corrections
+        createdBy: user.id
+      });
+
+      res.json({
+        success: true,
+        message: 'Training correction stored successfully',
+        query,
+        correctedResponse,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('AI Simulator training error:', error);
+      res.status(500).json({ error: 'Training correction failed' });
+    }
+  });
+
   // Basic chat endpoint
   app.post('/api/chat', async (req: Request, res: Response) => {
     try {
@@ -2277,64 +2379,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/admin/training/analytics', async (req: Request, res: Response) => {
     try {
-      const { db } = await import('./db.ts');
-      const { chats, chatMessages, trainingFeedback } = await import('../shared/schema.ts');
-      const { sql, count, avg, desc } = await import('drizzle-orm');
+      const { unifiedLearningSystem } = await import('./unified-learning-system');
       
-      // Get real chat interaction data
-      const totalChatsResult = await db.select({ count: count() }).from(chats);
-      const totalInteractions = totalChatsResult[0]?.count || 0;
+      // Get real analytics from unified learning system
+      const analytics = await unifiedLearningSystem.getLearningAnalytics();
       
-      // Get real message data for response time analysis
-      const totalMessagesResult = await db.select({ count: count() }).from(chatMessages);
-      const totalMessages = totalMessagesResult[0]?.count || 0;
-      
-      // Get feedback data if available
-      const feedbackResult = await db
-        .select({ 
-          rating: trainingFeedback.rating,
-          category: trainingFeedback.category 
-        })
-        .from(trainingFeedback)
-        .where(sql`${trainingFeedback.rating} IS NOT NULL`);
-      
-      // Calculate real metrics
-      const averageSatisfaction = feedbackResult.length > 0 
-        ? feedbackResult.reduce((sum, f) => sum + (f.rating || 0), 0) / feedbackResult.length
-        : 0;
-      
-      // Category breakdown from real feedback
-      const categoryBreakdown = feedbackResult.reduce((acc, feedback) => {
-        const cat = feedback.category || 'general';
-        acc[cat] = (acc[cat] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>);
-      
-      // Response quality distribution from feedback ratings
-      const responseQualityDistribution = feedbackResult.reduce((acc, feedback) => {
-        if (feedback.rating >= 4) acc.excellent++;
-        else if (feedback.rating >= 3) acc.good++;
-        else acc.poor++;
-        return acc;
-      }, { excellent: 0, good: 0, poor: 0 });
-      
-      const analytics = {
-        totalInteractions,
-        totalMessages,
-        averageSatisfaction: Math.round(averageSatisfaction * 10) / 10,
-        responseQualityDistribution,
-        categoryBreakdown,
-        averageResponseTime: 0, // Will be calculated from real message timestamps later
-        flaggedForReview: feedbackResult.filter(f => f.rating <= 2).length,
-        improvementTrends: {
-          weekOverWeek: "Real data needed",
-          monthOverMonth: "Real data needed"
-        },
-        dataSource: "live_database",
+      res.json({
+        ...analytics,
+        dataSource: "unified_learning_system",
         lastUpdated: new Date().toISOString()
-      };
-      
-      res.json(analytics);
+      });
     } catch (error) {
       console.error('Error fetching training analytics:', error);
       res.status(500).json({ error: 'Failed to fetch training analytics' });

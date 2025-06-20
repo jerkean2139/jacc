@@ -4,6 +4,7 @@ import { perplexitySearchService, type ExternalSearchResult } from "./perplexity
 import { aiEnhancedSearchService } from "./ai-enhanced-search";
 import { promptChainService } from "./prompt-chain";
 import { smartRoutingService } from "./smart-routing";
+import { unifiedLearningSystem } from "./unified-learning-system";
 import { db } from "./db";
 import { webSearchLogs, adminSettings } from "@shared/schema";
 import { eq } from "drizzle-orm";
@@ -134,6 +135,7 @@ export class EnhancedAIService {
       spreadsheetData?: any;
     }
   ): Promise<EnhancedAIResponse> {
+    const startTime = Date.now();
     try {
       // Find the last user message in the conversation
       const lastUserMessage = messages.slice().reverse().find(msg => msg.role === 'user');
@@ -331,7 +333,7 @@ When appropriate, suggest actions like saving payment processing information to 
         ? `Found ${searchResults.length} relevant documents in your knowledge base`
         : "No relevant documents found in internal database";
 
-      return {
+      const aiResponse = {
         message: content,
         actions: actions.length > 0 ? actions.filter(action => 
           ['save_to_folder', 'download', 'create_proposal', 'find_documents'].includes(action.type)
@@ -363,6 +365,25 @@ When appropriate, suggest actions like saving payment processing information to 
           "Show me processing rate comparisons for this business type"
         ]
       };
+
+      // Capture interaction for unified learning system
+      try {
+        await unifiedLearningSystem.captureInteraction({
+          query: lastUserMessage.content,
+          response: content,
+          source: 'user_chat',
+          userId: context?.userRole || 'unknown',
+          metadata: {
+            processingTime: Date.now() - startTime,
+            sourcesUsed: searchResults.map(r => r.metadata?.documentName || 'unknown'),
+            confidence: searchResults.length > 0 ? 0.9 : 0.6
+          }
+        });
+      } catch (error) {
+        console.log('Learning capture failed:', error);
+      }
+
+      return aiResponse;
     } catch (error) {
       console.error("Enhanced AI service error:", error);
       throw new Error("Failed to generate AI response with document context. Please check your API keys and try again.");
