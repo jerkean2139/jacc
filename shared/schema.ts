@@ -673,17 +673,6 @@ export const favoritesRelations = relations(favorites, ({ one }) => ({
   user: one(users, { fields: [favorites.userId], references: [users.id] }),
 }));
 
-export const chatReviewsRelations = relations(chatReviews, ({ one }) => ({
-  chat: one(chats, { fields: [chatReviews.chatId], references: [chats.id] }),
-  reviewer: one(users, { fields: [chatReviews.reviewedBy], references: [users.id] }),
-}));
-
-export const messageCorrectionsRelations = relations(messageCorrections, ({ one }) => ({
-  message: one(messages, { fields: [messageCorrections.messageId], references: [messages.id] }),
-  chat: one(chats, { fields: [messageCorrections.chatId], references: [chats.id] }),
-  corrector: one(users, { fields: [messageCorrections.correctedBy], references: [users.id] }),
-}));
-
 // Insert schemas
 export const insertFolderSchema = createInsertSchema(folders).omit({
   id: true,
@@ -729,16 +718,7 @@ export const insertApiKeySchema = createInsertSchema(apiKeys).omit({
   lastUsed: true,
 });
 
-export const insertChatReviewSchema = createInsertSchema(chatReviews).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
 
-export const insertMessageCorrectionSchema = createInsertSchema(messageCorrections).omit({
-  id: true,
-  createdAt: true,
-});
 
 // Learning System Tables
 export const learningPaths = pgTable("learning_paths", {
@@ -1109,6 +1089,35 @@ export const messageCorrections = pgTable("message_corrections", {
   improvementType: varchar("improvement_type").notNull(), // accuracy, completeness, tone, factual_error
   createdAt: timestamp("created_at").defaultNow(),
 });
+
+// Chat Review Center relations (defined after tables)
+export const chatReviewsRelations = relations(chatReviews, ({ one }) => ({
+  chat: one(chats, { fields: [chatReviews.chatId], references: [chats.id] }),
+  reviewer: one(users, { fields: [chatReviews.reviewedBy], references: [users.id] }),
+}));
+
+export const messageCorrectionsRelations = relations(messageCorrections, ({ one }) => ({
+  message: one(messages, { fields: [messageCorrections.messageId], references: [messages.id] }),
+  chat: one(chats, { fields: [messageCorrections.chatId], references: [chats.id] }),
+  corrector: one(users, { fields: [messageCorrections.correctedBy], references: [users.id] }),
+}));
+
+// Chat Review Center schema exports
+export const insertChatReviewSchema = createInsertSchema(chatReviews).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertMessageCorrectionSchema = createInsertSchema(messageCorrections).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type ChatReview = typeof chatReviews.$inferSelect;
+export type InsertChatReview = z.infer<typeof insertChatReviewSchema>;
+export type MessageCorrection = typeof messageCorrections.$inferSelect;
+export type InsertMessageCorrection = z.infer<typeof insertMessageCorrectionSchema>;
 
 // Document Retrieval Configuration
 export const retrievalConfigs = pgTable("retrieval_configs", {
