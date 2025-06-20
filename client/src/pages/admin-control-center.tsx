@@ -127,6 +127,13 @@ export default function AdminControlCenter() {
     wasCorrected: boolean;
   }>>([]);
 
+  // Chat Review Center states
+  const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
+  const [showChatReviewModal, setShowChatReviewModal] = useState(false);
+  const [reviewStatus, setReviewStatus] = useState('pending');
+  const [reviewNotes, setReviewNotes] = useState('');
+  const [chatReviewFilter, setChatReviewFilter] = useState('pending');
+
   // Fetch data
   const { data: faqData, isLoading: faqLoading } = useQuery({
     queryKey: ['/api/admin/faq'],
@@ -146,6 +153,20 @@ export default function AdminControlCenter() {
 
   const { data: foldersData } = useQuery({
     queryKey: ['/api/folders'],
+  });
+
+  // Chat Review Center data
+  const { data: chatReviews, isLoading: chatReviewsLoading } = useQuery({
+    queryKey: ['/api/admin/chat-reviews', { status: chatReviewFilter }],
+  });
+
+  const { data: chatReviewStats } = useQuery({
+    queryKey: ['/api/admin/chat-reviews/stats'],
+  });
+
+  const { data: selectedChatDetails } = useQuery({
+    queryKey: ['/api/admin/chat-reviews', selectedChatId],
+    enabled: !!selectedChatId,
   });
 
   const { data: trainingInteractions } = useQuery({

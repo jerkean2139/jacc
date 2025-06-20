@@ -658,7 +658,6 @@ export const chatsRelations = relations(chats, ({ one, many }) => ({
   user: one(users, { fields: [chats.userId], references: [users.id] }),
   folder: one(folders, { fields: [chats.folderId], references: [folders.id] }),
   messages: many(messages),
-  review: one(chatReviews, { fields: [chats.id], references: [chatReviews.chatId] }),
 }));
 
 export const messagesRelations = relations(messages, ({ one }) => ({
