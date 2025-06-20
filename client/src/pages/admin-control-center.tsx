@@ -158,6 +158,11 @@ export default function AdminControlCenter() {
     queryKey: ['/api/admin/training/analytics'],
   });
 
+  // Fetch integrated documents data
+  const { data: integratedDocuments, isLoading: integratedDocumentsLoading } = useQuery({
+    queryKey: ['/api/documents'],
+  });
+
   const { data: foldersData } = useQuery({
     queryKey: ['/api/folders'],
   });
@@ -767,6 +772,10 @@ export default function AdminControlCenter() {
           <TabsTrigger value="documents" className="flex items-center gap-2">
             <FileText className="w-4 h-4" />
             Document Center
+          </TabsTrigger>
+          <TabsTrigger value="repository" className="flex items-center gap-2">
+            <Database className="w-4 h-4" />
+            Documents Repository
           </TabsTrigger>
           <TabsTrigger value="prompts" className="flex items-center gap-2">
             <Brain className="w-4 h-4" />
