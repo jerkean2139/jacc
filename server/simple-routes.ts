@@ -1264,23 +1264,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Training analytics endpoint
+  // Training analytics endpoint - authentic data only
   app.get('/api/admin/training/analytics', async (req: Request, res: Response) => {
     try {
-      const analytics = {
-        totalInteractions: 47,
-        averageSatisfaction: 4.2,
-        flaggedForReview: 3,
-        averageResponseTime: 2300,
-        successRate: 94,
-        categoryBreakdown: {
-          pricing: 15,
-          technical: 12,
-          general: 20
-        }
-      };
+      const { unifiedLearningSystem } = await import('./unified-learning-system');
       
-      res.json(analytics);
+      // Get real analytics from unified learning system
+      const analytics = await unifiedLearningSystem.getLearningAnalytics();
+      
+      res.json({
+        ...analytics,
+        dataSource: "unified_learning_system",
+        lastUpdated: new Date().toISOString()
+      });
     } catch (error) {
       console.error('Error fetching training analytics:', error);
       res.status(500).json({ error: 'Failed to fetch training analytics' });
