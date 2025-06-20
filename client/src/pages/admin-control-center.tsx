@@ -1301,19 +1301,23 @@ export default function AdminControlCenter() {
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="text-sm font-medium">Total Interactions</span>
-                    <Badge variant="secondary">{trainingAnalytics?.totalInteractions || 47}</Badge>
+                    <Badge variant="secondary">{trainingAnalytics?.totalInteractions || 0}</Badge>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium">Success Rate</span>
-                    <Badge variant="secondary" className="text-green-600">94%</Badge>
+                    <span className="text-sm font-medium">Average Satisfaction</span>
+                    <Badge variant="secondary" className={trainingAnalytics?.averageSatisfaction > 0 ? "text-green-600" : ""}>
+                      {trainingAnalytics?.averageSatisfaction > 0 ? `${trainingAnalytics.averageSatisfaction}/5` : "No data"}
+                    </Badge>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium">Avg Response Time</span>
-                    <Badge variant="outline">2.3s</Badge>
+                    <span className="text-sm font-medium">Total Messages</span>
+                    <Badge variant="outline">{trainingAnalytics?.totalMessages || 0}</Badge>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium">User Satisfaction</span>
-                    <Badge variant="secondary">4.2/5</Badge>
+                    <span className="text-sm font-medium">Flagged for Review</span>
+                    <Badge variant="secondary" className={trainingAnalytics?.flaggedForReview > 0 ? "text-orange-600" : ""}>
+                      {trainingAnalytics?.flaggedForReview || 0}
+                    </Badge>
                   </div>
                 </div>
               </CardContent>

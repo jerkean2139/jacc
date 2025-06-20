@@ -2161,43 +2161,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
 
-  // Training & Feedback Center routes
+  // Training & Feedback Center routes - Real database queries
   app.get('/api/admin/training/interactions', async (req: Request, res: Response) => {
     try {
-      const interactions = [
-        {
-          id: "training-1",
-          userId: "user-123", 
-          chatId: "chat-456",
-          userFirstMessage: "What are the current processing rates for restaurants?",
-          aiFirstResponse: "Restaurant processing rates typically range from 2.3% to 3.5% for card-present transactions, depending on your monthly volume and average ticket size. For a typical restaurant processing $50,000 monthly with a $25 average ticket, you'd expect rates around 2.6-2.9%. Would you like me to analyze specific rate structures or compare processors?",
-          responseQuality: "good",
-          userSatisfaction: 4,
-          trainingCategory: "pricing",
-          isFirstEverChat: true,
-          responseTime: 2400,
-          documentsUsed: ["processor_rates.pdf", "restaurant_pricing.csv"],
-          flaggedForReview: false,
-          createdAt: new Date().toISOString()
-        },
-        {
-          id: "training-2", 
-          userId: "user-789",
-          chatId: "chat-101",
-          userFirstMessage: "I need help setting up a new merchant account for my coffee shop",
-          aiFirstResponse: "I'd be happy to help you set up a merchant account for your coffee shop! To provide the best recommendations, I'll need some information: What's your expected monthly processing volume? What's your average transaction amount? Do you need in-person, online, or both payment capabilities?",
-          responseQuality: "excellent",
-          userSatisfaction: 5,
-          trainingCategory: "onboarding",
-          isFirstEverChat: true,
-          responseTime: 1800,
-          documentsUsed: ["merchant_setup.pdf"],
-          flaggedForReview: false,
-          createdAt: new Date(Date.now() - 86400000).toISOString()
-        }
-      ];
+      const { db } = await import('./db.ts');
+      const { chats, chatMessages, users, trainingFeedback } = await import('../shared/schema.ts');
+      const { eq, desc, sql } = await import('drizzle-orm');
       
-      res.json(interactions);
+      // Get real chat interactions with user context and feedback
+      const interactions = await db
+        .select({
+          id: chats.id,
+          userId: chats.userId,
+          chatId: chats.id,
+          title: chats.title,
+          createdAt: chats.createdAt,
+          updatedAt: chats.updatedAt
+        })
+        .from(chats)
+        .orderBy(desc(chats.updatedAt))
+        .limit(50);
+
+      // Get first user message and AI response for each chat
+      const interactionsWithMessages = await Promise.all(
+        interactions.map(async (interaction) => {
+          // Get first user message
+          const firstUserMessage = await db
+            .select({ content: chatMessages.content, createdAt: chatMessages.createdAt })
+            .from(chatMessages)
+            .where(sql`${chatMessages.chatId} = ${interaction.chatId} AND ${chatMessages.role} = 'user'`)
+            .orderBy(chatMessages.createdAt)
+            .limit(1);
+
+          // Get first AI response
+          const firstAIResponse = await db
+            .select({ content: chatMessages.content, createdAt: chatMessages.createdAt })
+            .from(chatMessages)
+            .where(sql`${chatMessages.chatId} = ${interaction.chatId} AND ${chatMessages.role} = 'assistant'`)
+            .orderBy(chatMessages.createdAt)
+            .limit(1);
+
+          // Get feedback if available
+          const feedback = await db
+            .select()
+            .from(trainingFeedback)
+            .where(eq(trainingFeedback.chatId, interaction.chatId))
+            .limit(1);
+
+          // Calculate response time if both messages exist
+          let responseTime = null;
+          if (firstUserMessage[0] && firstAIResponse[0]) {
+            const userTime = new Date(firstUserMessage[0].createdAt).getTime();
+            const aiTime = new Date(firstAIResponse[0].createdAt).getTime();
+            responseTime = aiTime - userTime;
+          }
+
+          return {
+            id: interaction.id,
+            userId: interaction.userId,
+            chatId: interaction.chatId,
+            userFirstMessage: firstUserMessage[0]?.content || null,
+            aiFirstResponse: firstAIResponse[0]?.content || null,
+            responseQuality: feedback[0]?.quality || null,
+            userSatisfaction: feedback[0]?.rating || null,
+            trainingCategory: feedback[0]?.category || 'general',
+            isFirstEverChat: firstUserMessage.length > 0 && firstAIResponse.length > 0,
+            responseTime,
+            documentsUsed: [], // Will be populated from search logs in future
+            flaggedForReview: feedback[0]?.flaggedForReview || false,
+            adminNotes: feedback[0]?.adminNotes || null,
+            createdAt: interaction.createdAt,
+            dataSource: 'live_database'
+          };
+        })
+      );
+
+      // Filter out chats without any messages (empty chats)
+      const validInteractions = interactionsWithMessages.filter(
+        interaction => interaction.userFirstMessage !== null
+      );
+      
+      res.json(validInteractions);
     } catch (error) {
       console.error('Error fetching training interactions:', error);
       res.status(500).json({ error: 'Failed to fetch training interactions' });
@@ -2233,26 +2277,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/admin/training/analytics', async (req: Request, res: Response) => {
     try {
+      const { db } = await import('./db.ts');
+      const { chats, chatMessages, trainingFeedback } = await import('../shared/schema.ts');
+      const { sql, count, avg, desc } = await import('drizzle-orm');
+      
+      // Get real chat interaction data
+      const totalChatsResult = await db.select({ count: count() }).from(chats);
+      const totalInteractions = totalChatsResult[0]?.count || 0;
+      
+      // Get real message data for response time analysis
+      const totalMessagesResult = await db.select({ count: count() }).from(chatMessages);
+      const totalMessages = totalMessagesResult[0]?.count || 0;
+      
+      // Get feedback data if available
+      const feedbackResult = await db
+        .select({ 
+          rating: trainingFeedback.rating,
+          category: trainingFeedback.category 
+        })
+        .from(trainingFeedback)
+        .where(sql`${trainingFeedback.rating} IS NOT NULL`);
+      
+      // Calculate real metrics
+      const averageSatisfaction = feedbackResult.length > 0 
+        ? feedbackResult.reduce((sum, f) => sum + (f.rating || 0), 0) / feedbackResult.length
+        : 0;
+      
+      // Category breakdown from real feedback
+      const categoryBreakdown = feedbackResult.reduce((acc, feedback) => {
+        const cat = feedback.category || 'general';
+        acc[cat] = (acc[cat] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+      
+      // Response quality distribution from feedback ratings
+      const responseQualityDistribution = feedbackResult.reduce((acc, feedback) => {
+        if (feedback.rating >= 4) acc.excellent++;
+        else if (feedback.rating >= 3) acc.good++;
+        else acc.poor++;
+        return acc;
+      }, { excellent: 0, good: 0, poor: 0 });
+      
       const analytics = {
-        totalInteractions: 47,
-        averageSatisfaction: 4.2,
-        responseQualityDistribution: {
-          excellent: 18,
-          good: 22,
-          poor: 7
-        },
-        categoryBreakdown: {
-          pricing: 15,
-          onboarding: 12,
-          technical_support: 11,
-          product_inquiry: 9
-        },
-        averageResponseTime: 2100,
-        flaggedForReview: 7,
+        totalInteractions,
+        totalMessages,
+        averageSatisfaction: Math.round(averageSatisfaction * 10) / 10,
+        responseQualityDistribution,
+        categoryBreakdown,
+        averageResponseTime: 0, // Will be calculated from real message timestamps later
+        flaggedForReview: feedbackResult.filter(f => f.rating <= 2).length,
         improvementTrends: {
-          weekOverWeek: "+12%",
-          monthOverMonth: "+28%"
-        }
+          weekOverWeek: "Real data needed",
+          monthOverMonth: "Real data needed"
+        },
+        dataSource: "live_database",
+        lastUpdated: new Date().toISOString()
       };
       
       res.json(analytics);
