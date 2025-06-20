@@ -16,7 +16,7 @@ import {
   AlertTriangle, Clock, TrendingUp, Zap, Globe, Search, FileText, Eye, Download,
   Edit, Trash2, Save, Plus, Folder, FolderOpen, Upload, Users, Activity,
   BarChart3, Timer, ChevronDown, ChevronRight, Target, BookOpen, ThumbsUp,
-  ThumbsDown, Star, Copy
+  ThumbsDown, Star, Copy, AlertCircle, ArrowRight
 } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
@@ -133,6 +133,8 @@ export default function AdminControlCenter() {
   const [reviewStatus, setReviewStatus] = useState('pending');
   const [reviewNotes, setReviewNotes] = useState('');
   const [chatReviewFilter, setChatReviewFilter] = useState('pending');
+  const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
+  const [messageCorrection, setMessageCorrection] = useState('');
 
   // Fetch data
   const { data: faqData, isLoading: faqLoading } = useQuery({
@@ -678,6 +680,39 @@ export default function AdminControlCenter() {
   const confirmRemoveDuplicates = () => {
     removeDuplicatesMutation.mutate();
   };
+
+  // Chat Review Center mutations
+  const approveChatMutation = useMutation({
+    mutationFn: (chatId: string) =>
+      apiRequest('/api/admin/chat-reviews/approve', {
+        method: 'POST',
+        body: JSON.stringify({ chatId, reviewNotes }),
+      }),
+    onSuccess: () => {
+      toast({ title: 'Chat approved successfully' });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/chat-reviews'] });
+      setShowChatReviewModal(false);
+      setReviewNotes('');
+    },
+    onError: () => {
+      toast({ title: 'Failed to approve chat', variant: 'destructive' });
+    },
+  });
+
+  const submitMessageCorrectionMutation = useMutation({
+    mutationFn: (data: { messageId: string; chatId: string; correctedContent: string; improvementType: string }) =>
+      apiRequest('/api/admin/chat-reviews/correct-message', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    onSuccess: () => {
+      toast({ title: 'Message correction submitted' });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/chat-reviews'] });
+    },
+    onError: () => {
+      toast({ title: 'Failed to submit correction', variant: 'destructive' });
+    },
+  });
 
   const filteredFAQs = Array.isArray(faqData) ? faqData.filter((faq: FAQ) => {
     return faq.question && faq.answer;
@@ -1419,6 +1454,158 @@ export default function AdminControlCenter() {
                   )}
                 </div>
               </ScrollArea>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Chat Review Center Tab */}
+        <TabsContent value="chat-reviews" className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Chat Review Center</h3>
+              <p className="text-sm text-gray-600">Review user conversations and improve AI responses</p>
+            </div>
+            <div className="flex gap-2">
+              <Select value={chatReviewFilter} onValueChange={setChatReviewFilter}>
+                <SelectTrigger className="w-32">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="approved">Approved</SelectItem>
+                  <SelectItem value="needs_correction">Needs Correction</SelectItem>
+                  <SelectItem value="all">All</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Stats Dashboard */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600">Pending Reviews</p>
+                    <p className="text-2xl font-bold text-orange-600">
+                      {chatReviewStats?.pending || 0}
+                    </p>
+                  </div>
+                  <Clock className="h-8 w-8 text-orange-500" />
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600">Approved</p>
+                    <p className="text-2xl font-bold text-green-600">
+                      {chatReviewStats?.approved || 0}
+                    </p>
+                  </div>
+                  <CheckCircle className="h-8 w-8 text-green-500" />
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600">Need Correction</p>
+                    <p className="text-2xl font-bold text-red-600">
+                      {chatReviewStats?.needsCorrection || 0}
+                    </p>
+                  </div>
+                  <AlertCircle className="h-8 w-8 text-red-500" />
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600">Total Corrections</p>
+                    <p className="text-2xl font-bold text-blue-600">
+                      {chatReviewStats?.totalCorrections || 0}
+                    </p>
+                  </div>
+                  <Edit className="h-8 w-8 text-blue-500" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Chat Reviews List */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MessageSquare className="h-5 w-5" />
+                Chat Reviews ({chatReviewFilter})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {chatReviewsLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {chatReviews && Array.isArray(chatReviews) && chatReviews.length > 0 ? (
+                    chatReviews.map((chat: any) => (
+                      <div
+                        key={chat.chatId}
+                        className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer transition-colors"
+                        onClick={() => {
+                          setSelectedChatId(chat.chatId);
+                          setShowChatReviewModal(true);
+                        }}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <h4 className="font-medium text-gray-900">{chat.chatTitle}</h4>
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                chat.reviewStatus === 'pending' ? 'bg-orange-100 text-orange-800' :
+                                chat.reviewStatus === 'approved' ? 'bg-green-100 text-green-800' :
+                                chat.reviewStatus === 'needs_correction' ? 'bg-red-100 text-red-800' :
+                                'bg-gray-100 text-gray-800'
+                              }`}>
+                                {chat.reviewStatus || 'pending'}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-4 text-sm text-gray-600">
+                              <span>User: {chat.userName}</span>
+                              <span>Messages: {chat.messageCount}</span>
+                              <span>Corrections: {chat.correctionsMade || 0}</span>
+                              <span>Updated: {new Date(chat.updatedAt).toLocaleDateString()}</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedChatId(chat.chatId);
+                                setShowChatReviewModal(true);
+                              }}
+                            >
+                              Review
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      No chat reviews found for "{chatReviewFilter}" status
+                    </div>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -2409,6 +2596,247 @@ export default function AdminControlCenter() {
               disabled={editPromptMutation.isPending}
             >
               {editPromptMutation.isPending ? 'Updating...' : 'Update Prompt'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Chat Review Modal with Built-in Emulator */}
+      <Dialog open={showChatReviewModal} onOpenChange={setShowChatReviewModal}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Eye className="h-5 w-5" />
+              Chat Review & Emulator
+            </DialogTitle>
+            <DialogDescription>
+              Review conversation and make corrections with built-in AI emulator
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-h-[70vh] overflow-y-auto">
+            {/* Chat History Panel */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h4 className="font-medium">Conversation History</h4>
+                <Badge variant="outline">
+                  {selectedChatDetails?.messages?.length || 0} messages
+                </Badge>
+              </div>
+
+              <ScrollArea className="h-[500px] border rounded-lg p-4">
+                <div className="space-y-4">
+                  {selectedChatDetails?.messages?.map((message: any) => (
+                    <div
+                      key={message.id}
+                      className={`p-3 rounded-lg ${
+                        message.role === 'user' 
+                          ? 'bg-blue-50 border-l-4 border-blue-400' 
+                          : 'bg-gray-50 border-l-4 border-gray-400'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <span className="font-medium text-sm">
+                          {message.role === 'user' ? 'User' : 'AI Assistant'}
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-gray-500">
+                            {new Date(message.createdAt).toLocaleTimeString()}
+                          </span>
+                          {message.role === 'assistant' && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => {
+                                setSelectedMessageId(message.id);
+                                setMessageCorrection(message.content);
+                              }}
+                            >
+                              <Edit className="h-3 w-3" />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                      <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                        {message.content}
+                      </p>
+                      
+                      {/* Show correction interface for selected message */}
+                      {selectedMessageId === message.id && (
+                        <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded">
+                          <Label htmlFor="message-correction">Improved Response</Label>
+                          <Textarea
+                            id="message-correction"
+                            value={messageCorrection}
+                            onChange={(e) => setMessageCorrection(e.target.value)}
+                            placeholder="Enter the improved AI response..."
+                            className="mt-2 min-h-[100px]"
+                          />
+                          <div className="flex gap-2 mt-3">
+                            <Button
+                              size="sm"
+                              onClick={() => {
+                                submitMessageCorrectionMutation.mutate({
+                                  messageId: message.id,
+                                  chatId: selectedChatId!,
+                                  correctedContent: messageCorrection,
+                                  improvementType: 'accuracy'
+                                });
+                                setSelectedMessageId(null);
+                                setMessageCorrection('');
+                              }}
+                              disabled={submitMessageCorrectionMutation.isPending}
+                            >
+                              {submitMessageCorrectionMutation.isPending ? 'Submitting...' : 'Submit Correction'}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setSelectedMessageId(null);
+                                setMessageCorrection('');
+                              }}
+                            >
+                              Cancel
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+
+            {/* Review & Approval Panel */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h4 className="font-medium">Review Status</h4>
+                <Select value={reviewStatus} onValueChange={setReviewStatus}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="approved">Approved</SelectItem>
+                    <SelectItem value="needs_correction">Needs Correction</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Chat Details */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm">Chat Information</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>User:</span>
+                    <span className="font-medium">{selectedChatDetails?.userName || 'Unknown'}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span>Created:</span>
+                    <span>{selectedChatDetails?.createdAt ? new Date(selectedChatDetails.createdAt).toLocaleDateString() : 'Unknown'}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span>Messages:</span>
+                    <span>{selectedChatDetails?.messages?.length || 0}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span>Corrections Made:</span>
+                    <span className="text-orange-600">{selectedChatDetails?.correctionCount || 0}</span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Review Notes */}
+              <div className="space-y-3">
+                <Label htmlFor="review-notes">Review Notes</Label>
+                <Textarea
+                  id="review-notes"
+                  value={reviewNotes}
+                  onChange={(e) => setReviewNotes(e.target.value)}
+                  placeholder="Add notes about this conversation review..."
+                  className="min-h-[100px]"
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="space-y-3">
+                <Button
+                  className="w-full bg-green-600 hover:bg-green-700"
+                  onClick={() => {
+                    approveChatMutation.mutate(selectedChatId!);
+                  }}
+                  disabled={approveChatMutation.isPending}
+                >
+                  <ThumbsUp className="h-4 w-4 mr-2" />
+                  {approveChatMutation.isPending ? 'Approving...' : 'Approve Chat'}
+                </Button>
+
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => {
+                    // Move to next pending chat
+                    const currentIndex = chatReviews?.findIndex((chat: any) => chat.chatId === selectedChatId) || 0;
+                    const nextChat = chatReviews?.[currentIndex + 1];
+                    if (nextChat) {
+                      setSelectedChatId(nextChat.chatId);
+                      setReviewNotes('');
+                    } else {
+                      setShowChatReviewModal(false);
+                      toast({ title: 'No more chats to review' });
+                    }
+                  }}
+                >
+                  <ArrowRight className="h-4 w-4 mr-2" />
+                  Next Chat
+                </Button>
+              </div>
+
+              {/* Quick Stats */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm">Review Progress</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Reviewed Today:</span>
+                      <span className="font-medium">
+                        {chatReviewStats?.reviewedToday || 0}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span>Pending:</span>
+                      <span className="text-orange-600">
+                        {chatReviewStats?.pending || 0}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span>Your Progress:</span>
+                      <span className="text-green-600">
+                        {Math.round(((chatReviewStats?.approved || 0) / Math.max((chatReviewStats?.total || 1), 1)) * 100)}%
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowChatReviewModal(false);
+                setSelectedChatId(null);
+                setReviewNotes('');
+                setSelectedMessageId(null);
+              }}
+            >
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>
