@@ -323,25 +323,24 @@ export const chatRatings = pgTable("chat_ratings", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// Training data collection for first interactions
+// Training Interactions - Unified Learning System
 export const trainingInteractions = pgTable("training_interactions", {
   id: uuid("id").primaryKey().defaultRandom(),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  chatId: uuid("chat_id").notNull().references(() => chats.id, { onDelete: "cascade" }),
-  userFirstMessage: text("user_first_message").notNull(),
-  aiFirstResponse: text("ai_first_response").notNull(),
-  responseQuality: varchar("response_quality"), // poor, good, excellent
-  userSatisfaction: integer("user_satisfaction"), // 1-5 rating
-  adminNotes: text("admin_notes"),
-  trainingCategory: varchar("training_category"), // onboarding, product_inquiry, technical_support, pricing
-  isFirstEverChat: boolean("is_first_ever_chat").default(false),
-  responseTime: integer("response_time_ms"),
-  documentsUsed: text("documents_used").array(),
-  promptsTriggered: text("prompts_triggered").array(),
+  query: text("query").notNull(),
+  response: text("response").notNull(),
+  source: varchar("source").notNull(), // 'user_chat', 'admin_test', 'admin_correction'
+  userId: varchar("user_id").notNull(),
+  sessionId: varchar("session_id"),
+  chatId: uuid("chat_id").references(() => chats.id, { onDelete: "cascade" }),
+  quality: integer("quality"), // 1-5 rating
+  wasCorrect: boolean("was_correct").default(true),
+  correctedResponse: text("corrected_response"),
+  metadata: jsonb("metadata"), // Processing time, sources, confidence, etc.
+  reviewNotes: text("review_notes"),
+  lastReviewed: timestamp("last_reviewed"),
   flaggedForReview: boolean("flagged_for_review").default(false),
   reviewedBy: varchar("reviewed_by").references(() => users.id),
-  reviewedAt: timestamp("reviewed_at"),
-  createdAt: timestamp("created_at").defaultNow(),
+  timestamp: timestamp("timestamp").defaultNow(),
 });
 
 // AI prompt templates for admin management
@@ -497,6 +496,8 @@ export const webSearchLogs = pgTable("web_search_logs", {
   reviewNotes: text("review_notes"),
   createdAt: timestamp("created_at").defaultNow(),
 });
+
+
 
 // FAQ Knowledge Base for structured Q&A content
 export const faqKnowledgeBase = pgTable("faq_knowledge_base", {
