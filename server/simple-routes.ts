@@ -1791,7 +1791,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const sessionId = req.cookies?.sessionId;
       const user = sessions.get(sessionId);
       
-      if (!user || user.role !== 'admin') {
+      if (!user || (user.role !== 'admin' && user.role !== 'dev-admin')) {
         return res.status(403).json({ error: 'Admin access required' });
       }
 
@@ -1839,7 +1839,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const sessionId = req.cookies?.sessionId;
       const user = sessions.get(sessionId);
       
-      if (!user || user.role !== 'admin') {
+      if (!user || (user.role !== 'admin' && user.role !== 'dev-admin')) {
         return res.status(403).json({ error: 'Admin access required' });
       }
 
