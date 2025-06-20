@@ -4,40 +4,130 @@ import { chats, users, messages, chatReviews, messageCorrections } from '@shared
 import { eq, desc, isNull, sql } from 'drizzle-orm';
 
 export function registerChatReviewRoutes(app: any) {
+  // Get review stats (must be before parameterized routes)
+  app.get('/api/admin/chat-reviews/stats', async (req: Request, res: Response) => {
+    try {
+      // Count chats with messages (potential reviews)
+      const chatsWithMessages = await db.execute(sql`
+        SELECT COUNT(DISTINCT c.id) as count
+        FROM chats c
+        INNER JOIN messages m ON c.id = m.chat_id
+      `);
+
+      // Count pending reviews (chats with messages but no review)
+      const pendingReviews = await db.execute(sql`
+        SELECT COUNT(DISTINCT c.id) as count
+        FROM chats c
+        INNER JOIN messages m ON c.id = m.chat_id
+        LEFT JOIN chat_reviews cr ON c.id = cr.chat_id
+        WHERE cr.id IS NULL
+      `);
+
+      // Count approved reviews
+      const approvedReviews = await db.execute(sql`
+        SELECT COUNT(*) as count
+        FROM chat_reviews
+        WHERE review_status = 'approved'
+      `);
+
+      // Count reviews needing correction
+      const correctionReviews = await db.execute(sql`
+        SELECT COUNT(*) as count
+        FROM chat_reviews
+        WHERE review_status = 'needs_correction'
+      `);
+
+      // Count total message corrections
+      const corrections = await db.execute(sql`
+        SELECT COUNT(*) as count
+        FROM message_corrections
+      `);
+
+      res.json({
+        pending: Number(pendingReviews.rows[0]?.count) || 0,
+        approved: Number(approvedReviews.rows[0]?.count) || 0,
+        needsCorrection: Number(correctionReviews.rows[0]?.count) || 0,
+        totalCorrections: Number(corrections.rows[0]?.count) || 0,
+      });
+    } catch (error) {
+      console.error('Error fetching chat review stats:', error);
+      res.status(500).json({ error: 'Failed to fetch stats' });
+    }
+  });
+
   // Get chat reviews list
   app.get('/api/admin/chat-reviews', async (req: Request, res: Response) => {
     try {
-      const { status = 'pending', limit = 20, offset = 0 } = req.query;
+      const { status = 'all', limit = 20, offset = 0 } = req.query;
       
-      const chatsWithReviews = await db
+      // First get all chats with their message counts
+      const allChats = await db
         .select({
           chatId: chats.id,
           chatTitle: chats.title,
           userId: chats.userId,
-          userName: users.username,
           createdAt: chats.createdAt,
           updatedAt: chats.updatedAt,
           messageCount: sql<number>`COUNT(${messages.id})`,
-          reviewStatus: sql<string>`COALESCE(${chatReviews.reviewStatus}, 'pending')`,
-          reviewedBy: chatReviews.reviewedBy,
-          lastReviewedAt: chatReviews.lastReviewedAt,
-          correctionsMade: sql<number>`COALESCE(${chatReviews.correctionsMade}, 0)`,
         })
         .from(chats)
-        .leftJoin(chatReviews, eq(chats.id, chatReviews.chatId))
-        .leftJoin(users, eq(chats.userId, users.id))
         .leftJoin(messages, eq(chats.id, messages.chatId))
-        .where(
-          status === 'all' ? undefined : 
-          status === 'pending' ? isNull(chatReviews.reviewStatus) :
-          eq(chatReviews.reviewStatus, status as string)
-        )
-        .groupBy(chats.id, chats.title, chats.userId, users.username, chats.createdAt, chats.updatedAt, chatReviews.reviewStatus, chatReviews.reviewedBy, chatReviews.lastReviewedAt, chatReviews.correctionsMade)
-        .orderBy(desc(chats.updatedAt))
-        .limit(Number(limit))
-        .offset(Number(offset));
+        .groupBy(chats.id, chats.title, chats.userId, chats.createdAt, chats.updatedAt)
+        .having(sql`COUNT(${messages.id}) > 0`) // Only show chats with messages
+        .orderBy(desc(chats.updatedAt));
 
-      res.json(chatsWithReviews);
+      // Then get review statuses for these chats
+      const chatReviewStatuses = await db
+        .select({
+          chatId: chatReviews.chatId,
+          reviewStatus: chatReviews.reviewStatus,
+          reviewedBy: chatReviews.reviewedBy,
+          reviewNotes: chatReviews.reviewNotes,
+          updatedAt: chatReviews.updatedAt,
+        })
+        .from(chatReviews);
+
+      // Get correction counts for each chat
+      const correctionCounts = await db
+        .select({
+          chatId: messageCorrections.chatId,
+          correctionCount: sql<number>`COUNT(*)`,
+        })
+        .from(messageCorrections)
+        .groupBy(messageCorrections.chatId);
+
+      // Combine the data
+      const chatsWithReviews = allChats.map(chat => {
+        const review = chatReviewStatuses.find(r => r.chatId === chat.chatId);
+        const corrections = correctionCounts.find(c => c.chatId === chat.chatId);
+        
+        const reviewStatus = review?.reviewStatus || 'pending';
+        
+        return {
+          chatId: chat.chatId,
+          chatTitle: chat.chatTitle,
+          userId: chat.userId,
+          userName: chat.userId, // Will be the dev-user-123 from the database
+          createdAt: chat.createdAt,
+          updatedAt: chat.updatedAt,
+          messageCount: chat.messageCount,
+          reviewStatus,
+          reviewedBy: review?.reviewedBy || null,
+          lastReviewedAt: review?.updatedAt || chat.updatedAt,
+          correctionsMade: corrections?.correctionCount || 0,
+        };
+      });
+
+      // Filter by status if needed
+      const filteredChats = status === 'all' 
+        ? chatsWithReviews
+        : chatsWithReviews.filter(chat => chat.reviewStatus === status);
+
+      // Apply pagination
+      const paginatedChats = filteredChats
+        .slice(Number(offset), Number(offset) + Number(limit));
+
+      res.json(paginatedChats);
     } catch (error) {
       console.error('Error fetching chat reviews:', error);
       res.status(500).json({ error: 'Failed to fetch chat reviews' });
@@ -164,38 +254,4 @@ export function registerChatReviewRoutes(app: any) {
     }
   });
 
-  // Get review stats
-  app.get('/api/admin/chat-reviews/stats', async (req: Request, res: Response) => {
-    try {
-      const pendingCount = await db
-        .select({ count: sql<number>`COUNT(*)` })
-        .from(chats)
-        .leftJoin(chatReviews, eq(chats.id, chatReviews.chatId))
-        .where(isNull(chatReviews.reviewStatus));
-
-      const approvedCount = await db
-        .select({ count: sql<number>`COUNT(*)` })
-        .from(chatReviews)
-        .where(eq(chatReviews.reviewStatus, 'approved'));
-
-      const needsCorrectionCount = await db
-        .select({ count: sql<number>`COUNT(*)` })
-        .from(chatReviews)
-        .where(eq(chatReviews.reviewStatus, 'needs_correction'));
-
-      const totalCorrections = await db
-        .select({ count: sql<number>`COUNT(*)` })
-        .from(messageCorrections);
-
-      res.json({
-        pending: pendingCount[0]?.count || 0,
-        approved: approvedCount[0]?.count || 0,
-        needsCorrection: needsCorrectionCount[0]?.count || 0,
-        totalCorrections: totalCorrections[0]?.count || 0,
-      });
-    } catch (error) {
-      console.error('Error fetching chat review stats:', error);
-      res.status(500).json({ error: 'Failed to fetch stats' });
-    }
-  });
 }
