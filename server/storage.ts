@@ -422,22 +422,19 @@ export class DatabaseStorage implements IStorage {
 
   async getUserDefaultPrompt(userId: string, category?: string): Promise<UserPrompt | undefined> {
     try {
+      // Return the first prompt for the user (schema doesn't have isActive or isDefault)
       let query = db.select().from(userPrompts)
-        .where(and(
-          eq(userPrompts.userId, userId),
-          eq(userPrompts.isDefault, true)
-        ));
+        .where(eq(userPrompts.userId, userId));
       
       if (category) {
         query = db.select().from(userPrompts)
           .where(and(
             eq(userPrompts.userId, userId),
-            eq(userPrompts.isDefault, true),
             eq(userPrompts.category, category)
           ));
       }
       
-      const results = await query;
+      const results = await query.limit(1);
       return results[0];
     } catch (error) {
       console.error('Error fetching user default prompt:', error);

@@ -836,10 +836,26 @@ export const userLearningStats = pgTable("user_learning_stats", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Training interactions for unified learning system
+export const trainingInteractions = pgTable("training_interactions", {
+  id: varchar("id").primaryKey().notNull().$defaultFn(() => crypto.randomUUID()),
+  query: text("query").notNull(),
+  response: text("response").notNull(),
+  source: varchar("source").notNull(), // user_chat, admin_test, admin_correction
+  userId: varchar("user_id").references(() => users.id),
+  sessionId: varchar("session_id"),
+  wasCorrect: boolean("was_correct"),
+  correctedResponse: text("corrected_response"),
+  metadata: jsonb("metadata").$type<Record<string, any>>().default({}),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
+export type TrainingInteraction = typeof trainingInteractions.$inferSelect;
+export type InsertTrainingInteraction = typeof trainingInteractions.$inferInsert;
 
 // Processor pricing management
 export const processorPricing = pgTable("processor_pricing", {
