@@ -732,6 +732,10 @@ export default function AdminControlCenter() {
             <Brain className="w-4 h-4" />
             AI Prompts
           </TabsTrigger>
+          <TabsTrigger value="chat-reviews" className="flex items-center gap-2">
+            <Eye className="w-4 h-4" />
+            Chat Reviews
+          </TabsTrigger>
           <TabsTrigger value="training" className="flex items-center gap-2">
             <BarChart3 className="w-4 h-4" />
             Training & Feedback
