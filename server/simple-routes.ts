@@ -1755,6 +1755,136 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.status(500).json({ error: 'Login handler not found' });
   });
 
+  // Streak Gamification Endpoints
+  app.post('/api/streak/track-login', async (req: Request, res: Response) => {
+    try {
+      const sessionId = req.cookies?.sessionId;
+      const user = sessions.get(sessionId);
+      
+      if (!user) {
+        return res.status(401).json({ error: 'Not authenticated' });
+      }
+
+      const { streakGamificationEngine } = await import('./streak-gamification');
+      const result = await streakGamificationEngine.trackUserLogin(user.id);
+      
+      console.log(`Login tracked for ${user.username}: ${result.newStreak} day streak`);
+      res.json(result);
+    } catch (error) {
+      console.error('Error tracking login:', error);
+      res.status(500).json({ error: 'Failed to track login' });
+    }
+  });
+
+  app.get('/api/streak/status', async (req: Request, res: Response) => {
+    try {
+      const sessionId = req.cookies?.sessionId;
+      const user = sessions.get(sessionId);
+      
+      if (!user) {
+        return res.status(401).json({ error: 'Not authenticated' });
+      }
+
+      const { streakGamificationEngine } = await import('./streak-gamification');
+      const status = await streakGamificationEngine.getUserStreakStatus(user.id);
+      
+      res.json(status);
+    } catch (error) {
+      console.error('Error getting streak status:', error);
+      res.status(500).json({ error: 'Failed to get streak status' });
+    }
+  });
+
+  app.get('/api/streak/leaderboard', async (req: Request, res: Response) => {
+    try {
+      const { streakGamificationEngine } = await import('./streak-gamification');
+      const leaderboard = await streakGamificationEngine.getStreakLeaderboard(10);
+      
+      res.json(leaderboard);
+    } catch (error) {
+      console.error('Error getting streak leaderboard:', error);
+      res.status(500).json({ error: 'Failed to get leaderboard' });
+    }
+  });
+
+  app.post('/api/streak/track-activity', async (req: Request, res: Response) => {
+    try {
+      const sessionId = req.cookies?.sessionId;
+      const user = sessions.get(sessionId);
+      
+      if (!user) {
+        return res.status(401).json({ error: 'Not authenticated' });
+      }
+
+      const { activity } = req.body;
+      const { streakGamificationEngine } = await import('./streak-gamification');
+      const result = await streakGamificationEngine.updateUserActivity(user.id, activity);
+      
+      res.json(result);
+    } catch (error) {
+      console.error('Error tracking activity:', error);
+      res.status(500).json({ error: 'Failed to track activity' });
+    }
+  });
+
+  // Email Notification Endpoints
+  app.post('/api/admin/notifications/send-reminders', async (req: Request, res: Response) => {
+    try {
+      const sessionId = req.cookies?.sessionId;
+      const user = sessions.get(sessionId);
+      
+      if (!user || (user.role !== 'admin' && user.role !== 'dev-admin')) {
+        return res.status(403).json({ error: 'Admin access required' });
+      }
+
+      const { emailNotificationService } = await import('./email-notifications');
+      await emailNotificationService.sendDailyLoginReminders();
+      
+      res.json({ success: true, message: 'Login reminders sent' });
+    } catch (error) {
+      console.error('Error sending reminders:', error);
+      res.status(500).json({ error: 'Failed to send reminders' });
+    }
+  });
+
+  app.post('/api/admin/notifications/management-report', async (req: Request, res: Response) => {
+    try {
+      const sessionId = req.cookies?.sessionId;
+      const user = sessions.get(sessionId);
+      
+      if (!user || (user.role !== 'admin' && user.role !== 'dev-admin')) {
+        return res.status(403).json({ error: 'Admin access required' });
+      }
+
+      const { emailNotificationService } = await import('./email-notifications');
+      await emailNotificationService.sendManagementReport();
+      
+      res.json({ success: true, message: 'Management report sent' });
+    } catch (error) {
+      console.error('Error sending management report:', error);
+      res.status(500).json({ error: 'Failed to send report' });
+    }
+  });
+
+  app.get('/api/admin/analytics/streak', async (req: Request, res: Response) => {
+    try {
+      const sessionId = req.cookies?.sessionId;
+      const user = sessions.get(sessionId);
+      
+      if (!user || (user.role !== 'admin' && user.role !== 'dev-admin')) {
+        return res.status(403).json({ error: 'Admin access required' });
+      }
+
+      const { streakGamificationEngine } = await import('./streak-gamification');
+      const analytics = await streakGamificationEngine.getStreakAnalytics();
+      
+      res.json(analytics);
+    } catch (error) {
+      console.error('Error getting streak analytics:', error);
+      res.status(500).json({ error: 'Failed to get analytics' });
+    }
+  });
+
   // Demo admin access for testing documents
   app.get('/api/auth/demo-admin', (req: Request, res: Response) => {
     const sessionId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
