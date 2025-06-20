@@ -125,10 +125,18 @@ export default function AdminControlCenter() {
 
   // Mutations
   const createFAQMutation = useMutation({
-    mutationFn: (data: any) => apiRequest('/api/admin/faq', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    }),
+    mutationFn: async (data: any) => {
+      const response = await fetch('/api/admin/faq', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+        credentials: 'include',
+      });
+      if (!response.ok) throw new Error('Failed to create FAQ');
+      return response.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/faq'] });
       setNewQuestion('');
@@ -140,10 +148,18 @@ export default function AdminControlCenter() {
   });
 
   const createPromptMutation = useMutation({
-    mutationFn: (data: any) => apiRequest('/api/admin/prompts', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    }),
+    mutationFn: async (data: any) => {
+      const response = await fetch('/api/admin/prompts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+        credentials: 'include',
+      });
+      if (!response.ok) throw new Error('Failed to create prompt');
+      return response.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/prompts'] });
       setShowCreatePrompt(false);
@@ -172,11 +188,18 @@ export default function AdminControlCenter() {
   });
 
   const editFAQMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: any }) => 
-      apiRequest(`/api/admin/faq/${id}`, {
-        method: 'PUT',
+    mutationFn: async ({ id, data }: { id: number; data: any }) => {
+      const response = await fetch(`/api/admin/faq/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(data),
-      }),
+        credentials: 'include',
+      });
+      if (!response.ok) throw new Error('Failed to update FAQ');
+      return response.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/faq'] });
       setShowEditFAQModal(false);
@@ -186,10 +209,14 @@ export default function AdminControlCenter() {
   });
 
   const deleteFAQMutation = useMutation({
-    mutationFn: (id: number) => 
-      apiRequest(`/api/admin/faq/${id}`, {
+    mutationFn: async (id: number) => {
+      const response = await fetch(`/api/admin/faq/${id}`, {
         method: 'DELETE',
-      }),
+        credentials: 'include',
+      });
+      if (!response.ok) throw new Error('Failed to delete FAQ');
+      return response.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/faq'] });
       toast({ title: 'FAQ deleted successfully' });
@@ -459,7 +486,7 @@ export default function AdminControlCenter() {
   }) : [];
 
   const faqCategories = Array.isArray(faqData) ? 
-    [...new Set(faqData.map((faq: FAQ) => faq.category))] : [];
+    Array.from(new Set(faqData.map((faq: FAQ) => faq.category))) : [];
 
   // Filter documents based on search and filter criteria
   const filteredDocuments = Array.isArray(documentsData) ? documentsData.filter((doc: DocumentEntry) => {
@@ -1711,6 +1738,102 @@ export default function AdminControlCenter() {
               disabled={editDocumentMutation.isPending}
             >
               {editDocumentMutation.isPending ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* FAQ Edit Modal */}
+      <Dialog open={showEditFAQModal} onOpenChange={setShowEditFAQModal}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Edit FAQ Entry</DialogTitle>
+            <DialogDescription>
+              Update the question, answer, category, and priority level
+            </DialogDescription>
+          </DialogHeader>
+          
+          {editingFAQ && (
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="edit-faq-question">Question</Label>
+                <Input
+                  id="edit-faq-question"
+                  value={editFAQQuestion}
+                  onChange={(e) => setEditFAQQuestion(e.target.value)}
+                  placeholder="Enter the question"
+                />
+              </div>
+              
+              <div className="grid gap-2">
+                <Label htmlFor="edit-faq-answer">Answer</Label>
+                <Textarea
+                  id="edit-faq-answer"
+                  value={editFAQAnswer}
+                  onChange={(e) => setEditFAQAnswer(e.target.value)}
+                  placeholder="Enter the detailed answer"
+                  className="min-h-[100px]"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-faq-category">Category</Label>
+                  <Select value={editFAQCategory} onValueChange={setEditFAQCategory}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="general">General</SelectItem>
+                      <SelectItem value="pricing">Pricing</SelectItem>
+                      <SelectItem value="technical">Technical</SelectItem>
+                      <SelectItem value="compliance">Compliance</SelectItem>
+                      <SelectItem value="integration">Integration</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-faq-priority">Priority</Label>
+                  <Select value={editFAQPriority.toString()} onValueChange={(value) => setEditFAQPriority(parseInt(value))}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1">High Priority</SelectItem>
+                      <SelectItem value="2">Medium Priority</SelectItem>
+                      <SelectItem value="3">Low Priority</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <h4 className="text-sm font-medium mb-2">FAQ Information</h4>
+                <div className="text-sm text-gray-600">
+                  <div>ID: {editingFAQ.id}</div>
+                  <div>Current Category: {editingFAQ.category}</div>
+                  <div>Current Priority: {editingFAQ.priority}</div>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowEditFAQModal(false);
+                setEditingFAQ(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleUpdateFAQ}
+              disabled={editFAQMutation.isPending}
+            >
+              {editFAQMutation.isPending ? 'Updating...' : 'Update FAQ'}
             </Button>
           </DialogFooter>
         </DialogContent>
