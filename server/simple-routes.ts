@@ -1287,19 +1287,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Training interactions endpoint
+  // Training interactions endpoint - authentic data only
   app.get('/api/admin/training/interactions', async (req: Request, res: Response) => {
     try {
-      const interactions = [
-        {
-          id: 1,
-          userQuery: "What are the processing rates for restaurants?",
-          aiResponse: "Restaurant processing rates typically range from 2.3% to 3.5%...",
-          satisfaction: 5,
-          timestamp: new Date().toISOString(),
-          category: "pricing"
-        }
-      ];
+      const { db } = await import('./db.ts');
+      const { trainingInteractions } = await import('../shared/schema.ts');
+      const { desc } = await import('drizzle-orm');
+      
+      // Get real training interactions from database
+      const interactions = await db
+        .select()
+        .from(trainingInteractions)
+        .orderBy(desc(trainingInteractions.createdAt))
+        .limit(50);
       
       res.json(interactions);
     } catch (error) {

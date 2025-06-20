@@ -234,11 +234,13 @@ export class UnifiedLearningSystem {
         totalInteractions,
         correctInteractions,
         accuracyRate: totalInteractions > 0 ? (correctInteractions / totalInteractions) * 100 : 0,
-        averageQuality: Math.round(averageQuality * 10) / 10,
+        averageSatisfaction: Math.round(averageQuality * 10) / 10,
+        totalMessages: totalInteractions,
+        flaggedForReview: needsReview,
         sourceBreakdown,
         needsReview,
         recentInteractions: interactions
-          .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
           .slice(0, 10)
       };
     } catch (error) {
