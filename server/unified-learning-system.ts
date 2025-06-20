@@ -38,10 +38,10 @@ export class UnifiedLearningSystem {
         timestamp: new Date()
       });
 
-      // If this is a high-quality interaction or correction, add to knowledge base
-      if (this.shouldAddToKnowledgeBase(interaction)) {
-        await this.addToKnowledgeBase(interaction);
-      }
+      // Skip automatic knowledge base addition temporarily due to schema constraints
+      // if (this.shouldAddToKnowledgeBase(interaction)) {
+      //   await this.addToKnowledgeBase(interaction);
+      // }
 
       console.log(`📚 Learning interaction captured: ${interaction.source} - ${interaction.query.substring(0, 50)}...`);
     } catch (error) {
