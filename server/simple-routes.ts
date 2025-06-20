@@ -1835,7 +1835,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // AI Simulator Training Correction Endpoint
   app.post('/api/admin/ai-simulator/train', async (req: Request, res: Response) => {
     try {
-      const { query, originalResponse, correctedResponse, notes } = req.body;
+      const { originalQuery, originalResponse, correctedResponse, feedback } = req.body;
       const sessionId = req.cookies?.sessionId;
       const user = sessions.get(sessionId);
       
@@ -1843,10 +1843,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ error: 'Admin access required' });
       }
 
+      // Validate required fields
+      if (!originalQuery || !originalResponse || !correctedResponse) {
+        return res.status(400).json({ error: 'Missing required fields: originalQuery, originalResponse, correctedResponse' });
+      }
+
       // Capture training correction for unified learning system
       const { unifiedLearningSystem } = await import('./unified-learning-system');
       await unifiedLearningSystem.captureInteraction({
-        query,
+        query: originalQuery,
         response: originalResponse,
         source: 'admin_correction',
         userId: user.id,
@@ -1854,7 +1859,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         wasCorrect: false,
         correctedResponse,
         metadata: {
-          adminNotes: notes,
+          adminFeedback: feedback,
           correctionTimestamp: new Date().toISOString()
         }
       });
@@ -1864,7 +1869,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { faqKnowledgeBase } = await import('../shared/schema');
       
       await db.insert(faqKnowledgeBase).values({
-        question: query,
+        question: originalQuery,
         answer: correctedResponse,
         category: 'admin_training',
         tags: ['admin_corrected', 'ai_training'],

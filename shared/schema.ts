@@ -323,25 +323,7 @@ export const chatRatings = pgTable("chat_ratings", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// Training Interactions - Unified Learning System
-export const trainingInteractions = pgTable("training_interactions", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  query: text("query").notNull(),
-  response: text("response").notNull(),
-  source: varchar("source").notNull(), // 'user_chat', 'admin_test', 'admin_correction'
-  userId: varchar("user_id").notNull(),
-  sessionId: varchar("session_id"),
-  chatId: uuid("chat_id").references(() => chats.id, { onDelete: "cascade" }),
-  quality: integer("quality"), // 1-5 rating
-  wasCorrect: boolean("was_correct").default(true),
-  correctedResponse: text("corrected_response"),
-  metadata: jsonb("metadata"), // Processing time, sources, confidence, etc.
-  reviewNotes: text("review_notes"),
-  lastReviewed: timestamp("last_reviewed"),
-  flaggedForReview: boolean("flagged_for_review").default(false),
-  reviewedBy: varchar("reviewed_by").references(() => users.id),
-  timestamp: timestamp("timestamp").defaultNow(),
-});
+
 
 // AI prompt templates for admin management
 export const promptTemplates = pgTable("prompt_templates", {
