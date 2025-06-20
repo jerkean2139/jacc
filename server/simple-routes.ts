@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import cookieParser from "cookie-parser";
 import multer from "multer";
 import fs from "fs";
+import { eq, desc, sql, and, or, ilike } from 'drizzle-orm';
 import { registerChatTestingRoutes } from './chat-testing-system';
 // PDF parsing and OCR will be imported dynamically
 import { fromPath } from "pdf2pic";
@@ -1882,6 +1883,267 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error getting streak analytics:', error);
       res.status(500).json({ error: 'Failed to get analytics' });
+    }
+  });
+
+  // Integrated Documents with Folders Endpoint
+  app.get('/api/documents', async (req: Request, res: Response) => {
+    try {
+      const { db } = await import('./db.ts');
+      const { documents, folders } = await import('../shared/schema.ts');
+      
+      // Get all folders with document counts
+      const foldersWithCounts = await db
+        .select({
+          id: folders.id,
+          name: folders.name,
+          folderType: folders.folderType,
+          priority: folders.priority,
+          vectorNamespace: folders.vectorNamespace,
+          createdAt: folders.createdAt,
+          documentCount: sql<number>`COUNT(${documents.id})`
+        })
+        .from(folders)
+        .leftJoin(documents, eq(folders.id, documents.folderId))
+        .groupBy(folders.id, folders.name, folders.folderType, folders.priority, folders.vectorNamespace, folders.createdAt)
+        .orderBy(desc(sql`COUNT(${documents.id})`), folders.name);
+
+      // Get all documents with folder information
+      const allDocuments = await db
+        .select({
+          id: documents.id,
+          name: documents.name,
+          originalName: documents.originalName,
+          mimeType: documents.mimeType,
+          size: documents.size,
+          folderId: documents.folderId,
+          folderName: folders.name,
+          folderType: folders.folderType,
+          createdAt: documents.createdAt,
+          updatedAt: documents.updatedAt,
+          webViewLink: documents.webViewLink,
+          downloadLink: documents.downloadLink,
+          previewLink: documents.previewLink
+        })
+        .from(documents)
+        .leftJoin(folders, eq(documents.folderId, folders.id))
+        .orderBy(documents.createdAt);
+
+      // Get unassigned documents
+      const unassignedDocuments = allDocuments.filter(doc => !doc.folderId);
+
+      // Group documents by folder
+      const documentsByFolder = allDocuments.reduce((acc, doc) => {
+        if (doc.folderId) {
+          if (!acc[doc.folderId]) {
+            acc[doc.folderId] = [];
+          }
+          acc[doc.folderId].push(doc);
+        }
+        return acc;
+      }, {} as Record<string, typeof allDocuments>);
+
+      res.json({
+        folders: foldersWithCounts.map(folder => ({
+          ...folder,
+          documents: documentsByFolder[folder.id] || []
+        })),
+        unassignedDocuments,
+        totalDocuments: allDocuments.length,
+        totalFolders: foldersWithCounts.length,
+        documentsWithFolders: allDocuments.filter(doc => doc.folderId).length,
+        documentsWithoutFolders: unassignedDocuments.length
+      });
+    } catch (error) {
+      console.error('Error fetching documents:', error);
+      res.status(500).json({ error: 'Failed to fetch documents' });
+    }
+  });
+
+  // Get documents by folder ID
+  app.get('/api/documents/folder/:folderId', async (req: Request, res: Response) => {
+    try {
+      const { folderId } = req.params;
+      const { db } = await import('./db.ts');
+      const { documents, folders } = await import('../shared/schema.ts');
+      
+      // Get folder information
+      const folder = await db
+        .select()
+        .from(folders)
+        .where(eq(folders.id, folderId))
+        .limit(1);
+
+      if (folder.length === 0) {
+        return res.status(404).json({ error: 'Folder not found' });
+      }
+
+      // Get documents in this folder
+      const folderDocuments = await db
+        .select({
+          id: documents.id,
+          name: documents.name,
+          originalName: documents.originalName,
+          mimeType: documents.mimeType,
+          size: documents.size,
+          folderId: documents.folderId,
+          createdAt: documents.createdAt,
+          updatedAt: documents.updatedAt,
+          webViewLink: documents.webViewLink,
+          downloadLink: documents.downloadLink,
+          previewLink: documents.previewLink
+        })
+        .from(documents)
+        .where(eq(documents.folderId, folderId))
+        .orderBy(documents.createdAt);
+
+      res.json({
+        folder: folder[0],
+        documents: folderDocuments
+      });
+    } catch (error) {
+      console.error('Error fetching folder documents:', error);
+      res.status(500).json({ error: 'Failed to fetch folder documents' });
+    }
+  });
+
+  // Move document to folder
+  app.patch('/api/documents/:documentId/move', async (req: Request, res: Response) => {
+    try {
+      const { documentId } = req.params;
+      const { folderId } = req.body;
+      const { db } = await import('./db.ts');
+      const { documents } = await import('../shared/schema.ts');
+      
+      await db
+        .update(documents)
+        .set({ 
+          folderId: folderId || null,
+          updatedAt: new Date()
+        })
+        .where(eq(documents.id, documentId));
+
+      console.log(`Document ${documentId} moved to folder ${folderId || 'unassigned'}`);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error moving document:', error);
+      res.status(500).json({ error: 'Failed to move document' });
+    }
+  });
+
+  // Update document metadata
+  app.patch('/api/documents/:documentId', async (req: Request, res: Response) => {
+    try {
+      const { documentId } = req.params;
+      const { name, originalName } = req.body;
+      const { db } = await import('./db.ts');
+      const { documents } = await import('../shared/schema.ts');
+      
+      const updateData: any = { updatedAt: new Date() };
+      if (name !== undefined) updateData.name = name;
+      if (originalName !== undefined) updateData.originalName = originalName;
+
+      await db
+        .update(documents)
+        .set(updateData)
+        .where(eq(documents.id, documentId));
+
+      console.log(`Document ${documentId} updated`);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error updating document:', error);
+      res.status(500).json({ error: 'Failed to update document' });
+    }
+  });
+
+  // Delete document
+  app.delete('/api/documents/:documentId', async (req: Request, res: Response) => {
+    try {
+      const { documentId } = req.params;
+      const sessionId = req.cookies?.sessionId;
+      const user = sessions.get(sessionId);
+      
+      if (!user || (user.role !== 'admin' && user.role !== 'dev-admin')) {
+        return res.status(403).json({ error: 'Admin access required' });
+      }
+
+      const { db } = await import('./db.ts');
+      const { documents, documentChunks } = await import('../shared/schema.ts');
+      
+      // Delete document chunks first
+      await db
+        .delete(documentChunks)
+        .where(eq(documentChunks.documentId, documentId));
+      
+      // Delete document
+      await db
+        .delete(documents)
+        .where(eq(documents.id, documentId));
+
+      console.log(`Document ${documentId} deleted`);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting document:', error);
+      res.status(500).json({ error: 'Failed to delete document' });
+    }
+  });
+
+  // Search documents across all folders
+  app.get('/api/documents/search', async (req: Request, res: Response) => {
+    try {
+      const { q: query, folder } = req.query;
+      const { db } = await import('./db.ts');
+      const { documents, folders } = await import('../shared/schema.ts');
+      
+      let searchQuery = db
+        .select({
+          id: documents.id,
+          name: documents.name,
+          originalName: documents.originalName,
+          mimeType: documents.mimeType,
+          size: documents.size,
+          folderId: documents.folderId,
+          folderName: folders.name,
+          folderType: folders.folderType,
+          createdAt: documents.createdAt,
+          webViewLink: documents.webViewLink,
+          downloadLink: documents.downloadLink,
+          previewLink: documents.previewLink
+        })
+        .from(documents)
+        .leftJoin(folders, eq(documents.folderId, folders.id));
+
+      // Add search filters
+      const conditions = [];
+      
+      if (query && typeof query === 'string') {
+        conditions.push(
+          or(
+            ilike(documents.name, `%${query}%`),
+            ilike(documents.originalName, `%${query}%`)
+          )
+        );
+      }
+      
+      if (folder && typeof folder === 'string') {
+        conditions.push(eq(documents.folderId, folder));
+      }
+
+      if (conditions.length > 0) {
+        searchQuery = searchQuery.where(and(...conditions));
+      }
+
+      const results = await searchQuery.orderBy(documents.createdAt);
+
+      res.json({
+        documents: results,
+        total: results.length,
+        query: query || '',
+        folder: folder || ''
+      });
+    } catch (error) {
+      console.error('Error searching documents:', error);
+      res.status(500).json({ error: 'Failed to search documents' });
     }
   });
 
