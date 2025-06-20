@@ -1889,69 +1889,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Integrated Documents with Folders Endpoint
   app.get('/api/documents', async (req: Request, res: Response) => {
     try {
-      const { db } = await import('./db.ts');
-      const { documents, folders } = await import('../shared/schema.ts');
+      const { pool } = await import('./db.ts');
       
-      // Get all folders with document counts
-      const foldersWithCounts = await db
-        .select({
-          id: folders.id,
-          name: folders.name,
-          folderType: folders.folderType,
-          priority: folders.priority,
-          vectorNamespace: folders.vectorNamespace,
-          createdAt: folders.createdAt,
-          documentCount: sql<number>`COUNT(${documents.id})`
-        })
-        .from(folders)
-        .leftJoin(documents, eq(folders.id, documents.folderId))
-        .groupBy(folders.id, folders.name, folders.folderType, folders.priority, folders.vectorNamespace, folders.createdAt)
-        .orderBy(desc(sql`COUNT(${documents.id})`), folders.name);
-
-      // Get all documents with folder information
-      const allDocuments = await db
-        .select({
-          id: documents.id,
-          name: documents.name,
-          originalName: documents.originalName,
-          mimeType: documents.mimeType,
-          size: documents.size,
-          folderId: documents.folderId,
-          folderName: folders.name,
-          folderType: folders.folderType,
-          createdAt: documents.createdAt,
-          updatedAt: documents.updatedAt,
-          webViewLink: documents.webViewLink,
-          downloadLink: documents.downloadLink,
-          previewLink: documents.previewLink
-        })
-        .from(documents)
-        .leftJoin(folders, eq(documents.folderId, folders.id))
-        .orderBy(documents.createdAt);
-
-      // Get unassigned documents
-      const unassignedDocuments = allDocuments.filter(doc => !doc.folderId);
-
+      // Get all folders with document counts using raw SQL
+      const foldersQuery = `
+        SELECT 
+          f.id,
+          f.name,
+          f.folder_type,
+          f.priority,
+          f.vector_namespace,
+          f.created_at,
+          COUNT(d.id) as document_count
+        FROM folders f
+        LEFT JOIN documents d ON f.id = d.folder_id
+        GROUP BY f.id, f.name, f.folder_type, f.priority, f.vector_namespace, f.created_at
+        ORDER BY COUNT(d.id) DESC, f.name
+      `;
+      
+      const foldersResult = await pool.query(foldersQuery);
+      
+      // Get all documents with folder information using raw SQL
+      const documentsQuery = `
+        SELECT 
+          d.id,
+          d.name,
+          d.original_name,
+          d.mime_type,
+          d.size,
+          d.folder_id,
+          d.is_favorite,
+          d.is_public,
+          d.admin_only,
+          d.manager_only,
+          d.path,
+          d.created_at,
+          d.updated_at,
+          f.name as folder_name,
+          f.folder_type
+        FROM documents d
+        LEFT JOIN folders f ON d.folder_id = f.id
+        ORDER BY d.created_at DESC
+      `;
+      
+      const documentsResult = await pool.query(documentsQuery);
+      
       // Group documents by folder
-      const documentsByFolder = allDocuments.reduce((acc, doc) => {
-        if (doc.folderId) {
-          if (!acc[doc.folderId]) {
-            acc[doc.folderId] = [];
+      const documentsByFolder = {};
+      const unassignedDocuments = [];
+      
+      documentsResult.rows.forEach(doc => {
+        if (doc.folder_id) {
+          if (!documentsByFolder[doc.folder_id]) {
+            documentsByFolder[doc.folder_id] = [];
           }
-          acc[doc.folderId].push(doc);
+          documentsByFolder[doc.folder_id].push(doc);
+        } else {
+          unassignedDocuments.push(doc);
         }
-        return acc;
-      }, {} as Record<string, typeof allDocuments>);
-
+      });
+      
+      // Combine folders with their documents
+      const foldersWithDocuments = foldersResult.rows.map(folder => ({
+        ...folder,
+        documents: documentsByFolder[folder.id] || []
+      }));
+      
       res.json({
-        folders: foldersWithCounts.map(folder => ({
-          ...folder,
-          documents: documentsByFolder[folder.id] || []
-        })),
+        folders: foldersWithDocuments,
         unassignedDocuments,
-        totalDocuments: allDocuments.length,
-        totalFolders: foldersWithCounts.length,
-        documentsWithFolders: allDocuments.filter(doc => doc.folderId).length,
+        totalDocuments: documentsResult.rows.length,
+        totalFolders: foldersResult.rows.length,
+        documentsWithFolders: documentsResult.rows.filter(doc => doc.folder_id).length,
         documentsWithoutFolders: unassignedDocuments.length
       });
     } catch (error) {
