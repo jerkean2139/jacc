@@ -1889,10 +1889,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Integrated Documents with Folders Endpoint
   app.get('/api/documents', async (req: Request, res: Response) => {
     try {
-      const { pool } = await import('./db.ts');
+      // Use direct neon connection like other working endpoints
+      const { neon } = await import('@neondatabase/serverless');
+      const sql = neon(process.env.DATABASE_URL!);
       
-      // Get all folders with document counts using raw SQL
-      const foldersQuery = `
+      // Get document count first to verify database access
+      const docCountResult = await sql`SELECT COUNT(*) as count FROM documents`;
+      const documentCount = docCountResult[0]?.count || 0;
+      
+      // Get folder count 
+      const folderCountResult = await sql`SELECT COUNT(*) as count FROM folders`;
+      const folderCount = folderCountResult[0]?.count || 0;
+      
+      // Get folders with document counts
+      const foldersResult = await sql`
         SELECT 
           f.id,
           f.name,
@@ -1900,17 +1910,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           f.priority,
           f.vector_namespace,
           f.created_at,
-          COUNT(d.id) as document_count
+          COUNT(d.id)::integer as document_count
         FROM folders f
         LEFT JOIN documents d ON f.id = d.folder_id
         GROUP BY f.id, f.name, f.folder_type, f.priority, f.vector_namespace, f.created_at
         ORDER BY COUNT(d.id) DESC, f.name
       `;
       
-      const foldersResult = await pool.query(foldersQuery);
-      
-      // Get all documents with folder information using raw SQL
-      const documentsQuery = `
+      // Get documents with folder information
+      const documentsResult = await sql`
         SELECT 
           d.id,
           d.name,
@@ -1930,15 +1938,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         FROM documents d
         LEFT JOIN folders f ON d.folder_id = f.id
         ORDER BY d.created_at DESC
+        LIMIT 50
       `;
       
-      const documentsResult = await pool.query(documentsQuery);
-      
       // Group documents by folder
-      const documentsByFolder = {};
-      const unassignedDocuments = [];
+      const documentsByFolder: Record<string, any[]> = {};
+      const unassignedDocuments: any[] = [];
       
-      documentsResult.rows.forEach(doc => {
+      documentsResult.forEach((doc: any) => {
         if (doc.folder_id) {
           if (!documentsByFolder[doc.folder_id]) {
             documentsByFolder[doc.folder_id] = [];
@@ -1950,22 +1957,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       // Combine folders with their documents
-      const foldersWithDocuments = foldersResult.rows.map(folder => ({
+      const foldersWithDocuments = foldersResult.map((folder: any) => ({
         ...folder,
         documents: documentsByFolder[folder.id] || []
       }));
       
+      console.log(`Documents integration: ${documentCount} total documents, ${folderCount} folders`);
+      
       res.json({
         folders: foldersWithDocuments,
         unassignedDocuments,
-        totalDocuments: documentsResult.rows.length,
-        totalFolders: foldersResult.rows.length,
-        documentsWithFolders: documentsResult.rows.filter(doc => doc.folder_id).length,
-        documentsWithoutFolders: unassignedDocuments.length
+        totalDocuments: Number(documentCount),
+        totalFolders: Number(folderCount),
+        documentsWithFolders: documentsResult.filter((doc: any) => doc.folder_id).length,
+        documentsWithoutFolders: unassignedDocuments.length,
+        documentsShown: documentsResult.length
       });
     } catch (error) {
       console.error('Error fetching documents:', error);
-      res.status(500).json({ error: 'Failed to fetch documents' });
+      res.status(500).json({ error: 'Failed to fetch documents', details: String(error) });
     }
   });
 
