@@ -148,6 +148,10 @@ export default function AdminControlCenter() {
     queryKey: ['/api/folders'],
   });
 
+  const { data: trainingInteractions } = useQuery({
+    queryKey: ['/api/admin/training/interactions'],
+  });
+
   // Mutations
   const createFAQMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -1820,7 +1824,7 @@ export default function AdminControlCenter() {
               </CardHeader>
               <CardContent>
                 <ScrollArea className="h-[500px]">
-                  {simulatorHistory.length === 0 ? (
+                  {!trainingInteractions || trainingInteractions.length === 0 ? (
                     <div className="text-center py-8 text-gray-500">
                       <Target className="w-12 h-12 mx-auto mb-4 text-gray-400" />
                       <p>No test queries yet</p>
@@ -1828,26 +1832,29 @@ export default function AdminControlCenter() {
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      {simulatorHistory.map((entry) => (
+                      {trainingInteractions.map((entry) => (
                         <div 
                           key={entry.id} 
                           className={`border rounded-lg p-4 ${
-                            entry.wasCorrected ? 'bg-orange-50 border-orange-200' : 'bg-green-50 border-green-200'
+                            entry.correctedResponse ? 'bg-orange-50 border-orange-200' : 'bg-green-50 border-green-200'
                           }`}
                         >
                           <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center gap-2">
-                              {entry.wasCorrected ? (
+                              {entry.correctedResponse ? (
                                 <Edit className="w-4 h-4 text-orange-600" />
                               ) : (
                                 <ThumbsUp className="w-4 h-4 text-green-600" />
                               )}
                               <span className="text-sm font-medium">
-                                {entry.wasCorrected ? 'Training Correction' : 'Approved Response'}
+                                {entry.correctedResponse ? 'Training Correction' : entry.source === 'admin_test' ? 'AI Simulator Test' : 'User Chat'}
                               </span>
+                              <Badge variant="outline" className="text-xs">
+                                {entry.source}
+                              </Badge>
                             </div>
                             <span className="text-xs text-gray-500">
-                              {new Date(entry.timestamp).toLocaleTimeString()}
+                              {new Date(entry.createdAt).toLocaleString()}
                             </span>
                           </div>
                           
@@ -1857,10 +1864,17 @@ export default function AdminControlCenter() {
                               <p className="text-sm">{entry.query}</p>
                             </div>
                             
-                            {entry.wasCorrected && entry.correctedResponse && (
+                            {entry.correctedResponse && (
                               <div>
                                 <Label className="text-xs font-semibold text-green-600">Training Update:</Label>
                                 <p className="text-sm">{entry.correctedResponse}</p>
+                              </div>
+                            )}
+                            
+                            {entry.response && !entry.correctedResponse && (
+                              <div>
+                                <Label className="text-xs font-semibold text-blue-600">AI Response:</Label>
+                                <p className="text-sm text-gray-700">{entry.response.substring(0, 200)}...</p>
                               </div>
                             )}
                           </div>
@@ -1884,25 +1898,25 @@ export default function AdminControlCenter() {
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="text-center p-4 bg-blue-50 rounded-lg">
-                  <div className="text-2xl font-bold text-blue-600">{simulatorHistory.length}</div>
+                  <div className="text-2xl font-bold text-blue-600">{trainingInteractions?.length || 0}</div>
                   <div className="text-sm text-gray-600">Total Tests</div>
                 </div>
                 <div className="text-center p-4 bg-orange-50 rounded-lg">
                   <div className="text-2xl font-bold text-orange-600">
-                    {simulatorHistory.filter(h => h.wasCorrected).length}
+                    {trainingInteractions?.filter(h => h.correctedResponse).length || 0}
                   </div>
                   <div className="text-sm text-gray-600">Corrections Made</div>
                 </div>
                 <div className="text-center p-4 bg-green-50 rounded-lg">
                   <div className="text-2xl font-bold text-green-600">
-                    {simulatorHistory.filter(h => !h.wasCorrected).length}
+                    {trainingInteractions?.filter(h => !h.correctedResponse).length || 0}
                   </div>
                   <div className="text-sm text-gray-600">Approved Responses</div>
                 </div>
                 <div className="text-center p-4 bg-purple-50 rounded-lg">
                   <div className="text-2xl font-bold text-purple-600">
-                    {simulatorHistory.length > 0 ? 
-                      Math.round((simulatorHistory.filter(h => !h.wasCorrected).length / simulatorHistory.length) * 100) : 0}%
+                    {trainingInteractions && trainingInteractions.length > 0 ? 
+                      Math.round((trainingInteractions.filter(h => !h.correctedResponse).length / trainingInteractions.length) * 100) : 0}%
                   </div>
                   <div className="text-sm text-gray-600">Accuracy Rate</div>
                 </div>
