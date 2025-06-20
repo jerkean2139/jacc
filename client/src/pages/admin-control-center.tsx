@@ -102,6 +102,16 @@ export default function AdminControlCenter() {
   // Knowledge base accordion states
   const [openKnowledgeCategories, setOpenKnowledgeCategories] = useState<string[]>([]);
 
+  // Prompt editing states
+  const [editingPrompt, setEditingPrompt] = useState<PromptTemplate | null>(null);
+  const [showEditPromptModal, setShowEditPromptModal] = useState(false);
+  const [editPromptName, setEditPromptName] = useState('');
+  const [editPromptDescription, setEditPromptDescription] = useState('');
+  const [editPromptTemplate, setEditPromptTemplate] = useState('');
+  const [editPromptCategory, setEditPromptCategory] = useState('system');
+  const [editPromptTemperature, setEditPromptTemperature] = useState(0.7);
+  const [editPromptMaxTokens, setEditPromptMaxTokens] = useState(1000);
+
   // Fetch data
   const { data: faqData, isLoading: faqLoading } = useQuery({
     queryKey: ['/api/admin/faq'],
@@ -223,6 +233,27 @@ export default function AdminControlCenter() {
     },
   });
 
+  const editPromptMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: any }) => {
+      const response = await fetch(`/api/admin/prompts/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+        credentials: 'include',
+      });
+      if (!response.ok) throw new Error('Failed to update prompt');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/prompts'] });
+      setShowEditPromptModal(false);
+      setEditingPrompt(null);
+      toast({ title: 'Prompt template updated successfully' });
+    },
+  });
+
   const handleCreateFAQ = () => {
     if (!newQuestion.trim() || !newAnswer.trim()) {
       toast({ title: 'Please fill in both question and answer', variant: 'destructive' });
@@ -294,6 +325,37 @@ export default function AdminControlCenter() {
         ? prev.filter(c => c !== category)
         : [...prev, category]
     );
+  };
+
+  const handleEditPrompt = (prompt: PromptTemplate) => {
+    setEditingPrompt(prompt);
+    setEditPromptName(prompt.name);
+    setEditPromptDescription(prompt.description);
+    setEditPromptTemplate(prompt.template);
+    setEditPromptCategory(prompt.category);
+    setEditPromptTemperature(prompt.temperature);
+    setEditPromptMaxTokens(prompt.maxTokens);
+    setShowEditPromptModal(true);
+  };
+
+  const handleUpdatePrompt = () => {
+    if (!editPromptName.trim() || !editPromptTemplate.trim() || !editingPrompt) {
+      toast({ title: 'Please fill in template name and content', variant: 'destructive' });
+      return;
+    }
+
+    editPromptMutation.mutate({
+      id: editingPrompt.id,
+      data: {
+        name: editPromptName,
+        description: editPromptDescription,
+        template: editPromptTemplate,
+        category: editPromptCategory,
+        temperature: editPromptTemperature,
+        maxTokens: editPromptMaxTokens,
+        isActive: true,
+      },
+    });
   };
 
   const handleEditDocument = (document: DocumentEntry) => {
@@ -488,20 +550,22 @@ export default function AdminControlCenter() {
   const faqCategories = Array.isArray(faqData) ? 
     Array.from(new Set(faqData.map((faq: FAQ) => faq.category))) : [];
 
-  // Filter documents based on search and filter criteria
-  const filteredDocuments = Array.isArray(documentsData) ? documentsData.filter((doc: DocumentEntry) => {
-    const matchesSearch = documentSearchTerm === '' || 
-      doc.originalName.toLowerCase().includes(documentSearchTerm.toLowerCase()) ||
-      doc.name.toLowerCase().includes(documentSearchTerm.toLowerCase());
-    
-    const matchesFilter = documentFilter === 'all' || 
-      (documentFilter === 'pdf' && doc.mimeType === 'application/pdf') ||
-      (documentFilter === 'text' && doc.mimeType.includes('text/')) ||
-      (documentFilter === 'csv' && doc.mimeType.includes('csv')) ||
-      (documentFilter === 'recent' && new Date(doc.createdAt) > new Date(Date.now() - 24 * 60 * 60 * 1000));
-    
-    return matchesSearch && matchesFilter;
-  }) : [];
+  // Filter and sort documents based on search and filter criteria (newest first)
+  const filteredDocuments = Array.isArray(documentsData) ? documentsData
+    .filter((doc: DocumentEntry) => {
+      const matchesSearch = documentSearchTerm === '' || 
+        doc.originalName.toLowerCase().includes(documentSearchTerm.toLowerCase()) ||
+        doc.name.toLowerCase().includes(documentSearchTerm.toLowerCase());
+      
+      const matchesFilter = documentFilter === 'all' || 
+        (documentFilter === 'pdf' && doc.mimeType === 'application/pdf') ||
+        (documentFilter === 'text' && doc.mimeType.includes('text/')) ||
+        (documentFilter === 'csv' && doc.mimeType.includes('csv')) ||
+        (documentFilter === 'recent' && new Date(doc.createdAt) > new Date(Date.now() - 24 * 60 * 60 * 1000));
+      
+      return matchesSearch && matchesFilter;
+    })
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) : [];
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -1159,7 +1223,11 @@ export default function AdminControlCenter() {
           <Card>
             <CardHeader>
               <CardTitle>System & Admin Prompts</CardTitle>
-              <CardDescription>Manage core AI prompts that control system behavior</CardDescription>
+              <CardDescription>
+                These prompts control how the AI assistant behaves and responds to users. System prompts define the AI's personality, 
+                knowledge base instructions, and response formatting. Edit these to customize the AI's expertise in merchant services, 
+                payment processing, and sales support.
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <ScrollArea className="h-[400px]">
@@ -1175,7 +1243,7 @@ export default function AdminControlCenter() {
                             </div>
                             <div className="flex items-center gap-2">
                               <Badge variant="outline">{template.category}</Badge>
-                              <Button size="sm" variant="ghost">
+                              <Button size="sm" variant="ghost" onClick={() => handleEditPrompt(template)}>
                                 <Edit className="w-3 h-3" />
                               </Button>
                             </div>
@@ -1834,6 +1902,132 @@ export default function AdminControlCenter() {
               disabled={editFAQMutation.isPending}
             >
               {editFAQMutation.isPending ? 'Updating...' : 'Update FAQ'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Prompt Edit Modal */}
+      <Dialog open={showEditPromptModal} onOpenChange={setShowEditPromptModal}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Edit AI Prompt Template</DialogTitle>
+            <DialogDescription>
+              Modify the AI prompt template that controls how the assistant responds. These prompts define the AI's behavior, 
+              expertise level, and response style for merchant services and payment processing queries.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {editingPrompt && (
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="edit-prompt-name">Template Name</Label>
+                <Input
+                  id="edit-prompt-name"
+                  value={editPromptName}
+                  onChange={(e) => setEditPromptName(e.target.value)}
+                  placeholder="Enter template name"
+                />
+              </div>
+              
+              <div className="grid gap-2">
+                <Label htmlFor="edit-prompt-description">Description</Label>
+                <Input
+                  id="edit-prompt-description"
+                  value={editPromptDescription}
+                  onChange={(e) => setEditPromptDescription(e.target.value)}
+                  placeholder="Brief description of this prompt's purpose"
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="edit-prompt-template">Prompt Template</Label>
+                <Textarea
+                  id="edit-prompt-template"
+                  value={editPromptTemplate}
+                  onChange={(e) => setEditPromptTemplate(e.target.value)}
+                  placeholder="Enter the AI prompt instructions..."
+                  className="min-h-[200px] font-mono text-sm"
+                />
+                <p className="text-xs text-gray-500">
+                  This controls how the AI assistant behaves. Include instructions about merchant services expertise, 
+                  response tone, and specific knowledge areas.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-prompt-category">Category</Label>
+                  <Select value={editPromptCategory} onValueChange={setEditPromptCategory}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="system">System</SelectItem>
+                      <SelectItem value="merchant">Merchant Services</SelectItem>
+                      <SelectItem value="technical">Technical Support</SelectItem>
+                      <SelectItem value="sales">Sales Assistant</SelectItem>
+                      <SelectItem value="analysis">Document Analysis</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-prompt-temperature">Temperature</Label>
+                  <Input
+                    id="edit-prompt-temperature"
+                    type="number"
+                    min="0"
+                    max="2"
+                    step="0.1"
+                    value={editPromptTemperature}
+                    onChange={(e) => setEditPromptTemperature(parseFloat(e.target.value))}
+                  />
+                  <p className="text-xs text-gray-500">0=focused, 2=creative</p>
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-prompt-tokens">Max Tokens</Label>
+                  <Input
+                    id="edit-prompt-tokens"
+                    type="number"
+                    min="100"
+                    max="4000"
+                    step="100"
+                    value={editPromptMaxTokens}
+                    onChange={(e) => setEditPromptMaxTokens(parseInt(e.target.value))}
+                  />
+                  <p className="text-xs text-gray-500">Response length limit</p>
+                </div>
+              </div>
+
+              <div className="bg-blue-50 p-3 rounded-lg">
+                <h4 className="text-sm font-medium mb-2">Current Template Info</h4>
+                <div className="text-sm text-gray-600">
+                  <div>ID: {editingPrompt.id}</div>
+                  <div>Category: {editingPrompt.category}</div>
+                  <div>Status: {editingPrompt.isActive ? 'Active' : 'Inactive'}</div>
+                  <div>Current Length: {editingPrompt.template.length} characters</div>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowEditPromptModal(false);
+                setEditingPrompt(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleUpdatePrompt}
+              disabled={editPromptMutation.isPending}
+            >
+              {editPromptMutation.isPending ? 'Updating...' : 'Update Prompt'}
             </Button>
           </DialogFooter>
         </DialogContent>
