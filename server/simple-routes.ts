@@ -2364,24 +2364,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/admin/training/analytics', async (req: Request, res: Response) => {
-    try {
-      const { unifiedLearningSystem } = await import('./unified-learning-system');
-      
-      // Get real analytics from unified learning system
-      const analytics = await unifiedLearningSystem.getLearningAnalytics();
-      
-      res.json({
-        ...analytics,
-        dataSource: "unified_learning_system",
-        lastUpdated: new Date().toISOString()
-      });
-    } catch (error) {
-      console.error('Error fetching training analytics:', error);
-      res.status(500).json({ error: 'Failed to fetch training analytics' });
-    }
-  });
-
   // AI Simulator endpoints for testing and training
   app.post('/api/admin/ai-simulator/test', async (req, res) => {
     try {
