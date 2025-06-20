@@ -112,6 +112,21 @@ export default function AdminControlCenter() {
   const [editPromptTemperature, setEditPromptTemperature] = useState(0.7);
   const [editPromptMaxTokens, setEditPromptMaxTokens] = useState(1000);
 
+  // AI Simulator state
+  const [testQuery, setTestQuery] = useState('');
+  const [aiResponse, setAiResponse] = useState('');
+  const [correctedResponse, setCorrectedResponse] = useState('');
+  const [isTestingAI, setIsTestingAI] = useState(false);
+  const [showCorrectInterface, setShowCorrectInterface] = useState(false);
+  const [simulatorHistory, setSimulatorHistory] = useState<Array<{
+    id: string;
+    query: string;
+    originalResponse: string;
+    correctedResponse?: string;
+    timestamp: string;
+    wasCorrected: boolean;
+  }>>([]);
+
   // Fetch data
   const { data: faqData, isLoading: faqLoading } = useQuery({
     queryKey: ['/api/admin/faq'],
@@ -358,6 +373,102 @@ export default function AdminControlCenter() {
     });
   };
 
+  // AI Simulator functions
+  const testAIQuery = async () => {
+    if (!testQuery.trim()) {
+      toast({ title: 'Please enter a test query', variant: 'destructive' });
+      return;
+    }
+
+    setIsTestingAI(true);
+    setAiResponse('');
+    setShowCorrectInterface(false);
+
+    try {
+      const response = await fetch('/api/admin/ai-simulator/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: testQuery }),
+        credentials: 'include',
+      });
+
+      if (!response.ok) throw new Error('Failed to test AI query');
+      
+      const result = await response.json();
+      setAiResponse(result.response);
+      setShowCorrectInterface(true);
+      
+    } catch (error) {
+      toast({ title: 'Failed to test AI query', variant: 'destructive' });
+    } finally {
+      setIsTestingAI(false);
+    }
+  };
+
+  const submitCorrection = async () => {
+    if (!correctedResponse.trim()) {
+      toast({ title: 'Please enter a corrected response', variant: 'destructive' });
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/admin/ai-simulator/train', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: testQuery,
+          originalResponse: aiResponse,
+          correctedResponse: correctedResponse,
+        }),
+        credentials: 'include',
+      });
+
+      if (!response.ok) throw new Error('Failed to submit training correction');
+      
+      // Add to history
+      const newEntry = {
+        id: `sim-${Date.now()}`,
+        query: testQuery,
+        originalResponse: aiResponse,
+        correctedResponse: correctedResponse,
+        timestamp: new Date().toISOString(),
+        wasCorrected: true,
+      };
+      
+      setSimulatorHistory(prev => [newEntry, ...prev]);
+      
+      // Reset form
+      setTestQuery('');
+      setAiResponse('');
+      setCorrectedResponse('');
+      setShowCorrectInterface(false);
+      
+      toast({ title: 'AI training updated successfully' });
+      
+    } catch (error) {
+      toast({ title: 'Failed to submit training correction', variant: 'destructive' });
+    }
+  };
+
+  const markResponseGood = () => {
+    const newEntry = {
+      id: `sim-${Date.now()}`,
+      query: testQuery,
+      originalResponse: aiResponse,
+      timestamp: new Date().toISOString(),
+      wasCorrected: false,
+    };
+    
+    setSimulatorHistory(prev => [newEntry, ...prev]);
+    
+    // Reset form
+    setTestQuery('');
+    setAiResponse('');
+    setShowCorrectInterface(false);
+    
+    toast({ title: 'Response marked as good' });
+  };
+
   const handleEditDocument = (document: DocumentEntry) => {
     setEditingDocument(document);
     setEditDocumentName(document.name);
@@ -583,7 +694,7 @@ export default function AdminControlCenter() {
       </div>
 
       <Tabs defaultValue="knowledge" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="knowledge" className="flex items-center gap-2">
             <MessageSquare className="w-4 h-4" />
             Q&A Knowledge Base
@@ -599,6 +710,10 @@ export default function AdminControlCenter() {
           <TabsTrigger value="training" className="flex items-center gap-2">
             <BarChart3 className="w-4 h-4" />
             Training & Feedback
+          </TabsTrigger>
+          <TabsTrigger value="simulator" className="flex items-center gap-2">
+            <Target className="w-4 h-4" />
+            AI Simulator
           </TabsTrigger>
         </TabsList>
 
