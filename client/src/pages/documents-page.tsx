@@ -10,12 +10,17 @@ import { DraggableDocument } from "@/components/draggable-document";
 import { DroppableFolder } from "@/components/droppable-folder";
 import { apiRequest } from "@/lib/queryClient";
 import { Search, FileText, Upload, Folder, Trash2 } from "lucide-react";
-import type { Document, Folder as FolderType } from "@shared/schema";
+import type { Document, Folder as FolderType, User } from "@shared/schema";
 
 export default function DocumentsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Fetch user data to determine role
+  const { data: user } = useQuery<User>({
+    queryKey: ["/api/user"],
+  });
 
   // Fetch documents and folders
   const { data: documentsData } = useQuery({
@@ -26,10 +31,24 @@ export default function DocumentsPage() {
     queryKey: ["/api/folders"],
   });
 
-  // Extract documents from the integrated structure
+  // Check if user is admin
+  const isAdmin = user?.role === 'dev-admin' || user?.role === 'client-admin';
+
+  // Extract documents from the integrated structure with role-based filtering
   const documents = documentsData ? [
-    ...(documentsData.folders?.flatMap((folder: any) => folder.documents || []) || []),
-    ...(documentsData.unassignedDocuments || [])
+    ...(documentsData.folders?.flatMap((folder: any) => {
+      if (!folder.documents) return [];
+      // Filter documents based on user role and permissions
+      return folder.documents.filter((doc: any) => {
+        if (isAdmin) return true; // Admins see all documents
+        // Regular users only see documents that are not admin-only
+        return !doc.adminOnly;
+      });
+    }) || []),
+    ...(documentsData.unassignedDocuments?.filter((doc: any) => {
+      if (isAdmin) return true; // Admins see all documents
+      return !doc.adminOnly; // Regular users only see non-admin documents
+    }) || [])
   ] : [];
 
   // Delete document mutation
@@ -92,21 +111,37 @@ export default function DocumentsPage() {
   return (
     <div className="flex-1 space-y-6 p-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Document Management</h1>
-        <p className="text-muted-foreground">
-          Upload and organize your merchant services documents for instant search in Tracer
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Document Management</h1>
+            <p className="text-muted-foreground">
+              Upload and organize your merchant services documents for instant search in Tracer
+            </p>
+          </div>
+          {user && (
+            <div className="text-right">
+              <div className="text-sm font-medium">
+                {isAdmin ? 'Administrator View' : 'User View'}
+              </div>
+              <div className="text-xs text-muted-foreground">
+                {isAdmin ? 'Viewing all documents' : 'Viewing permitted documents only'}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
-      <Tabs defaultValue="upload" className="space-y-4">
+      <Tabs defaultValue={isAdmin ? "upload" : "manage"} className="space-y-4">
         <TabsList>
-          <TabsTrigger value="upload">
-            <Upload className="h-4 w-4 mr-2" />
-            Upload Documents
-          </TabsTrigger>
+          {isAdmin && (
+            <TabsTrigger value="upload">
+              <Upload className="h-4 w-4 mr-2" />
+              Upload Documents
+            </TabsTrigger>
+          )}
           <TabsTrigger value="manage">
             <FileText className="h-4 w-4 mr-2" />
-            Manage Documents ({documents.length})
+            {isAdmin ? 'All Documents' : 'Documents'} ({documents.length})
           </TabsTrigger>
           <TabsTrigger value="folders">
             <Folder className="h-4 w-4 mr-2" />
@@ -114,9 +149,11 @@ export default function DocumentsPage() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="upload" className="space-y-4">
-          <DocumentUpload />
-        </TabsContent>
+        {isAdmin && (
+          <TabsContent value="upload" className="space-y-4">
+            <DocumentUpload />
+          </TabsContent>
+        )}
 
         <TabsContent value="manage" className="space-y-4">
           <Card>
