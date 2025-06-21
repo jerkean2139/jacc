@@ -86,6 +86,7 @@ function DocumentItem({ document, onPreview, onDownload, onEdit }: DocumentItemP
   };
 
   const getFileIcon = (mimeType: string) => {
+    if (!mimeType) return <FileText className="h-4 w-4 text-gray-500" />;
     if (mimeType.includes('pdf')) return <FileText className="h-4 w-4 text-red-500" />;
     if (mimeType.includes('image')) return <FileText className="h-4 w-4 text-green-500" />;
     if (mimeType.includes('text')) return <FileText className="h-4 w-4 text-blue-500" />;
