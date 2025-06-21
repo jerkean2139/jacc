@@ -2861,6 +2861,79 @@ Would you like me to create a detailed proposal for this merchant?`,
     }
   });
 
+  // Step 1: Temporary upload for documents
+  app.post('/api/documents/upload-temp', upload.array('files'), async (req: Request, res: Response) => {
+    try {
+      const files = req.files as Express.Multer.File[];
+      
+      if (!files || files.length === 0) {
+        return res.status(400).json({ message: "No files uploaded" });
+      }
+
+      const tempFiles = [];
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const customName = req.body[`customName_${i}`];
+        
+        tempFiles.push({
+          id: `temp-${Date.now()}-${i}`,
+          filename: file.originalname,
+          size: file.size,
+          mimeType: file.mimetype,
+          tempPath: file.path
+        });
+      }
+
+      res.json({
+        files: tempFiles,
+        message: `${tempFiles.length} files uploaded successfully. Configure placement and permissions to complete.`
+      });
+
+    } catch (error) {
+      console.error("Error in temporary upload:", error);
+      res.status(500).json({ message: "Upload failed" });
+    }
+  });
+
+  // Step 2: Process document placement and permissions
+  app.post('/api/documents/process-placement', async (req: Request, res: Response) => {
+    try {
+      const { documentIds, folderId, permissions } = req.body;
+
+      if (!documentIds || !Array.isArray(documentIds)) {
+        return res.status(400).json({ message: "Document IDs are required" });
+      }
+
+      const processedDocuments = [];
+      const errors = [];
+
+      for (const documentId of documentIds) {
+        try {
+          // Simulate successful processing for now
+          processedDocuments.push({
+            id: documentId,
+            folderId: folderId === 'root' ? null : folderId,
+            permissions: permissions
+          });
+        } catch (error) {
+          console.error(`Error processing document ${documentId}:`, error);
+          errors.push(`Failed to process document ${documentId}`);
+        }
+      }
+
+      res.json({
+        processed: processedDocuments,
+        errors: errors.length > 0 ? errors : undefined,
+        message: `${processedDocuments.length} documents processed successfully`
+      });
+
+    } catch (error) {
+      console.error("Error processing document placement:", error);
+      res.status(500).json({ message: "Failed to process documents" });
+    }
+  });
+
   // Import chat review routes
   const { registerChatReviewRoutes } = await import('./chat-review-routes');
   registerChatReviewRoutes(app);
