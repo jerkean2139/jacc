@@ -9,9 +9,12 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Folder, FileText, AlertTriangle, Settings, Users, BarChart3, MessageSquare, Brain, ChevronDown, Download, Edit, Send, ThumbsUp, Eye, RefreshCw, Plus } from 'lucide-react';
+import { Folder, FileText, AlertTriangle, Settings, Users, BarChart3, MessageSquare, Brain, ChevronDown, Download, Edit, Send, ThumbsUp, Eye, RefreshCw, Plus, Upload, Search } from 'lucide-react';
 import DocumentDragDrop from '@/components/ui/document-drag-drop';
 import DocumentPreviewModal from '@/components/ui/document-preview-modal';
+import DocumentUpload from '@/components/document-upload';
+import { DraggableDocument } from '@/components/draggable-document';
+import { DroppableFolder } from '@/components/droppable-folder';
 import { useToast } from '@/hooks/use-toast';
 
 interface DocumentEntry {
@@ -38,6 +41,7 @@ export default function AdminControlCenter() {
   const [expandedFolders, setExpandedFolders] = useState<string[]>([]);
   const [previewDocument, setPreviewDocument] = useState<DocumentEntry | null>(null);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   
   // AI Simulator state
   const [testQuery, setTestQuery] = useState('');
@@ -85,6 +89,17 @@ export default function AdminControlCenter() {
     queryKey: ['/api/admin/chat-reviews', selectedChatId],
     enabled: !!selectedChatId,
   });
+
+  // Extract documents from the integrated structure for search and display
+  const allDocuments = integratedDocuments ? [
+    ...((integratedDocuments as any)?.folders?.flatMap((folder: any) => folder.documents || []) || []),
+    ...((integratedDocuments as any)?.unassignedDocuments || [])
+  ] : [];
+
+  const filteredDocuments = allDocuments.filter((doc: any) =>
+    doc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    doc.originalName?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handlePreviewDocument = (document: DocumentEntry) => {
     setPreviewDocument(document);
