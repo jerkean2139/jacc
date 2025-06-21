@@ -240,6 +240,7 @@ export default function DocumentUpload({ folderId, onUploadComplete }: DocumentU
 
   const handleUpload = () => {
     if (selectedFiles.length === 0) return;
+    if (uploadMutation.isPending) return; // Prevent double upload
     
     // Create FormData with custom names
     const formData = new FormData();
@@ -314,27 +315,40 @@ export default function DocumentUpload({ folderId, onUploadComplete }: DocumentU
 
           {/* Enhanced Drag & Drop Upload Area */}
           <div 
-            className={`border-2 border-dashed rounded-lg p-8 text-center transition-all duration-200 cursor-pointer relative ${
-              isDragOver 
-                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 scale-105' 
-                : 'border-gray-300 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500'
+            className={`border-2 border-dashed rounded-lg p-8 text-center transition-all duration-200 relative ${
+              selectedFiles.length > 0 
+                ? 'border-green-500 bg-green-50 dark:bg-green-900/20' 
+                : isDragOver 
+                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 scale-105' 
+                  : 'border-gray-300 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500 cursor-pointer'
             } ${!isAuthenticated ? 'opacity-50 pointer-events-none' : ''}`}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
-            onClick={() => fileInputRef.current?.click()}
+            onClick={selectedFiles.length === 0 ? () => fileInputRef.current?.click() : undefined}
           >
-            <Upload className={`mx-auto h-12 w-12 mb-4 transition-colors ${
-              isDragOver ? 'text-blue-500' : 'text-gray-400 dark:text-gray-500'
-            }`} />
+            {selectedFiles.length > 0 ? (
+              <CheckCircle className="mx-auto h-12 w-12 mb-4 text-green-500" />
+            ) : (
+              <Upload className={`mx-auto h-12 w-12 mb-4 transition-colors ${
+                isDragOver ? 'text-blue-500' : 'text-gray-400 dark:text-gray-500'
+              }`} />
+            )}
             <div className="space-y-2">
               <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
-                {isDragOver ? 'Drop your files here!' : 'Upload Documents'}
+                {selectedFiles.length > 0 
+                  ? `${selectedFiles.length} File(s) Selected` 
+                  : isDragOver 
+                    ? 'Drop your files here!' 
+                    : 'Upload Documents'
+                }
               </h3>
               <p className="text-gray-600 dark:text-gray-400">
-                {isDragOver 
-                  ? 'Release to add your documents' 
-                  : 'Drag and drop files here, or click to browse'
+                {selectedFiles.length > 0 
+                  ? 'Ready to upload. Click "Upload Documents" below to proceed.' 
+                  : isDragOver 
+                    ? 'Release to add your documents' 
+                    : 'Drag and drop files here, or click to browse'
                 }
               </p>
             </div>

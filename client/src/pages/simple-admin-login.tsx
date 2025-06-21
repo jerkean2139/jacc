@@ -31,11 +31,11 @@ export default function SimpleAdminLogin() {
       if (response.ok) {
         toast({
           title: "Login successful",
-          description: "Redirecting to admin training...",
+          description: "Redirecting to admin control center...",
         });
         
         // Force page reload to ensure session is picked up
-        window.location.href = '/admin/training';
+        window.location.href = '/admin-control-center';
       } else {
         toast({
           title: "Login failed",
