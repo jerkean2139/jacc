@@ -52,6 +52,7 @@ export default function AdminControlCenter() {
   
   // Chat Review state
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
+  const [selectedChatDetails, setSelectedChatDetails] = useState<any>(null);
   const [showChatReviewModal, setShowChatReviewModal] = useState(false);
   const [reviewStatus, setReviewStatus] = useState('pending');
   const [chatReviewFilter, setChatReviewFilter] = useState('pending');
@@ -105,11 +106,7 @@ export default function AdminControlCenter() {
     enabled: activeTab === 'chat-review',
   });
 
-  // Fetch chat details for review
-  const { data: selectedChatDetails } = useQuery({
-    queryKey: ['/api/admin/chat-reviews', selectedChatId],
-    enabled: !!selectedChatId,
-  });
+  // Fetch chat details for review (handled manually in handleReviewChat function)
 
   // Extract documents from the integrated structure for search and display
   const allDocuments = integratedDocuments ? [
@@ -314,7 +311,9 @@ export default function AdminControlCenter() {
       if (!response.ok) throw new Error('Failed to load chat details');
       const chatData = await response.json();
       setTrainingChatMessages(chatData.messages || []);
+      setSelectedChatDetails(chatData);
     } catch (error) {
+      console.error('Error loading chat details:', error);
       toast({ title: 'Failed to load chat details', variant: 'destructive' });
     }
   };
