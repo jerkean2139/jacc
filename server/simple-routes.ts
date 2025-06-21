@@ -1122,7 +1122,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update FAQ entry
-  app.patch('/api/admin/faq/:id', async (req: Request, res: Response) => {
+  app.put('/api/admin/faq/:id', async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
       const updates = req.body;
@@ -1136,7 +1136,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ...updates, 
           lastUpdated: new Date() 
         })
-        .where(eq(faqKnowledgeBase.id, id));
+        .where(eq(faqKnowledgeBase.id, parseInt(id)));
       
       console.log(`FAQ updated: ${id}`);
       res.json({ success: true });
@@ -1155,12 +1155,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { faqKnowledgeBase } = await import('../shared/schema.ts');
       const { eq } = await import('drizzle-orm');
       
-      await db.delete(faqKnowledgeBase).where(eq(faqKnowledgeBase.id, id));
+      await db.delete(faqKnowledgeBase).where(eq(faqKnowledgeBase.id, parseInt(id)));
       console.log(`FAQ deleted: ${id}`);
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting FAQ:", error);
       res.status(500).json({ error: 'Failed to delete FAQ' });
+    }
+  });
+
+  // Create new FAQ category
+  app.post('/api/admin/faq/categories', async (req: Request, res: Response) => {
+    try {
+      const { name } = req.body;
+      
+      if (!name || !name.trim()) {
+        return res.status(400).json({ error: 'Category name is required' });
+      }
+
+      const { db } = await import('./db.ts');
+      const { faqKnowledgeBase } = await import('../shared/schema.ts');
+      
+      // Create a placeholder FAQ entry for the new category to establish it
+      const placeholderFAQ = {
+        question: `Welcome to ${name}`,
+        answer: `This is the ${name} category. Add your FAQ entries here.`,
+        category: name.trim(),
+        tags: [],
+        isActive: false,
+        priority: 0
+      };
+
+      await db.insert(faqKnowledgeBase).values(placeholderFAQ);
+      console.log(`FAQ category created: ${name}`);
+      res.json({ success: true, category: name.trim() });
+    } catch (error) {
+      console.error("Error creating FAQ category:", error);
+      res.status(500).json({ error: 'Failed to create category' });
+    }
+  });
+
+  // Delete FAQ category and all entries
+  app.delete('/api/admin/faq/categories/:categoryName', async (req: Request, res: Response) => {
+    try {
+      const { categoryName } = req.params;
+      
+      const { db } = await import('./db.ts');
+      const { faqKnowledgeBase } = await import('../shared/schema.ts');
+      const { eq } = await import('drizzle-orm');
+      
+      // Delete all FAQ entries in this category
+      await db.delete(faqKnowledgeBase).where(eq(faqKnowledgeBase.category, decodeURIComponent(categoryName)));
+      console.log(`FAQ category deleted: ${categoryName}`);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting FAQ category:", error);
+      res.status(500).json({ error: 'Failed to delete category' });
     }
   });
 
