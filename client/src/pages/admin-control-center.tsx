@@ -304,6 +304,7 @@ export default function AdminControlCenter() {
   // Chat Review handlers
   const handleReviewChat = async (chatId: string) => {
     setSelectedChatId(chatId);
+    setShowChatReviewModal(true);
     try {
       const response = await fetch(`/api/admin/chat-reviews/${chatId}`, {
         credentials: 'include'
