@@ -478,10 +478,99 @@ export default function AdminControlCenter() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <div className="text-center p-8 text-gray-500">
-                  AI Simulator functionality being restored...
+              <div className="space-y-6">
+                {/* Query Input */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Test Query</label>
+                  <div className="flex gap-2">
+                    <Textarea
+                      placeholder="Enter a test query for the AI system..."
+                      value={testQuery}
+                      onChange={(e) => setTestQuery(e.target.value)}
+                      className="flex-1"
+                      rows={3}
+                    />
+                    <Button
+                      onClick={handleTestAI}
+                      disabled={!testQuery.trim() || isTestingAI}
+                      className="px-6"
+                    >
+                      {isTestingAI ? (
+                        <RefreshCw className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Send className="h-4 w-4" />
+                      )}
+                      Test AI
+                    </Button>
+                  </div>
                 </div>
+
+                {/* AI Response */}
+                {aiResponse && (
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">AI Response</label>
+                      <div className="p-4 bg-gray-50 rounded-lg border">
+                        <p className="text-sm whitespace-pre-wrap">{aiResponse}</p>
+                      </div>
+                    </div>
+
+                    {/* Correction Interface */}
+                    {showCorrectInterface && (
+                      <div className="space-y-4 p-4 bg-blue-50 rounded-lg border">
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-medium text-blue-900">Train the AI</h4>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setShowCorrectInterface(false)}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium text-blue-900">
+                            Provide Corrected Response
+                          </label>
+                          <Textarea
+                            placeholder="Enter the correct response to train the AI..."
+                            value={correctedResponse}
+                            onChange={(e) => setCorrectedResponse(e.target.value)}
+                            rows={4}
+                          />
+                        </div>
+                        
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={handleSubmitCorrection}
+                            disabled={!correctedResponse.trim()}
+                            className="bg-blue-600 hover:bg-blue-700"
+                          >
+                            <Plus className="h-4 w-4 mr-1" />
+                            Submit Training
+                          </Button>
+                          <Button
+                            variant="outline"
+                            onClick={() => {
+                              setShowCorrectInterface(false);
+                              toast({ title: 'Response marked as correct' });
+                            }}
+                          >
+                            <ThumbsUp className="h-4 w-4 mr-1" />
+                            Mark as Correct
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {!aiResponse && !isTestingAI && (
+                  <div className="text-center p-8 text-gray-500 border-2 border-dashed border-gray-200 rounded-lg">
+                    Enter a test query above to simulate AI responses and train the system
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -519,6 +608,174 @@ export default function AdminControlCenter() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Chat Review Modal with Built-in Emulator */}
+      <Dialog open={showChatReviewModal} onOpenChange={setShowChatReviewModal}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Eye className="h-5 w-5" />
+              Chat Review & Emulator
+            </DialogTitle>
+            <DialogDescription>
+              Review conversation and make corrections with built-in AI emulator
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-h-[70vh] overflow-y-auto">
+            {/* Chat History Panel */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h4 className="font-medium">Conversation History</h4>
+                <Badge variant="outline">
+                  {selectedChatDetails?.messages?.length || 0} messages
+                </Badge>
+              </div>
+              
+              <ScrollArea className="h-[500px] border rounded-lg p-4">
+                {selectedChatDetails?.messages?.map((message: any, index: number) => (
+                  <div key={message.id || index} className="mb-4">
+                    <div className={`p-3 rounded-lg ${
+                      message.role === 'user' 
+                        ? 'bg-blue-50 border-l-4 border-blue-400' 
+                        : 'bg-gray-50 border-l-4 border-gray-400'
+                    }`}>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium">
+                          {message.role === 'user' ? 'User' : 'Assistant'}
+                        </span>
+                        {message.role === 'assistant' && (
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleApproveMessage(message.id)}
+                            >
+                              <ThumbsUp className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                      
+                      {message.role === 'assistant' && (
+                        <div className="mt-3 space-y-2">
+                          <Textarea
+                            placeholder="Enter correction for this response..."
+                            value={messageCorrection}
+                            onChange={(e) => setMessageCorrection(e.target.value)}
+                            className="text-sm"
+                            rows={2}
+                          />
+                          <Button
+                            size="sm"
+                            onClick={() => handleCorrectMessage(message.id, messageCorrection)}
+                            disabled={!messageCorrection.trim()}
+                          >
+                            Submit Correction
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )) || (
+                  <div className="text-center text-gray-500 py-8">
+                    No messages in this conversation
+                  </div>
+                )}
+              </ScrollArea>
+            </div>
+
+            {/* AI Emulator Panel */}
+            <div className="space-y-4">
+              <h4 className="font-medium">AI Response Emulator</h4>
+              
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Test Query</label>
+                  <Textarea
+                    placeholder="Test how AI would respond to this query..."
+                    value={testQuery}
+                    onChange={(e) => setTestQuery(e.target.value)}
+                    rows={3}
+                  />
+                  <Button
+                    onClick={handleTestAI}
+                    disabled={!testQuery.trim() || isTestingAI}
+                    className="w-full"
+                  >
+                    {isTestingAI ? (
+                      <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+                    ) : (
+                      <Send className="h-4 w-4 mr-2" />
+                    )}
+                    Test AI Response
+                  </Button>
+                </div>
+
+                {aiResponse && (
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">AI Response</label>
+                      <div className="p-3 bg-gray-50 border rounded-lg">
+                        <p className="text-sm whitespace-pre-wrap">{aiResponse}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => setShowCorrectInterface(true)}
+                        className="flex-1"
+                      >
+                        Need Correction
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          toast({ title: 'Response approved' });
+                          setAiResponse('');
+                        }}
+                        className="flex-1"
+                      >
+                        <ThumbsUp className="h-4 w-4 mr-1" />
+                        Approve
+                      </Button>
+                    </div>
+
+                    {showCorrectInterface && (
+                      <div className="space-y-4 p-4 bg-blue-50 rounded-lg border">
+                        <h5 className="font-medium text-blue-900">Provide Training Correction</h5>
+                        <Textarea
+                          placeholder="Enter the correct response..."
+                          value={correctedResponse}
+                          onChange={(e) => setCorrectedResponse(e.target.value)}
+                          rows={4}
+                        />
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={handleSubmitCorrection}
+                            disabled={!correctedResponse.trim()}
+                            className="bg-blue-600 hover:bg-blue-700"
+                          >
+                            Submit Training
+                          </Button>
+                          <Button
+                            variant="outline"
+                            onClick={() => setShowCorrectInterface(false)}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
