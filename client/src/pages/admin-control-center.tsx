@@ -1133,202 +1133,291 @@ export default function AdminControlCenter() {
         </TabsContent>
       </Tabs>
 
-      {/* Chat Review Modal with Built-in Emulator */}
+      {/* Chat Review Modal */}
       <Dialog open={showChatReviewModal} onOpenChange={setShowChatReviewModal}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden">
+        <DialogContent className="max-w-7xl max-h-[90vh] overflow-hidden">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Eye className="h-5 w-5" />
-              Chat Review & Emulator
+              <MessageSquare className="h-5 w-5" />
+              Chat Review & AI Training
             </DialogTitle>
             <DialogDescription>
-              Review conversation and make corrections with built-in AI emulator
+              Review user conversations and train AI responses
             </DialogDescription>
           </DialogHeader>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-h-[70vh] overflow-y-auto">
-            {/* Chat History Panel */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h4 className="font-medium">Conversation History</h4>
-                <Badge variant="outline">
-                  {(selectedChatDetails as any)?.messages?.length || 0} messages
-                </Badge>
+          <Tabs defaultValue="chat-review" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="chat-review" className="flex items-center gap-2">
+                <Eye className="h-4 w-4" />
+                Chat Review
+              </TabsTrigger>
+              <TabsTrigger value="ai-emulator" className="flex items-center gap-2">
+                <Brain className="h-4 w-4" />
+                AI Emulator
+              </TabsTrigger>
+            </TabsList>
+
+            {/* Chat Review Tab */}
+            <TabsContent value="chat-review" className="space-y-4 max-h-[70vh] overflow-y-auto">
+              <div className="text-sm text-muted-foreground">
+                Review actual user conversations and provide training corrections
               </div>
               
-              <ScrollArea className="h-[500px] border rounded-lg p-4">
+              <ScrollArea className="h-[60vh] border rounded-lg p-4">
                 {(selectedChatDetails as any)?.messages?.map((message: any, index: number) => (
-                  <div key={message.id || index} className="mb-4">
-                    <div className={`p-3 rounded-lg ${
-                      message.role === 'user' 
-                        ? 'bg-blue-50 border-l-4 border-blue-400' 
-                        : 'bg-gray-50 border-l-4 border-gray-400'
-                    }`}>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium">
-                          {message.role === 'user' ? 'User' : 'Assistant'}
+                  <div key={message.id || index} className={`mb-6 p-4 rounded-lg border ${
+                    message.role === 'user' 
+                      ? 'bg-blue-50 border-blue-200' 
+                      : 'bg-gray-50 border-gray-200'
+                  }`}>
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-semibold text-gray-700">
+                          {message.role === 'user' ? '👤 User' : '🤖 AI Assistant'}
                         </span>
                         {message.role === 'assistant' && (
-                          <div className="flex gap-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleApproveMessage(message.id)}
-                            >
-                              <ThumbsUp className="h-3 w-3" />
-                            </Button>
+                          <Badge variant="outline" className="text-xs">
+                            Needs Review
+                          </Badge>
+                        )}
+                      </div>
+                      <span className="text-xs text-muted-foreground">
+                        {message.createdAt ? new Date(message.createdAt).toLocaleTimeString() : 'Just now'}
+                      </span>
+                    </div>
+                    
+                    <div className="mb-4">
+                      <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
+                    </div>
+                    
+                    {message.role === 'assistant' && (
+                      <div className="space-y-3">
+                        <div className="flex gap-3">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleApproveMessage(message.id)}
+                            className="text-green-600 border-green-200 hover:bg-green-50"
+                          >
+                            <ThumbsUp className="h-3 w-3 mr-1" />
+                            Approve Response
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setCorrectingMessageId(message.id);
+                              setMessageCorrection('');
+                            }}
+                            className="text-orange-600 border-orange-200 hover:bg-orange-50"
+                          >
+                            <Edit className="h-3 w-3 mr-1" />
+                            Train AI
+                          </Button>
+                        </div>
+
+                        {correctingMessageId === message.id && (
+                          <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
+                            <h6 className="font-medium text-orange-900 mb-2">AI Training Instructions</h6>
+                            <p className="text-xs text-orange-700 mb-3">
+                              Describe how the AI should improve this response. The AI will learn from your feedback and update its knowledge.
+                            </p>
+                            <Textarea
+                              placeholder="Example: 'This response should mention competitive rates first, then explain benefits. Make it less technical and more business-focused. Include specific pricing ranges when discussing costs.'"
+                              value={messageCorrection}
+                              onChange={(e) => setMessageCorrection(e.target.value)}
+                              rows={4}
+                              className="mb-3"
+                            />
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                onClick={() => handleCorrectMessage(message.id, messageCorrection)}
+                                disabled={!messageCorrection.trim()}
+                                className="bg-orange-600 hover:bg-orange-700 text-white"
+                              >
+                                <Send className="h-3 w-3 mr-1" />
+                                Submit Training
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => setCorrectingMessageId(null)}
+                              >
+                                Cancel
+                              </Button>
+                            </div>
                           </div>
                         )}
                       </div>
-                      <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                      
-                      {message.role === 'assistant' && (
-                        <div className="mt-3 space-y-2">
-                          <Textarea
-                            placeholder="Enter correction for this response..."
-                            value={messageCorrection}
-                            onChange={(e) => setMessageCorrection(e.target.value)}
-                            className="text-sm"
-                            rows={2}
-                          />
-                          <Button
-                            size="sm"
-                            onClick={() => handleCorrectMessage(message.id, messageCorrection)}
-                            disabled={!messageCorrection.trim()}
-                          >
-                            Submit Correction
-                          </Button>
-                        </div>
-                      )}
-                    </div>
+                    )}
                   </div>
                 )) || (
-                  <div className="text-center text-gray-500 py-8">
-                    No messages in this conversation
+                  <div className="text-center text-muted-foreground py-12">
+                    <MessageSquare className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                    <p className="text-lg font-medium mb-2">No conversation selected</p>
+                    <p className="text-sm">Select a chat from the list to review and train AI responses</p>
                   </div>
                 )}
               </ScrollArea>
-            </div>
+            </TabsContent>
 
-            {/* AI Emulator Panel */}
-            <div className="space-y-4">
-              <h4 className="font-medium">AI Response Emulator</h4>
+            {/* AI Emulator Tab */}
+            <TabsContent value="ai-emulator" className="space-y-4 max-h-[70vh] overflow-y-auto">
+              <div className="text-sm text-muted-foreground">
+                Test AI responses to specific queries (independent testing tool)
+              </div>
               
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Test Query</label>
-                  <Textarea
-                    placeholder="Test how AI would respond to this query..."
-                    value={testQuery}
-                    onChange={(e) => setTestQuery(e.target.value)}
-                    rows={3}
-                  />
-                  <Button
-                    onClick={handleTestAI}
-                    disabled={!testQuery.trim() || isTestingAI}
-                    className="w-full"
-                  >
-                    {isTestingAI ? (
-                      <RefreshCw className="h-4 w-4 animate-spin mr-2" />
-                    ) : (
-                      <Send className="h-4 w-4 mr-2" />
-                    )}
-                    Test AI Response
-                  </Button>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Test Input */}
+                <div className="space-y-4">
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <Send className="h-5 w-5" />
+                        Test Query
+                      </CardTitle>
+                      <CardDescription>Enter a question to test AI response</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <Textarea
+                        placeholder="Example: What are your payment processing rates for restaurants?"
+                        value={testQuery}
+                        onChange={(e) => setTestQuery(e.target.value)}
+                        rows={4}
+                      />
+                      <Button
+                        onClick={handleTestAI}
+                        disabled={!testQuery.trim() || isTestingAI}
+                        className="w-full"
+                        size="lg"
+                      >
+                        {isTestingAI ? (
+                          <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+                        ) : (
+                          <Send className="h-4 w-4 mr-2" />
+                        )}
+                        Test AI Response
+                      </Button>
+                    </CardContent>
+                  </Card>
                 </div>
 
-                {aiResponse && (
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">AI Response</label>
-                      <div className="p-3 bg-gray-50 border rounded-lg">
-                        <p className="text-sm whitespace-pre-wrap">{aiResponse}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        onClick={() => setShowCorrectInterface(true)}
-                        className="flex-1"
-                      >
-                        Need Correction
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() => {
-                          toast({ title: 'Response approved' });
-                          setAiResponse('');
-                        }}
-                        className="flex-1"
-                      >
-                        <ThumbsUp className="h-4 w-4 mr-1" />
-                        Approve
-                      </Button>
-                    </div>
-
-                    {showCorrectInterface && (
-                      <div className="space-y-4 p-4 bg-blue-50 rounded-lg border">
-                        <h5 className="font-medium text-blue-900">Conversational Training System</h5>
-                        <div className="text-sm text-blue-700 mb-3">
-                          Describe what needs to be corrected. The AI will learn from your feedback.
+                {/* Response Output */}
+                <div className="space-y-4">
+                  {aiResponse ? (
+                    <Card>
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-lg flex items-center gap-2">
+                          <Brain className="h-5 w-5" />
+                          AI Response
+                        </CardTitle>
+                        <CardDescription>Current AI response to your test query</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 bg-gray-50 border rounded-lg">
+                          <p className="text-sm whitespace-pre-wrap leading-relaxed">{aiResponse}</p>
                         </div>
                         
-                        {/* Training Chat Messages */}
-                        {trainingChatMessages.length > 0 && (
-                          <div className="max-h-64 overflow-y-auto border rounded-lg bg-white p-3 space-y-2">
-                            {trainingChatMessages.map((msg, idx) => (
-                              <div key={idx} className={`p-2 rounded ${
-                                msg.role === 'user' 
-                                  ? 'bg-blue-100 text-blue-900 ml-8' 
-                                  : 'bg-gray-100 text-gray-900 mr-8'
-                              }`}>
-                                <div className="text-xs font-medium mb-1">
-                                  {msg.role === 'user' ? 'Admin' : 'AI'}
-                                </div>
-                                <div className="text-sm">{msg.content}</div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-
-                        <Textarea
-                          placeholder="Describe what needs to be corrected or improved about this response..."
-                          value={trainingQuery}
-                          onChange={(e) => setTrainingQuery(e.target.value)}
-                          rows={3}
-                        />
                         <div className="flex gap-2">
-                          <Button
-                            onClick={handleSendTrainingMessage}
-                            disabled={!trainingQuery.trim() || isTrainingChat}
-                            className="bg-blue-600 hover:bg-blue-700"
-                          >
-                            {isTrainingChat ? (
-                              <RefreshCw className="h-4 w-4 animate-spin mr-2" />
-                            ) : (
-                              <Send className="h-4 w-4 mr-2" />
-                            )}
-                            Send Training Instruction
-                          </Button>
                           <Button
                             variant="outline"
                             onClick={() => {
-                              setShowCorrectInterface(false);
-                              setTrainingChatMessages([]);
-                              setTrainingQuery('');
+                              toast({ title: 'Response approved' });
+                              setAiResponse('');
+                              setTestQuery('');
                             }}
+                            className="flex-1 text-green-600 border-green-200 hover:bg-green-50"
                           >
-                            Close Training
+                            <ThumbsUp className="h-4 w-4 mr-1" />
+                            Good Response
+                          </Button>
+                          <Button
+                            variant="outline"
+                            onClick={() => setShowCorrectInterface(true)}
+                            className="flex-1 text-orange-600 border-orange-200 hover:bg-orange-50"
+                          >
+                            <Edit className="h-4 w-4 mr-1" />
+                            Needs Training
                           </Button>
                         </div>
-                      </div>
-                    )}
-                  </div>
-                )}
+
+                        {showCorrectInterface && (
+                          <Card className="border-orange-200">
+                            <CardHeader className="bg-orange-50 pb-3">
+                              <CardTitle className="text-lg text-orange-900">AI Training Session</CardTitle>
+                              <CardDescription className="text-orange-700">
+                                Describe what needs improvement. The AI will learn from your feedback.
+                              </CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                              {/* Training Chat Messages */}
+                              {trainingChatMessages.length > 0 && (
+                                <div className="max-h-64 overflow-y-auto border rounded-lg p-3 space-y-2 bg-white">
+                                  {trainingChatMessages.map((msg, idx) => (
+                                    <div key={idx} className={`p-3 rounded ${
+                                      msg.role === 'user' 
+                                        ? 'bg-blue-100 text-blue-900 ml-6' 
+                                        : 'bg-gray-100 text-gray-900 mr-6'
+                                    }`}>
+                                      <div className="text-xs font-medium mb-1">
+                                        {msg.role === 'user' ? '👨‍💼 Admin' : '🤖 AI Learning'}
+                                      </div>
+                                      <div className="text-sm leading-relaxed">{msg.content}</div>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+
+                              <Textarea
+                                placeholder="Example: 'This response is too technical. Make it simpler and focus on business benefits. Start with pricing information since that's what they asked about.'"
+                                value={trainingQuery}
+                                onChange={(e) => setTrainingQuery(e.target.value)}
+                                rows={3}
+                              />
+                              <div className="flex gap-2">
+                                <Button
+                                  onClick={handleSendTrainingMessage}
+                                  disabled={!trainingQuery.trim() || isTrainingChat}
+                                  className="bg-orange-600 hover:bg-orange-700 text-white"
+                                >
+                                  {isTrainingChat ? (
+                                    <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+                                  ) : (
+                                    <Send className="h-4 w-4 mr-2" />
+                                  )}
+                                  Send Training
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  onClick={() => {
+                                    setShowCorrectInterface(false);
+                                    setTrainingChatMessages([]);
+                                    setTrainingQuery('');
+                                  }}
+                                >
+                                  Close Training
+                                </Button>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    <Card className="border-dashed">
+                      <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+                        <Brain className="h-12 w-12 text-gray-300 mb-4" />
+                        <p className="text-lg font-medium text-gray-500 mb-2">Ready to Test</p>
+                        <p className="text-sm text-gray-400">Enter a query and click "Test AI Response" to see how the AI responds</p>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
               </div>
-            </div>
-          </div>
+            </TabsContent>
+          </Tabs>
         </DialogContent>
       </Dialog>
     </div>
