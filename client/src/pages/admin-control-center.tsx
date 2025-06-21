@@ -5,7 +5,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Folder, FileText, AlertTriangle, Settings, Users, BarChart3, MessageSquare, Brain, ChevronDown, Download, Edit } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Folder, FileText, AlertTriangle, Settings, Users, BarChart3, MessageSquare, Brain, ChevronDown, Download, Edit, Send, ThumbsUp, Eye, RefreshCw, Plus } from 'lucide-react';
 import DocumentDragDrop from '@/components/ui/document-drag-drop';
 import DocumentPreviewModal from '@/components/ui/document-preview-modal';
 import { useToast } from '@/hooks/use-toast';
@@ -34,6 +38,21 @@ export default function AdminControlCenter() {
   const [expandedFolders, setExpandedFolders] = useState<string[]>([]);
   const [previewDocument, setPreviewDocument] = useState<DocumentEntry | null>(null);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
+  
+  // AI Simulator state
+  const [testQuery, setTestQuery] = useState('');
+  const [aiResponse, setAiResponse] = useState('');
+  const [correctedResponse, setCorrectedResponse] = useState('');
+  const [isTestingAI, setIsTestingAI] = useState(false);
+  const [showCorrectInterface, setShowCorrectInterface] = useState(false);
+  
+  // Chat Review state
+  const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
+  const [showChatReviewModal, setShowChatReviewModal] = useState(false);
+  const [reviewStatus, setReviewStatus] = useState('pending');
+  const [chatReviewFilter, setChatReviewFilter] = useState('pending');
+  const [messageCorrection, setMessageCorrection] = useState('');
+  
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -53,6 +72,18 @@ export default function AdminControlCenter() {
   const { data: trainingAnalytics, isLoading: trainingLoading } = useQuery({
     queryKey: ['/api/admin/training/analytics'],
     enabled: activeTab === 'training',
+  });
+
+  // Fetch chat reviews
+  const { data: chatReviews, isLoading: chatReviewsLoading } = useQuery({
+    queryKey: ['/api/admin/chat-reviews'],
+    enabled: activeTab === 'chat-review',
+  });
+
+  // Fetch chat details for review
+  const { data: selectedChatDetails } = useQuery({
+    queryKey: ['/api/admin/chat-reviews', selectedChatId],
+    enabled: !!selectedChatId,
   });
 
   const handlePreviewDocument = (document: DocumentEntry) => {
@@ -83,7 +114,6 @@ export default function AdminControlCenter() {
       
       if (!response.ok) throw new Error('Failed to move document');
       
-      // Refresh the documents data
       queryClient.invalidateQueries({ queryKey: ['/api/documents'] });
       toast({ title: 'Document moved successfully' });
     } catch (error) {
@@ -92,6 +122,99 @@ export default function AdminControlCenter() {
         description: 'Please try again',
         variant: 'destructive' 
       });
+    }
+  };
+
+  // AI Simulator handlers
+  const handleTestAI = async () => {
+    if (!testQuery.trim()) return;
+    
+    setIsTestingAI(true);
+    try {
+      const response = await fetch('/api/admin/ai-simulator/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: testQuery }),
+        credentials: 'include',
+      });
+      
+      if (!response.ok) throw new Error('Failed to test AI');
+      
+      const data = await response.json();
+      setAiResponse(data.response);
+      setShowCorrectInterface(true);
+    } catch (error) {
+      toast({ title: 'Failed to test AI query', variant: 'destructive' });
+    } finally {
+      setIsTestingAI(false);
+    }
+  };
+
+  const handleSubmitCorrection = async () => {
+    if (!correctedResponse.trim()) return;
+    
+    try {
+      const response = await fetch('/api/admin/ai-simulator/train', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: testQuery,
+          originalResponse: aiResponse,
+          correctedResponse: correctedResponse,
+        }),
+        credentials: 'include',
+      });
+      
+      if (!response.ok) throw new Error('Failed to submit correction');
+      
+      toast({ title: 'Training correction submitted successfully' });
+      setCorrectedResponse('');
+      setShowCorrectInterface(false);
+    } catch (error) {
+      toast({ title: 'Failed to submit correction', variant: 'destructive' });
+    }
+  };
+
+  // Chat Review handlers
+  const handleReviewChat = (chatId: string) => {
+    setSelectedChatId(chatId);
+    setShowChatReviewModal(true);
+  };
+
+  const handleApproveMessage = async (messageId: string) => {
+    try {
+      const response = await fetch(`/api/admin/chat-reviews/${selectedChatId}/approve`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messageId }),
+        credentials: 'include',
+      });
+      
+      if (!response.ok) throw new Error('Failed to approve message');
+      
+      toast({ title: 'Message approved' });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/chat-reviews'] });
+    } catch (error) {
+      toast({ title: 'Failed to approve message', variant: 'destructive' });
+    }
+  };
+
+  const handleCorrectMessage = async (messageId: string, correction: string) => {
+    try {
+      const response = await fetch(`/api/admin/chat-reviews/${selectedChatId}/correct`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messageId, correction }),
+        credentials: 'include',
+      });
+      
+      if (!response.ok) throw new Error('Failed to submit correction');
+      
+      toast({ title: 'Correction submitted' });
+      setMessageCorrection('');
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/chat-reviews'] });
+    } catch (error) {
+      toast({ title: 'Failed to submit correction', variant: 'destructive' });
     }
   };
 
@@ -106,7 +229,7 @@ export default function AdminControlCenter() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="documents" className="flex items-center gap-2">
             <Folder className="h-4 w-4" />
             Documents
@@ -114,6 +237,14 @@ export default function AdminControlCenter() {
           <TabsTrigger value="faq" className="flex items-center gap-2">
             <MessageSquare className="h-4 w-4" />
             Knowledge Base
+          </TabsTrigger>
+          <TabsTrigger value="chat-review" className="flex items-center gap-2">
+            <MessageSquare className="h-4 w-4" />
+            Chat Review
+          </TabsTrigger>
+          <TabsTrigger value="ai-simulator" className="flex items-center gap-2">
+            <Brain className="h-4 w-4" />
+            AI Simulator
           </TabsTrigger>
           <TabsTrigger value="training" className="flex items-center gap-2">
             <Brain className="h-4 w-4" />
@@ -267,6 +398,91 @@ export default function AdminControlCenter() {
                   </div>
                 </div>
               )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="chat-review" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                Chat Review Center
+                <div className="flex gap-2">
+                  <Select value={chatReviewFilter} onValueChange={setChatReviewFilter}>
+                    <SelectTrigger className="w-32">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="approved">Approved</SelectItem>
+                      <SelectItem value="needs_correction">Needs Correction</SelectItem>
+                      <SelectItem value="all">All</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </CardTitle>
+              <CardDescription>
+                Review user conversations and make corrections for training
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {chatReviewsLoading ? (
+                <div className="flex items-center justify-center p-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  <span className="ml-2">Loading chat reviews...</span>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {Array.isArray(chatReviews) && chatReviews.length > 0 ? (
+                    chatReviews.map((chat: any) => (
+                      <div key={chat.id} className="border rounded-lg p-4 hover:bg-gray-50">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h4 className="font-medium">Chat {chat.id}</h4>
+                            <p className="text-sm text-gray-600">
+                              {chat.messageCount} messages • {chat.status}
+                            </p>
+                          </div>
+                          <div className="flex gap-2">
+                            <Badge variant={chat.status === 'approved' ? 'default' : 'secondary'}>
+                              {chat.status}
+                            </Badge>
+                            <Button
+                              size="sm"
+                              onClick={() => handleReviewChat(chat.id)}
+                            >
+                              <Eye className="h-4 w-4 mr-1" />
+                              Review
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center p-8 text-gray-500">
+                      No chat reviews available
+                    </div>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="ai-simulator" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>AI Simulator</CardTitle>
+              <CardDescription>
+                Test AI responses and train the system with corrections
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="text-center p-8 text-gray-500">
+                  AI Simulator functionality being restored...
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
