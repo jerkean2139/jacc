@@ -187,8 +187,8 @@ export function registerChatReviewRoutes(app: any) {
             id: messageCorrections.id,
             messageId: messageCorrections.messageId,
             chatId: messageCorrections.chatId,
-            correctedResponse: messageCorrections.correctedResponse,
-            correctionReason: messageCorrections.correctionReason,
+            originalContent: messageCorrections.originalContent,
+            correctedContent: messageCorrections.correctedContent,
             correctedBy: messageCorrections.correctedBy,
             improvementType: messageCorrections.improvementType,
             createdAt: messageCorrections.createdAt

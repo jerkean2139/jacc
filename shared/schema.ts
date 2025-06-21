@@ -1087,9 +1087,8 @@ export const messageCorrections = pgTable("message_corrections", {
   id: uuid("id").primaryKey().defaultRandom(),
   messageId: uuid("message_id").notNull().references(() => messages.id, { onDelete: "cascade" }),
   chatId: uuid("chat_id").notNull().references(() => chats.id, { onDelete: "cascade" }),
-  originalResponse: text("original_response").notNull(),
-  correctedResponse: text("corrected_response").notNull(),
-  correctionReason: text("correction_reason"),
+  originalContent: text("original_content").notNull(),
+  correctedContent: text("corrected_content").notNull(),
   correctedBy: varchar("corrected_by").notNull().references(() => users.id, { onDelete: "cascade" }),
   improvementType: varchar("improvement_type").notNull(), // accuracy, completeness, tone, factual_error
   createdAt: timestamp("created_at").defaultNow(),
