@@ -349,7 +349,7 @@ export default function DocumentUpload({ folderId, onUploadComplete }: DocumentU
                   ? 'Ready to upload. Click "Upload Documents" below to proceed.' 
                   : isDragOver 
                     ? 'Release to add your documents' 
-                    : 'Drag and drop files here, or click to browse'
+                    : 'Drag and drop files here'
                 }
               </p>
             </div>
@@ -359,15 +359,27 @@ export default function DocumentUpload({ folderId, onUploadComplete }: DocumentU
               onChange={handleFileSelect}
               multiple
               accept=".pdf,.doc,.docx,.xls,.xlsx,.pptx,.jpg,.jpeg,.png,.zip"
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              className="hidden"
             />
-            <div className="mt-4 space-y-1">
-              <p className="text-sm text-muted-foreground">
-                Supported: PDF, Word, Excel, PowerPoint, Images, ZIP files
-              </p>
-              <p className="text-xs text-green-600 dark:text-green-400 font-medium">
-                ✓ 100MB max per file ✓ Automatic ZIP extraction ✓ Folder organization
-              </p>
+            <div className="mt-4 space-y-3">
+              {selectedFiles.length === 0 && (
+                <Button
+                  onClick={() => fileInputRef.current?.click()}
+                  variant="outline"
+                  className="w-full"
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  Choose Files to Upload
+                </Button>
+              )}
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">
+                  Supported: PDF, Word, Excel, PowerPoint, Images, ZIP files
+                </p>
+                <p className="text-xs text-green-600 dark:text-green-400 font-medium">
+                  ✓ 100MB max per file ✓ Automatic ZIP extraction ✓ Folder organization
+                </p>
+              </div>
             </div>
           </div>
 
