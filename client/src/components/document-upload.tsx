@@ -14,6 +14,7 @@ import {
   Image,
   X,
   Check,
+  CheckCircle,
   AlertCircle,
   Download,
   ExternalLink,
