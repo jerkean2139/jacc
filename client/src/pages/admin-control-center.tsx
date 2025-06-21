@@ -141,6 +141,8 @@ export default function AdminControlCenter() {
   const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
   const [messageCorrection, setMessageCorrection] = useState('');
 
+
+
   // Fetch data
   const { data: faqData, isLoading: faqLoading } = useQuery({
     queryKey: ['/api/admin/faq'],
@@ -2160,6 +2162,194 @@ export default function AdminControlCenter() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Documents Repository Tab */}
+        <TabsContent value="repository" className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold">Documents Repository</h2>
+              <p className="text-gray-600 mt-1">Complete document management with folder organization</p>
+            </div>
+            <Badge variant="outline" className="px-3 py-1">
+              {integratedDocuments?.totalDocuments || 0} Total Documents
+            </Badge>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Documents Overview Cards */}
+            <div className="space-y-4">
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg text-blue-600">Repository Stats</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Total Documents</span>
+                    <span className="font-semibold">{integratedDocuments?.totalDocuments || 0}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Total Folders</span>
+                    <span className="font-semibold">{integratedDocuments?.totalFolders || 0}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">With Folders</span>
+                    <span className="font-semibold">{integratedDocuments?.documentsWithFolders || 0}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Unassigned</span>
+                    <span className="font-semibold text-orange-600">{integratedDocuments?.documentsWithoutFolders || 0}</span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg">Search Documents</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Input
+                    placeholder="Search documents..."
+                    value={documentSearchQuery}
+                    onChange={(e) => setDocumentSearchQuery(e.target.value)}
+                    className="w-full"
+                  />
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Folders and Documents */}
+            <div className="lg:col-span-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Document Organization</CardTitle>
+                  <CardDescription>Documents organized by folders with real-time data</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {integratedDocumentsLoading ? (
+                    <div className="flex items-center justify-center p-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                      <span className="ml-2">Loading documents...</span>
+                    </div>
+                  ) : (
+                    <ScrollArea className="h-[600px] pr-4">
+                      <div className="space-y-4">
+                        {integratedDocuments?.folders?.map((folder: any) => (
+                          <div key={folder.id} className="border rounded-lg">
+                            <div 
+                              className="flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50"
+                              onClick={() => {
+                                const isExpanded = expandedFolders.includes(folder.id);
+                                setExpandedFolders(prev => 
+                                  isExpanded 
+                                    ? prev.filter(id => id !== folder.id)
+                                    : [...prev, folder.id]
+                                );
+                              }}
+                            >
+                              <div className="flex items-center gap-2">
+                                <Folder className="h-4 w-4 text-blue-600" />
+                                <span className="font-medium">{folder.name}</span>
+                                <Badge variant="secondary" className="text-xs">
+                                  {folder.document_count} docs
+                                </Badge>
+                              </div>
+                              <ChevronDown className={`h-4 w-4 transition-transform ${
+                                expandedFolders.includes(folder.id) ? 'rotate-180' : ''
+                              }`} />
+                            </div>
+                            
+                            {expandedFolders.includes(folder.id) && folder.documents && (
+                              <div className="border-t bg-gray-50 p-3">
+                                <div className="space-y-2">
+                                  {folder.documents.length > 0 ? (
+                                    folder.documents.map((doc: any) => (
+                                      <div key={doc.id} className="flex items-center justify-between p-2 bg-white rounded border">
+                                        <div className="flex items-center gap-2">
+                                          <FileText className="h-3 w-3 text-gray-500" />
+                                          <span className="text-sm">{doc.name}</span>
+                                          <Badge variant="outline" className="text-xs">
+                                            {doc.mime_type?.split('/')[1] || 'unknown'}
+                                          </Badge>
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                          {doc.is_favorite && <Star className="h-3 w-3 text-yellow-500" />}
+                                          {doc.is_public && <Globe className="h-3 w-3 text-green-500" />}
+                                          <span className="text-xs text-gray-500">
+                                            {Math.round((doc.size || 0) / 1024)}KB
+                                          </span>
+                                        </div>
+                                      </div>
+                                    ))
+                                  ) : (
+                                    <div className="text-center text-gray-500 py-4">
+                                      No documents in this folder
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+
+                        {integratedDocuments?.unassignedDocuments?.length > 0 && (
+                          <div className="border rounded-lg border-orange-200">
+                            <div 
+                              className="flex items-center justify-between p-3 cursor-pointer hover:bg-orange-50"
+                              onClick={() => {
+                                const isExpanded = expandedFolders.includes('unassigned');
+                                setExpandedFolders(prev => 
+                                  isExpanded 
+                                    ? prev.filter(id => id !== 'unassigned')
+                                    : [...prev, 'unassigned']
+                                );
+                              }}
+                            >
+                              <div className="flex items-center gap-2">
+                                <AlertTriangle className="h-4 w-4 text-orange-600" />
+                                <span className="font-medium text-orange-800">Unassigned Documents</span>
+                                <Badge variant="destructive" className="text-xs">
+                                  {integratedDocuments.unassignedDocuments.length}
+                                </Badge>
+                              </div>
+                              <ChevronDown className={`h-4 w-4 transition-transform ${
+                                expandedFolders.includes('unassigned') ? 'rotate-180' : ''
+                              }`} />
+                            </div>
+                            
+                            {expandedFolders.includes('unassigned') && (
+                              <div className="border-t bg-orange-50 p-3">
+                                <div className="space-y-2">
+                                  {integratedDocuments.unassignedDocuments.map((doc: any) => (
+                                    <div key={doc.id} className="flex items-center justify-between p-2 bg-white rounded border">
+                                      <div className="flex items-center gap-2">
+                                        <FileText className="h-3 w-3 text-gray-500" />
+                                        <span className="text-sm">{doc.name}</span>
+                                        <Badge variant="outline" className="text-xs">
+                                          {doc.mime_type?.split('/')[1] || 'unknown'}
+                                        </Badge>
+                                      </div>
+                                      <div className="flex items-center gap-1">
+                                        {doc.is_favorite && <Star className="h-3 w-3 text-yellow-500" />}
+                                        {doc.is_public && <Globe className="h-3 w-3 text-green-500" />}
+                                        <span className="text-xs text-gray-500">
+                                          {Math.round((doc.size || 0) / 1024)}KB
+                                        </span>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </ScrollArea>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </TabsContent>
       </Tabs>
 
