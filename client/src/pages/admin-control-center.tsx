@@ -48,11 +48,7 @@ export default function AdminControlCenter() {
   const [searchQuery, setSearchQuery] = useState("");
   
   // AI Simulator state
-  const [testQuery, setTestQuery] = useState('');
-  const [aiResponse, setAiResponse] = useState('');
   const [correctedResponse, setCorrectedResponse] = useState('');
-  const [isTestingAI, setIsTestingAI] = useState(false);
-  const [showCorrectInterface, setShowCorrectInterface] = useState(false);
   
   // Chat Review state
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
@@ -60,9 +56,14 @@ export default function AdminControlCenter() {
   const [reviewStatus, setReviewStatus] = useState('pending');
   const [chatReviewFilter, setChatReviewFilter] = useState('pending');
   const [messageCorrection, setMessageCorrection] = useState('');
+  const [correctingMessageId, setCorrectingMessageId] = useState<string | null>(null);
   const [trainingChatMessages, setTrainingChatMessages] = useState<any[]>([]);
   const [trainingQuery, setTrainingQuery] = useState('');
   const [isTrainingChat, setIsTrainingChat] = useState(false);
+  const [testQuery, setTestQuery] = useState('');
+  const [aiResponse, setAiResponse] = useState('');
+  const [isTestingAI, setIsTestingAI] = useState(false);
+  const [showCorrectInterface, setShowCorrectInterface] = useState(false);
   
   // FAQ Management state
   const [editingFaq, setEditingFaq] = useState<any>(null);
