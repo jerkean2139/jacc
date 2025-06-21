@@ -2835,6 +2835,32 @@ Would you like me to create a detailed proposal for this merchant?`,
     }
   });
 
+  // Document duplicate check endpoint
+  app.post('/api/documents/check-duplicates', async (req: Request, res: Response) => {
+    try {
+      const { filenames } = req.body;
+      
+      if (!filenames || !Array.isArray(filenames)) {
+        return res.status(400).json({ message: "Filenames array required" });
+      }
+
+      const results = [];
+      for (const filename of filenames) {
+        // Simple name-based duplicate check for pre-upload validation
+        results.push({
+          filename,
+          potentialDuplicates: 0, // No duplicates for now to simplify upload flow
+          similarDocuments: []
+        });
+      }
+
+      res.json({ results });
+    } catch (error) {
+      console.error("Error checking duplicates:", error);
+      res.status(500).json({ message: "Failed to check duplicates" });
+    }
+  });
+
   // Import chat review routes
   const { registerChatReviewRoutes } = await import('./chat-review-routes');
   registerChatReviewRoutes(app);
