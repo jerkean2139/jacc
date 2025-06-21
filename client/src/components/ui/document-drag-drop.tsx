@@ -115,7 +115,9 @@ function DocumentItem({ document, onPreview, onDownload, onEdit }: DocumentItemP
         {getFileIcon(document.mimeType)}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <p className="text-sm font-medium truncate">{document.originalName}</p>
+            <p className="text-sm font-medium truncate">
+              {document.name || document.originalName || 'Untitled Document'}
+            </p>
             {document.tags && document.tags.length > 0 && (
               <div className="flex gap-1">
                 {document.tags.slice(0, 2).map((tag, index) => (
@@ -378,7 +380,9 @@ export default function DocumentDragDrop({
           <div className="bg-white p-3 rounded-lg shadow-lg border border-blue-200 opacity-90">
             <div className="flex items-center gap-2">
               <FileText className="h-4 w-4 text-blue-600" />
-              <span className="text-sm font-medium">{draggedDocument.originalName}</span>
+              <span className="text-sm font-medium">
+                {draggedDocument.name || draggedDocument.originalName || 'Untitled Document'}
+              </span>
             </div>
           </div>
         ) : null}
