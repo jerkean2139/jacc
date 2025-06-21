@@ -143,17 +143,39 @@ export class EnhancedAIService {
         throw new Error('No user message found in conversation');
       }
 
-      // Use provided search results from context or search documents
+      // STEP 1: Search FAQ Knowledge Base FIRST
+      let faqResults = [];
       let searchResults = context?.searchResults || [];
       let webSearchResults = null;
       
-      // If no search results provided, search documents
       if (searchResults.length === 0) {
         try {
-          searchResults = await this.searchDocuments(lastUserMessage.content);
-          console.log(`Found ${searchResults.length} document matches for: "${lastUserMessage.content}"`);
+          console.log(`🔍 STEP 1: Searching FAQ Knowledge Base for: "${lastUserMessage.content}"`);
+          faqResults = await this.searchFAQKnowledgeBase(lastUserMessage.content);
+          
+          if (faqResults.length > 0) {
+            console.log(`✅ Found ${faqResults.length} FAQ matches - using FAQ knowledge base`);
+            // Convert FAQ results to searchResults format
+            searchResults = faqResults.map(faq => ({
+              id: `faq-${faq.id}`,
+              score: 0.95, // High confidence for FAQ matches
+              documentId: `faq-${faq.id}`,
+              content: `**Q: ${faq.question}**\n\n**A:** ${faq.answer}`,
+              metadata: {
+                documentName: `FAQ: ${faq.question}`,
+                category: faq.category,
+                source: 'faq_knowledge_base',
+                mimeType: 'text/faq'
+              }
+            }));
+          } else {
+            console.log(`📄 STEP 2: No FAQ matches found - searching document center`);
+            // Only search documents if no FAQ matches found
+            searchResults = await this.searchDocuments(lastUserMessage.content);
+            console.log(`Found ${searchResults.length} document matches for: "${lastUserMessage.content}"`);
+          }
         } catch (error) {
-          console.log("Document search failed");
+          console.log("FAQ and document search failed");
           searchResults = [];
         }
       }
@@ -179,15 +201,16 @@ export class EnhancedAIService {
         }
       }
       
-      // Only use web search if absolutely no relevant documents found after comprehensive search
+      // STEP 3: Web search only if no FAQ or document matches found
       let webSearchReason = null;
       if (searchResults.length === 0) {
+        console.log(`🌐 STEP 3: No internal matches found - searching web for: "${lastUserMessage.content}"`);
         // Validate query is business-appropriate before web search
         if (this.isBusinessAppropriateQuery(lastUserMessage.content)) {
-          webSearchReason = "Comprehensive search completed: No internal documents found with original query or alternative search terms";
+          webSearchReason = "No matches found in JACC Memory (FAQ knowledge base and document center). Searched the web for helpful information.";
           try {
             webSearchResults = await perplexitySearchService.searchWeb(lastUserMessage.content);
-            console.log("Web search completed successfully - no internal documents found");
+            console.log("✅ Web search completed - providing external results with JACC Memory disclaimer");
             
             // Log the web search usage
             await this.logWebSearchUsage(lastUserMessage.content, webSearchResults.content, webSearchReason, context);
@@ -199,12 +222,12 @@ export class EnhancedAIService {
           webSearchReason = "Query outside business scope - external search restricted";
         }
       } else {
-        console.log("Using internal documents, web search not needed");
+        console.log("Using internal knowledge base, web search not needed");
       }
       
       // Create context from search results
       const documentContext = this.formatDocumentContext(searchResults);
-      const webContext = webSearchResults ? `\nWEB SEARCH RESULTS:\n${webSearchResults.content}\n${webSearchResults.citations.length > 0 ? `Sources: ${webSearchResults.citations.join(', ')}` : ''}` : '';
+      const webContext = webSearchResults ? `\n\n**EXTERNAL WEB SEARCH RESULTS:**\n${webSearchResults.content}\n${webSearchResults.citations.length > 0 ? `\nSources: ${webSearchResults.citations.join(', ')}` : ''}` : '';
       
       // Create document examples for response (show top 3)
       const topDocuments = searchResults.slice(0, 3);
@@ -252,6 +275,12 @@ Example: "Perfect! I'd love to help you find the best rates. What type of busine
 Keep it short, conversational, and ask only ONE question at a time.` :
         `You are JACC, a knowledgeable AI assistant for merchant services sales agents.
 
+**SEARCH HIERARCHY COMPLETED:**
+${faqResults.length > 0 ? `✅ Found ${faqResults.length} matches in FAQ Knowledge Base` : 
+  searchResults.length > 0 ? `✅ Found ${searchResults.length} matches in Document Center` :
+  webSearchResults ? `❌ Nothing found in JACC Memory (FAQ + Documents). Searched the web and found information that may be helpful.` :
+  `❌ No relevant information found in internal systems or web search.`}
+
 **RESPONSE FORMAT - ALWAYS USE THIS STRUCTURE:**
 
 [One sentence direct answer]
@@ -263,6 +292,8 @@ Keep it short, conversational, and ask only ONE question at a time.` :
 
 [One brief paragraph of explanation if needed]
 
+${webSearchResults ? `\n**Note:** This information comes from external web sources since nothing was found in our internal JACC Memory (FAQ knowledge base and document center).` : ''}
+
 **CRITICAL RULES:**
 - Start every response with a direct one-sentence answer (no "TLDR:" label)
 - Use exactly 3 bullet points maximum for key information
@@ -270,8 +301,9 @@ Keep it short, conversational, and ask only ONE question at a time.` :
 - Keep total response under 150 words
 - NO repetition of information
 - NO multiple sections saying the same thing
-- Prioritize document content over general knowledge
+- Prioritize internal knowledge (FAQ/Documents) over web results
 - Document links will be added automatically - don't include them in your response
+- When using web search results, clearly indicate they are external sources
 
 **PERSONALITY:**
 - Professional but friendly tone
@@ -280,8 +312,10 @@ Keep it short, conversational, and ask only ONE question at a time.` :
 
 User context: ${context?.userRole || 'Merchant Services Sales Agent'}
 
-${!isConversationStarter ? `DOCUMENT CONTEXT:` : ''}
+${!isConversationStarter ? `INTERNAL KNOWLEDGE CONTEXT:` : ''}
 ${documentContext}
+
+${webContext}
 
 ACTION ITEMS AND TASK EXTRACTION:
 - **AUTOMATICALLY IDENTIFY**: Extract action items, follow-up tasks, and deadlines from transcriptions and conversations
@@ -748,6 +782,33 @@ When appropriate, suggest actions like saving payment processing information to 
     }
     
     return matches / queryWords.length;
+  }
+
+  async searchFAQKnowledgeBase(query: string): Promise<any[]> {
+    try {
+      const { db } = await import('./db');
+      const { faqKnowledgeBase } = await import('../shared/schema');
+      const { or, ilike, eq } = await import('drizzle-orm');
+      
+      // Search active FAQ entries for relevant matches
+      const faqMatches = await db
+        .select()
+        .from(faqKnowledgeBase)
+        .where(
+          or(
+            ilike(faqKnowledgeBase.question, `%${query}%`),
+            ilike(faqKnowledgeBase.answer, `%${query}%`),
+            ilike(faqKnowledgeBase.tags, `%${query}%`)
+          )
+        )
+        .where(eq(faqKnowledgeBase.isActive, true));
+      
+      console.log(`Found ${faqMatches.length} FAQ matches for: "${query}"`);
+      return faqMatches;
+    } catch (error) {
+      console.error('Error searching FAQ knowledge base:', error);
+      return [];
+    }
   }
 
   async searchDocuments(query: string, limit: number = 10): Promise<VectorSearchResult[]> {
