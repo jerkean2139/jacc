@@ -18,13 +18,19 @@ export default function DocumentsPage() {
   const queryClient = useQueryClient();
 
   // Fetch documents and folders
-  const { data: documents = [] } = useQuery<Document[]>({
+  const { data: documentsData } = useQuery({
     queryKey: ["/api/documents"],
   });
 
   const { data: folders = [] } = useQuery<FolderType[]>({
     queryKey: ["/api/folders"],
   });
+
+  // Extract documents from the integrated structure
+  const documents = documentsData ? [
+    ...(documentsData.folders?.flatMap((folder: any) => folder.documents || []) || []),
+    ...(documentsData.unassignedDocuments || [])
+  ] : [];
 
   // Delete document mutation
   const deleteMutation = useMutation({
