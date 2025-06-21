@@ -19,6 +19,7 @@ import DocumentUpload from '@/components/document-upload';
 import { DraggableDocument } from '@/components/draggable-document';
 import { DroppableFolder } from '@/components/droppable-folder';
 import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '@/lib/queryClient';
 
 interface DocumentEntry {
   id: string;
@@ -59,6 +60,9 @@ export default function AdminControlCenter() {
   const [reviewStatus, setReviewStatus] = useState('pending');
   const [chatReviewFilter, setChatReviewFilter] = useState('pending');
   const [messageCorrection, setMessageCorrection] = useState('');
+  const [trainingChatMessages, setTrainingChatMessages] = useState<any[]>([]);
+  const [trainingQuery, setTrainingQuery] = useState('');
+  const [isTrainingChat, setIsTrainingChat] = useState(false);
   
   // FAQ Management state
   const [editingFaq, setEditingFaq] = useState<any>(null);
@@ -349,48 +353,103 @@ export default function AdminControlCenter() {
     }
   };
 
-  // Chat Review handlers
-  const handleReviewChat = (chatId: string) => {
-    setSelectedChatId(chatId);
-    setShowChatReviewModal(true);
-  };
-
+  // Message handlers for chat review
   const handleApproveMessage = async (messageId: string) => {
     try {
-      const response = await fetch(`/api/admin/chat-reviews/${selectedChatId}/approve`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messageId }),
-        credentials: 'include',
+      await apiRequest(`/api/admin/chat-reviews/messages/${messageId}/approve`, {
+        method: 'POST'
       });
-      
-      if (!response.ok) throw new Error('Failed to approve message');
-      
       toast({ title: 'Message approved' });
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/chat-reviews'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/chat-reviews', selectedChatId] });
     } catch (error) {
-      toast({ title: 'Failed to approve message', variant: 'destructive' });
+      toast({ title: 'Error approving message', variant: 'destructive' });
     }
   };
 
   const handleCorrectMessage = async (messageId: string, correction: string) => {
+    if (!correction.trim()) return;
+    
     try {
-      const response = await fetch(`/api/admin/chat-reviews/${selectedChatId}/correct`, {
+      await apiRequest(`/api/admin/chat-reviews/messages/${messageId}/correct`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messageId, correction }),
-        credentials: 'include',
+        body: JSON.stringify({ correction, chatId: selectedChatId })
       });
-      
-      if (!response.ok) throw new Error('Failed to submit correction');
-      
-      toast({ title: 'Correction submitted' });
+      toast({ title: 'Correction submitted for training' });
       setMessageCorrection('');
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/chat-reviews'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/chat-reviews', selectedChatId] });
     } catch (error) {
-      toast({ title: 'Failed to submit correction', variant: 'destructive' });
+      toast({ title: 'Error submitting correction', variant: 'destructive' });
     }
   };
+
+  const handleStartTrainingChat = () => {
+    setTrainingChatMessages([{
+      role: 'assistant',
+      content: 'Hi! I am ready to learn from your feedback. Tell me about the corrections you would like to make to my responses. You can speak naturally - for example: "When users ask about pricing, you should mention our competitive rates first" or "Your response about merchant services was too technical, make it simpler."'
+    }]);
+    setIsTrainingChat(true);
+  };
+
+  const handleSendTrainingMessage = async () => {
+    if (!trainingQuery.trim()) return;
+
+    const userMessage = { role: 'user', content: trainingQuery };
+    setTrainingChatMessages(prev => [...prev, userMessage]);
+    setTrainingQuery('');
+    setIsTrainingChat(true);
+
+    try {
+      const response = await apiRequest('/api/admin/training/conversational', {
+        method: 'POST',
+        body: JSON.stringify({
+          message: trainingQuery,
+          context: selectedChatDetails,
+          chatHistory: trainingChatMessages
+        })
+      });
+
+      const aiMessage = { role: 'assistant', content: response.response };
+      setTrainingChatMessages(prev => [...prev, aiMessage]);
+      
+      if (response.trainingApplied) {
+        toast({ title: 'Training correction applied successfully' });
+      }
+    } catch (error) {
+      console.error('Training chat error:', error);
+      setTrainingChatMessages(prev => [...prev, {
+        role: 'assistant',
+        content: 'I apologize, but I encountered an error processing your training feedback. Please try again.'
+      }]);
+    } finally {
+      setIsTrainingChat(false);
+    }
+  };
+
+  // Chat Review handlers
+  const handleReviewChat = async (chatId: string) => {
+    setSelectedChatId(chatId);
+    setShowChatReviewModal(true);
+    
+    // Fetch chat details immediately
+    try {
+      const response = await fetch(`/api/admin/chat-reviews/${chatId}`, {
+        credentials: 'include'
+      });
+      if (response.ok) {
+        const chatDetails = await response.json();
+        console.log('Chat details loaded:', chatDetails);
+      }
+    } catch (error) {
+      console.error('Error loading chat details:', error);
+      toast({ 
+        title: 'Error loading chat history',
+        description: 'Please try again',
+        variant: 'destructive'
+      });
+    }
+  };
+
+
 
   const categories = Array.isArray(faqData) ? 
     Array.from(new Set(faqData.map((faq: FAQ) => faq.category))) : [];
