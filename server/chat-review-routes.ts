@@ -179,12 +179,27 @@ export function registerChatReviewRoutes(app: any) {
         .where(eq(chatReviews.chatId, chatId))
         .limit(1);
 
-      // Get any message corrections
-      const corrections = await db
-        .select()
-        .from(messageCorrections)
-        .where(eq(messageCorrections.chatId, chatId))
-        .orderBy(messageCorrections.createdAt);
+      // Get any message corrections (handle missing columns gracefully)
+      let corrections = [];
+      try {
+        corrections = await db
+          .select({
+            id: messageCorrections.id,
+            messageId: messageCorrections.messageId,
+            chatId: messageCorrections.chatId,
+            correctedResponse: messageCorrections.correctedResponse,
+            correctionReason: messageCorrections.correctionReason,
+            correctedBy: messageCorrections.correctedBy,
+            improvementType: messageCorrections.improvementType,
+            createdAt: messageCorrections.createdAt
+          })
+          .from(messageCorrections)
+          .where(eq(messageCorrections.chatId, chatId))
+          .orderBy(messageCorrections.createdAt);
+      } catch (error) {
+        console.log('Message corrections table not fully migrated, using empty array');
+        corrections = [];
+      }
 
       res.json({
         chat: chatWithMessages[0],
