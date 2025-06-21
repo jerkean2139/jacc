@@ -230,6 +230,11 @@ export const documents = pgTable("documents", {
   isPublic: boolean("is_public").default(true), // Visible to all users
   adminOnly: boolean("admin_only").default(false), // Only admins can view
   managerOnly: boolean("manager_only").default(false), // Admins and managers can view
+  // Tagging system for enhanced organization
+  tags: text("tags").array().default([]), // Array of tag strings
+  category: varchar("category", { length: 100 }), // Primary category
+  subcategory: varchar("subcategory", { length: 100 }), // Secondary classification
+  processorType: varchar("processor_type", { length: 50 }), // Payment processor related
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

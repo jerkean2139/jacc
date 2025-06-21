@@ -2262,7 +2262,7 @@ export default function AdminControlCenter() {
                             {expandedFolders.includes(folder.id) && (
                               <div className="border-t bg-gray-50 p-3">
                                 <div className="space-y-2">
-                                  {console.log('Folder documents:', folder.documents) || folder.documents && folder.documents.length > 0 ? (
+                                  {folder.documents && folder.documents.length > 0 ? (
                                     folder.documents.map((doc: any) => (
                                       <div key={doc.id} className="flex items-center justify-between p-2 bg-white rounded border">
                                         <div className="flex items-center gap-2">
