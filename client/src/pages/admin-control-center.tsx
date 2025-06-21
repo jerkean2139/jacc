@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Folder, FileText, AlertTriangle, Settings, Users, BarChart3, MessageSquare, Brain, ChevronDown, Download, Edit, Send, ThumbsUp, Eye, RefreshCw, Plus, Upload, Search, Trash2, Save, X } from 'lucide-react';
+import { Folder, FileText, AlertTriangle, Settings, Users, BarChart3, MessageSquare, Brain, ChevronDown, Download, Edit, Send, ThumbsUp, Eye, RefreshCw, Plus, Upload, Search, Trash2, Save, X, User, Bot, Loader2, CheckCircle, AlertCircle, SkipForward } from 'lucide-react';
 import DocumentDragDrop from '@/components/ui/document-drag-drop';
 import DocumentPreviewModal from '@/components/ui/document-preview-modal';
 import DocumentUpload from '@/components/document-upload';
@@ -304,6 +304,73 @@ export default function AdminControlCenter() {
     }
   };
 
+  // Chat Review handlers
+  const handleReviewChat = async (chatId: string) => {
+    setSelectedChatId(chatId);
+    try {
+      const response = await fetch(`/api/admin/chat-reviews/${chatId}`, {
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to load chat details');
+      const chatData = await response.json();
+      setTrainingChatMessages(chatData.messages || []);
+    } catch (error) {
+      toast({ title: 'Failed to load chat details', variant: 'destructive' });
+    }
+  };
+
+  const handleSubmitTraining = async () => {
+    if (!trainingQuery.trim() || !selectedChatId) return;
+    
+    setIsTrainingChat(true);
+    try {
+      const response = await fetch('/api/admin/ai-simulator/train', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          query: trainingQuery,
+          chatId: selectedChatId,
+          context: 'chat_review'
+        }),
+        credentials: 'include'
+      });
+      
+      if (!response.ok) throw new Error('Failed to submit training');
+      
+      const result = await response.json();
+      setTrainingChatMessages(prev => [...prev, 
+        { role: 'user', content: trainingQuery, createdAt: new Date() },
+        { role: 'assistant', content: result.response, createdAt: new Date() }
+      ]);
+      setTrainingQuery('');
+      toast({ title: 'Training submitted successfully' });
+    } catch (error) {
+      toast({ title: 'Failed to submit training', variant: 'destructive' });
+    } finally {
+      setIsTrainingChat(false);
+    }
+  };
+
+  const handleUpdateReviewStatus = async (status: string) => {
+    if (!selectedChatId) return;
+    
+    try {
+      const response = await fetch(`/api/admin/chat-reviews/${selectedChatId}/review`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+        credentials: 'include'
+      });
+      
+      if (!response.ok) throw new Error('Failed to update review status');
+      
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/chat-reviews'] });
+      toast({ title: `Chat marked as ${status}` });
+    } catch (error) {
+      toast({ title: 'Failed to update status', variant: 'destructive' });
+    }
+  };
+
   // AI Simulator handlers
   const handleTestAI = async () => {
     if (!testQuery.trim()) return;
@@ -386,20 +453,30 @@ export default function AdminControlCenter() {
     setIsTrainingChat(true);
   };
 
+  // Unified training message handler for chat review
   const handleSendTrainingMessage = async () => {
     if (!trainingQuery.trim()) return;
 
-    const userMessage = { role: 'user', content: trainingQuery };
+    const userMessage = { role: 'user', content: trainingQuery, createdAt: new Date() };
     setTrainingChatMessages(prev => [...prev, userMessage]);
     setTrainingQuery('');
     setIsTrainingChat(true);
 
     try {
-      const response = await apiRequest('POST', '/api/admin/training/conversational', {
-        message: userMessage.content,
-        context: selectedChatDetails,
-        chatHistory: trainingChatMessages
+      const response = await fetch('/api/admin/ai-simulator/train', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: userMessage.content,
+          chatId: selectedChatId,
+          context: 'chat_review_training'
+        }),
+        credentials: 'include'
       });
+
+      if (!response.ok) throw new Error('Failed to send training message');
+      
+      const result = await response.json();
 
       const responseData = await response.json();
       const aiMessage = { role: 'assistant', content: responseData.response };
@@ -419,29 +496,7 @@ export default function AdminControlCenter() {
     }
   };
 
-  // Chat Review handlers
-  const handleReviewChat = async (chatId: string) => {
-    setSelectedChatId(chatId);
-    setShowChatReviewModal(true);
-    
-    // Fetch chat details immediately
-    try {
-      const response = await fetch(`/api/admin/chat-reviews/${chatId}`, {
-        credentials: 'include'
-      });
-      if (response.ok) {
-        const chatDetails = await response.json();
-        console.log('Chat details loaded:', chatDetails);
-      }
-    } catch (error) {
-      console.error('Error loading chat details:', error);
-      toast({ 
-        title: 'Error loading chat history',
-        description: 'Please try again',
-        variant: 'destructive'
-      });
-    }
-  };
+  // Chat Review specific handlers
 
 
 
@@ -1369,177 +1424,6 @@ export default function AdminControlCenter() {
               )}
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )) || (
-                  <div className="text-center text-muted-foreground py-12">
-                    <MessageSquare className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                    <p className="text-lg font-medium mb-2">No conversation selected</p>
-                    <p className="text-sm">Select a chat from the list to review and train AI responses</p>
-                  </div>
-                )}
-              </ScrollArea>
-            </TabsContent>
-
-            {/* AI Emulator Tab */}
-            <TabsContent value="ai-emulator" className="space-y-4 max-h-[70vh] overflow-y-auto">
-              <div className="text-sm text-muted-foreground">
-                Test AI responses to specific queries (independent testing tool)
-              </div>
-              
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Test Input */}
-                <div className="space-y-4">
-                  <Card>
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        <Send className="h-5 w-5" />
-                        Test Query
-                      </CardTitle>
-                      <CardDescription>Enter a question to test AI response</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <Textarea
-                        placeholder="Example: What are your payment processing rates for restaurants?"
-                        value={testQuery}
-                        onChange={(e) => setTestQuery(e.target.value)}
-                        rows={4}
-                      />
-                      <Button
-                        onClick={handleTestAI}
-                        disabled={!testQuery.trim() || isTestingAI}
-                        className="w-full"
-                        size="lg"
-                      >
-                        {isTestingAI ? (
-                          <RefreshCw className="h-4 w-4 animate-spin mr-2" />
-                        ) : (
-                          <Send className="h-4 w-4 mr-2" />
-                        )}
-                        Test AI Response
-                      </Button>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                {/* Response Output */}
-                <div className="space-y-4">
-                  {aiResponse ? (
-                    <Card>
-                      <CardHeader className="pb-3">
-                        <CardTitle className="text-lg flex items-center gap-2">
-                          <Brain className="h-5 w-5" />
-                          AI Response
-                        </CardTitle>
-                        <CardDescription>Current AI response to your test query</CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="p-4 bg-gray-50 border rounded-lg">
-                          <p className="text-sm whitespace-pre-wrap leading-relaxed">{aiResponse}</p>
-                        </div>
-                        
-                        <div className="flex gap-2">
-                          <Button
-                            variant="outline"
-                            onClick={() => {
-                              toast({ title: 'Response approved' });
-                              setAiResponse('');
-                              setTestQuery('');
-                            }}
-                            className="flex-1 text-green-600 border-green-200 hover:bg-green-50"
-                          >
-                            <ThumbsUp className="h-4 w-4 mr-1" />
-                            Good Response
-                          </Button>
-                          <Button
-                            variant="outline"
-                            onClick={() => setShowCorrectInterface(true)}
-                            className="flex-1 text-orange-600 border-orange-200 hover:bg-orange-50"
-                          >
-                            <Edit className="h-4 w-4 mr-1" />
-                            Needs Training
-                          </Button>
-                        </div>
-
-                        {showCorrectInterface && (
-                          <Card className="border-orange-200">
-                            <CardHeader className="bg-orange-50 pb-3">
-                              <CardTitle className="text-lg text-orange-900">AI Training Session</CardTitle>
-                              <CardDescription className="text-orange-700">
-                                Describe what needs improvement. The AI will learn from your feedback.
-                              </CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                              {/* Training Chat Messages */}
-                              {trainingChatMessages.length > 0 && (
-                                <div className="max-h-64 overflow-y-auto border rounded-lg p-3 space-y-2 bg-white">
-                                  {trainingChatMessages.map((msg, idx) => (
-                                    <div key={idx} className={`p-3 rounded ${
-                                      msg.role === 'user' 
-                                        ? 'bg-blue-100 text-blue-900 ml-6' 
-                                        : 'bg-gray-100 text-gray-900 mr-6'
-                                    }`}>
-                                      <div className="text-xs font-medium mb-1">
-                                        {msg.role === 'user' ? '👨‍💼 Admin' : '🤖 AI Learning'}
-                                      </div>
-                                      <div className="text-sm leading-relaxed">{msg.content}</div>
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-
-                              <Textarea
-                                placeholder="Example: 'This response is too technical. Make it simpler and focus on business benefits. Start with pricing information since that's what they asked about.'"
-                                value={trainingQuery}
-                                onChange={(e) => setTrainingQuery(e.target.value)}
-                                rows={3}
-                              />
-                              <div className="flex gap-2">
-                                <Button
-                                  onClick={handleSendTrainingMessage}
-                                  disabled={!trainingQuery.trim() || isTrainingChat}
-                                  className="bg-orange-600 hover:bg-orange-700 text-white"
-                                >
-                                  {isTrainingChat ? (
-                                    <RefreshCw className="h-4 w-4 animate-spin mr-2" />
-                                  ) : (
-                                    <Send className="h-4 w-4 mr-2" />
-                                  )}
-                                  Send Training
-                                </Button>
-                                <Button
-                                  variant="outline"
-                                  onClick={() => {
-                                    setShowCorrectInterface(false);
-                                    setTrainingChatMessages([]);
-                                    setTrainingQuery('');
-                                  }}
-                                >
-                                  Close Training
-                                </Button>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        )}
-                      </CardContent>
-                    </Card>
-                  ) : (
-                    <Card className="border-dashed">
-                      <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-                        <Brain className="h-12 w-12 text-gray-300 mb-4" />
-                        <p className="text-lg font-medium text-gray-500 mb-2">Ready to Test</p>
-                        <p className="text-sm text-gray-400">Enter a query and click "Test AI Response" to see how the AI responds</p>
-                      </CardContent>
-                    </Card>
-                  )}
-                </div>
-              </div>
-            </TabsContent>
-          </Tabs>
         </DialogContent>
       </Dialog>
     </div>
