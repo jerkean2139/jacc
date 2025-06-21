@@ -394,12 +394,13 @@ export default function AdminControlCenter() {
     setIsTrainingChat(true);
 
     try {
-      const responseData = await apiRequest('/api/admin/training/conversational', 'POST', {
-        message: trainingQuery,
+      const response = await apiRequest('POST', '/api/admin/training/conversational', {
+        message: userMessage.content,
         context: selectedChatDetails,
         chatHistory: trainingChatMessages
       });
 
+      const responseData = await response.json();
       const aiMessage = { role: 'assistant', content: responseData.response };
       setTrainingChatMessages(prev => [...prev, aiMessage]);
       
@@ -1268,26 +1269,57 @@ export default function AdminControlCenter() {
 
                     {showCorrectInterface && (
                       <div className="space-y-4 p-4 bg-blue-50 rounded-lg border">
-                        <h5 className="font-medium text-blue-900">Provide Training Correction</h5>
+                        <h5 className="font-medium text-blue-900">Conversational Training System</h5>
+                        <div className="text-sm text-blue-700 mb-3">
+                          Describe what needs to be corrected. The AI will learn from your feedback.
+                        </div>
+                        
+                        {/* Training Chat Messages */}
+                        {trainingChatMessages.length > 0 && (
+                          <div className="max-h-64 overflow-y-auto border rounded-lg bg-white p-3 space-y-2">
+                            {trainingChatMessages.map((msg, idx) => (
+                              <div key={idx} className={`p-2 rounded ${
+                                msg.role === 'user' 
+                                  ? 'bg-blue-100 text-blue-900 ml-8' 
+                                  : 'bg-gray-100 text-gray-900 mr-8'
+                              }`}>
+                                <div className="text-xs font-medium mb-1">
+                                  {msg.role === 'user' ? 'Admin' : 'AI'}
+                                </div>
+                                <div className="text-sm">{msg.content}</div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
                         <Textarea
-                          placeholder="Enter the correct response..."
-                          value={correctedResponse}
-                          onChange={(e) => setCorrectedResponse(e.target.value)}
-                          rows={4}
+                          placeholder="Describe what needs to be corrected or improved about this response..."
+                          value={trainingQuery}
+                          onChange={(e) => setTrainingQuery(e.target.value)}
+                          rows={3}
                         />
                         <div className="flex gap-2">
                           <Button
-                            onClick={handleSubmitCorrection}
-                            disabled={!correctedResponse.trim()}
+                            onClick={handleSendTrainingMessage}
+                            disabled={!trainingQuery.trim() || isTrainingChat}
                             className="bg-blue-600 hover:bg-blue-700"
                           >
-                            Submit Training
+                            {isTrainingChat ? (
+                              <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+                            ) : (
+                              <Send className="h-4 w-4 mr-2" />
+                            )}
+                            Send Training Instruction
                           </Button>
                           <Button
                             variant="outline"
-                            onClick={() => setShowCorrectInterface(false)}
+                            onClick={() => {
+                              setShowCorrectInterface(false);
+                              setTrainingChatMessages([]);
+                              setTrainingQuery('');
+                            }}
                           >
-                            Cancel
+                            Close Training
                           </Button>
                         </div>
                       </div>
