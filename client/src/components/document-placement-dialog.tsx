@@ -229,32 +229,48 @@ export default function DocumentPlacementDialog({
                 <div className="space-y-3">
                   <Label className="text-sm font-medium">Visibility</Label>
                   
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="viewAll"
-                      checked={permissions.viewAll}
-                      onCheckedChange={(checked) => 
-                        handlePermissionChange('viewAll', checked as boolean)
-                      }
-                    />
-                    <Label htmlFor="viewAll" className="text-sm flex items-center gap-2">
-                      <Eye className="h-3 w-3" />
-                      Visible to all users
-                    </Label>
-                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="radio"
+                        id="viewAll"
+                        name="visibility"
+                        checked={permissions.viewAll && !permissions.adminOnly}
+                        onChange={() => {
+                          setPermissions(prev => ({ 
+                            ...prev, 
+                            viewAll: true, 
+                            adminOnly: false 
+                          }));
+                        }}
+                        className="h-4 w-4 text-blue-600"
+                      />
+                      <Label htmlFor="viewAll" className="text-sm flex items-center gap-2">
+                        <Eye className="h-3 w-3" />
+                        Visible to all users
+                      </Label>
+                    </div>
 
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="adminOnly"
-                      checked={permissions.adminOnly}
-                      onCheckedChange={(checked) => 
-                        handlePermissionChange('adminOnly', checked as boolean)
-                      }
-                    />
-                    <Label htmlFor="adminOnly" className="text-sm flex items-center gap-2">
-                      <Lock className="h-3 w-3" />
-                      Admin only access
-                    </Label>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="radio"
+                        id="adminOnly"
+                        name="visibility"
+                        checked={permissions.adminOnly}
+                        onChange={() => {
+                          setPermissions(prev => ({ 
+                            ...prev, 
+                            viewAll: false, 
+                            adminOnly: true 
+                          }));
+                        }}
+                        className="h-4 w-4 text-blue-600"
+                      />
+                      <Label htmlFor="adminOnly" className="text-sm flex items-center gap-2">
+                        <Lock className="h-3 w-3" />
+                        Admin only access
+                      </Label>
+                    </div>
                   </div>
                 </div>
 
