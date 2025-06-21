@@ -1962,7 +1962,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }));
       
       console.log(`Documents integration: ${documentCount} total documents, ${folderCount} folders`);
-      console.log(`Query returned ${documentsResult.length} documents from database`);
       
       res.json({
         folders: foldersWithDocuments,
