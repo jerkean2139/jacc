@@ -70,22 +70,25 @@ export default function DocumentUpload({ folderId, onUploadComplete }: DocumentU
         body: JSON.stringify({ filenames })
       });
 
-      if (response.ok && response.headers.get('content-type')?.includes('application/json')) {
-        const data = await response.json();
-        const duplicates: string[] = [];
-        
-        if (data.results && Array.isArray(data.results)) {
-          data.results.forEach((result: any) => {
-            if (result.potentialDuplicates > 0) {
-              duplicates.push(result.filename);
-            }
-          });
+      if (response.ok) {
+        try {
+          const data = await response.json();
+          const duplicates: string[] = [];
+          
+          if (data.results && Array.isArray(data.results)) {
+            data.results.forEach((result: any) => {
+              if (result.potentialDuplicates > 0) {
+                duplicates.push(result.filename);
+              }
+            });
+          }
+          
+          setDuplicateWarnings(duplicates);
+          return; // Successfully processed, exit function
+        } catch (jsonError) {
+          console.log('API response not JSON, using local check');
+          // Fall through to local check
         }
-        
-        setDuplicateWarnings(duplicates);
-      } else {
-        // API not available or returning HTML, use local check
-        throw new Error('API response not JSON');
       }
     } catch (error) {
       console.error('Error checking for duplicates, using local check:', error);

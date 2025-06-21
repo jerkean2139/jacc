@@ -4207,10 +4207,17 @@ User Context: {userRole}`,
         // For pre-upload checks, we only check name similarity since we don't have file content yet
         const documents = await storage.getUserDocuments(userId);
         const similarDocuments = documents.filter(doc => {
-          const similarity = duplicateDetectionService.calculateNameSimilarity 
-            ? duplicateDetectionService.calculateNameSimilarity(filename, doc.originalName)
-            : 0;
-          return similarity > 0.8;
+          if (!doc.originalName) return false;
+          
+          // Simple name similarity check
+          const name1 = filename.toLowerCase().replace(/\.[^/.]+$/, "");
+          const name2 = doc.originalName.toLowerCase().replace(/\.[^/.]+$/, "");
+          
+          // Check for exact match or very similar names
+          return name1 === name2 || 
+                 name1.includes(name2) || 
+                 name2.includes(name1) ||
+                 filename.toLowerCase() === doc.originalName.toLowerCase();
         });
 
         results.push({
