@@ -2279,162 +2279,33 @@ export default function AdminControlCenter() {
                     </div>
                   ) : (
                     <ScrollArea className="h-[600px] pr-4">
-                      <div className="space-y-4">
-                        {integratedDocuments?.folders?.map((folder: any) => (
-                          <div key={folder.id} className="border rounded-lg">
-                            <div 
-                              className="flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50"
-                              onClick={() => {
-                                const isExpanded = expandedFolders.includes(folder.id);
-                                setExpandedFolders(prev => 
-                                  isExpanded 
-                                    ? prev.filter(id => id !== folder.id)
-                                    : [...prev, folder.id]
-                                );
-                              }}
-                            >
-                              <div className="flex items-center gap-2">
-                                <Folder className="h-4 w-4 text-blue-600" />
-                                <span className="font-medium">{folder.name}</span>
-                                <Badge variant="secondary" className="text-xs">
-                                  {folder.documents?.length || 0} docs
-                                </Badge>
-                              </div>
-                              <ChevronDown className={`h-4 w-4 transition-transform ${
-                                expandedFolders.includes(folder.id) ? 'rotate-180' : ''
-                              }`} />
-                            </div>
-                            
-                            {expandedFolders.includes(folder.id) && (
-                              <div className="border-t bg-gray-50 p-3">
-                                <div className="space-y-2">
-                                  {folder.documents && folder.documents.length > 0 ? (
-                                    folder.documents.map((doc: any) => (
-                                      <div key={doc.id} className="flex items-center justify-between p-2 bg-white rounded border">
-                                        <div className="flex items-center gap-2">
-                                          <FileText className="h-3 w-3 text-gray-500" />
-                                          <span className="text-sm">{doc.name}</span>
-                                          <Badge variant="outline" className="text-xs">
-                                            {doc.mimeType?.split('/')[1] || 'unknown'}
-                                          </Badge>
-                                          {doc.tags && doc.tags.length > 0 && (
-                                            <div className="flex gap-1">
-                                              {doc.tags.slice(0, 2).map((tag: string, idx: number) => (
-                                                <Badge key={idx} variant="secondary" className="text-xs px-1 py-0">
-                                                  {tag}
-                                                </Badge>
-                                              ))}
-                                              {doc.tags.length > 2 && (
-                                                <Badge variant="secondary" className="text-xs px-1 py-0">
-                                                  +{doc.tags.length - 2}
-                                                </Badge>
-                                              )}
-                                            </div>
-                                          )}
-                                        </div>
-                                        <div className="flex items-center gap-1">
-                                          {doc.isFavorite && <Star className="h-3 w-3 text-yellow-500" />}
-                                          {doc.isPublic && <Globe className="h-3 w-3 text-green-500" />}
-                                          {doc.category && (
-                                            <Badge variant="outline" className="text-xs">
-                                              {doc.category}
-                                            </Badge>
-                                          )}
-                                          <span className="text-xs text-gray-500">
-                                            {Math.round((doc.size || 0) / 1024)}KB
-                                          </span>
-                                        </div>
-                                      </div>
-                                    ))
-                                  ) : (
-                                    <div className="text-center text-gray-500 py-4">
-                                      No documents in this folder
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        ))}
-
-                        {integratedDocuments?.unassignedDocuments?.length > 0 && (
-                          <div className="border rounded-lg border-orange-200">
-                            <div 
-                              className="flex items-center justify-between p-3 cursor-pointer hover:bg-orange-50"
-                              onClick={() => {
-                                const isExpanded = expandedFolders.includes('unassigned');
-                                setExpandedFolders(prev => 
-                                  isExpanded 
-                                    ? prev.filter(id => id !== 'unassigned')
-                                    : [...prev, 'unassigned']
-                                );
-                              }}
-                            >
-                              <div className="flex items-center gap-2">
-                                <AlertTriangle className="h-4 w-4 text-orange-600" />
-                                <span className="font-medium text-orange-800">Unassigned Documents</span>
-                                <Badge variant="destructive" className="text-xs">
-                                  {integratedDocuments.unassignedDocuments.length}
-                                </Badge>
-                              </div>
-                              <ChevronDown className={`h-4 w-4 transition-transform ${
-                                expandedFolders.includes('unassigned') ? 'rotate-180' : ''
-                              }`} />
-                            </div>
-                            
-                            {expandedFolders.includes('unassigned') && (
-                              <div className="border-t bg-orange-50 p-3">
-                                <div className="space-y-2">
-                                  {integratedDocuments.unassignedDocuments.map((doc: any) => (
-                                    <div key={doc.id} className="flex items-center justify-between p-2 bg-white rounded border">
-                                      <div className="flex items-center gap-2">
-                                        <FileText className="h-3 w-3 text-gray-500" />
-                                        <span className="text-sm">{doc.name}</span>
-                                        <Badge variant="outline" className="text-xs">
-                                          {doc.mime_type?.split('/')[1] || 'unknown'}
-                                        </Badge>
-                                      </div>
-                                      <div className="flex items-center gap-1">
-                                        {doc.is_favorite && <Star className="h-3 w-3 text-yellow-500" />}
-                                        {doc.is_public && <Globe className="h-3 w-3 text-green-500" />}
-                                        <span className="text-xs text-gray-500">
-                                          {Math.round((doc.size || 0) / 1024)}KB
-                                        </span>
-                                      </div>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
+                      <DocumentDragDrop
+                        folders={integratedDocuments?.folders || []}
+                        unassignedDocuments={integratedDocuments?.unassignedDocuments || []}
+                        onMoveDocument={handleMoveDocument}
+                        onPreviewDocument={handlePreviewDocument}
+                        onDownloadDocument={handleDownloadDocument}
+                        onEditDocument={handleEditDocumentTags}
+                      />
                     </ScrollArea>
                   )}
                 </CardContent>
               </Card>
             </div>
           </div>
+
+          {/* Document Preview Modal */}
+          <DocumentPreviewModal
+            document={previewDocument}
+            isOpen={showPreviewModal}
+            onClose={() => setShowPreviewModal(false)}
+            onDownload={handleDownloadDocument}
+          />
         </TabsContent>
       </Tabs>
-
-      {/* Duplicate Preview Modal */}
-      <Dialog open={showDuplicateModal} onOpenChange={setShowDuplicateModal}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Duplicate Documents Found</DialogTitle>
-            <DialogDescription>
-              Review the duplicates found before removing them. This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          
-          {duplicatePreview && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-4 gap-4 text-sm">
-                <div className="text-center p-3 bg-blue-50 rounded">
-                  <div className="font-semibold text-lg">{duplicatePreview.totalProcessed}</div>
-                  <div className="text-gray-600">Database Records</div>
-                </div>
+    </div>
+  );
+}
                 <div className="text-center p-3 bg-green-50 rounded">
                   <div className="font-semibold text-lg">{duplicatePreview.validFiles || 0}</div>
                   <div className="text-gray-600">Valid Files</div>
