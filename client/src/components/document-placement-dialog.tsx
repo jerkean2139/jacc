@@ -73,6 +73,7 @@ export default function DocumentPlacementDialog({
       documentIds: string[];
       folderId: string;
       permissions: DocumentPermissions;
+      tempFiles?: any[];
     }) => {
       const response = await fetch("/api/documents/process-placement", {
         method: "POST",
@@ -127,6 +128,7 @@ export default function DocumentPlacementDialog({
       documentIds: uploadedFiles.map(file => file.id),
       folderId: selectedFolderId,
       permissions,
+      tempFiles: uploadedFiles,
     });
   };
 
