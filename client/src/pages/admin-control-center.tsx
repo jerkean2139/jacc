@@ -261,39 +261,120 @@ export default function AdminControlCenter() {
         </TabsList>
 
         <TabsContent value="documents" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-3">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Folder className="h-5 w-5" />
-                    Document Repository
-                  </CardTitle>
-                  <CardDescription>
-                    Organize and manage your document collection with drag-and-drop functionality
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {documentsLoading ? (
-                    <div className="flex items-center justify-center p-8">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                      <span className="ml-2">Loading documents...</span>
-                    </div>
-                  ) : (
-                    <ScrollArea className="h-[600px] pr-4">
-                      <DocumentDragDrop
-                        folders={(integratedDocuments as any)?.folders || []}
-                        unassignedDocuments={(integratedDocuments as any)?.unassignedDocuments || []}
-                        onMoveDocument={handleMoveDocument}
-                        onPreviewDocument={handlePreviewDocument}
-                        onDownloadDocument={handleDownloadDocument}
-                        onEditDocument={handleEditDocument}
-                      />
-                    </ScrollArea>
-                  )}
-                </CardContent>
-              </Card>
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-lg font-medium">Document Management</h3>
+              <p className="text-sm text-muted-foreground">
+                Upload and organize merchant services documents for instant search in Tracer
+              </p>
             </div>
+
+            <Tabs defaultValue="upload" className="space-y-4">
+              <TabsList>
+                <TabsTrigger value="upload">
+                  <Upload className="h-4 w-4 mr-2" />
+                  Upload Documents
+                </TabsTrigger>
+                <TabsTrigger value="manage">
+                  <FileText className="h-4 w-4 mr-2" />
+                  Manage Documents ({allDocuments.length})
+                </TabsTrigger>
+                <TabsTrigger value="folders">
+                  <Folder className="h-4 w-4 mr-2" />
+                  Folders ({(integratedDocuments as any)?.folders?.length || 0})
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="upload" className="space-y-4">
+                <DocumentUpload />
+              </TabsContent>
+
+              <TabsContent value="manage" className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Search Documents</CardTitle>
+                    <div className="relative">
+                      <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Search documents by name, description, or category..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-10"
+                      />
+                    </div>
+                  </CardHeader>
+                  {filteredDocuments.length > 0 && (
+                    <CardContent>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {filteredDocuments.map((doc: any) => (
+                          <DraggableDocument
+                            key={doc.id}
+                            document={doc}
+                            onMove={handleMoveDocument}
+                          />
+                        ))}
+                      </div>
+                    </CardContent>
+                  )}
+                  {filteredDocuments.length === 0 && (
+                    <CardContent>
+                      <div className="text-center py-8">
+                        <FileText className="mx-auto h-12 w-12 text-muted-foreground" />
+                        <h3 className="mt-2 text-sm font-semibold text-gray-900">No documents found</h3>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          {searchQuery ? 'Try adjusting your search terms.' : 'Upload some documents to get started.'}
+                        </p>
+                      </div>
+                    </CardContent>
+                  )}
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="folders" className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Folder Organization</CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                      Organize your documents into folders for better management
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-950 rounded-lg border-2 border-dashed border-blue-200 dark:border-blue-800">
+                      <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">Drag & Drop Instructions</h4>
+                      <p className="text-sm text-blue-700 dark:text-blue-200">
+                        • Drag documents from the "Manage Documents" tab to any folder below to organize them
+                      </p>
+                      <p className="text-sm text-blue-700 dark:text-blue-200">
+                        • Folders will highlight when you can drop documents into them
+                      </p>
+                    </div>
+                    
+                    {(integratedDocuments as any)?.folders?.length > 0 ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {(integratedDocuments as any)?.folders?.map((folder: any) => (
+                          <DroppableFolder
+                            key={folder.id}
+                            folder={{
+                              ...folder,
+                              documentCount: folder.documents?.length || 0
+                            }}
+                            onDocumentMove={handleMoveDocument}
+                          />
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <Folder className="mx-auto h-12 w-12 text-muted-foreground" />
+                        <h3 className="mt-2 text-sm font-semibold text-gray-900">No folders available</h3>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          Contact administrator to create folders for document organization.
+                        </p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
           </div>
 
           {/* Document Preview Modal */}
