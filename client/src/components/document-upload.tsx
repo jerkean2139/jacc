@@ -46,9 +46,15 @@ export default function DocumentUpload({ folderId, onUploadComplete }: DocumentU
   const isAuthenticated = true; // Admin-only component, no auth check needed
 
   // Fetch existing documents
-  const { data: documents = [] } = useQuery<Document[]>({
+  const { data: documentsData } = useQuery({
     queryKey: ["/api/documents"],
   });
+
+  // Extract documents from the integrated structure
+  const documents = documentsData ? [
+    ...((documentsData as any)?.folders?.flatMap((folder: any) => folder.documents || []) || []),
+    ...((documentsData as any)?.unassignedDocuments || [])
+  ] : [];
 
   // Check for duplicate files using the API
   const checkForDuplicates = async (files: File[]) => {
