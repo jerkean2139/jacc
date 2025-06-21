@@ -69,20 +69,25 @@ export default function DocumentUpload({ folderId, onUploadComplete }: DocumentU
         body: JSON.stringify({ filenames })
       });
 
-      if (response.ok) {
+      if (response.ok && response.headers.get('content-type')?.includes('application/json')) {
         const data = await response.json();
         const duplicates: string[] = [];
         
-        data.results.forEach((result: any) => {
-          if (result.potentialDuplicates > 0) {
-            duplicates.push(result.filename);
-          }
-        });
+        if (data.results && Array.isArray(data.results)) {
+          data.results.forEach((result: any) => {
+            if (result.potentialDuplicates > 0) {
+              duplicates.push(result.filename);
+            }
+          });
+        }
         
         setDuplicateWarnings(duplicates);
+      } else {
+        // API not available or returning HTML, use local check
+        throw new Error('API response not JSON');
       }
     } catch (error) {
-      console.error('Error checking for duplicates:', error);
+      console.error('Error checking for duplicates, using local check:', error);
       // Fallback to local check
       const duplicates: string[] = [];
       files.forEach(file => {
@@ -305,20 +310,7 @@ export default function DocumentUpload({ folderId, onUploadComplete }: DocumentU
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Authentication Button */}
-          {!isAuthenticated && (
-            <div className="mb-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-sm font-medium text-yellow-800 dark:text-yellow-200">Authentication Required</h3>
-                  <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">Click to enable document uploads</p>
-                </div>
-                <Button onClick={handleAuthenticate} variant="outline" size="sm">
-                  Enable Uploads
-                </Button>
-              </div>
-            </div>
-          )}
+
 
           {/* Enhanced Drag & Drop Upload Area */}
           <div 
