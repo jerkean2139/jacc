@@ -95,6 +95,15 @@ export default function AdminControlCenter() {
   const [integratedDocumentsData, setIntegratedDocumentsData] = useState<any>(null);
   const [documentSearchQuery, setDocumentSearchQuery] = useState('');
   const [expandedFolders, setExpandedFolders] = useState<string[]>([]);
+  
+  // Tag management states
+  const [availableTags, setAvailableTags] = useState<any>({});
+  const [selectedDocuments, setSelectedDocuments] = useState<string[]>([]);
+  const [bulkTagOperation, setBulkTagOperation] = useState(false);
+  const [newTag, setNewTag] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedSubcategory, setSelectedSubcategory] = useState('');
+  const [selectedProcessorType, setSelectedProcessorType] = useState('');
 
   // FAQ edit states
   const [editingFAQ, setEditingFAQ] = useState<FAQ | null>(null);
