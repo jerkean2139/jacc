@@ -161,7 +161,13 @@ export function registerChatReviewRoutes(app: any) {
 
       // Get all messages for this chat
       const chatMessages = await db
-        .select()
+        .select({
+          id: messages.id,
+          content: messages.content,
+          role: messages.role,
+          createdAt: messages.createdAt,
+          chatId: messages.chatId,
+        })
         .from(messages)
         .where(eq(messages.chatId, chatId))
         .orderBy(messages.createdAt);
