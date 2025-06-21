@@ -51,10 +51,10 @@ export default function DocumentPreviewModal({
   if (!document) return null;
 
   const isPDF = document.mimeType === 'application/pdf';
-  const isImage = document.mimeType.startsWith('image/');
-  const isText = document.mimeType.startsWith('text/') || 
+  const isImage = document.mimeType?.startsWith('image/') || false;
+  const isText = document.mimeType?.startsWith('text/') || 
                  document.mimeType === 'application/json' ||
-                 document.mimeType === 'application/javascript';
+                 document.mimeType === 'application/javascript' || false;
 
   const previewUrl = `/api/documents/${document.id}/view`;
   const downloadUrl = `/api/documents/${document.id}/download`;
