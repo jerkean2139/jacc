@@ -1917,7 +1917,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ORDER BY COUNT(d.id) DESC, f.name
       `;
       
-      // Get documents with folder information
+      // Get ALL documents with folder information (no limit)
       const documentsResult = await sql`
         SELECT 
           d.id,
@@ -1937,8 +1937,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           f.folder_type
         FROM documents d
         LEFT JOIN folders f ON d.folder_id = f.id
-        ORDER BY d.created_at DESC
-        LIMIT 50
+        ORDER BY CASE WHEN d.folder_id IS NOT NULL THEN 0 ELSE 1 END, f.name, d.created_at DESC
       `;
       
       // Group documents by folder
@@ -1963,6 +1962,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }));
       
       console.log(`Documents integration: ${documentCount} total documents, ${folderCount} folders`);
+      console.log(`Query returned ${documentsResult.length} documents from database`);
       
       res.json({
         folders: foldersWithDocuments,
