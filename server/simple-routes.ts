@@ -1963,6 +1963,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`Documents integration: ${documentCount} total documents, ${folderCount} folders`);
       
+      // Debug document assignment
+      let totalAssigned = 0;
+      Object.keys(documentsByFolder).forEach(folderId => {
+        totalAssigned += documentsByFolder[folderId].length;
+      });
+      console.log(`Documents assigned to folders: ${totalAssigned}, unassigned: ${unassignedDocuments.length}`);
+      
       res.json({
         folders: foldersWithDocuments,
         unassignedDocuments,

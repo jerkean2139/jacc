@@ -2251,7 +2251,7 @@ export default function AdminControlCenter() {
                                 <Folder className="h-4 w-4 text-blue-600" />
                                 <span className="font-medium">{folder.name}</span>
                                 <Badge variant="secondary" className="text-xs">
-                                  {folder.document_count} docs
+                                  {folder.documents?.length || 0}/{folder.document_count} docs
                                 </Badge>
                               </div>
                               <ChevronDown className={`h-4 w-4 transition-transform ${
@@ -2259,10 +2259,10 @@ export default function AdminControlCenter() {
                               }`} />
                             </div>
                             
-                            {expandedFolders.includes(folder.id) && folder.documents && (
+                            {expandedFolders.includes(folder.id) && (
                               <div className="border-t bg-gray-50 p-3">
                                 <div className="space-y-2">
-                                  {folder.documents.length > 0 ? (
+                                  {console.log('Folder documents:', folder.documents) || folder.documents && folder.documents.length > 0 ? (
                                     folder.documents.map((doc: any) => (
                                       <div key={doc.id} className="flex items-center justify-between p-2 bg-white rounded border">
                                         <div className="flex items-center gap-2">
