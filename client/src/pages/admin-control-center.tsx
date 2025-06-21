@@ -8,8 +8,11 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Folder, FileText, AlertTriangle, Settings, Users, BarChart3, MessageSquare, Brain, ChevronDown, Download, Edit, Send, ThumbsUp, Eye, RefreshCw, Plus, Upload, Search } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { Folder, FileText, AlertTriangle, Settings, Users, BarChart3, MessageSquare, Brain, ChevronDown, Download, Edit, Send, ThumbsUp, Eye, RefreshCw, Plus, Upload, Search, Trash2, Save, X } from 'lucide-react';
 import DocumentDragDrop from '@/components/ui/document-drag-drop';
 import DocumentPreviewModal from '@/components/ui/document-preview-modal';
 import DocumentUpload from '@/components/document-upload';
@@ -56,6 +59,19 @@ export default function AdminControlCenter() {
   const [reviewStatus, setReviewStatus] = useState('pending');
   const [chatReviewFilter, setChatReviewFilter] = useState('pending');
   const [messageCorrection, setMessageCorrection] = useState('');
+  
+  // FAQ Management state
+  const [editingFaq, setEditingFaq] = useState<any>(null);
+  const [showFaqDialog, setShowFaqDialog] = useState(false);
+  const [showCategoryDialog, setShowCategoryDialog] = useState(false);
+  const [newCategory, setNewCategory] = useState('');
+  const [editingCategory, setEditingCategory] = useState<string | null>(null);
+  const [faqForm, setFaqForm] = useState({
+    question: '',
+    answer: '',
+    category: '',
+    isActive: true
+  });
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -114,6 +130,149 @@ export default function AdminControlCenter() {
   const handleEditDocument = (document: DocumentEntry) => {
     // Placeholder for edit functionality
     toast({ title: 'Edit functionality coming soon' });
+  };
+
+  // FAQ Management mutations
+  const createFaqMutation = useMutation({
+    mutationFn: async (faqData: any) => {
+      const response = await fetch('/api/admin/faq', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(faqData),
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to create FAQ');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/faq'] });
+      setShowFaqDialog(false);
+      setFaqForm({ question: '', answer: '', category: '', isActive: true });
+      toast({ title: 'FAQ created successfully' });
+    },
+    onError: () => {
+      toast({ title: 'Error creating FAQ', variant: 'destructive' });
+    }
+  });
+
+  const updateFaqMutation = useMutation({
+    mutationFn: async ({ id, ...data }: any) => {
+      const response = await fetch(`/api/admin/faq/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to update FAQ');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/faq'] });
+      setEditingFaq(null);
+      setShowFaqDialog(false);
+      toast({ title: 'FAQ updated successfully' });
+    },
+    onError: () => {
+      toast({ title: 'Error updating FAQ', variant: 'destructive' });
+    }
+  });
+
+  const deleteFaqMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await fetch(`/api/admin/faq/${id}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to delete FAQ');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/faq'] });
+      toast({ title: 'FAQ deleted successfully' });
+    },
+    onError: () => {
+      toast({ title: 'Error deleting FAQ', variant: 'destructive' });
+    }
+  });
+
+  const createCategoryMutation = useMutation({
+    mutationFn: async (categoryName: string) => {
+      const response = await fetch('/api/admin/faq/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: categoryName }),
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to create category');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/faq'] });
+      setShowCategoryDialog(false);
+      setNewCategory('');
+      toast({ title: 'Category created successfully' });
+    },
+    onError: () => {
+      toast({ title: 'Error creating category', variant: 'destructive' });
+    }
+  });
+
+  const deleteCategoryMutation = useMutation({
+    mutationFn: async (categoryName: string) => {
+      const response = await fetch(`/api/admin/faq/categories/${encodeURIComponent(categoryName)}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to delete category');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/faq'] });
+      toast({ title: 'Category deleted successfully' });
+    },
+    onError: () => {
+      toast({ title: 'Error deleting category', variant: 'destructive' });
+    }
+  });
+
+  // FAQ Management handlers
+  const handleCreateFaq = () => {
+    setEditingFaq(null);
+    setFaqForm({ question: '', answer: '', category: '', isActive: true });
+    setShowFaqDialog(true);
+  };
+
+  const handleEditFaq = (faq: any) => {
+    setEditingFaq(faq);
+    setFaqForm({
+      question: faq.question,
+      answer: faq.answer,
+      category: faq.category,
+      isActive: faq.isActive
+    });
+    setShowFaqDialog(true);
+  };
+
+  const handleSaveFaq = () => {
+    if (editingFaq) {
+      updateFaqMutation.mutate({ id: editingFaq.id, ...faqForm });
+    } else {
+      createFaqMutation.mutate(faqForm);
+    }
+  };
+
+  const handleDeleteFaq = (id: number) => {
+    deleteFaqMutation.mutate(id);
+  };
+
+  const handleCreateCategory = () => {
+    if (newCategory.trim()) {
+      createCategoryMutation.mutate(newCategory.trim());
+    }
+  };
+
+  const handleDeleteCategory = (categoryName: string) => {
+    deleteCategoryMutation.mutate(categoryName);
   };
 
   const handleMoveDocument = async (documentId: string, targetFolderId: string | null) => {
@@ -427,10 +586,55 @@ export default function AdminControlCenter() {
         <TabsContent value="faq" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Knowledge Base Management</CardTitle>
-              <CardDescription>
-                Manage FAQ entries and knowledge base content
-              </CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Knowledge Base Management</CardTitle>
+                  <CardDescription>
+                    Manage FAQ entries and knowledge base content with full CRUD operations
+                  </CardDescription>
+                </div>
+                <div className="flex gap-2">
+                  <Dialog open={showCategoryDialog} onOpenChange={setShowCategoryDialog}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Category
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Add New Category</DialogTitle>
+                        <DialogDescription>
+                          Create a new category for organizing FAQ entries
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="categoryName">Category Name</Label>
+                          <Input
+                            id="categoryName"
+                            value={newCategory}
+                            onChange={(e) => setNewCategory(e.target.value)}
+                            placeholder="Enter category name"
+                          />
+                        </div>
+                      </div>
+                      <div className="flex justify-end gap-2">
+                        <Button variant="outline" onClick={() => setShowCategoryDialog(false)}>
+                          Cancel
+                        </Button>
+                        <Button onClick={handleCreateCategory} disabled={!newCategory.trim()}>
+                          Create Category
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                  <Button onClick={handleCreateFaq} size="sm">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add FAQ
+                  </Button>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               {faqLoading ? (
@@ -449,14 +653,40 @@ export default function AdminControlCenter() {
                         <div className="p-4 bg-gray-50 border-b">
                           <div className="flex items-center justify-between">
                             <h3 className="font-semibold">{category}</h3>
-                            <Badge variant="secondary">
-                              {categoryFAQs.length} entries
-                            </Badge>
+                            <div className="flex items-center gap-2">
+                              <Badge variant="secondary">
+                                {categoryFAQs.length} entries
+                              </Badge>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button variant="outline" size="sm">
+                                    <Trash2 className="h-3 w-3" />
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Delete Category</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Are you sure you want to delete the "{category}" category? This will also delete all FAQ entries in this category. This action cannot be undone.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction
+                                      onClick={() => handleDeleteCategory(category)}
+                                      className="bg-red-600 hover:bg-red-700"
+                                    >
+                                      Delete Category
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </div>
                           </div>
                         </div>
                         <div className="p-4 space-y-2">
                           {categoryFAQs.map((faq: FAQ) => (
-                            <div key={faq.id} className="flex items-center justify-between p-2 border rounded">
+                            <div key={faq.id} className="flex items-center justify-between p-3 border rounded hover:bg-gray-50">
                               <div className="flex-1">
                                 <p className="text-sm font-medium">{faq.question}</p>
                                 <p className="text-xs text-gray-600 mt-1 line-clamp-2">{faq.answer}</p>
@@ -465,20 +695,131 @@ export default function AdminControlCenter() {
                                 <Badge variant={faq.isActive ? "default" : "secondary"}>
                                   {faq.isActive ? "Active" : "Inactive"}
                                 </Badge>
-                                <Button size="sm" variant="outline">
+                                <Button size="sm" variant="outline" onClick={() => handleEditFaq(faq)}>
                                   <Edit className="h-3 w-3" />
                                 </Button>
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button size="sm" variant="outline">
+                                      <Trash2 className="h-3 w-3" />
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Delete FAQ Entry</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        Are you sure you want to delete this FAQ entry? This action cannot be undone.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                      <AlertDialogAction
+                                        onClick={() => handleDeleteFaq(faq.id)}
+                                        className="bg-red-600 hover:bg-red-700"
+                                      >
+                                        Delete FAQ
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
                               </div>
                             </div>
                           ))}
+                          {categoryFAQs.length === 0 && (
+                            <div className="text-center py-4 text-gray-500">
+                              No FAQ entries in this category
+                            </div>
+                          )}
                         </div>
                       </div>
                     );
                   })}
+                  {categories.length === 0 && (
+                    <div className="text-center py-8">
+                      <MessageSquare className="mx-auto h-12 w-12 text-muted-foreground" />
+                      <h3 className="mt-2 text-sm font-semibold text-gray-900">No FAQ categories</h3>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        Start by creating a category to organize your FAQ entries.
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
             </CardContent>
           </Card>
+
+          {/* FAQ Edit/Create Dialog */}
+          <Dialog open={showFaqDialog} onOpenChange={setShowFaqDialog}>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>
+                  {editingFaq ? 'Edit FAQ Entry' : 'Create New FAQ Entry'}
+                </DialogTitle>
+                <DialogDescription>
+                  {editingFaq ? 'Update the FAQ entry details below' : 'Add a new FAQ entry to the knowledge base'}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="question">Question</Label>
+                  <Input
+                    id="question"
+                    value={faqForm.question}
+                    onChange={(e) => setFaqForm({ ...faqForm, question: e.target.value })}
+                    placeholder="Enter the FAQ question"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="answer">Answer</Label>
+                  <Textarea
+                    id="answer"
+                    value={faqForm.answer}
+                    onChange={(e) => setFaqForm({ ...faqForm, answer: e.target.value })}
+                    placeholder="Enter the detailed answer"
+                    rows={4}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="category">Category</Label>
+                  <Select
+                    value={faqForm.category}
+                    onValueChange={(value) => setFaqForm({ ...faqForm, category: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map((category: string) => (
+                        <SelectItem key={category} value={category}>
+                          {category}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="isActive"
+                    checked={faqForm.isActive}
+                    onCheckedChange={(checked) => setFaqForm({ ...faqForm, isActive: checked })}
+                  />
+                  <Label htmlFor="isActive">Active (visible to users)</Label>
+                </div>
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowFaqDialog(false)}>
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={handleSaveFaq} 
+                  disabled={!faqForm.question.trim() || !faqForm.answer.trim() || !faqForm.category}
+                >
+                  <Save className="h-4 w-4 mr-2" />
+                  {editingFaq ? 'Update FAQ' : 'Create FAQ'}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
         </TabsContent>
 
         <TabsContent value="training" className="space-y-6">
