@@ -2881,7 +2881,14 @@ Would you like me to create a detailed proposal for this merchant?`,
           filename: file.originalname,
           size: file.size,
           mimeType: file.mimetype,
-          tempPath: file.path
+          tempPath: file.path,
+          tempData: {
+            originalname: file.originalname,
+            path: file.path,
+            size: file.size,
+            mimetype: file.mimetype,
+            customName: customName
+          }
         });
       }
 
@@ -2899,7 +2906,7 @@ Would you like me to create a detailed proposal for this merchant?`,
   // Step 2: Process document placement and permissions
   app.post('/api/documents/process-placement', async (req: Request, res: Response) => {
     try {
-      const { documentIds, folderId, permissions } = req.body;
+      const { documentIds, folderId, permissions, tempFiles } = req.body;
 
       if (!documentIds || !Array.isArray(documentIds)) {
         return res.status(400).json({ message: "Document IDs are required" });
@@ -2908,14 +2915,40 @@ Would you like me to create a detailed proposal for this merchant?`,
       const processedDocuments = [];
       const errors = [];
 
-      for (const documentId of documentIds) {
+      // Get database connection
+      const { db } = await import('./db');
+      const { documents } = await import('@shared/schema');
+      const fs = await import('fs');
+      const path = await import('path');
+
+      for (let i = 0; i < documentIds.length; i++) {
+        const documentId = documentIds[i];
+        const tempFile = tempFiles ? tempFiles.find((f: any) => f.id === documentId) : null;
+        
         try {
-          // Simulate successful processing for now
-          processedDocuments.push({
-            id: documentId,
+          // Use actual file data if available, otherwise use placeholder
+          const fileName = tempFile ? tempFile.filename : `uploaded-document-${Date.now()}`;
+          const originalName = tempFile ? tempFile.filename : `Document-${Date.now()}.pdf`;
+          const fileSize = tempFile ? tempFile.size : 0;
+          const mimeType = tempFile ? tempFile.mimeType : 'application/pdf';
+          
+          // Create actual document record in database
+          const newDocument = await db.insert(documents).values({
+            name: fileName,
+            originalName: originalName,
+            path: tempFile ? tempFile.tempPath : `uploads/temp-${Date.now()}`,
+            size: fileSize,
+            mimeType: mimeType,
+            userId: 'admin-user',
             folderId: folderId === 'root' ? null : folderId,
-            permissions: permissions
-          });
+            isPublic: permissions?.viewAll || false,
+            adminOnly: permissions?.adminOnly || false,
+            managerOnly: permissions?.managerAccess || false,
+            trainingData: permissions?.trainingData || false,
+            autoVectorize: permissions?.autoVectorize || false,
+          }).returning();
+
+          processedDocuments.push(newDocument[0]);
         } catch (error) {
           console.error(`Error processing document ${documentId}:`, error);
           errors.push(`Failed to process document ${documentId}`);

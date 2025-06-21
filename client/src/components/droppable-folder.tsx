@@ -11,6 +11,7 @@ interface DroppableFolderProps {
     name: string;
     documentCount?: number;
     createdAt?: string;
+    documents?: any[];
   };
   onDocumentMove?: (documentId: string, targetFolderId: string) => Promise<void>;
   onClick?: () => void;
@@ -21,6 +22,7 @@ export function DroppableFolder({ folder, onDocumentMove, onClick, isSelected }:
   const { draggedItem, setDropTarget, dropTarget } = useDragDrop();
   const { toast } = useToast();
   const [isHovered, setIsHovered] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const canAcceptDrop = draggedItem?.type === 'document';
   const isDropTarget = dropTarget === folder.id;
@@ -63,6 +65,14 @@ export function DroppableFolder({ folder, onDocumentMove, onClick, isSelected }:
     }
   };
 
+  const handleFolderClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!canAcceptDrop) {
+      setIsExpanded(!isExpanded);
+    }
+    if (onClick) onClick();
+  };
+
   return (
     <Card
       className={`
@@ -74,13 +84,15 @@ export function DroppableFolder({ folder, onDocumentMove, onClick, isSelected }:
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      onClick={onClick}
+      onClick={handleFolderClick}
     >
       <CardContent className="p-4">
         <div className="flex items-center gap-3">
           <div className="flex-shrink-0">
             {isHovered && canAcceptDrop ? (
               <FolderOpen className="h-8 w-8 text-green-600" />
+            ) : isExpanded ? (
+              <FolderOpen className="h-8 w-8 text-blue-600" />
             ) : (
               <Folder className="h-8 w-8 text-yellow-600" />
             )}
@@ -102,9 +114,23 @@ export function DroppableFolder({ folder, onDocumentMove, onClick, isSelected }:
             )}
           </div>
 
-          {isDropTarget && canAcceptDrop && (
+          {isDropTarget && canAcceptDrop ? (
             <div className="flex-shrink-0">
               <Plus className="h-5 w-5 text-green-600" />
+            </div>
+          ) : (
+            <div className="flex-shrink-0">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-6 w-6 p-0"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsExpanded(!isExpanded);
+                }}
+              >
+                {isExpanded ? '−' : '+'}
+              </Button>
             </div>
           )}
         </div>
@@ -112,6 +138,17 @@ export function DroppableFolder({ folder, onDocumentMove, onClick, isSelected }:
         {isDropTarget && canAcceptDrop && (
           <div className="mt-2 text-xs text-green-600 font-medium">
             Drop to move document here
+          </div>
+        )}
+
+        {isExpanded && folder.documents && folder.documents.length > 0 && (
+          <div className="mt-3 space-y-2 border-t pt-3">
+            {folder.documents.map((doc: any) => (
+              <div key={doc.id} className="flex items-center gap-2 p-2 bg-gray-50 rounded text-xs">
+                <span className="flex-1 truncate font-medium">{doc.originalName || doc.name}</span>
+                <span className="text-gray-500">{new Date(doc.createdAt).toLocaleDateString()}</span>
+              </div>
+            ))}
           </div>
         )}
       </CardContent>
