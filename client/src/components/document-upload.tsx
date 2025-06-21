@@ -325,11 +325,11 @@ export default function DocumentUpload({ folderId, onUploadComplete }: DocumentU
                 : isDragOver 
                   ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 scale-105' 
                   : 'border-gray-300 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500 cursor-pointer'
-            } ${!isAuthenticated ? 'opacity-50 pointer-events-none' : ''}`}
+            } ${!isAuthenticated ? 'opacity-50 pointer-events-none' : ''}
+            ${selectedFiles.length > 0 ? 'pointer-events-none' : ''}`}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
-            onClick={selectedFiles.length === 0 ? () => fileInputRef.current?.click() : undefined}
           >
             {selectedFiles.length > 0 ? (
               <CheckCircle className="mx-auto h-12 w-12 mb-4 text-green-500" />
