@@ -517,10 +517,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "File not found on disk" });
       }
       
-      // Set headers for inline viewing
+      // Set headers for inline viewing with CORS support
       res.setHeader('Content-Type', document.mimeType || 'application/pdf');
       res.setHeader('Content-Disposition', `inline; filename="${document.originalName}"`);
       res.setHeader('Cache-Control', 'public, max-age=31536000');
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Access-Control-Allow-Methods', 'GET');
+      res.setHeader('X-Content-Type-Options', 'nosniff');
       
       const fileStream = fs.createReadStream(filePath);
       fileStream.pipe(res);

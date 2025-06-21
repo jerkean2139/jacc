@@ -18,6 +18,8 @@ import {
   BarChart3, Timer, ChevronDown, ChevronRight, Target, BookOpen, ThumbsUp,
   ThumbsDown, Star, Copy, AlertCircle, ArrowRight
 } from 'lucide-react';
+import DocumentDragDrop from '@/components/ui/document-drag-drop';
+import DocumentPreviewModal from '@/components/ui/document-preview-modal';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
