@@ -2939,7 +2939,7 @@ Would you like me to create a detailed proposal for this merchant?`,
             path: tempFile ? tempFile.tempPath : `uploads/temp-${Date.now()}`,
             size: fileSize,
             mimeType: mimeType,
-            userId: 'admin-user',
+            userId: 'dev-admin-001', // Use existing user ID
             folderId: folderId === 'root' ? null : folderId,
             isPublic: permissions?.viewAll || false,
             adminOnly: permissions?.adminOnly || false,
