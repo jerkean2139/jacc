@@ -282,8 +282,8 @@ export default function AdminControlCenter() {
                   ) : (
                     <ScrollArea className="h-[600px] pr-4">
                       <DocumentDragDrop
-                        folders={integratedDocuments?.folders || []}
-                        unassignedDocuments={integratedDocuments?.unassignedDocuments || []}
+                        folders={(integratedDocuments as any)?.folders || []}
+                        unassignedDocuments={(integratedDocuments as any)?.unassignedDocuments || []}
                         onMoveDocument={handleMoveDocument}
                         onPreviewDocument={handlePreviewDocument}
                         onDownloadDocument={handleDownloadDocument}
@@ -377,24 +377,30 @@ export default function AdminControlCenter() {
                   <span className="ml-2">Loading training data...</span>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div className="text-center p-4 bg-blue-50 rounded-lg">
                     <div className="text-2xl font-bold text-blue-700">
-                      {trainingAnalytics?.totalInteractions || 0}
+                      {(trainingAnalytics as any)?.totalInteractions || 0}
                     </div>
-                    <div className="text-sm text-gray-600">Total Interactions</div>
+                    <div className="text-sm text-gray-600">Training Interactions</div>
                   </div>
                   <div className="text-center p-4 bg-green-50 rounded-lg">
                     <div className="text-2xl font-bold text-green-700">
-                      {trainingAnalytics?.averageSatisfaction || 0}%
+                      {(trainingAnalytics as any)?.correctionsSubmitted || 0}
                     </div>
-                    <div className="text-sm text-gray-600">Satisfaction Rate</div>
+                    <div className="text-sm text-gray-600">AI Corrections</div>
                   </div>
                   <div className="text-center p-4 bg-purple-50 rounded-lg">
                     <div className="text-2xl font-bold text-purple-700">
-                      {trainingAnalytics?.totalMessages || 0}
+                      {(trainingAnalytics as any)?.averageResponseTime || 0}ms
                     </div>
-                    <div className="text-sm text-gray-600">Total Messages</div>
+                    <div className="text-sm text-gray-600">Avg Response Time</div>
+                  </div>
+                  <div className="text-center p-4 bg-orange-50 rounded-lg">
+                    <div className="text-2xl font-bold text-orange-700">
+                      {(trainingAnalytics as any)?.knowledgeBaseEntries || 0}
+                    </div>
+                    <div className="text-sm text-gray-600">Knowledge Entries</div>
                   </div>
                 </div>
               )}
@@ -435,21 +441,27 @@ export default function AdminControlCenter() {
                 <div className="space-y-4">
                   {Array.isArray(chatReviews) && chatReviews.length > 0 ? (
                     chatReviews.map((chat: any) => (
-                      <div key={chat.id} className="border rounded-lg p-4 hover:bg-gray-50">
+                      <div key={chat.chatId} className="border rounded-lg p-4 hover:bg-gray-50">
                         <div className="flex items-center justify-between">
                           <div>
-                            <h4 className="font-medium">Chat {chat.id}</h4>
+                            <h4 className="font-medium">
+                              {chat.chatTitle || `Chat ${chat.chatId.substring(0, 8)}`}
+                            </h4>
                             <p className="text-sm text-gray-600">
-                              {chat.messageCount} messages • {chat.status}
+                              {chat.messageCount} messages • User: {chat.userId}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              Last updated: {new Date(chat.updatedAt).toLocaleDateString()}
+                              {chat.correctionsMade > 0 && ` • ${chat.correctionsMade} corrections`}
                             </p>
                           </div>
                           <div className="flex gap-2">
-                            <Badge variant={chat.status === 'approved' ? 'default' : 'secondary'}>
-                              {chat.status}
+                            <Badge variant={chat.reviewStatus === 'approved' ? 'default' : 'secondary'}>
+                              {chat.reviewStatus}
                             </Badge>
                             <Button
                               size="sm"
-                              onClick={() => handleReviewChat(chat.id)}
+                              onClick={() => handleReviewChat(chat.chatId)}
                             >
                               <Eye className="h-4 w-4 mr-1" />
                               Review
@@ -628,12 +640,12 @@ export default function AdminControlCenter() {
               <div className="flex items-center justify-between">
                 <h4 className="font-medium">Conversation History</h4>
                 <Badge variant="outline">
-                  {selectedChatDetails?.messages?.length || 0} messages
+                  {(selectedChatDetails as any)?.messages?.length || 0} messages
                 </Badge>
               </div>
               
               <ScrollArea className="h-[500px] border rounded-lg p-4">
-                {selectedChatDetails?.messages?.map((message: any, index: number) => (
+                {(selectedChatDetails as any)?.messages?.map((message: any, index: number) => (
                   <div key={message.id || index} className="mb-4">
                     <div className={`p-3 rounded-lg ${
                       message.role === 'user' 

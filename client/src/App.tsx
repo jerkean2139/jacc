@@ -83,9 +83,10 @@ function Router() {
           <Route path="/pricing-comparison" component={PricingComparison} />
 
           <Route path="/guide" component={UserGuide} />
-          {/* Documents only accessible to admin users */}
+          {/* Admin only routes */}
           {user?.role === 'admin' && (
             <>
+              <Route path="/admin-control-center" component={AdminControlCenter} />
               <Route path="/documents" component={DocumentsPage} />
               <Route path="/documents/:documentId" component={DocumentViewer} />
             </>
