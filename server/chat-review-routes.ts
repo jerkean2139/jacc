@@ -107,7 +107,7 @@ export function registerChatReviewRoutes(app: any) {
           chatId: chat.chatId,
           chatTitle: chat.chatTitle,
           userId: chat.userId,
-          userName: chat.userId, // Will be the dev-user-123 from the database
+          userName: chat.userId,
           createdAt: chat.createdAt,
           updatedAt: chat.updatedAt,
           messageCount: chat.messageCount,

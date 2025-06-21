@@ -1140,116 +1140,237 @@ export default function AdminControlCenter() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <MessageSquare className="h-5 w-5" />
-              Chat Review & AI Training
+              Chat Review & Training Center
             </DialogTitle>
             <DialogDescription>
-              Review user conversations and train AI responses
+              Review conversations and train AI responses through interactive correction
             </DialogDescription>
           </DialogHeader>
 
-          <Tabs defaultValue="chat-review" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="chat-review" className="flex items-center gap-2">
-                <Eye className="h-4 w-4" />
-                Chat Review
-              </TabsTrigger>
-              <TabsTrigger value="ai-emulator" className="flex items-center gap-2">
-                <Brain className="h-4 w-4" />
-                AI Emulator
-              </TabsTrigger>
-            </TabsList>
-
-            {/* Chat Review Tab */}
-            <TabsContent value="chat-review" className="space-y-4 max-h-[70vh] overflow-y-auto">
-              <div className="text-sm text-muted-foreground">
-                Review actual user conversations and provide training corrections
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[70vh]">
+            {/* Left Side - Conversation History */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold">Conversation History</h3>
+                <Select value={chatReviewFilter} onValueChange={setChatReviewFilter}>
+                  <SelectTrigger className="w-[140px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Chats</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="approved">Approved</SelectItem>
+                    <SelectItem value="needs_correction">Needs Review</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               
-              <ScrollArea className="h-[60vh] border rounded-lg p-4">
-                {(selectedChatDetails as any)?.messages?.map((message: any, index: number) => (
-                  <div key={message.id || index} className={`mb-6 p-4 rounded-lg border ${
-                    message.role === 'user' 
-                      ? 'bg-blue-50 border-blue-200' 
-                      : 'bg-gray-50 border-gray-200'
-                  }`}>
-                    <div className="flex justify-between items-start mb-3">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-semibold text-gray-700">
-                          {message.role === 'user' ? '👤 User' : '🤖 AI Assistant'}
-                        </span>
-                        {message.role === 'assistant' && (
-                          <Badge variant="outline" className="text-xs">
-                            Needs Review
-                          </Badge>
-                        )}
-                      </div>
-                      <span className="text-xs text-muted-foreground">
-                        {message.createdAt ? new Date(message.createdAt).toLocaleTimeString() : 'Just now'}
-                      </span>
-                    </div>
-                    
-                    <div className="mb-4">
-                      <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
-                    </div>
-                    
-                    {message.role === 'assistant' && (
-                      <div className="space-y-3">
-                        <div className="flex gap-3">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleApproveMessage(message.id)}
-                            className="text-green-600 border-green-200 hover:bg-green-50"
-                          >
-                            <ThumbsUp className="h-3 w-3 mr-1" />
-                            Approve Response
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                              setCorrectingMessageId(message.id);
-                              setMessageCorrection('');
-                            }}
-                            className="text-orange-600 border-orange-200 hover:bg-orange-50"
-                          >
-                            <Edit className="h-3 w-3 mr-1" />
-                            Train AI
-                          </Button>
-                        </div>
-
-                        {correctingMessageId === message.id && (
-                          <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
-                            <h6 className="font-medium text-orange-900 mb-2">AI Training Instructions</h6>
-                            <p className="text-xs text-orange-700 mb-3">
-                              Describe how the AI should improve this response. The AI will learn from your feedback and update its knowledge.
+              {/* Chat List */}
+              <div className="border rounded-lg h-[25vh] overflow-y-auto">
+                <div className="p-4 space-y-3">
+                  {Array.isArray(chatReviews) && chatReviews.length > 0 ? (
+                    chatReviews.map((chat: any) => (
+                      <div 
+                        key={chat.chatId} 
+                        className={`border rounded-lg p-3 cursor-pointer transition-colors ${
+                          selectedChatId === chat.chatId ? 'bg-blue-50 border-blue-200' : 'hover:bg-gray-50'
+                        }`}
+                        onClick={() => handleReviewChat(chat.chatId)}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h4 className="font-medium text-sm">
+                              {chat.chatTitle || `Chat ${chat.chatId.substring(0, 8)}`}
+                            </h4>
+                            <p className="text-xs text-gray-600">
+                              {chat.messageCount} messages • {chat.userId}
                             </p>
-                            <Textarea
-                              placeholder="Example: 'This response should mention competitive rates first, then explain benefits. Make it less technical and more business-focused. Include specific pricing ranges when discussing costs.'"
-                              value={messageCorrection}
-                              onChange={(e) => setMessageCorrection(e.target.value)}
-                              rows={4}
-                              className="mb-3"
-                            />
-                            <div className="flex gap-2">
-                              <Button
-                                size="sm"
-                                onClick={() => handleCorrectMessage(message.id, messageCorrection)}
-                                disabled={!messageCorrection.trim()}
-                                className="bg-orange-600 hover:bg-orange-700 text-white"
-                              >
-                                <Send className="h-3 w-3 mr-1" />
-                                Submit Training
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => setCorrectingMessageId(null)}
-                              >
-                                Cancel
-                              </Button>
+                            <p className="text-xs text-gray-500">
+                              {new Date(chat.updatedAt).toLocaleDateString()}
+                              {chat.correctionsMade > 0 && ` • ${chat.correctionsMade} corrections`}
+                            </p>
+                          </div>
+                          <Badge variant={chat.reviewStatus === 'approved' ? 'default' : 'secondary'} className="text-xs">
+                            {chat.reviewStatus}
+                          </Badge>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      No chat reviews found for "{chatReviewFilter}" status
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              {/* Selected Chat Messages */}
+              <div className="space-y-2">
+                <h4 className="font-medium">Messages</h4>
+                <ScrollArea className="h-[35vh] border rounded-lg p-4">
+                  {trainingChatMessages.length > 0 ? (
+                    <div className="space-y-3">
+                      {trainingChatMessages.map((message: any, index: number) => (
+                        <div key={index} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                          <div className={`max-w-[85%] rounded-lg p-3 ${
+                            message.role === 'user' 
+                              ? 'bg-blue-500 text-white' 
+                              : 'bg-gray-100 text-gray-900'
+                          }`}>
+                            <div className="flex items-center gap-2 mb-1">
+                              {message.role === 'user' ? <User className="h-3 w-3" /> : <Bot className="h-3 w-3" />}
+                              <span className="text-xs font-medium">
+                                {message.role === 'user' ? 'User' : 'AI Assistant'}
+                              </span>
+                            </div>
+                            <p className="text-sm">{message.content}</p>
+                            <p className="text-xs opacity-70 mt-1">
+                              {new Date(message.createdAt).toLocaleTimeString()}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-gray-500">
+                      <div className="text-center">
+                        <MessageSquare className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                        <p className="text-sm">Select a chat to view conversation</p>
+                      </div>
+                    </div>
+                  )}
+                </ScrollArea>
+              </div>
+            </div>
+            
+            {/* Right Side - AI Training Chat */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold">AI Training Chat</h3>
+                {selectedChatId && (
+                  <Badge variant="outline">Chat: {selectedChatId.substring(0, 8)}</Badge>
+                )}
+              </div>
+              
+              {selectedChatId ? (
+                <Card className="h-full">
+                  <CardContent className="p-4 h-full flex flex-col">
+                    {/* Training Chat Messages */}
+                    <ScrollArea className="flex-1 mb-4 border rounded-lg p-3 min-h-[40vh]">
+                      <div className="space-y-3">
+                        <div className="flex justify-start">
+                          <div className="bg-gray-100 rounded-lg p-3 max-w-[85%]">
+                            <div className="flex items-center gap-2 mb-1">
+                              <Bot className="h-3 w-3" />
+                              <span className="text-xs font-medium">AI Trainer</span>
+                            </div>
+                            <p className="text-sm">
+                              I'm here to help you train and improve AI responses. You can:
+                              <br/>• Ask how the AI should have responded differently
+                              <br/>• Provide better example responses
+                              <br/>• Explain why certain responses need improvement
+                              <br/>• Test new response strategies
+                            </p>
+                          </div>
+                        </div>
+                        
+                        {/* Show any existing training conversation */}
+                        {isTrainingChat && (
+                          <div className="flex justify-center">
+                            <div className="bg-blue-50 rounded-lg p-2">
+                              <Loader2 className="h-4 w-4 animate-spin mx-auto" />
+                              <p className="text-xs text-center mt-1">AI is learning...</p>
                             </div>
                           </div>
+                        )}
+                      </div>
+                    </ScrollArea>
+                    
+                    {/* Training Input */}
+                    <div className="space-y-3">
+                      <Textarea
+                        placeholder="Ask how the AI should respond differently, provide corrections, or explain improvements..."
+                        value={trainingQuery}
+                        onChange={(e) => setTrainingQuery(e.target.value)}
+                        className="min-h-[80px] resize-none"
+                      />
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={handleSubmitTraining}
+                          disabled={!trainingQuery.trim() || isTrainingChat}
+                          className="flex-1"
+                        >
+                          {isTrainingChat ? (
+                            <>
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              Training...
+                            </>
+                          ) : (
+                            <>
+                              <Send className="h-4 w-4 mr-2" />
+                              Send Training
+                            </>
+                          )}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            setTrainingQuery('');
+                          }}
+                          disabled={isTrainingChat}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      
+                      {/* Review Status Actions */}
+                      <div className="flex gap-2 pt-2 border-t">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleUpdateReviewStatus('approved')}
+                          className="text-green-600 hover:text-green-700"
+                        >
+                          <CheckCircle className="h-4 w-4 mr-1" />
+                          Approve
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleUpdateReviewStatus('needs_correction')}
+                          className="text-yellow-600 hover:text-yellow-700"
+                        >
+                          <AlertCircle className="h-4 w-4 mr-1" />
+                          Needs Work
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleUpdateReviewStatus('skipped')}
+                          className="text-gray-600 hover:text-gray-700"
+                        >
+                          <SkipForward className="h-4 w-4 mr-1" />
+                          Skip
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                <Card className="border-dashed h-full">
+                  <CardContent className="flex flex-col items-center justify-center h-full text-center">
+                    <Brain className="h-16 w-16 text-gray-300 mb-4" />
+                    <p className="text-lg font-medium text-gray-500 mb-2">Select a Chat to Start Training</p>
+                    <p className="text-sm text-gray-400 max-w-sm">
+                      Choose a conversation from the left to review messages and train the AI with better responses
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
                         )}
                       </div>
                     )}
