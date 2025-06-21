@@ -8,10 +8,9 @@ import {
   useSensor,
   useSensors,
   closestCorners,
+  useDroppable,
 } from '@dnd-kit/core';
 import {
-  SortableContext,
-  verticalListSortingStrategy,
   useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -26,7 +25,8 @@ import {
   Eye,
   Download,
   Tag,
-  MoreVertical 
+  MoreVertical,
+  GripVertical,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -75,53 +75,78 @@ function DocumentItem({ document, onPreview, onDownload, onEdit }: DocumentItemP
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  const getFileIcon = (mimeType: string) => {
+    if (mimeType.includes('pdf')) return <FileText className="h-4 w-4 text-red-500" />;
+    if (mimeType.includes('image')) return <FileText className="h-4 w-4 text-green-500" />;
+    if (mimeType.includes('text')) return <FileText className="h-4 w-4 text-blue-500" />;
+    return <FileText className="h-4 w-4 text-gray-500" />;
   };
 
   return (
     <div
       ref={setNodeRef}
       style={style}
-      {...attributes}
-      {...listeners}
-      className={`group flex items-center justify-between p-3 bg-white rounded-lg border hover:border-blue-300 transition-all cursor-grab active:cursor-grabbing ${
-        isDragging ? 'shadow-lg ring-2 ring-blue-400' : 'hover:shadow-md'
+      className={`group flex items-center gap-3 p-3 border rounded-lg hover:bg-gray-50 transition-colors ${
+        isDragging ? 'opacity-50 shadow-lg bg-blue-50 border-blue-300' : 'bg-white'
       }`}
     >
-      <div className="flex items-center gap-3 min-w-0 flex-1">
-        <FileText className="h-4 w-4 text-gray-500 flex-shrink-0" />
-        <div className="min-w-0 flex-1">
-          <div className="font-medium text-sm truncate">{document.name}</div>
+      {/* Drag Handle */}
+      <div 
+        {...attributes}
+        {...listeners}
+        className="cursor-grab active:cursor-grabbing p-1 hover:bg-gray-100 rounded flex items-center"
+      >
+        <GripVertical className="h-4 w-4 text-gray-400" />
+      </div>
+
+      {/* File Info */}
+      <div className="flex items-center gap-3 flex-1 min-w-0">
+        {getFileIcon(document.mimeType)}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-medium truncate">{document.originalName}</p>
+            {document.tags && document.tags.length > 0 && (
+              <div className="flex gap-1">
+                {document.tags.slice(0, 2).map((tag, index) => (
+                  <Badge key={index} variant="outline" className="text-xs">
+                    {tag}
+                  </Badge>
+                ))}
+                {document.tags.length > 2 && (
+                  <Badge variant="outline" className="text-xs">
+                    +{document.tags.length - 2}
+                  </Badge>
+                )}
+              </div>
+            )}
+          </div>
           <div className="flex items-center gap-2 mt-1">
-            <Badge variant="outline" className="text-xs">
-              {document.mimeType?.split('/')[1] || 'unknown'}
-            </Badge>
-            <span className="text-xs text-gray-500">
-              {Math.round((document.size || 0) / 1024)}KB
-            </span>
+            <p className="text-xs text-gray-500">{formatFileSize(document.size)}</p>
+            {document.createdAt && (
+              <p className="text-xs text-gray-400">
+                {new Date(document.createdAt).toLocaleDateString()}
+              </p>
+            )}
             {document.category && (
               <Badge variant="secondary" className="text-xs">
                 {document.category}
               </Badge>
             )}
           </div>
-          {document.tags && document.tags.length > 0 && (
-            <div className="flex gap-1 mt-1">
-              {document.tags.slice(0, 3).map((tag, idx) => (
-                <Badge key={idx} variant="outline" className="text-xs px-1">
-                  {tag}
-                </Badge>
-              ))}
-              {document.tags.length > 3 && (
-                <Badge variant="outline" className="text-xs px-1">
-                  +{document.tags.length - 3}
-                </Badge>
-              )}
-            </div>
-          )}
         </div>
       </div>
       
+      {/* Actions */}
       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
         {document.isFavorite && <Star className="h-3 w-3 text-yellow-500" />}
         {document.isPublic && <Globe className="h-3 w-3 text-green-500" />}
@@ -153,27 +178,47 @@ function DocumentItem({ document, onPreview, onDownload, onEdit }: DocumentItemP
 }
 
 interface FolderDropZoneProps {
-  folder: Folder;
+  folderId: string;
+  folderName: string;
+  documentCount: number;
   isOver: boolean;
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
-function FolderDropZone({ folder, isOver, children }: FolderDropZoneProps) {
+function FolderDropZone({ folderId, folderName, documentCount, isOver }: FolderDropZoneProps) {
+  const { setNodeRef } = useDroppable({
+    id: folderId,
+  });
+
   return (
-    <Card className={`transition-all ${isOver ? 'ring-2 ring-blue-400 bg-blue-50' : ''}`}>
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-base">
+    <div
+      ref={setNodeRef}
+      className={`min-h-[100px] border-2 border-dashed rounded-lg p-4 transition-all ${
+        isOver 
+          ? 'border-blue-500 bg-blue-50' 
+          : folderId === 'unassigned' 
+            ? 'border-gray-300 bg-gray-50 hover:bg-gray-100' 
+            : 'border-blue-200 bg-blue-50 hover:bg-blue-100'
+      }`}
+    >
+      <div className="flex items-center gap-2 mb-2">
+        {folderId === 'unassigned' ? (
+          <FileText className="h-4 w-4 text-gray-600" />
+        ) : (
           <Folder className="h-4 w-4 text-blue-600" />
-          {folder.name}
-          <Badge variant="secondary" className="text-xs">
-            {folder.documents.length} docs
-          </Badge>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-2">
-        {children}
-      </CardContent>
-    </Card>
+        )}
+        <span className="text-sm font-medium">{folderName}</span>
+        <Badge variant="outline" className="ml-auto">
+          {documentCount}
+        </Badge>
+      </div>
+      <p className="text-xs text-gray-500">
+        {folderId === 'unassigned' 
+          ? 'Drop documents here to remove from folders' 
+          : 'Drop documents here to organize into this folder'
+        }
+      </p>
+    </div>
   );
 }
 
@@ -196,6 +241,7 @@ export default function DocumentDragDrop({
 }: DocumentDragDropProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [draggedDocument, setDraggedDocument] = useState<Document | null>(null);
+  const [overId, setOverId] = useState<string | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -205,17 +251,23 @@ export default function DocumentDragDrop({
     })
   );
 
+  // Combine all documents for the left side
+  const allDocuments = [
+    ...unassignedDocuments,
+    ...folders.flatMap(folder => folder.documents)
+  ];
+
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
     setActiveId(active.id as string);
     
-    // Find the dragged document
-    const allDocuments = [
-      ...unassignedDocuments,
-      ...folders.flatMap(folder => folder.documents)
-    ];
     const document = allDocuments.find(doc => doc.id === active.id);
     setDraggedDocument(document || null);
+  };
+
+  const handleDragOver = (event: any) => {
+    const { over } = event;
+    setOverId(over?.id || null);
   };
 
   const handleDragEnd = async (event: DragEndEvent) => {
@@ -224,29 +276,22 @@ export default function DocumentDragDrop({
     if (!over) {
       setActiveId(null);
       setDraggedDocument(null);
+      setOverId(null);
       return;
     }
 
     const documentId = active.id as string;
     const targetFolderId = over.id === 'unassigned' ? null : over.id as string;
     
-    // Find current folder of the document
-    const currentFolder = folders.find(folder => 
-      folder.documents.some(doc => doc.id === documentId)
-    );
-    const currentFolderId = currentFolder?.id || null;
-
-    // Only move if target is different from current
-    if (targetFolderId !== currentFolderId) {
-      try {
-        await onMoveDocument(documentId, targetFolderId);
-      } catch (error) {
-        console.error('Failed to move document:', error);
-      }
+    try {
+      await onMoveDocument(documentId, targetFolderId);
+    } catch (error) {
+      console.error('Failed to move document:', error);
     }
 
     setActiveId(null);
     setDraggedDocument(null);
+    setOverId(null);
   };
 
   return (
@@ -254,59 +299,25 @@ export default function DocumentDragDrop({
       sensors={sensors}
       collisionDetection={closestCorners}
       onDragStart={handleDragStart}
+      onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <div className="space-y-6">
-        {/* Folders */}
-        {folders.map(folder => (
-          <SortableContext 
-            key={folder.id} 
-            items={folder.documents.map(doc => doc.id)}
-            strategy={verticalListSortingStrategy}
-          >
-            <FolderDropZone 
-              folder={folder}
-              isOver={activeId !== null && draggedDocument?.folderId !== folder.id}
-            >
-              {folder.documents.length > 0 ? (
-                folder.documents.map(document => (
-                  <DocumentItem
-                    key={document.id}
-                    document={document}
-                    onPreview={onPreviewDocument}
-                    onDownload={onDownloadDocument}
-                    onEdit={onEditDocument}
-                  />
-                ))
-              ) : (
-                <div className="text-center py-8 text-gray-500 text-sm">
-                  No documents in this folder
-                  <br />
-                  <span className="text-xs">Drag documents here to organize them</span>
-                </div>
-              )}
-            </FolderDropZone>
-          </SortableContext>
-        ))}
-
-        {/* Unassigned Documents */}
-        {unassignedDocuments.length > 0 && (
-          <SortableContext 
-            items={unassignedDocuments.map(doc => doc.id)}
-            strategy={verticalListSortingStrategy}
-          >
-            <Card className="border-dashed border-orange-300">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-base text-orange-600">
-                  <FileText className="h-4 w-4" />
-                  Unassigned Documents
-                  <Badge variant="outline" className="text-xs border-orange-300">
-                    {unassignedDocuments.length} docs
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {unassignedDocuments.map(document => (
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Left Side - All Documents */}
+        <div className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                All Documents
+                <Badge variant="secondary" className="ml-auto">
+                  {allDocuments.length}
+                </Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="max-h-[600px] overflow-y-auto">
+              <div className="space-y-2">
+                {allDocuments.map((document) => (
                   <DocumentItem
                     key={document.id}
                     document={document}
@@ -315,23 +326,58 @@ export default function DocumentDragDrop({
                     onEdit={onEditDocument}
                   />
                 ))}
-              </CardContent>
-            </Card>
-          </SortableContext>
-        )}
+                {allDocuments.length === 0 && (
+                  <div className="text-center py-8 text-gray-500">
+                    No documents available
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Right Side - Folder Drop Zones */}
+        <div className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Folder className="h-5 w-5" />
+                Organize into Folders
+                <Badge variant="secondary" className="ml-auto">
+                  {folders.length + 1} zones
+                </Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="max-h-[600px] overflow-y-auto space-y-4">
+              {/* Unassigned Drop Zone */}
+              <FolderDropZone
+                folderId="unassigned"
+                folderName="Unassigned"
+                documentCount={unassignedDocuments.length}
+                isOver={overId === 'unassigned'}
+              />
+
+              {/* Folder Drop Zones */}
+              {folders.map((folder) => (
+                <FolderDropZone
+                  key={folder.id}
+                  folderId={folder.id}
+                  folderName={folder.name}
+                  documentCount={folder.documents.length}
+                  isOver={overId === folder.id}
+                />
+              ))}
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       <DragOverlay>
         {activeId && draggedDocument ? (
-          <div className="bg-white rounded-lg border shadow-lg p-3 opacity-95">
-            <div className="flex items-center gap-3">
-              <FileText className="h-4 w-4 text-gray-500" />
-              <div>
-                <div className="font-medium text-sm">{draggedDocument.name}</div>
-                <div className="text-xs text-gray-500">
-                  {Math.round((draggedDocument.size || 0) / 1024)}KB
-                </div>
-              </div>
+          <div className="bg-white p-3 rounded-lg shadow-lg border border-blue-200 opacity-90">
+            <div className="flex items-center gap-2">
+              <FileText className="h-4 w-4 text-blue-600" />
+              <span className="text-sm font-medium">{draggedDocument.originalName}</span>
             </div>
           </div>
         ) : null}
