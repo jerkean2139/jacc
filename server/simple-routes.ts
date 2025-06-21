@@ -584,11 +584,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Document edit endpoint
+  // Document edit endpoint with tagging support
   app.put('/api/documents/:id', async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
-      const { name, folderId, isPublic, adminOnly, managerOnly } = req.body;
+      const { name, folderId, isPublic, adminOnly, managerOnly, tags, category, subcategory, processorType } = req.body;
       const { db } = await import('./db.ts');
       const { documents } = await import('../shared/schema.ts');
       const { eq } = await import('drizzle-orm');
@@ -598,12 +598,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Document not found" });
       }
       
-      const updateData: any = {};
+      const updateData: any = { updatedAt: new Date() };
       if (name !== undefined) updateData.name = name;
       if (folderId !== undefined) updateData.folderId = folderId;
       if (isPublic !== undefined) updateData.isPublic = isPublic;
       if (adminOnly !== undefined) updateData.adminOnly = adminOnly;
       if (managerOnly !== undefined) updateData.managerOnly = managerOnly;
+      if (tags !== undefined) updateData.tags = tags;
+      if (category !== undefined) updateData.category = category;
+      if (subcategory !== undefined) updateData.subcategory = subcategory;
+      if (processorType !== undefined) updateData.processorType = processorType;
       
       const [updatedDocument] = await db
         .update(documents)
@@ -1285,6 +1289,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Training interactions endpoint - authentic data only
+  // Bulk tag documents endpoint
+  app.post('/api/admin/documents/bulk-tag', async (req: Request, res: Response) => {
+    try {
+      const { documentIds, tags, category, subcategory, processorType } = req.body;
+      const { db } = await import('./db.ts');
+      const { documents } = await import('../shared/schema.ts');
+      const { inArray } = await import('drizzle-orm');
+      
+      const updateData: any = { updatedAt: new Date() };
+      if (tags !== undefined) updateData.tags = tags;
+      if (category !== undefined) updateData.category = category;
+      if (subcategory !== undefined) updateData.subcategory = subcategory;
+      if (processorType !== undefined) updateData.processorType = processorType;
+      
+      await db
+        .update(documents)
+        .set(updateData)
+        .where(inArray(documents.id, documentIds));
+      
+      console.log(`Bulk tagged ${documentIds.length} documents`);
+      res.json({ success: true, updated: documentIds.length });
+    } catch (error) {
+      console.error('Error bulk tagging documents:', error);
+      res.status(500).json({ error: 'Failed to bulk tag documents' });
+    }
+  });
+
+  // Get available tags and categories
+  app.get('/api/admin/documents/tags', async (req: Request, res: Response) => {
+    try {
+      const { db } = await import('./db.ts');
+      const { documents } = await import('../shared/schema.ts');
+      const { sql } = await import('drizzle-orm');
+      
+      // Get all unique tags, categories, subcategories, and processor types
+      const result = await db.execute(sql`
+        SELECT 
+          ARRAY_AGG(DISTINCT unnest(tags)) FILTER (WHERE tags IS NOT NULL AND array_length(tags, 1) > 0) as all_tags,
+          ARRAY_AGG(DISTINCT category) FILTER (WHERE category IS NOT NULL) as categories,
+          ARRAY_AGG(DISTINCT subcategory) FILTER (WHERE subcategory IS NOT NULL) as subcategories,
+          ARRAY_AGG(DISTINCT processor_type) FILTER (WHERE processor_type IS NOT NULL) as processor_types
+        FROM documents
+      `);
+      
+      const data = result.rows[0] || {};
+      res.json({
+        tags: data.all_tags || [],
+        categories: data.categories || [],
+        subcategories: data.subcategories || [],
+        processorTypes: data.processor_types || []
+      });
+    } catch (error) {
+      console.error('Error getting tags:', error);
+      res.status(500).json({ error: 'Failed to get tags' });
+    }
+  });
+
   app.get('/api/admin/training/interactions', async (req: Request, res: Response) => {
     try {
       const { db } = await import('./db.ts');

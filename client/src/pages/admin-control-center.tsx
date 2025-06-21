@@ -2251,7 +2251,7 @@ export default function AdminControlCenter() {
                                 <Folder className="h-4 w-4 text-blue-600" />
                                 <span className="font-medium">{folder.name}</span>
                                 <Badge variant="secondary" className="text-xs">
-                                  {folder.documents?.length || 0}/{folder.document_count} docs
+                                  {folder.documents?.length || 0} docs
                                 </Badge>
                               </div>
                               <ChevronDown className={`h-4 w-4 transition-transform ${
@@ -2269,12 +2269,31 @@ export default function AdminControlCenter() {
                                           <FileText className="h-3 w-3 text-gray-500" />
                                           <span className="text-sm">{doc.name}</span>
                                           <Badge variant="outline" className="text-xs">
-                                            {doc.mime_type?.split('/')[1] || 'unknown'}
+                                            {doc.mimeType?.split('/')[1] || 'unknown'}
                                           </Badge>
+                                          {doc.tags && doc.tags.length > 0 && (
+                                            <div className="flex gap-1">
+                                              {doc.tags.slice(0, 2).map((tag: string, idx: number) => (
+                                                <Badge key={idx} variant="secondary" className="text-xs px-1 py-0">
+                                                  {tag}
+                                                </Badge>
+                                              ))}
+                                              {doc.tags.length > 2 && (
+                                                <Badge variant="secondary" className="text-xs px-1 py-0">
+                                                  +{doc.tags.length - 2}
+                                                </Badge>
+                                              )}
+                                            </div>
+                                          )}
                                         </div>
                                         <div className="flex items-center gap-1">
-                                          {doc.is_favorite && <Star className="h-3 w-3 text-yellow-500" />}
-                                          {doc.is_public && <Globe className="h-3 w-3 text-green-500" />}
+                                          {doc.isFavorite && <Star className="h-3 w-3 text-yellow-500" />}
+                                          {doc.isPublic && <Globe className="h-3 w-3 text-green-500" />}
+                                          {doc.category && (
+                                            <Badge variant="outline" className="text-xs">
+                                              {doc.category}
+                                            </Badge>
+                                          )}
                                           <span className="text-xs text-gray-500">
                                             {Math.round((doc.size || 0) / 1024)}KB
                                           </span>
