@@ -107,6 +107,10 @@ export default function AdminControlCenter() {
   const [selectedSubcategory, setSelectedSubcategory] = useState('');
   const [selectedProcessorType, setSelectedProcessorType] = useState('');
 
+  // Document preview states
+  const [previewDocument, setPreviewDocument] = useState<DocumentEntry | null>(null);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+
   // FAQ edit states
   const [editingFAQ, setEditingFAQ] = useState<FAQ | null>(null);
   const [showEditFAQModal, setShowEditFAQModal] = useState(false);
@@ -392,6 +396,46 @@ export default function AdminControlCenter() {
     );
   };
 
+  // Document handlers
+  const handlePreviewDocument = (document: DocumentEntry) => {
+    setPreviewDocument(document);
+    setShowPreviewModal(true);
+  };
+
+  const handleDownloadDocument = (doc: DocumentEntry) => {
+    const downloadUrl = `/api/documents/${doc.id}/download`;
+    window.open(downloadUrl, '_blank');
+  };
+
+  const handleEditDocumentTags = (document: DocumentEntry) => {
+    setEditingDocument(document);
+    setEditDocumentName(document.name);
+    setEditDocumentFolder(document.folderId || '');
+    setShowEditModal(true);
+  };
+
+  const handleMoveDocument = async (documentId: string, targetFolderId: string | null) => {
+    try {
+      const response = await fetch(`/api/documents/${documentId}/move`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ folderId: targetFolderId }),
+        credentials: 'include',
+      });
+      
+      if (!response.ok) throw new Error('Failed to move document');
+      
+      // Refresh the documents data
+      queryClient.invalidateQueries({ queryKey: ['/api/documents'] });
+      toast({ title: 'Document moved successfully' });
+    } catch (error) {
+      console.error('Error moving document:', error);
+      toast({ title: 'Failed to move document', variant: 'destructive' });
+    }
+  };
+
   const handleEditPrompt = (prompt: PromptTemplate) => {
     setEditingPrompt(prompt);
     setEditPromptName(prompt.name);
@@ -519,20 +563,11 @@ export default function AdminControlCenter() {
     toast({ title: 'Response marked as good' });
   };
 
-  const handleEditDocument = (document: DocumentEntry) => {
+  const handleEditDocumentModal = (document: DocumentEntry) => {
     setEditingDocument(document);
     setEditDocumentName(document.name);
     setEditDocumentFolder(document.folderId || 'no-folder');
-    // Determine permissions based on document flags
-    if (document.isPublic) {
-      setEditDocumentPermissions('public');
-    } else if (document.adminOnly) {
-      setEditDocumentPermissions('admin');
-    } else if (document.managerOnly) {
-      setEditDocumentPermissions('manager');
-    } else {
-      setEditDocumentPermissions('admin');
-    }
+    setEditDocumentPermissions('admin');
     setShowEditModal(true);
   };
 
