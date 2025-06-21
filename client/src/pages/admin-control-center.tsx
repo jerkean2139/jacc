@@ -356,9 +356,7 @@ export default function AdminControlCenter() {
   // Message handlers for chat review
   const handleApproveMessage = async (messageId: string) => {
     try {
-      await apiRequest(`/api/admin/chat-reviews/messages/${messageId}/approve`, {
-        method: 'POST'
-      });
+      await apiRequest(`/api/admin/chat-reviews/messages/${messageId}/approve`, 'POST');
       toast({ title: 'Message approved' });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/chat-reviews', selectedChatId] });
     } catch (error) {
@@ -370,10 +368,7 @@ export default function AdminControlCenter() {
     if (!correction.trim()) return;
     
     try {
-      await apiRequest(`/api/admin/chat-reviews/messages/${messageId}/correct`, {
-        method: 'POST',
-        body: JSON.stringify({ correction, chatId: selectedChatId })
-      });
+      await apiRequest(`/api/admin/chat-reviews/messages/${messageId}/correct`, 'POST', { correction, chatId: selectedChatId });
       toast({ title: 'Correction submitted for training' });
       setMessageCorrection('');
       queryClient.invalidateQueries({ queryKey: ['/api/admin/chat-reviews', selectedChatId] });
@@ -399,19 +394,16 @@ export default function AdminControlCenter() {
     setIsTrainingChat(true);
 
     try {
-      const response = await apiRequest('/api/admin/training/conversational', {
-        method: 'POST',
-        body: JSON.stringify({
-          message: trainingQuery,
-          context: selectedChatDetails,
-          chatHistory: trainingChatMessages
-        })
+      const responseData = await apiRequest('/api/admin/training/conversational', 'POST', {
+        message: trainingQuery,
+        context: selectedChatDetails,
+        chatHistory: trainingChatMessages
       });
 
-      const aiMessage = { role: 'assistant', content: response.response };
+      const aiMessage = { role: 'assistant', content: responseData.response };
       setTrainingChatMessages(prev => [...prev, aiMessage]);
       
-      if (response.trainingApplied) {
+      if (responseData.trainingApplied) {
         toast({ title: 'Training correction applied successfully' });
       }
     } catch (error) {

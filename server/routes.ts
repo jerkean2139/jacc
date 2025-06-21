@@ -1790,6 +1790,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Conversational Training Endpoint
+  app.post('/api/admin/training/conversational', isAuthenticated, async (req, res) => {
+    try {
+      const { message, context, chatHistory } = req.body;
+      
+      // Process conversational training feedback
+      const trainingPrompt = `You are an AI training assistant helping improve the JACC merchant services AI system.
+
+An admin is providing training feedback through conversation. Listen to their feedback and:
+1. Acknowledge what they're trying to improve
+2. Extract actionable training insights
+3. Suggest how to implement their feedback
+4. Ask clarifying questions if needed
+
+Admin's feedback: "${message}"
+
+Context from chat being reviewed: ${context ? JSON.stringify(context, null, 2) : 'No specific chat context provided'}
+
+Previous conversation: ${chatHistory ? JSON.stringify(chatHistory.slice(-3), null, 2) : 'No previous conversation'}
+
+Respond as a helpful training assistant that understands merchant services and can help refine AI responses.`;
+
+      // Use enhanced AI to process the training conversation
+      const { enhancedAI } = require('./enhanced-ai');
+      const response = await enhancedAI.generateResponse(trainingPrompt, {
+        maxTokens: 500,
+        temperature: 0.7
+      });
+
+      // Extract training insights and save to knowledge base if actionable
+      let trainingApplied = false;
+      
+      // Look for specific training patterns in the admin's message
+      const trainingKeywords = ['should', 'need to', 'must', 'always', 'never', 'when users ask', 'response should'];
+      const hasTrainingContent = trainingKeywords.some(keyword => 
+        message.toLowerCase().includes(keyword)
+      );
+
+      if (hasTrainingContent && message.length > 50) {
+        // Save training correction to knowledge base
+        try {
+          const [newEntry] = await db.insert(qaKnowledgeBase).values({
+            question: `Training Correction: ${message.substring(0, 100)}...`,
+            answer: `Admin training feedback: ${message}`,
+            category: 'training_corrections',
+            tags: ['admin_training', 'ai_improvement'],
+            priority: 2,
+            isActive: true,
+            createdBy: req.user?.id || 'admin'
+          }).returning();
+          
+          trainingApplied = true;
+        } catch (error) {
+          console.error('Error saving training correction:', error);
+        }
+      }
+
+      res.json({ 
+        response: response.content,
+        trainingApplied,
+        timestamp: new Date().toISOString()
+      });
+
+    } catch (error) {
+      console.error('Error in conversational training:', error);
+      res.status(500).json({ 
+        response: "I apologize, but I encountered an error processing your training feedback. Please try again.",
+        trainingApplied: false
+      });
+    }
+  });
+
   app.get('/api/admin/training/prompts', isAuthenticated, async (req, res) => {
     try {
       // Return actual working prompts from the system
