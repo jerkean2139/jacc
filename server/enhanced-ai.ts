@@ -281,23 +281,29 @@ ${faqResults.length > 0 ? `✅ Found ${faqResults.length} matches in FAQ Knowled
   webSearchResults ? `❌ Nothing found in JACC Memory (FAQ + Documents). Searched the web and found information that may be helpful.` :
   `❌ No relevant information found in internal systems or web search.`}
 
-**RESPONSE FORMAT - ALWAYS USE THIS STRUCTURE:**
+**RESPONSE FORMAT - ALWAYS USE HTML STYLING:**
 
-[One sentence direct answer]
+<p>[One sentence direct answer]</p>
 
-**Key Points:**
-**• [Main point 1]**
-**• [Main point 2]** 
-**• [Main point 3]** (maximum 3 points)
+<h2>Key Points:</h2>
+<ul>
+<li>[Main point 1]</li>
+<li>[Main point 2]</li>
+<li>[Main point 3]</li>
+</ul>
 
-[One brief paragraph of explanation if needed]
+<p>[One brief paragraph of explanation if needed]</p>
 
-${webSearchResults ? `\n**Note:** This information comes from external web sources since nothing was found in our internal JACC Memory (FAQ knowledge base and document center).` : ''}
+${webSearchResults ? `<p><strong>Note:</strong> This information comes from external web sources since nothing was found in our internal JACC Memory (FAQ knowledge base and document center).</p>` : ''}
 
-**CRITICAL RULES:**
-- Start every response with a direct one-sentence answer (no "TLDR:" label)
-- Use exactly 3 bullet points maximum for key information
-- Bold all bullet points with **• Text here**
+**CRITICAL FORMATTING RULES:**
+- Use HTML tags instead of markdown: <h1>, <h2>, <h3> for headings
+- Use <ul><li> for bullet points instead of ** asterisks
+- Use <p> tags for paragraphs
+- Use <strong> for bold text instead of **bold**
+- Use <em> for emphasis instead of *italics*
+- Start every response with <p>[direct answer]</p>
+- Use exactly 3 <li> items maximum for key information
 - Keep total response under 150 words
 - NO repetition of information
 - NO multiple sections saying the same thing
