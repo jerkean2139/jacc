@@ -1091,7 +1091,10 @@ export default function AdminControlCenter() {
                     <div className="space-y-2">
                       <label className="text-sm font-medium">AI Response</label>
                       <div className="p-4 bg-gray-50 rounded-lg border">
-                        <p className="text-sm whitespace-pre-wrap">{aiResponse}</p>
+                        <div 
+                          className="text-sm [&>h1]:text-xl [&>h1]:font-bold [&>h1]:mb-2 [&>h2]:text-lg [&>h2]:font-semibold [&>h2]:mb-2 [&>h3]:text-base [&>h3]:font-medium [&>h3]:mb-1 [&>ul]:list-disc [&>ul]:ml-4 [&>ul]:mb-2 [&>ol]:list-decimal [&>ol]:ml-4 [&>ol]:mb-2 [&>li]:mb-1 [&>p]:mb-2 [&>strong]:font-semibold [&>em]:italic"
+                          dangerouslySetInnerHTML={{ __html: aiResponse }}
+                        />
                       </div>
                     </div>
 
