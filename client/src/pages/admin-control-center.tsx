@@ -1983,6 +1983,313 @@ export default function AdminControlCenter() {
             </CardContent>
           </Card>
 
+          {/* AI Prompts Management */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Brain className="h-5 w-5" />
+                AI Prompts Management
+              </CardTitle>
+              <CardDescription>
+                Configure system prompts, personality settings, and AI behavior templates
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* System Prompts */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-medium">System Prompts</h4>
+                    <Button variant="outline" size="sm">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add New
+                    </Button>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <div className="p-4 border rounded-lg bg-blue-50">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-medium text-sm">Document Search Prompt</span>
+                        <div className="flex gap-1">
+                          <Button variant="ghost" size="sm">
+                            <Edit className="h-3 w-3" />
+                          </Button>
+                          <Badge variant="secondary">Active</Badge>
+                        </div>
+                      </div>
+                      <p className="text-xs text-gray-600 mb-2">
+                        Controls how AI searches through documents and knowledge base
+                      </p>
+                      <div className="text-xs bg-white p-2 rounded border max-h-20 overflow-y-auto">
+                        "You are JACC, an AI assistant for merchant services. Search FAQ first, then documents, then web as fallback..."
+                      </div>
+                    </div>
+                    
+                    <div className="p-4 border rounded-lg bg-green-50">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-medium text-sm">Response Formatting Prompt</span>
+                        <div className="flex gap-1">
+                          <Button variant="ghost" size="sm">
+                            <Edit className="h-3 w-3" />
+                          </Button>
+                          <Badge variant="secondary">Active</Badge>
+                        </div>
+                      </div>
+                      <p className="text-xs text-gray-600 mb-2">
+                        Defines how AI formats responses with HTML styling
+                      </p>
+                      <div className="text-xs bg-white p-2 rounded border max-h-20 overflow-y-auto">
+                        "Format responses using HTML: &lt;h1&gt;, &lt;h2&gt; for headings, &lt;ul&gt;&lt;li&gt; for lists, &lt;p&gt; for paragraphs..."
+                      </div>
+                    </div>
+                    
+                    <div className="p-4 border rounded-lg bg-yellow-50">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-medium text-sm">Error Handling Prompt</span>
+                        <div className="flex gap-1">
+                          <Button variant="ghost" size="sm">
+                            <Edit className="h-3 w-3" />
+                          </Button>
+                          <Badge variant="outline">Draft</Badge>
+                        </div>
+                      </div>
+                      <p className="text-xs text-gray-600 mb-2">
+                        How AI handles errors and unknown information
+                      </p>
+                      <div className="text-xs bg-white p-2 rounded border max-h-20 overflow-y-auto">
+                        "When information is not found in JACC Memory, clearly state limitations and offer web search..."
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Personality & Behavior */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-medium">Personality & Behavior</h4>
+                    <Button variant="outline" size="sm">
+                      <User className="h-4 w-4 mr-2" />
+                      User Defaults
+                    </Button>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <Label>AI Personality Style</Label>
+                      <Select defaultValue="professional-helpful">
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="professional-helpful">Professional & Helpful</SelectItem>
+                          <SelectItem value="friendly-expert">Friendly Expert</SelectItem>
+                          <SelectItem value="direct-efficient">Direct & Efficient</SelectItem>
+                          <SelectItem value="conversational">Conversational & Engaging</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div>
+                      <Label>Response Tone</Label>
+                      <div className="grid grid-cols-2 gap-2 mt-2">
+                        <div className="flex items-center space-x-2">
+                          <input type="radio" id="tone-formal" name="tone" value="formal" defaultChecked />
+                          <Label htmlFor="tone-formal" className="text-sm">Formal</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <input type="radio" id="tone-casual" name="tone" value="casual" />
+                          <Label htmlFor="tone-casual" className="text-sm">Casual</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <input type="radio" id="tone-technical" name="tone" value="technical" />
+                          <Label htmlFor="tone-technical" className="text-sm">Technical</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <input type="radio" id="tone-sales" name="tone" value="sales" />
+                          <Label htmlFor="tone-sales" className="text-sm">Sales-focused</Label>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <Label>Industry Expertise Level</Label>
+                      <div className="flex items-center space-x-4 mt-2">
+                        <span className="text-sm text-gray-500">Basic</span>
+                        <input
+                          type="range"
+                          min="1"
+                          max="5"
+                          step="1"
+                          defaultValue="4"
+                          className="flex-1"
+                        />
+                        <span className="text-sm text-gray-500">Expert</span>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Current: Level 4 - Advanced merchant services knowledge
+                      </p>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <Label>Behavioral Settings</Label>
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <input type="checkbox" id="proactive-suggestions" defaultChecked />
+                          <Label htmlFor="proactive-suggestions" className="text-sm">
+                            Offer proactive suggestions and recommendations
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <input type="checkbox" id="ask-clarifying" defaultChecked />
+                          <Label htmlFor="ask-clarifying" className="text-sm">
+                            Ask clarifying questions when requests are vague
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <input type="checkbox" id="include-examples" defaultChecked />
+                          <Label htmlFor="include-examples" className="text-sm">
+                            Include practical examples in explanations
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <input type="checkbox" id="follow-up-questions" />
+                          <Label htmlFor="follow-up-questions" className="text-sm">
+                            Suggest follow-up questions after responses
+                          </Label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Custom Prompt Templates */}
+              <div className="border-t pt-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="font-medium">Custom Prompt Templates</h4>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm">
+                      <Download className="h-4 w-4 mr-2" />
+                      Export
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      <Upload className="h-4 w-4 mr-2" />
+                      Import
+                    </Button>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="p-4 border rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-medium text-sm">Pricing Analysis</span>
+                      <Button variant="ghost" size="sm">
+                        <Edit className="h-3 w-3" />
+                      </Button>
+                    </div>
+                    <p className="text-xs text-gray-600 mb-3">
+                      Template for analyzing merchant pricing scenarios
+                    </p>
+                    <div className="text-xs bg-gray-50 p-2 rounded max-h-16 overflow-y-auto">
+                      "When analyzing pricing, always consider interchange costs, processor markups, monthly fees..."
+                    </div>
+                  </div>
+                  
+                  <div className="p-4 border rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-medium text-sm">Objection Handling</span>
+                      <Button variant="ghost" size="sm">
+                        <Edit className="h-3 w-3" />
+                      </Button>
+                    </div>
+                    <p className="text-xs text-gray-600 mb-3">
+                      Template for handling common sales objections
+                    </p>
+                    <div className="text-xs bg-gray-50 p-2 rounded max-h-16 overflow-y-auto">
+                      "When addressing pricing objections, focus on value proposition and total cost of ownership..."
+                    </div>
+                  </div>
+                  
+                  <div className="p-4 border rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-medium text-sm">Compliance Guidance</span>
+                      <Button variant="ghost" size="sm">
+                        <Edit className="h-3 w-3" />
+                      </Button>
+                    </div>
+                    <p className="text-xs text-gray-600 mb-3">
+                      Template for PCI compliance and regulatory guidance
+                    </p>
+                    <div className="text-xs bg-gray-50 p-2 rounded max-h-16 overflow-y-auto">
+                      "For PCI compliance questions, always reference current standards and emphasize security..."
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* User-Specific Prompts */}
+              <div className="border-t pt-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="font-medium">User-Specific Prompt Overrides</h4>
+                  <Button variant="outline" size="sm">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add User Override
+                  </Button>
+                </div>
+                
+                <div className="space-y-3">
+                  <div className="p-4 border rounded-lg bg-blue-50">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4" />
+                        <span className="font-medium text-sm">admin@jacc.com</span>
+                        <Badge variant="secondary">Dev Admin</Badge>
+                      </div>
+                      <div className="flex gap-1">
+                        <Button variant="ghost" size="sm">
+                          <Edit className="h-3 w-3" />
+                        </Button>
+                        <Button variant="ghost" size="sm">
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-600 mb-2">
+                      Override: Technical responses with debugging information
+                    </p>
+                    <div className="text-xs bg-white p-2 rounded border max-h-16 overflow-y-auto">
+                      "For this user, include technical details, API endpoints, and debugging information in responses..."
+                    </div>
+                  </div>
+                  
+                  <div className="p-4 border rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4" />
+                        <span className="font-medium text-sm">sales@company.com</span>
+                        <Badge variant="outline">Sales Agent</Badge>
+                      </div>
+                      <div className="flex gap-1">
+                        <Button variant="ghost" size="sm">
+                          <Edit className="h-3 w-3" />
+                        </Button>
+                        <Button variant="ghost" size="sm">
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-600 mb-2">
+                      Override: Sales-focused responses with objection handling
+                    </p>
+                    <div className="text-xs bg-white p-2 rounded border max-h-16 overflow-y-auto">
+                      "Focus on sales benefits, ROI calculations, and provide objection handling scripts..."
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* System Performance */}
           <Card>
             <CardHeader>
