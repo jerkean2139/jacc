@@ -717,30 +717,32 @@ function ComprehensiveSettingsInterface() {
   // Fetch settings data
   const { data: settingsData, isLoading: settingsLoading } = useQuery({
     queryKey: ['/api/admin/settings'],
-    queryFn: () => apiRequest('/api/admin/settings')
+    queryFn: () => fetch('/api/admin/settings').then(res => res.json())
   });
 
   // Fetch performance metrics
   const { data: performanceData, isLoading: performanceLoading } = useQuery({
     queryKey: ['/api/admin/performance'],
-    queryFn: () => apiRequest('/api/admin/performance'),
+    queryFn: () => fetch('/api/admin/performance').then(res => res.json()),
     refetchInterval: 30000 // Refresh every 30 seconds
   });
 
   // Fetch active sessions
   const { data: sessionsData, isLoading: sessionsLoading } = useQuery({
     queryKey: ['/api/admin/sessions'],
-    queryFn: () => apiRequest('/api/admin/sessions'),
+    queryFn: () => fetch('/api/admin/sessions').then(res => res.json()),
     refetchInterval: 60000 // Refresh every minute
   });
 
   // Save settings mutation
   const saveSettingsMutation = useMutation({
     mutationFn: async ({ category, subcategory, settings }: { category: string, subcategory: string, settings: any }) => {
-      return apiRequest(`/api/admin/settings/${category}/${subcategory}`, {
+      const response = await fetch(`/api/admin/settings/${category}/${subcategory}`, {
         method: 'PUT',
-        body: { settings }
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ settings })
       });
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/settings'] });
@@ -760,10 +762,11 @@ function ComprehensiveSettingsInterface() {
 
   // End session mutation
   const endSessionMutation = useMutation({
-    mutationFn: (sessionId: string) => {
-      return apiRequest(`/api/admin/sessions/${sessionId}`, {
+    mutationFn: async (sessionId: string) => {
+      const response = await fetch(`/api/admin/sessions/${sessionId}`, {
         method: 'DELETE'
       });
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/sessions'] });
@@ -776,10 +779,11 @@ function ComprehensiveSettingsInterface() {
 
   // Clear cache mutation
   const clearCacheMutation = useMutation({
-    mutationFn: () => {
-      return apiRequest('/api/admin/cache/clear', {
+    mutationFn: async () => {
+      const response = await fetch('/api/admin/cache/clear', {
         method: 'POST'
       });
+      return response.json();
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/performance'] });
@@ -1634,31 +1638,39 @@ function ComprehensiveSettingsInterface() {
 
             <div>
               <h3 className="text-lg font-medium mb-4">Cache Statistics</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="border rounded-lg p-4">
-                  <div className="text-2xl font-bold text-green-600">89%</div>
-                  <div className="text-sm text-gray-600">Cache Hit Rate</div>
-                  <div className="text-xs text-gray-400">Last 24 hours</div>
+              {performanceLoading ? (
+                <div className="p-8 text-center text-gray-500">Loading cache data...</div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="border rounded-lg p-4">
+                    <div className="text-2xl font-bold text-green-600">{performanceData?.cache?.hitRate || 0}%</div>
+                    <div className="text-sm text-gray-600">Cache Hit Rate</div>
+                    <div className="text-xs text-gray-400">Last 24 hours</div>
+                  </div>
+                  <div className="border rounded-lg p-4">
+                    <div className="text-2xl font-bold text-blue-600">{performanceData?.cache?.size || 0} MB</div>
+                    <div className="text-sm text-gray-600">Cache Size</div>
+                    <div className="text-xs text-gray-400">{Math.round((performanceData?.cache?.size || 0) / 5)}% of limit</div>
+                  </div>
+                  <div className="border rounded-lg p-4">
+                    <div className="text-2xl font-bold text-purple-600">{performanceData?.cache?.items || 0}</div>
+                    <div className="text-sm text-gray-600">Cached Items</div>
+                    <div className="text-xs text-gray-400">Active entries</div>
+                  </div>
                 </div>
-                <div className="border rounded-lg p-4">
-                  <div className="text-2xl font-bold text-blue-600">245 MB</div>
-                  <div className="text-sm text-gray-600">Cache Size</div>
-                  <div className="text-xs text-gray-400">49% of limit</div>
-                </div>
-                <div className="border rounded-lg p-4">
-                  <div className="text-2xl font-bold text-purple-600">1,247</div>
-                  <div className="text-sm text-gray-600">Cached Items</div>
-                  <div className="text-xs text-gray-400">Active entries</div>
-                </div>
-              </div>
+              )}
             </div>
 
             <div>
               <h3 className="text-lg font-medium mb-4">Cache Management</h3>
               <div className="flex gap-3">
-                <Button variant="outline">
+                <Button 
+                  variant="outline"
+                  onClick={() => clearCacheMutation.mutate()}
+                  disabled={clearCacheMutation.isPending}
+                >
                   <RefreshCw className="h-4 w-4 mr-2" />
-                  Clear Cache
+                  {clearCacheMutation.isPending ? 'Clearing...' : 'Clear Cache'}
                 </Button>
                 <Button variant="outline">
                   <Database className="h-4 w-4 mr-2" />
@@ -1678,32 +1690,47 @@ function ComprehensiveSettingsInterface() {
           <div className="space-y-6">
             <div>
               <h3 className="text-lg font-medium mb-4">Real-time System Status</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="border rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium">Database</span>
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              {performanceLoading ? (
+                <div className="p-8 text-center text-gray-500">Loading performance data...</div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="border rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium">Database</span>
+                      <div className={`w-2 h-2 rounded-full ${
+                        performanceData?.database?.status === 'online' ? 'bg-green-500' : 'bg-red-500'
+                      }`}></div>
+                    </div>
+                    <p className="text-2xl font-bold capitalize">{performanceData?.database?.status || 'Unknown'}</p>
+                    <p className="text-xs text-gray-500">Response: {performanceData?.database?.responseTime || '--'}ms</p>
                   </div>
-                  <p className="text-2xl font-bold">Online</p>
-                  <p className="text-xs text-gray-500">Response: 45ms</p>
-                </div>
-                <div className="border rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium">AI Services</span>
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <div className="border rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium">AI Services</span>
+                      <div className={`w-2 h-2 rounded-full ${
+                        performanceData?.aiServices?.status === 'active' ? 'bg-green-500' : 'bg-red-500'
+                      }`}></div>
+                    </div>
+                    <p className="text-2xl font-bold capitalize">{performanceData?.aiServices?.status || 'Unknown'}</p>
+                    <p className="text-xs text-gray-500">
+                      {performanceData?.aiServices?.claudeStatus} + {performanceData?.aiServices?.gptStatus}
+                    </p>
                   </div>
-                  <p className="text-2xl font-bold">Active</p>
-                  <p className="text-xs text-gray-500">Claude + GPT-4o</p>
-                </div>
-                <div className="border rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium">Memory Usage</span>
-                    <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                  <div className="border rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium">Memory Usage</span>
+                      <div className={`w-2 h-2 rounded-full ${
+                        (performanceData?.memory?.percentage || 0) > 80 ? 'bg-red-500' : 
+                        (performanceData?.memory?.percentage || 0) > 60 ? 'bg-yellow-500' : 'bg-green-500'
+                      }`}></div>
+                    </div>
+                    <p className="text-2xl font-bold">{performanceData?.memory?.percentage || 0}%</p>
+                    <p className="text-xs text-gray-500">
+                      {performanceData?.memory?.used || 0}MB / {performanceData?.memory?.total || 672}MB
+                    </p>
                   </div>
-                  <p className="text-2xl font-bold">68%</p>
-                  <p className="text-xs text-gray-500">456MB / 672MB</p>
                 </div>
-              </div>
+              )}
             </div>
 
             <div>
@@ -1712,23 +1739,30 @@ function ComprehensiveSettingsInterface() {
                 <div>
                   <div className="flex justify-between text-sm mb-1">
                     <span>Average Response Time</span>
-                    <span>1.2s</span>
+                    <span>{performanceData?.performance?.averageResponseTime || 0}ms</span>
                   </div>
-                  <Progress value={75} className="h-2" />
+                  <Progress value={Math.min(100, (performanceData?.performance?.averageResponseTime || 0) / 30)} className="h-2" />
                 </div>
                 <div>
                   <div className="flex justify-between text-sm mb-1">
                     <span>Document Processing Speed</span>
-                    <span>Good</span>
+                    <span>{performanceData?.performance?.documentProcessingSpeed || 0}%</span>
                   </div>
-                  <Progress value={85} className="h-2" />
+                  <Progress value={performanceData?.performance?.documentProcessingSpeed || 0} className="h-2" />
                 </div>
                 <div>
                   <div className="flex justify-between text-sm mb-1">
                     <span>Search Accuracy</span>
-                    <span>92%</span>
+                    <span>{performanceData?.performance?.searchAccuracy || 0}%</span>
                   </div>
-                  <Progress value={92} className="h-2" />
+                  <Progress value={performanceData?.performance?.searchAccuracy || 0} className="h-2" />
+                </div>
+                <div>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span>Cache Hit Rate</span>
+                    <span>{performanceData?.performance?.cacheHitRate || 0}%</span>
+                  </div>
+                  <Progress value={performanceData?.performance?.cacheHitRate || 0} className="h-2" />
                 </div>
               </div>
             </div>
@@ -1753,7 +1787,7 @@ function ComprehensiveSettingsInterface() {
                 <div className="flex items-center justify-between p-3 border rounded-lg">
                   <div>
                     <p className="font-medium">Error rate alerts</p>
-                    <p className="text-sm text-gray-500">Alert when error rate exceeds 5%</p>
+                    <p className="text-sm text-gray-500">Alert when error rate exceeds {(performanceData?.performance?.errorRate || 0).toFixed(1)}%</p>
                   </div>
                   <input type="checkbox" className="rounded" defaultChecked />
                 </div>
@@ -1834,12 +1868,58 @@ function ComprehensiveSettingsInterface() {
       {/* Save Settings Button */}
       <div className="flex justify-end pt-6 border-t">
         <div className="flex gap-3">
-          <Button variant="outline">
+          <Button 
+            variant="outline"
+            onClick={async () => {
+              try {
+                const response = await fetch('/api/admin/settings/reset', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ 
+                    category: activeSettingsTab,
+                    subcategory: activeSubTab 
+                  })
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                  queryClient.invalidateQueries({ queryKey: ['/api/admin/settings'] });
+                  toast({
+                    title: "Settings Reset",
+                    description: `Reset ${data.deletedCount} settings to defaults`,
+                  });
+                }
+              } catch (error) {
+                toast({
+                  title: "Reset Failed",
+                  description: "Failed to reset settings. Please try again.",
+                  variant: "destructive",
+                });
+              }
+            }}
+          >
             Reset to Defaults
           </Button>
-          <Button>
+          <Button
+            onClick={() => {
+              // Example save action - in real implementation, collect form data
+              const sampleSettings = {
+                sessionTimeout: "1 hour",
+                rememberMeDuration: "30 days",
+                enableNotifications: true,
+                lastUpdated: new Date().toISOString()
+              };
+              
+              saveSettingsMutation.mutate({
+                category: activeSettingsTab,
+                subcategory: activeSubTab,
+                settings: sampleSettings
+              });
+            }}
+            disabled={saveSettingsMutation.isPending}
+          >
             <CheckCircle className="h-4 w-4 mr-2" />
-            Save Settings
+            {saveSettingsMutation.isPending ? 'Saving...' : 'Save Settings'}
           </Button>
         </div>
       </div>
