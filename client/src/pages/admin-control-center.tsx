@@ -679,7 +679,7 @@ function ChatReviewCenter() {
                           <span className={`font-medium ${message.role === 'user' ? 'text-blue-600' : 'text-green-600'}`}>
                             {message.role === 'user' ? 'User' : 'Assistant'}:
                           </span> 
-                          <span className="ml-2">{message.content.substring(0, 100)}...</span>
+                          <span className="ml-2">{message.content ? message.content.substring(0, 100) + '...' : 'No content'}</span>
                         </div>
                       ))}
                       {chatMessages.length > 3 && (
@@ -1112,10 +1112,11 @@ function ThreeStepDocumentUpload({ foldersData, onUploadComplete }: {
 
   const uploadMutation = useMutation({
     mutationFn: async (formData: FormData) => {
-      return apiRequest('/api/documents/upload', {
+      const response = await fetch('/api/documents/upload', {
         method: 'POST',
         body: formData,
       });
+      return response.json();
     },
     onSuccess: () => {
       toast({

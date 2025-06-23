@@ -1,0 +1,38 @@
+Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner.
+2
+admin-control-center.tsx:682 Uncaught TypeError: Cannot read properties of undefined (reading 'substring')
+    at admin-control-center.tsx:682:67
+    at Array.map (<anonymous>)
+    at ChatReviewCenter (admin-control-center.tsx:677:49)
+chunk-WERSD76P.js?v=c3d04521:14032 The above error occurred in the <ChatReviewCenter> component:
+
+    at ChatReviewCenter (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/pages/admin-control-center.tsx:413:47)
+    at div
+    at https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit…unner/workspace/node_modules/.vite/deps/chunk-PALV7G7K.js?v=c3d04521:42:13
+    at Presence (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit…unner/workspace/node_modules/.vite/deps/chunk-KHCZ25XA.js?v=c3d04521:24:11)
+    at https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit…orkspace/node_modules/.vite/deps/@radix-ui_react-tabs.js?v=c3d04521:176:13
+    at _c5 (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/components/ui/tabs.tsx:72:12)
+    at div
+    at https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit…unner/workspace/node_modules/.vite/deps/chunk-PALV7G7K.js?v=c3d04521:42:13
+    at Provider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit…unner/workspace/node_modules/.vite/deps/chunk-PLT6GTVM.js?v=c3d04521:38:15)
+    at https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit…/workspace/node_modules/.vite/deps/@radix-ui_react-tabs.js?v=c3d04521:54:7
+    at div
+    at AdminControlCenter (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/pages/admin-control-center.tsx:3064:37)
+    at Route (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit…/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=c3d04521:323:16)
+    at Switch (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit…/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=c3d04521:379:17)
+    at Router (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/App.tsx?v=kDD7tUXZ9Jwd7oSBEJqaC:62:31)
+    at DragDropProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/components/drag-drop-provider.tsx:20:36)
+    at GamificationProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/hooks/useGamification.tsx:22:40)
+    at AppContent (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/App.tsx?v=kDD7tUXZ9Jwd7oSBEJqaC:293:20)
+    at Provider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit…unner/workspace/node_modules/.vite/deps/chunk-PLT6GTVM.js?v=c3d04521:38:15)
+    at TooltipProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit…rkspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=c3d04521:64:5)
+    at QueryClientProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit…rkspace/node_modules/.vite/deps/@tanstack_react-query.js?v=c3d04521:2805:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+chunk-WERSD76P.js?v=c3d04521:9129 Uncaught TypeError: Cannot read properties of undefined (reading 'substring')
+    at admin-control-center.tsx:682:67
+    at Array.map (<anonymous>)
+    at ChatReviewCenter (admin-control-center.tsx:677:49)
+
