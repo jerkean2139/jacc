@@ -2408,34 +2408,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ error: 'Admin access required' });
       }
 
+      // Handle different training submission formats
+      const query = originalQuery || req.body.query;
+      const response = originalResponse || req.body.originalResponse;
+      const correction = correctedResponse || req.body.correctedResponse;
+      
       // Validate required fields
-      if (!originalQuery || !originalResponse || !correctedResponse) {
-        return res.status(400).json({ error: 'Missing required fields: originalQuery, originalResponse, correctedResponse' });
+      if (!query) {
+        return res.status(400).json({ error: 'Missing required field: query' });
       }
 
-      // Capture training correction for unified learning system
-      const { unifiedLearningSystem } = await import('./unified-learning-system');
-      await unifiedLearningSystem.captureInteraction({
-        query: originalQuery,
-        response: originalResponse,
-        source: 'admin_correction',
-        userId: user.id,
-        sessionId: sessionId,
-        wasCorrect: false,
-        correctedResponse,
-        metadata: {
-          adminFeedback: feedback,
-          correctionTimestamp: new Date().toISOString()
-        }
-      });
+      // If correction is provided, capture training correction
+      if (correction) {
+        const { unifiedLearningSystem } = await import('./unified-learning-system');
+        await unifiedLearningSystem.captureInteraction({
+          query: query,
+          response: response || 'No original response provided',
+          source: 'admin_correction',
+          userId: user.id,
+          sessionId: sessionId,
+          wasCorrect: false,
+          correctedResponse: correction,
+          metadata: {
+            adminFeedback: feedback,
+            correctionTimestamp: new Date().toISOString()
+          }
+        });
 
-      res.json({
-        success: true,
-        message: 'Training correction stored successfully',
-        originalQuery,
-        correctedResponse,
-        timestamp: new Date().toISOString()
-      });
+        res.json({
+          success: true,
+          message: 'Training correction stored successfully',
+          query,
+          correctedResponse: correction,
+          timestamp: new Date().toISOString()
+        });
+      } else {
+        // Handle training chat messages
+        const { enhancedAIService } = await import('./enhanced-ai');
+        const aiResponseData = await enhancedAIService.generateStandardResponse(
+          query, 
+          [], 
+          { userRole: 'Sales Agent' }
+        );
+
+        res.json({
+          success: true,
+          response: aiResponseData.message,
+          query,
+          timestamp: new Date().toISOString()
+        });
+      }
     } catch (error) {
       console.error('AI Simulator training error:', error);
       res.status(500).json({ error: 'Training correction failed' });
