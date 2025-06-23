@@ -1,312 +1,419 @@
 # JACC User Guide
-**AI-Powered Merchant Services Assistant**
 
 ## Table of Contents
 1. [Getting Started](#getting-started)
-2. [JACC Core Functionality](#jacc-core-functionality)
-3. [ISO AMP Integration](#iso-amp-integration)
-4. [Statement Analysis Workflow](#statement-analysis-workflow)
-5. [Document Management](#document-management)
-6. [Competitive Intelligence](#competitive-intelligence)
-7. [Advanced Features](#advanced-features)
-
----
+2. [Dashboard Overview](#dashboard-overview)
+3. [Chat Interface](#chat-interface)
+4. [Document Access](#document-access)
+5. [Search Features](#search-features)
+6. [Profile Management](#profile-management)
+7. [Gamification & Achievements](#gamification--achievements)
+8. [Tips & Best Practices](#tips--best-practices)
+9. [Troubleshooting](#troubleshooting)
 
 ## Getting Started
 
-### Login Process
+### First Time Login
 1. Navigate to the JACC application
-2. Use your assigned credentials to log in
-3. Access is restricted to authorized sales agents only
+2. Enter your provided username and password
+3. Complete any required setup steps
+4. Familiarize yourself with the dashboard layout
 
-### Dashboard Overview
-Upon login, you'll see:
-- **Chat Interface**: Primary AI interaction area
-- **Document Library**: Access to sales materials and processor documentation
-- **ISO AMP Calculator**: Statement analysis and competitive intelligence tools
-- **Vendor Intelligence**: Real-time processor updates and market insights
+### Interface Overview
+JACC features a clean, intuitive interface with:
+- **Chat Interface**: Your primary interaction point with the AI assistant
+- **Document Browser**: Access to your permitted documents and resources
+- **Profile Dashboard**: View your activity, achievements, and statistics
+- **Navigation Menu**: Quick access to all features
 
----
+## Dashboard Overview
 
-## JACC Core Functionality
+### Welcome Screen
+Your dashboard displays:
+- **Personal Greeting**: Customized welcome message
+- **Recent Activity**: Your latest conversations and interactions
+- **Quick Stats**: Message counts, achievements, and streak information
+- **Leaderboard**: See how you rank among other users
 
-### 1. AI-Powered Chat Assistant
-**Primary Interface**: Central chat window for merchant services questions
+### Activity Metrics
+Track your engagement with:
+- **Total Messages**: All your conversations with JACC
+- **Chat Sessions**: Number of separate conversation threads
+- **Documents Accessed**: Resources you've viewed or downloaded
+- **Achievement Level**: Your current ranking and progress
 
-**Capabilities**:
-- Payment processing terminology and explanations
-- Merchant onboarding guidance
-- Competitive positioning strategies
-- Technical support for payment systems
-- Industry compliance requirements
+### Streak System
+Build daily login streaks to unlock benefits:
+- **3 Days**: Welcome bonus
+- **7 Days**: Weekly warrior badge
+- **14 Days**: Consistent user status
+- **30 Days**: Monthly master achievement
+- **60 Days**: Dedicated professional badge
+- **100 Days**: Elite user status
 
-**Usage**:
-1. Type your question in the chat interface
-2. Receive instant AI-powered responses
-3. Follow up with clarifying questions
-4. Access suggested documents and resources
+## Chat Interface
 
-### 2. Document Search & Discovery
-**Knowledge Base Access**: Comprehensive payment industry documentation
+### Starting a Conversation
+1. Click the chat input field at the bottom of the screen
+2. Type your question or request
+3. Press Enter or click the send button
+4. Wait for JACC's response
 
-**Available Resources**:
-- Processor rate sheets and pricing guides
-- Technical integration manuals
-- Compliance documentation
-- Sales training materials
-- Competitive analysis reports
+### Types of Queries JACC Can Handle
 
-**Search Process**:
-1. Use the search function to find specific documents
-2. Browse by category (pricing, technical, compliance, marketing)
-3. Access real-time document updates
-4. Download or share relevant materials
+**Payment Processing Questions:**
+- "What are the current interchange rates for restaurants?"
+- "How do I calculate processing fees for a retail client?"
+- "What's the difference between swiped and keyed transactions?"
 
-### 3. Merchant Profiling
-**Merchant Analysis**: Create detailed merchant profiles for optimal recommendations
+**Compliance & Regulations:**
+- "What are the latest PCI compliance requirements?"
+- "How do I help a client with chargeback management?"
+- "What documentation is needed for high-risk merchants?"
 
-**Profile Components**:
-- Business type and industry classification
-- Monthly processing volume
-- Average transaction value
-- Current processor and rates
-- Risk assessment factors
+**Technical Support:**
+- "How do I troubleshoot a terminal connection issue?"
+- "What are the integration requirements for online payments?"
+- "How do I set up recurring billing for a subscription business?"
 
----
+**Sales & Pricing:**
+- "What's the best processor for a restaurant with $50K monthly volume?"
+- "How do I present competitive pricing to a prospect?"
+- "What are the typical fees for e-commerce processing?"
 
-## ISO AMP Integration
+### Understanding JACC's Responses
 
-### Overview
-JACC integrates with ISO AMP's external merchant processing tools, providing seamless access to statement analysis and competitive intelligence within your workflow.
+**Response Structure:**
+JACC provides comprehensive answers that include:
+- **Direct Answer**: Clear response to your question
+- **Supporting Details**: Additional context and explanation
+- **Relevant Documents**: Links to related resources
+- **Next Steps**: Suggested actions or follow-up questions
 
-### Key Features
+**Source Information:**
+JACC searches information in this order:
+1. **FAQ Knowledge Base**: Curated answers to common questions
+2. **Document Center**: Internal company resources and documentation
+3. **Web Search**: External information with clear disclaimers
 
-#### 1. Statement Upload & Analysis
-**Supported Formats**:
-- PDF bank statements (Chase, Wells Fargo, Bank of America)
-- Processor statements (First Data, Worldpay, TSYS)
-- Genesis ReyPay automotive statements
-- Custom merchant reporting formats
+**Response Indicators:**
+- **📋 FAQ**: Answer from internal knowledge base
+- **📄 Document**: Information from uploaded documents
+- **🌐 Web**: External search results (marked with disclaimer)
 
-**Analysis Process**:
-1. Upload merchant statement via secure interface
-2. Automatic data extraction and parsing
-3. Competitive rate analysis across 14+ processors
-4. Savings opportunity identification
-5. Implementation recommendations
+### Chat History
+- **Recent Conversations**: Access your last 10 chat sessions
+- **Search History**: Find previous conversations by keyword
+- **Bookmark Important**: Save useful responses for later reference
+- **Download Transcripts**: Export conversations for offline reference
 
-#### 2. Competitive Intelligence Engine
-**Real-Time Market Data**:
-- Current processor rates and fees
-- Market positioning analysis
-- Competitive advantage identification
-- Industry trend monitoring
+### Message Actions
+For each AI response, you can:
+- **Copy Text**: Copy response to clipboard
+- **Download**: Save response as text file
+- **Share**: Send response to colleagues (if permitted)
+- **Rate Response**: Provide feedback (thumbs up/down)
 
-**Processor Coverage**:
-- **Payment Processors**: Fiserv (First Data), Chase Paymentech, Worldpay (FIS), TSYS (Global Payments), Elavon (U.S. Bank)
-- **Gateways**: Authorize.Net (Visa), CyberSource (Visa), Network Merchants Inc (NMI), Payment Express (Windcave)
-- **POS Systems**: Shift4 (SkyTab), Clover (Fiserv), Quantic POS, Lightspeed POS, Revel Systems
+## Document Access
 
-#### 3. TracerPay Positioning
-**Strategic Advantage**:
-- Automatic TracerPay competitive positioning
-- Interchange-plus pricing transparency
-- Cost savings calculations
-- Implementation timelines
-
----
-
-## Statement Analysis Workflow
-
-### Step-by-Step Process
-
-#### 1. Upload Statement
-1. Navigate to "ISO AMP Calculator" section
-2. Click "Upload Statement" button
-3. Select PDF file (max 10MB)
-4. Confirm merchant business details
-
-#### 2. Automatic Data Extraction
-**System Processing**:
-- Merchant identification and business type
-- Monthly volume calculation
-- Transaction count and average ticket
-- Current processor identification
-- Fee structure analysis
-
-#### 3. Competitive Analysis
-**Generated Intelligence**:
-- Current effective rate calculation
-- Processor markup identification
-- Market comparison across major players
-- TracerPay positioning and savings potential
-
-#### 4. Results Review
-**Analysis Output**:
-- **Merchant Profile**: Business details and processing characteristics
-- **Current Analysis**: Effective rates, fees, and processor performance
-- **TracerPay Recommendation**: Proposed rates and potential savings
-- **Competitor Comparison**: Side-by-side rate analysis
-- **Implementation Plan**: Next steps and timeline
-
-### Example Analysis Result
-```
-Genesis of Conway (Automotive Dealership)
-- Monthly Volume: $76,268.10
-- Transaction Count: 82 transactions
-- Average Ticket: $930.10
-- Current Processor: Reynolds & Reynolds
-- Effective Rate: 1.80%
-
-TracerPay Recommendation:
-- Proposed Rate: 1.35%
-- Monthly Savings: $408
-- Annual Savings: $4,896
-- Confidence Level: 92%
-
-Competitive Positioning:
-- First Data: 2.29% (+$400/month)
-- Clover: 2.6% (+$626/month)
-- PayPal: 2.89% (+$833/month)
-- Square: 2.9% (+$840/month)
-```
-
----
-
-## Document Management
-
-### TracerPay Sales Materials
-**Available Resources**:
-- Product comparison guides
-- Objection handling scripts
-- Technical specifications
-- Marketing materials
-- Sales training documentation
-
-### Vendor Intelligence
-**Automated Updates**:
-- Real-time processor news monitoring
-- Rate change notifications
-- Feature announcement tracking
-- Competitive landscape shifts
+### Available Documents
+Access documents based on your permission level:
+- **Public Resources**: Available to all users
+- **Role-Specific**: Documents for your user type
+- **Personal**: Documents assigned specifically to you
 
 ### Document Categories
-1. **Pricing & Rates**: Current rate sheets and fee structures
-2. **Technical**: Integration guides and API documentation
-3. **Compliance**: PCI, security, and regulatory requirements
-4. **Marketing**: Sales presentations and competitive materials
-5. **Support**: Training guides and troubleshooting resources
 
----
+**Processing Information:**
+- Processor statements and reports
+- Rate sheets and pricing guides
+- Product specifications and features
 
-## Competitive Intelligence
+**Training Materials:**
+- Sales training documents
+- Technical guides and manuals
+- Best practices and procedures
 
-### Market Monitoring
-**Automated Tracking**:
-- Processor rate changes
-- New product launches
-- Market share shifts
-- Industry trend analysis
+**Compliance Resources:**
+- Regulatory guidelines
+- Audit checklists
+- Compliance documentation
 
-### Competitive Positioning
-**Strategic Insights**:
-- TracerPay advantages identification
-- Competitor weakness analysis
-- Market opportunity assessment
-- Pricing strategy recommendations
+**Client Resources:**
+- Onboarding materials
+- Support guides
+- Marketing collateral
 
-### Intelligence Sources
-- Official processor websites
-- Industry publications
-- Market research reports
-- Real-time news monitoring
+### Document Features
 
----
+**View Options:**
+- **Preview**: Quick view without downloading
+- **Full View**: Complete document display
+- **Download**: Save to your device
+
+**Search Within Documents:**
+- Use the search bar to find specific content
+- Filter by document type or category
+- Sort by date, name, or relevance
+
+### Organizing Your Workflow
+- **Bookmark Frequently Used**: Quick access to important documents
+- **Recent Documents**: See your last accessed files
+- **Folder Navigation**: Browse organized document structure
+
+## Search Features
+
+### Search Types
+
+**Quick Search:**
+- Type keywords in the main search bar
+- Get instant results from all available sources
+- See preview snippets before clicking
+
+**Advanced Search:**
+- Filter by document type
+- Specify date ranges
+- Search within specific folders
+- Use exact phrase matching
+
+**AI-Powered Search:**
+Ask JACC natural language questions like:
+- "Find information about restaurant processing rates"
+- "Show me compliance documents for high-risk merchants"
+- "What training materials cover objection handling?"
+
+### Search Tips
+
+**Effective Keywords:**
+- Use specific terms related to your industry
+- Include product names or company names
+- Try both technical and common terms
+
+**Phrase Searching:**
+- Use quotes for exact phrases: "PCI compliance checklist"
+- Combine keywords: restaurant processing rates
+- Use OR for alternatives: terminal OR POS
+
+**Filtering Results:**
+- By date: Recent documents or specific time periods
+- By type: PDFs, spreadsheets, presentations
+- By source: Internal documents vs. web results
+
+## Profile Management
+
+### Account Information
+- **Personal Details**: Name, email, role
+- **Preferences**: Language, timezone, notification settings
+- **Activity Summary**: Usage statistics and history
+
+### Notification Settings
+Configure alerts for:
+- **New Documents**: When relevant files are added
+- **System Updates**: Important announcements
+- **Achievement Unlocks**: Gamification milestones
+- **Daily Reminders**: Login streak notifications
+
+### Privacy Controls
+- **Chat History**: Control what's saved and for how long
+- **Activity Tracking**: Opt in/out of analytics
+- **Data Sharing**: Control information sharing with team
+
+## Gamification & Achievements
+
+### Leveling System
+Progress through user levels based on activity:
+- **Level 1-5**: Beginner (0-100 points)
+- **Level 6-10**: Intermediate (101-500 points)
+- **Level 11-15**: Advanced (501-1500 points)
+- **Level 16-20**: Expert (1500+ points)
+
+### Earning Points
+Gain points through various activities:
+- **Daily Login**: 5 points
+- **Ask Question**: 2 points per query
+- **Rate Response**: 1 point per rating
+- **Document Access**: 1 point per document
+- **Streak Bonus**: Extra points for consecutive days
+
+### Achievement Badges
+
+**Engagement Badges:**
+- **Curious Mind**: Ask 50 questions
+- **Document Explorer**: Access 100 documents
+- **Conversation Starter**: Initiate 25 chat sessions
+- **Knowledge Seeker**: Spend 10+ hours in system
+
+**Streak Badges:**
+- **Getting Started**: 3-day login streak
+- **Consistent User**: 7-day login streak
+- **Dedicated Professional**: 30-day login streak
+- **Elite Member**: 100-day login streak
+
+**Special Achievements:**
+- **Problem Solver**: Help improve AI responses
+- **Team Player**: Share resources with colleagues
+- **Expert User**: Master all system features
+
+### Leaderboard
+Compete with colleagues in:
+- **Total Messages**: Most conversations
+- **Document Access**: Most resources accessed
+- **Login Streaks**: Longest consecutive days
+- **Points Earned**: Overall engagement score
+
+## Tips & Best Practices
+
+### Getting Better Responses
+
+**Be Specific:**
+- Instead of: "Tell me about processing"
+- Try: "What are the processing rates for a $30K/month restaurant?"
+
+**Provide Context:**
+- Include relevant details about your client or situation
+- Mention specific products or services
+- Specify your role (sales, support, technical)
+
+**Ask Follow-up Questions:**
+- "Can you explain that in more detail?"
+- "What would be the next step?"
+- "Are there any exceptions to this rule?"
+
+### Effective Document Usage
+
+**Search Before Asking:**
+- Check if information exists in documents first
+- Use specific keywords related to your question
+- Browse relevant folders for comprehensive information
+
+**Combine Resources:**
+- Use both JACC chat and document search
+- Cross-reference multiple sources
+- Verify important information with official documents
+
+### Building Your Expertise
+
+**Regular Engagement:**
+- Login daily to maintain streaks
+- Ask questions as they arise
+- Explore different document categories
+
+**Continuous Learning:**
+- Review new documents when added
+- Ask JACC to explain complex concepts
+- Practice with different types of queries
+
+**Knowledge Sharing:**
+- Rate responses to help improve the system
+- Suggest improvements or corrections
+- Share useful findings with team members
+
+## Troubleshooting
+
+### Common Issues
+
+**Can't Find Information:**
+1. Try different search terms or keywords
+2. Check if you have permission to access the resource
+3. Ask JACC to search for related topics
+4. Contact support if information should be available
+
+**Slow Response Times:**
+1. Check your internet connection
+2. Try refreshing the page
+3. Wait a moment for system processing
+4. Report persistent issues to support
+
+**Login or Access Issues:**
+1. Verify your credentials
+2. Check if your account is active
+3. Clear browser cache and cookies
+4. Contact administrator for account issues
+
+### Getting Help
+
+**Built-in Support:**
+- Use the help function within JACC
+- Check the FAQ section for common questions
+- Access tutorial videos and guides
+
+**Contact Support:**
+- Email support team for technical issues
+- Contact administrator for access problems
+- Report bugs or suggestions through feedback form
+
+**Self-Service Options:**
+- Review user guide and documentation
+- Search community forums or knowledge base
+- Try troubleshooting steps before contacting support
+
+### Best Practices for Smooth Operation
+
+**Browser Recommendations:**
+- Use updated versions of Chrome, Firefox, or Safari
+- Enable JavaScript and cookies
+- Clear cache regularly for optimal performance
+
+**Security Guidelines:**
+- Don't share login credentials
+- Log out when using shared computers
+- Report suspicious activity immediately
+- Keep personal information secure
+
+**Optimal Usage:**
+- Take regular breaks during long sessions
+- Save important information to your device
+- Keep the application updated
+- Provide feedback to help improve the system
 
 ## Advanced Features
 
-### 1. Multi-Merchant Analysis
-- Batch statement processing
-- Portfolio optimization
-- Risk assessment across merchant base
-- Aggregated savings calculations
+### Power User Tips
 
-### 2. Industry-Specific Intelligence
-**Specialized Analysis**:
-- Restaurant processing optimization
-- Retail transaction patterns
-- E-commerce rate structures
-- Automotive dealership processing
-- High-risk merchant solutions
+**Keyboard Shortcuts:**
+- Ctrl/Cmd + Enter: Send message
+- Ctrl/Cmd + K: Quick search
+- Ctrl/Cmd + H: Chat history
+- Esc: Cancel current action
 
-### 3. Implementation Planning
-**Merchant Transition Support**:
-- Timeline development
-- Equipment requirements
-- Integration considerations
-- Risk mitigation strategies
+**Advanced Queries:**
+- Use specific industry terminology
+- Reference document titles or sections
+- Ask for comparisons between options
+- Request step-by-step procedures
 
-### 4. Reporting & Analytics
-**Performance Tracking**:
-- Conversion rate monitoring
-- Savings achievement verification
-- Merchant satisfaction metrics
-- Market penetration analysis
+**Workflow Integration:**
+- Bookmark frequently needed information
+- Create personal reference lists
+- Use JACC alongside other business tools
+- Export useful responses for offline use
 
----
+### Staying Updated
 
-## Best Practices
+**System Changes:**
+- Check announcements for new features
+- Review updated documentation
+- Participate in training sessions
+- Adapt to interface improvements
 
-### Statement Analysis
-1. **Verify Merchant Details**: Confirm business type and volume accuracy
-2. **Review Current Setup**: Understand existing processor relationship
-3. **Identify Pain Points**: Focus on specific merchant challenges
-4. **Present Clear Value**: Emphasize quantifiable savings and benefits
+**Industry Updates:**
+- Ask JACC about recent industry changes
+- Access new regulatory documents
+- Stay informed about product updates
+- Review competitive intelligence
 
-### Competitive Positioning
-1. **Use Real Data**: Leverage authentic processor rates and fees
-2. **Highlight Advantages**: Emphasize TracerPay's unique value propositions
-3. **Address Objections**: Prepare responses using competitive intelligence
-4. **Follow Up**: Track implementation success and merchant satisfaction
+### Maximizing Value
 
-### Document Usage
-1. **Stay Current**: Access latest versions of all materials
-2. **Customize Presentation**: Tailor documents to specific merchant needs
-3. **Verify Information**: Cross-reference data across multiple sources
-4. **Track Effectiveness**: Monitor which materials drive best results
+**Daily Routine:**
+- Start day with JACC check-in
+- Use for research and preparation
+- Reference during client conversations
+- End day with information review
 
----
+**Professional Development:**
+- Use JACC to learn new concepts
+- Practice explaining complex topics
+- Stay current with industry trends
+- Build comprehensive knowledge base
 
-## Support & Troubleshooting
-
-### Common Issues
-- **Statement Upload Failures**: Verify PDF format and file size limits
-- **Data Extraction Errors**: Ensure statement quality and legibility
-- **Analysis Discrepancies**: Cross-reference with manual calculations
-- **System Performance**: Clear browser cache and refresh application
-
-### Contact Information
-- **Technical Support**: Available through in-app chat
-- **Training Resources**: Access via document library
-- **Feature Requests**: Submit through feedback system
-
----
-
-## Security & Compliance
-
-### Data Protection
-- All merchant data encrypted in transit and at rest
-- Secure statement upload with automatic deletion after analysis
-- Role-based access controls for sensitive information
-- Audit logging for compliance tracking
-
-### Privacy Policy
-- Merchant information processed for analysis purposes only
-- No data sharing with unauthorized third parties
-- Compliance with industry data protection standards
-- Regular security assessments and updates
-
----
-
-*Last Updated: June 2025*
-*Version: 2.1*
+Remember: JACC is designed to be your intelligent assistant for merchant services. The more you use it, the better it becomes at understanding your needs and providing relevant, helpful information.
