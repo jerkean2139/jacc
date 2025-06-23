@@ -288,55 +288,6 @@ Would you like me to run a competitive analysis and show you better processing o
 
         {/* Chat Panel - Flexible grid column */}
         <div className="overflow-hidden flex flex-col">
-          {/* Desktop Header Navigation */}
-          <div className="border-b border-border p-2 bg-background">
-            <div className="flex items-center gap-2">
-              {/* Calculator link hidden for MVP - Version 2 feature */}
-              {false && (
-                <Link href="/calculator">
-                  <Button variant="ghost" size="sm" className="gap-2">
-                    <Calculator className="w-4 h-4" />
-                    Calculator
-                  </Button>
-                </Link>
-              )}
-              <Link href="/prompts">
-                <Button variant="ghost" size="sm" className="gap-2">
-                  <MessageSquare className="w-4 h-4" />
-                  AI Prompts
-                </Button>
-              </Link>
-              <Link href="/guide">
-                <Button variant="ghost" size="sm" className="gap-2">
-                  <BookOpen className="w-4 h-4" />
-                  Guide
-                </Button>
-              </Link>
-              <div className="relative group">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="gap-2 cursor-not-allowed opacity-60" 
-                  disabled
-                  title="Coming Soon"
-                >
-                  <Calculator className="w-4 h-4" />
-                  ISO-AMP
-                </Button>
-                <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
-                  Coming Soon
-                </span>
-              </div>
-              {user?.role === 'dev_admin' && (
-                <Link href="/admin">
-                  <Button variant="ghost" size="sm" className="gap-2">
-                    <Settings className="w-4 h-4" />
-                    Admin
-                  </Button>
-                </Link>
-              )}
-            </div>
-          </div>
           
           {/* Chat Interface */}
           <div className="flex-1 overflow-hidden">
