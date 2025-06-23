@@ -47,7 +47,7 @@ import {
   RefreshCw
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import DocumentPreviewModal from "@/components/ui/document-preview-modal";
+// import DocumentPreviewModal from "@/components/ui/document-preview-modal";
 import { SettingsManager } from "@/components/settings-manager";
 
 interface DocumentEntry {
@@ -123,7 +123,7 @@ export default function AdminControlCenter() {
   };
 
   function TrainingInteractionsTable() {
-    const interactions = trainingData?.interactions || [];
+    const interactions = Array.isArray(trainingData?.interactions) ? trainingData.interactions : [];
     
     return (
       <div className="space-y-4">
@@ -178,7 +178,7 @@ export default function AdminControlCenter() {
     );
   }
 
-  const categories = faqData ? 
+  const categories = Array.isArray(faqData) ? 
     Array.from(new Set(faqData.map((faq: FAQ) => faq.category))) : [];
 
   return (
@@ -235,7 +235,7 @@ export default function AdminControlCenter() {
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                      <Badge variant="secondary">{faqData?.length || 0} total entries</Badge>
+                      <Badge variant="secondary">{Array.isArray(faqData) ? faqData.length : 0} total entries</Badge>
                       <Badge variant="outline">{categories.length} categories</Badge>
                     </div>
                     <Button className="flex items-center gap-2">
@@ -246,7 +246,7 @@ export default function AdminControlCenter() {
 
                   <div className="space-y-4">
                     {categories.map(category => {
-                      const categoryFAQs = faqData ? 
+                      const categoryFAQs = Array.isArray(faqData) ? 
                         faqData.filter((f: FAQ) => f.category === category) : [];
                       
                       return (
@@ -463,15 +463,7 @@ export default function AdminControlCenter() {
         </TabsContent>
       </Tabs>
 
-      {/* Document Preview Modal */}
-      {showPreviewModal && previewDocument && (
-        <DocumentPreviewModal
-          document={previewDocument}
-          isOpen={showPreviewModal}
-          onClose={() => setShowPreviewModal(false)}
-          onDownload={() => handleDownloadDocument(previewDocument)}
-        />
-      )}
+      {/* Document Preview Modal - Temporarily disabled */}
 
       {/* Chat Review Modal */}
       <Dialog open={showChatReviewModal} onOpenChange={setShowChatReviewModal}>
