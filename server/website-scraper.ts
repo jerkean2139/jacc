@@ -73,7 +73,7 @@ class WebsiteScrapingService {
       });
 
       // Wait for content to load
-      await page.waitForLoadState('networkidle');
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
       // Extract HTML content
       const htmlContent = await page.content();
@@ -141,7 +141,7 @@ class WebsiteScrapingService {
         wordCount
       };
 
-    } catch (error) {
+    } catch (error: any) {
       if (browser) {
         await browser.close();
       }
@@ -230,7 +230,7 @@ Please format your response as JSON:
 
       // Try to parse JSON response
       try {
-        const responseText = typeof aiResponse === 'string' ? aiResponse : aiResponse.content || '';
+        const responseText = typeof aiResponse === 'string' ? aiResponse : (aiResponse as any).content || '';
         const parsed = JSON.parse(responseText);
         return {
           summary: parsed.summary || 'Content extracted from website',
