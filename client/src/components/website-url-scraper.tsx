@@ -173,19 +173,19 @@ ${scrapeResult.markdownContent}
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="website-url">Website URL</Label>
-              <div className="flex gap-2">
+              <div className="flex flex-col md:flex-row gap-2">
                 <Input
                   id="website-url"
                   type="url"
                   placeholder="https://shift4.zendesk.com/hc/en-us"
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
-                  className="flex-1"
+                  className="w-full md:flex-1"
                 />
                 <Button 
                   onClick={handleScrapeWebsite}
                   disabled={isLoading}
-                  className="min-w-[120px]"
+                  className="w-full md:min-w-[120px] md:w-auto"
                 >
                   {isLoading ? (
                     <>

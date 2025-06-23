@@ -190,6 +190,21 @@
     background-color: hsl(var(--green-600));
   }
   
+  /* Horizontal scrolling for bottom navigation */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .nav-scroll {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+
   /* Chat message animations */
   .message-enter {
     animation: slideInUp 0.3s ease-out;
