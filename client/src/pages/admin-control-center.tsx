@@ -70,6 +70,349 @@ interface FAQ {
   isActive: boolean;
 }
 
+const categories = ["General", "Payment Processing", "Compliance", "Technical", "Pricing"];
+
+// Three-Step Document Upload Component
+function ThreeStepDocumentUpload({ foldersData, onUploadComplete }: { 
+  foldersData: any[], 
+  onUploadComplete: () => void 
+}) {
+  const [currentStep, setCurrentStep] = useState(1);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [selectedFolder, setSelectedFolder] = useState<string>("");
+  const [permissions, setPermissions] = useState<"admin-only" | "all-users">("all-users");
+  const [isUploading, setIsUploading] = useState(false);
+  const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const uploadMutation = useMutation({
+    mutationFn: async (formData: FormData) => {
+      return apiRequest('/api/documents/upload', {
+        method: 'POST',
+        body: formData,
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Upload Successful",
+        description: `${selectedFiles.length} document(s) uploaded successfully`,
+      });
+      setCurrentStep(1);
+      setSelectedFiles([]);
+      setSelectedFolder("");
+      setPermissions("all-users");
+      onUploadComplete();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Upload Failed",
+        description: error.message || "Failed to upload documents",
+        variant: "destructive",
+      });
+    },
+    onSettled: () => {
+      setIsUploading(false);
+    }
+  });
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    setSelectedFiles(files);
+    if (files.length > 0) {
+      setCurrentStep(2);
+    }
+  };
+
+  const handleFolderSelect = (folderId: string) => {
+    setSelectedFolder(folderId);
+    setCurrentStep(3);
+  };
+
+  const handleUpload = async () => {
+    if (selectedFiles.length === 0) return;
+
+    setIsUploading(true);
+    const formData = new FormData();
+    
+    selectedFiles.forEach((file) => {
+      formData.append('files', file);
+    });
+    
+    if (selectedFolder) {
+      formData.append('folderId', selectedFolder);
+    }
+    formData.append('permissions', permissions);
+
+    uploadMutation.mutate(formData);
+  };
+
+  const resetUpload = () => {
+    setCurrentStep(1);
+    setSelectedFiles([]);
+    setSelectedFolder("");
+    setPermissions("all-users");
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-4">
+          {[1, 2, 3].map((step) => (
+            <div key={step} className="flex items-center">
+              <div className={`
+                w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium
+                ${currentStep >= step 
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-gray-200 text-gray-600'
+                }
+              `}>
+                {step}
+              </div>
+              {step < 3 && (
+                <div className={`
+                  w-12 h-0.5 mx-2
+                  ${currentStep > step ? 'bg-blue-600' : 'bg-gray-200'}
+                `} />
+              )}
+            </div>
+          ))}
+        </div>
+        <Button variant="ghost" onClick={resetUpload} className="text-sm">
+          Reset
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-3 gap-4 text-center">
+        <div className={currentStep >= 1 ? 'text-blue-600 font-medium' : 'text-gray-500'}>
+          1. Select Files
+        </div>
+        <div className={currentStep >= 2 ? 'text-blue-600 font-medium' : 'text-gray-500'}>
+          2. Choose Folder
+        </div>
+        <div className={currentStep >= 3 ? 'text-blue-600 font-medium' : 'text-gray-500'}>
+          3. Set Permissions
+        </div>
+      </div>
+
+      <div className="border rounded-lg p-6">
+        {currentStep === 1 && (
+          <div className="text-center space-y-4">
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8">
+              <Upload className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+              <h3 className="text-lg font-medium mb-2">Select Files to Upload</h3>
+              <p className="text-gray-500 mb-4">
+                Choose documents, PDFs, images, or other files to add to your knowledge base
+              </p>
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                onChange={handleFileSelect}
+                className="hidden"
+                accept=".pdf,.doc,.docx,.txt,.csv,.jpg,.jpeg,.png"
+              />
+              <Button onClick={() => fileInputRef.current?.click()}>
+                <Upload className="h-4 w-4 mr-2" />
+                Choose Files
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {currentStep === 2 && (
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-lg font-medium mb-2">Selected Files ({selectedFiles.length})</h3>
+              <div className="space-y-2 mb-6">
+                {selectedFiles.map((file, index) => (
+                  <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                    <span className="text-sm">{file.name}</span>
+                    <Badge variant="outline">{Math.round(file.size / 1024)}KB</Badge>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-medium mb-4">Choose Destination Folder</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div 
+                  onClick={() => handleFolderSelect("")}
+                  className={`
+                    border rounded-lg p-4 cursor-pointer transition-colors
+                    ${selectedFolder === "" 
+                      ? 'border-blue-500 bg-blue-50' 
+                      : 'border-gray-200 hover:border-gray-300'
+                    }
+                  `}
+                >
+                  <div className="flex items-center gap-2">
+                    <Folder className="h-5 w-5" />
+                    <div>
+                      <div className="font-medium">Unassigned</div>
+                      <div className="text-sm text-gray-500">Place in root directory</div>
+                    </div>
+                  </div>
+                </div>
+
+                {Array.isArray(foldersData) && foldersData.map((folder: any) => (
+                  <div 
+                    key={folder.id}
+                    onClick={() => handleFolderSelect(folder.id)}
+                    className={`
+                      border rounded-lg p-4 cursor-pointer transition-colors
+                      ${selectedFolder === folder.id 
+                        ? 'border-blue-500 bg-blue-50' 
+                        : 'border-gray-200 hover:border-gray-300'
+                      }
+                    `}
+                  >
+                    <div className="flex items-center gap-2">
+                      <FolderOpen className="h-5 w-5" />
+                      <div>
+                        <div className="font-medium">{folder.name}</div>
+                        <div className="text-sm text-gray-500">
+                          {folder.documentCount || 0} documents
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {currentStep === 3 && (
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-lg font-medium mb-2">Review Upload Details</h3>
+              <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Files:</span>
+                  <span className="font-medium">{selectedFiles.length} selected</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Destination:</span>
+                  <span className="font-medium">
+                    {selectedFolder 
+                      ? foldersData?.find((f: any) => f.id === selectedFolder)?.name || "Unknown Folder"
+                      : "Unassigned (Root)"
+                    }
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Total Size:</span>
+                  <span className="font-medium">
+                    {Math.round(selectedFiles.reduce((acc, file) => acc + file.size, 0) / 1024)}KB
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-medium mb-4">Set Access Permissions</h3>
+              <div className="space-y-3">
+                <div 
+                  onClick={() => setPermissions("all-users")}
+                  className={`
+                    border rounded-lg p-4 cursor-pointer transition-colors
+                    ${permissions === "all-users" 
+                      ? 'border-blue-500 bg-blue-50' 
+                      : 'border-gray-200 hover:border-gray-300'
+                    }
+                  `}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`
+                      w-4 h-4 rounded-full border-2
+                      ${permissions === "all-users" 
+                        ? 'border-blue-500 bg-blue-500' 
+                        : 'border-gray-300'
+                      }
+                    `}>
+                      {permissions === "all-users" && (
+                        <div className="w-2 h-2 bg-white rounded-full mx-auto mt-0.5" />
+                      )}
+                    </div>
+                    <div>
+                      <div className="font-medium">All Users</div>
+                      <div className="text-sm text-gray-500">
+                        Documents visible to all authenticated users
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div 
+                  onClick={() => setPermissions("admin-only")}
+                  className={`
+                    border rounded-lg p-4 cursor-pointer transition-colors
+                    ${permissions === "admin-only" 
+                      ? 'border-blue-500 bg-blue-50' 
+                      : 'border-gray-200 hover:border-gray-300'
+                    }
+                  `}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`
+                      w-4 h-4 rounded-full border-2
+                      ${permissions === "admin-only" 
+                        ? 'border-blue-500 bg-blue-500' 
+                        : 'border-gray-300'
+                      }
+                    `}>
+                      {permissions === "admin-only" && (
+                        <div className="w-2 h-2 bg-white rounded-full mx-auto mt-0.5" />
+                      )}
+                    </div>
+                    <div>
+                      <div className="font-medium">Admin Only</div>
+                      <div className="text-sm text-gray-500">
+                        Restricted access for administrators only
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-between pt-4">
+              <Button 
+                variant="outline" 
+                onClick={() => setCurrentStep(2)}
+                disabled={isUploading}
+              >
+                Back
+              </Button>
+              <Button 
+                onClick={handleUpload}
+                disabled={isUploading || selectedFiles.length === 0}
+                className="min-w-[120px]"
+              >
+                {isUploading ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="h-4 w-4 mr-2" />
+                    Upload Files
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function AdminControlCenter() {
   const [activeTab, setActiveTab] = useState("qa-knowledge");
   const [showPreviewModal, setShowPreviewModal] = useState(false);
