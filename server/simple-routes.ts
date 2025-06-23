@@ -1327,7 +1327,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/admin/training/analytics', async (req: Request, res: Response) => {
     try {
       const { db } = await import('./db.ts');
-      const { chats, messages, learningData, qaKnowledgeBase, documents } = await import('../shared/schema.ts');
+      const { chats, messages, trainingInteractions, qaKnowledgeBase, documents } = await import('../shared/schema.ts');
       const { sql, desc, eq } = await import('drizzle-orm');
       
       // Total interactions (chat sessions)
@@ -1343,12 +1343,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Training corrections submitted by admins
       const correctionsQuery = await db.select({
         count: sql<number>`count(*)`
-      }).from(learningData).where(eq(learningData.source, 'admin_correction'));
+      }).from(trainingInteractions).where(eq(trainingInteractions.source, 'admin_correction'));
       
       // Positive approvals from admins
       const approvalsQuery = await db.select({
         count: sql<number>`count(*)`
-      }).from(learningData).where(eq(learningData.source, 'admin_approval'));
+      }).from(trainingInteractions).where(eq(trainingInteractions.source, 'admin_test'));
       
       // Knowledge base entries count
       const knowledgeBaseQuery = await db.select({
@@ -1386,34 +1386,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/admin/training/interactions', async (req: Request, res: Response) => {
     try {
       const { db } = await import('./db.ts');
-      const { learningData, chats, messages } = await import('../shared/schema.ts');
+      const { trainingInteractions, chats, messages } = await import('../shared/schema.ts');
       const { desc, eq, sql } = await import('drizzle-orm');
       
       // Get recent training interactions with details
       const recentInteractions = await db
         .select({
-          id: learningData.id,
-          query: learningData.query,
-          response: learningData.response,
-          source: learningData.source,
-          wasCorrect: learningData.wasCorrect,
-          correctedResponse: learningData.correctedResponse,
-          userId: learningData.userId,
-          createdAt: learningData.createdAt,
-          metadata: learningData.metadata
+          id: trainingInteractions.id,
+          query: trainingInteractions.query,
+          response: trainingInteractions.response,
+          source: trainingInteractions.source,
+          wasCorrect: trainingInteractions.wasCorrect,
+          correctedResponse: trainingInteractions.correctedResponse,
+          userId: trainingInteractions.userId,
+          createdAt: trainingInteractions.createdAt,
+          metadata: trainingInteractions.metadata
         })
-        .from(learningData)
-        .orderBy(desc(learningData.createdAt))
+        .from(trainingInteractions)
+        .orderBy(desc(trainingInteractions.createdAt))
         .limit(50);
 
       // Get training statistics by source
       const sourceStats = await db
         .select({
-          source: learningData.source,
+          source: trainingInteractions.source,
           count: sql<number>`count(*)`
         })
-        .from(learningData)
-        .groupBy(learningData.source);
+        .from(trainingInteractions)
+        .groupBy(trainingInteractions.source);
 
       // Get recent chat sessions with message counts
       const recentChats = await db

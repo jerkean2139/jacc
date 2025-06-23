@@ -13,6 +13,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Folder, FileText, AlertTriangle, Settings, Users, BarChart3, MessageSquare, Brain, ChevronDown, Download, Edit, Send, ThumbsUp, Eye, RefreshCw, Plus, Upload, Search, Trash2, Save, X, User, Bot, Loader2, CheckCircle, AlertCircle, SkipForward } from 'lucide-react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import DocumentDragDrop from '@/components/ui/document-drag-drop';
 import DocumentPreviewModal from '@/components/ui/document-preview-modal';
 import DocumentUpload from '@/components/document-upload';
@@ -81,6 +82,158 @@ export default function AdminControlCenter() {
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Training Interactions Table Component
+  function TrainingInteractionsTable() {
+    const { data: trainingInteractions, isLoading: interactionsLoading } = useQuery({
+      queryKey: ['/api/admin/training/interactions'],
+      refetchInterval: 30000, // Refresh every 30 seconds
+    });
+
+    if (interactionsLoading) {
+      return (
+        <div className="flex items-center justify-center p-8">
+          <Loader2 className="h-8 w-8 animate-spin" />
+          <span className="ml-2">Loading training interactions...</span>
+        </div>
+      );
+    }
+
+    const interactions = (trainingInteractions as any)?.interactions || [];
+    const sourceStats = (trainingInteractions as any)?.sourceStatistics || [];
+    const recentChats = (trainingInteractions as any)?.recentChats || [];
+
+    return (
+      <div className="space-y-6">
+        {/* Source Statistics */}
+        {sourceStats.length > 0 && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {sourceStats.map((stat: any, index: number) => (
+              <div key={index} className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                  {stat.count}
+                </div>
+                <div className="text-xs text-gray-600 dark:text-gray-400 capitalize">
+                  {stat.source?.replace('_', ' ') || 'Unknown'}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Training Interactions Table */}
+        <div className="border rounded-lg">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[100px]">Type</TableHead>
+                <TableHead className="w-[200px]">Query</TableHead>
+                <TableHead className="w-[250px]">Response</TableHead>
+                <TableHead className="w-[100px]">Status</TableHead>
+                <TableHead className="w-[100px]">User</TableHead>
+                <TableHead className="w-[120px]">Date</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {interactions.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-8 text-gray-500">
+                    No training interactions found
+                  </TableCell>
+                </TableRow>
+              ) : (
+                interactions.slice(0, 20).map((interaction: any) => (
+                  <TableRow key={interaction.id}>
+                    <TableCell>
+                      <Badge variant={
+                        interaction.source === 'admin_correction' ? 'destructive' :
+                        interaction.source === 'admin_test' ? 'default' :
+                        'secondary'
+                      }>
+                        {interaction.source?.replace('_', ' ') || 'Unknown'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="max-w-[200px]">
+                      <div className="truncate text-sm">
+                        {interaction.query || 'No query'}
+                      </div>
+                    </TableCell>
+                    <TableCell className="max-w-[250px]">
+                      <div className="truncate text-sm">
+                        {interaction.correctedResponse || interaction.response || 'No response'}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {interaction.wasCorrect !== null ? (
+                        <Badge variant={interaction.wasCorrect ? 'default' : 'destructive'}>
+                          {interaction.wasCorrect ? 'Correct' : 'Corrected'}
+                        </Badge>
+                      ) : (
+                        <Badge variant="secondary">Pending</Badge>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-sm">
+                      {interaction.userId || 'Admin'}
+                    </TableCell>
+                    <TableCell className="text-sm">
+                      {interaction.createdAt ? 
+                        new Date(interaction.createdAt).toLocaleDateString() : 
+                        'Unknown'
+                      }
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
+
+        {/* Recent Chat Sessions */}
+        {recentChats.length > 0 && (
+          <div className="space-y-4">
+            <h4 className="text-lg font-semibold">Recent Chat Sessions</h4>
+            <div className="border rounded-lg">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Chat Title</TableHead>
+                    <TableHead>Messages</TableHead>
+                    <TableHead>User</TableHead>
+                    <TableHead>Created</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {recentChats.slice(0, 10).map((chat: any) => (
+                    <TableRow key={chat.id}>
+                      <TableCell className="max-w-[200px]">
+                        <div className="truncate">
+                          {chat.title || 'Untitled Chat'}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline">
+                          {chat.messageCount || 0}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-sm">
+                        {chat.userId || 'Unknown'}
+                      </TableCell>
+                      <TableCell className="text-sm">
+                        {chat.createdAt ? 
+                          new Date(chat.createdAt).toLocaleDateString() : 
+                          'Unknown'
+                        }
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   // Fetch documents data
   const { data: integratedDocuments, isLoading: documentsLoading } = useQuery({
