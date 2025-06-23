@@ -961,7 +961,7 @@ export default function AdminControlCenter() {
             <CardHeader>
               <CardTitle>Training Analytics</CardTitle>
               <CardDescription>
-                Monitor AI training performance and user interactions
+                Real-time AI training performance and user interactions from database
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -971,33 +971,70 @@ export default function AdminControlCenter() {
                   <span className="ml-2">Loading training data...</span>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <div className="text-center p-4 bg-blue-50 rounded-lg">
-                    <div className="text-2xl font-bold text-blue-700">
-                      {(trainingAnalytics as any)?.totalInteractions || 0}
+                <div className="space-y-6">
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                    <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                      <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">
+                        {(trainingAnalytics as any)?.totalInteractions || 0}
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Chat Sessions</div>
                     </div>
-                    <div className="text-sm text-gray-600">Training Interactions</div>
+                    <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                      <div className="text-2xl font-bold text-green-700 dark:text-green-300">
+                        {(trainingAnalytics as any)?.totalMessages || 0}
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">AI Responses</div>
+                    </div>
+                    <div className="text-center p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                      <div className="text-2xl font-bold text-red-700 dark:text-red-300">
+                        {(trainingAnalytics as any)?.correctionsSubmitted || 0}
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Corrections</div>
+                    </div>
+                    <div className="text-center p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg">
+                      <div className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">
+                        {(trainingAnalytics as any)?.approvalsSubmitted || 0}
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Approvals</div>
+                    </div>
+                    <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                      <div className="text-2xl font-bold text-purple-700 dark:text-purple-300">
+                        {(trainingAnalytics as any)?.knowledgeBaseEntries || 0}
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Knowledge Base</div>
+                    </div>
+                    <div className="text-center p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+                      <div className="text-2xl font-bold text-orange-700 dark:text-orange-300">
+                        {(trainingAnalytics as any)?.documentsProcessed || 0}
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Documents</div>
+                    </div>
                   </div>
-                  <div className="text-center p-4 bg-green-50 rounded-lg">
-                    <div className="text-2xl font-bold text-green-700">
-                      {(trainingAnalytics as any)?.correctionsSubmitted || 0}
-                    </div>
-                    <div className="text-sm text-gray-600">AI Corrections</div>
-                  </div>
-                  <div className="text-center p-4 bg-purple-50 rounded-lg">
-                    <div className="text-2xl font-bold text-purple-700">
-                      {(trainingAnalytics as any)?.averageResponseTime || 0}ms
-                    </div>
-                    <div className="text-sm text-gray-600">Avg Response Time</div>
-                  </div>
-                  <div className="text-center p-4 bg-orange-50 rounded-lg">
-                    <div className="text-2xl font-bold text-orange-700">
-                      {(trainingAnalytics as any)?.knowledgeBaseEntries || 0}
-                    </div>
-                    <div className="text-sm text-gray-600">Knowledge Entries</div>
+                  
+                  <div className="flex items-center justify-between">
+                    <Badge variant="outline" className="text-xs">
+                      Data Source: {(trainingAnalytics as any)?.dataSource || 'database'}
+                    </Badge>
+                    <Badge variant="outline" className="text-xs">
+                      Last Updated: {(trainingAnalytics as any)?.lastUpdated ? 
+                        new Date((trainingAnalytics as any).lastUpdated).toLocaleString() : 'Now'}
+                    </Badge>
                   </div>
                 </div>
               )}
+            </CardContent>
+          </Card>
+
+          {/* Training Interactions Table */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Training Interactions</CardTitle>
+              <CardDescription>
+                Detailed view of admin corrections, approvals, and training activities
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <TrainingInteractionsTable />
             </CardContent>
           </Card>
         </TabsContent>
