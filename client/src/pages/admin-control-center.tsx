@@ -1120,6 +1120,10 @@ function ThreeStepDocumentUpload({ foldersData, onUploadComplete }: {
         method: 'POST',
         body: formData,
       });
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Upload failed: ${response.status} - ${errorText}`);
+      }
       return response.json();
     },
     onSuccess: () => {
@@ -1923,7 +1927,15 @@ export default function AdminControlCenter() {
                       <Badge variant="secondary">{Array.isArray(faqData) ? faqData.length : 0} total entries</Badge>
                       <Badge variant="outline">{categories.length} categories</Badge>
                     </div>
-                    <Button className="flex items-center gap-2">
+                    <Button 
+                      className="flex items-center gap-2"
+                      onClick={() => {
+                        toast({
+                          title: "Add FAQ Entry",
+                          description: "FAQ creation dialog coming soon...",
+                        });
+                      }}
+                    >
                       <Plus className="h-4 w-4" />
                       Add FAQ
                     </Button>
