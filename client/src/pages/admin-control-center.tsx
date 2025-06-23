@@ -1972,6 +1972,13 @@ function ComprehensiveSettingsInterface() {
           </Button>
         </div>
       </div>
+
+      {/* Prompt Editor Modal */}
+      <PromptEditorModal
+        open={showPromptEditor}
+        onOpenChange={setShowPromptEditor}
+        template={selectedPromptTemplate}
+      />
     </div>
   );
 }
