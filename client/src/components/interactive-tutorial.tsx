@@ -51,7 +51,7 @@ export default function InteractiveTutorial() {
     if (!tutorialStatus && user) {
       // Auto-start tutorial for new users after a brief delay
       setTimeout(() => setIsActive(true), 2000);
-    } else if (tutorialStatus === 'completed') {
+    } else if (tutorialStatus === 'completed' || tutorialStatus === 'never-show') {
       setIsCompleted(true);
     }
   }, [user]);
@@ -421,6 +421,12 @@ export default function InteractiveTutorial() {
     setIsCompleted(true);
   };
 
+  const handleNeverShowAgain = () => {
+    localStorage.setItem(`jacc-tutorial-${user?.id}`, 'never-show');
+    setIsActive(false);
+    setIsCompleted(true);
+  };
+
   const progress = ((currentStep + 1) / tutorialSteps.length) * 100;
   const currentStepData = tutorialSteps[currentStep];
 
@@ -486,9 +492,14 @@ export default function InteractiveTutorial() {
               )}
               
               {currentStep < tutorialSteps.length - 1 && (
-                <Button variant="ghost" onClick={handleSkip} className="text-muted-foreground">
-                  Skip Tutorial
-                </Button>
+                <div className="flex gap-2">
+                  <Button variant="ghost" onClick={handleSkip} className="text-muted-foreground">
+                    Skip Tutorial
+                  </Button>
+                  <Button variant="ghost" onClick={handleNeverShowAgain} className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20">
+                    I'm a pro, don't show this again
+                  </Button>
+                </div>
               )}
             </div>
 
