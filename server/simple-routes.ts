@@ -2331,46 +2331,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           console.log('Saving test conversation to chat history:', { chatId, userId: user.id, query: query.substring(0, 50) });
           
-          // Use the existing storage instance to create chat and messages
-          const storage = require('./storage').storage;
-          
-          // Create a test chat record directly in memory storage
-          const chatData = {
+          // Create test chat and messages directly using storage methods
+          await storage.createChat({
             id: chatId,
             userId: user.id,
             title: query.length > 50 ? query.substring(0, 47) + '...' : query,
             createdAt: now,
             updatedAt: now
-          };
-          
-          // Add to in-memory storage
-          if (!storage.chats) storage.chats = new Map();
-          storage.chats.set(chatId, chatData);
-          
-          // Create messages
-          const userMessageId = `msg-${Date.now()}-user`;
-          const aiMessageId = `msg-${Date.now()}-ai`;
-          
-          const userMessage = {
-            id: userMessageId,
+          });
+
+          // Create user message
+          await storage.createMessage({
+            id: `msg-${Date.now()}-user`,
             chatId: chatId,
             role: 'user',
             content: query,
             createdAt: now
-          };
-          
-          const aiMessage = {
-            id: aiMessageId,
+          });
+
+          // Create AI response message
+          await storage.createMessage({
+            id: `msg-${Date.now()}-ai`,
             chatId: chatId,
             role: 'assistant',
             content: aiResponse.message,
             createdAt: new Date(now.getTime() + 1000)
-          };
-          
-          // Add messages to storage
-          if (!storage.messages) storage.messages = new Map();
-          storage.messages.set(userMessageId, userMessage);
-          storage.messages.set(aiMessageId, aiMessage);
+          });
           
           console.log('✅ Test conversation saved to chat history successfully');
         } catch (saveError) {
