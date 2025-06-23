@@ -2209,7 +2209,7 @@ function ThreeStepDocumentUpload({ foldersData, onUploadComplete }: {
                 <div 
                   onClick={() => handleFolderSelect("")}
                   className={`
-                    border rounded-lg p-4 cursor-pointer transition-colors
+                    border rounded-lg p-3 md:p-4 cursor-pointer transition-colors
                     ${selectedFolder === "" 
                       ? 'border-blue-500 bg-blue-50' 
                       : 'border-gray-200 hover:border-gray-300'
@@ -2217,10 +2217,10 @@ function ThreeStepDocumentUpload({ foldersData, onUploadComplete }: {
                   `}
                 >
                   <div className="flex items-center gap-2">
-                    <Folder className="h-5 w-5" />
+                    <Folder className="h-4 w-4 md:h-5 md:w-5" />
                     <div>
-                      <div className="font-medium">Unassigned</div>
-                      <div className="text-sm text-gray-500">Place in root directory</div>
+                      <div className="font-medium text-sm md:text-base">Unassigned</div>
+                      <div className="text-xs md:text-sm text-gray-500">Place in root directory</div>
                     </div>
                   </div>
                 </div>
@@ -2230,7 +2230,7 @@ function ThreeStepDocumentUpload({ foldersData, onUploadComplete }: {
                     key={folder.id}
                     onClick={() => handleFolderSelect(folder.id)}
                     className={`
-                      border rounded-lg p-4 cursor-pointer transition-colors
+                      border rounded-lg p-3 md:p-4 cursor-pointer transition-colors
                       ${selectedFolder === folder.id 
                         ? 'border-blue-500 bg-blue-50' 
                         : 'border-gray-200 hover:border-gray-300'
@@ -2238,10 +2238,10 @@ function ThreeStepDocumentUpload({ foldersData, onUploadComplete }: {
                     `}
                   >
                     <div className="flex items-center gap-2">
-                      <FolderOpen className="h-5 w-5" />
+                      <FolderOpen className="h-4 w-4 md:h-5 md:w-5" />
                       <div>
-                        <div className="font-medium">{folder.name}</div>
-                        <div className="text-sm text-gray-500">
+                        <div className="font-medium text-sm md:text-base">{folder.name}</div>
+                        <div className="text-xs md:text-sm text-gray-500">
                           {folder.documentCount || 0} documents
                         </div>
                       </div>
