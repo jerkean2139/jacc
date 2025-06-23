@@ -98,52 +98,54 @@ class WebsiteScrapingService {
         await new Promise(resolve => setTimeout(resolve, 2000));
 
         // Extract HTML content
-        console.log('📄 Extracting page content...');
-        const html = await page.content();
-        console.log('✅ HTML content extracted, length:', html.length);
-
+        console.log('📄 Extracting HTML content...');
+        const htmlContent = await page.content();
+        console.log('✅ HTML content extracted, length:', htmlContent.length);
+        
+        // Parse with Cheerio
+        const $ = cheerio.load(htmlContent);
+        
         // Extract title
-        const title = await page.title();
-        console.log('✅ Page title extracted:', title);
+        const title = $('title').text().trim() || 
+                     $('h1').first().text().trim() || 
+                     'Scraped Website Content';
 
-        // Parse with Cheerio for content extraction
-        const $ = cheerio.load(html);
-        
         // Remove unwanted elements
-        $('script, style, nav, header, footer, aside, .sidebar, #sidebar, .menu, #menu').remove();
+        $('script, style, nav, header, footer, aside, .advertisement, .ads, .cookie-banner').remove();
         
-        // Extract main content
-        let textContent = '';
-        const contentSelectors = ['main', 'article', '.content', '#content', '.main', '#main', 'body'];
-        
+        // Extract main content (try common content selectors)
+        let mainContent = '';
+        const contentSelectors = [
+          'main',
+          '[role="main"]',
+          '.main-content',
+          '.content',
+          '.article-content',
+          '.post-content',
+          'article',
+          '.entry-content',
+          '#content',
+          '.page-content'
+        ];
+
         for (const selector of contentSelectors) {
-          const element = $(selector);
-          if (element.length > 0 && element.text().trim().length > 200) {
-            textContent = element.text().trim();
-            console.log(`✅ Content extracted using selector: ${selector}`);
-            break;
+          const content = $(selector).html();
+          if (content && content.trim().length > mainContent.length) {
+            mainContent = content;
           }
         }
-        
-        // Fallback to body if no main content found
-        if (!textContent) {
-          textContent = $('body').text().trim();
-          console.log('✅ Fallback to body content extraction');
+
+        // Fallback to body content if no main content found
+        if (!mainContent || mainContent.trim().length < 500) {
+          mainContent = $('body').html() || '';
         }
 
-        // Clean up text content
-        textContent = textContent
-          .replace(/\s+/g, ' ')
-          .replace(/\n+/g, '\n')
-          .trim();
-
-        console.log('✅ Text content cleaned, length:', textContent.length);
-
-        // Convert to markdown
-        const bodyHtml = $('body').html() || '';
-        const markdownContent = this.turndownService.turndown(bodyHtml);
-        console.log('✅ Markdown conversion completed');
-
+        // Convert to text for processing
+        const textContent = $(mainContent).text().replace(/\s+/g, ' ').trim();
+        
+        // Convert HTML to Markdown
+        const markdownContent = this.turndownService.turndown(mainContent);
+        
         // Calculate word count
         const wordCount = textContent.split(/\s+/).filter(word => word.length > 0).length;
 
@@ -176,27 +178,27 @@ class WebsiteScrapingService {
 
         return result;
 
-      } catch (error: any) {
-        if (browser) {
-          await browser.close();
-        }
-        
-        console.error('❌ Website scraping failed:', error);
-        console.error('❌ Error details:', {
-          message: error.message,
-          stack: error.stack,
-          name: error.name
-        });
-        
-        // Fallback to simple HTTP request if Puppeteer fails
-        try {
-          console.log('🔄 Attempting fallback scraping method...');
-          return await this.fallbackScrape(url);
-        } catch (fallbackError: any) {
-          console.error('❌ Fallback scraping also failed:', fallbackError);
-          throw new Error(`Website scraping failed: ${error.message}. Fallback also failed: ${fallbackError.message}`);
-        }
+    } catch (error: any) {
+      if (browser) {
+        await browser.close();
       }
+      
+      console.error('❌ Website scraping failed:', error);
+      console.error('❌ Error details:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
+      
+      // Fallback to simple HTTP request if Puppeteer fails
+      try {
+        console.log('🔄 Attempting fallback scraping method...');
+        return await this.fallbackScrape(url);
+      } catch (fallbackError: any) {
+        console.error('❌ Fallback scraping also failed:', fallbackError);
+        throw new Error(`Website scraping failed: ${error.message}. Fallback also failed: ${fallbackError.message}`);
+      }
+    }
     }
   }
 
@@ -217,57 +219,55 @@ class WebsiteScrapingService {
 
       console.log('✅ HTTP request successful, response length:', response.data.length);
 
-      // Parse with Cheerio
       const $ = cheerio.load(response.data);
       
       // Extract title
-      const title = $('title').text().trim() || 'Untitled Document';
-      console.log('✅ Title extracted:', title);
-
-      // Remove unwanted elements
-      $('script, style, nav, header, footer, aside, .sidebar, #sidebar, .menu, #menu').remove();
+      const title = $('title').text().trim() || 
+                   $('h1').first().text().trim() || 
+                   'Website Content';
       
-      // Extract main content
-      let textContent = '';
-      const contentSelectors = ['main', 'article', '.content', '#content', '.main', '#main', 'body'];
+      console.log('📄 Extracted title:', title);
+      
+      // Remove unwanted elements
+      $('script, style, nav, header, footer, aside, .advertisement, .ads, .cookie-banner').remove();
+      
+      // Try to find main content area
+      let mainContent = '';
+      const contentSelectors = [
+        'main', 'article', '.content', '.main-content', 
+        '.article-content', '.post-content', '#content'
+      ];
       
       for (const selector of contentSelectors) {
-        const element = $(selector);
-        if (element.length > 0 && element.text().trim().length > 200) {
-          textContent = element.text().trim();
-          console.log(`✅ Content extracted using selector: ${selector}`);
-          break;
+        const content = $(selector).html();
+        if (content && content.trim().length > mainContent.length) {
+          mainContent = content;
         }
       }
       
       // Fallback to body if no main content found
-      if (!textContent) {
-        textContent = $('body').text().trim();
-        console.log('✅ Fallback to body content extraction');
+      if (!mainContent || mainContent.trim().length < 200) {
+        mainContent = $('body').html() || '';
       }
-
-      // Clean up text content
-      textContent = textContent
-        .replace(/\s+/g, ' ')
-        .replace(/\n+/g, '\n')
-        .trim();
-
-      console.log('✅ Text content cleaned, length:', textContent.length);
-
+      
+      // Extract text content
+      const textContent = $(mainContent).text().replace(/\s+/g, ' ').trim();
+      console.log('📝 Extracted text content length:', textContent.length);
+      
       // Convert to markdown
-      const bodyHtml = $('body').html() || '';
-      const markdownContent = this.turndownService.turndown(bodyHtml);
-      console.log('✅ Markdown conversion completed');
-
+      const markdownContent = this.turndownService.turndown(mainContent);
+      console.log('📋 Converted to markdown, length:', markdownContent.length);
+      
       // Calculate word count
       const wordCount = textContent.split(/\s+/).filter(word => word.length > 0).length;
-
-      // Generate summary and bullet points using AI
-      console.log('🤖 Generating AI summary and bullet points...');
+      console.log('🔢 Word count:', wordCount);
+      
+      // Generate summary and bullet points
       const { summary, bulletPoints } = await this.generateSummaryAndBulletPoints(textContent, title, url);
-      console.log('✅ AI summary generated successfully');
 
-      const result = {
+      console.log('✅ Fallback scraping completed successfully');
+
+      return {
         title,
         content: textContent,
         markdownContent,
@@ -277,69 +277,69 @@ class WebsiteScrapingService {
         scrapedAt: new Date().toISOString(),
         wordCount
       };
-
-      console.log('📊 HTTP scraping results:', {
-        title: result.title.substring(0, 50) + '...',
-        contentLength: result.content.length,
-        markdownLength: result.markdownContent.length,
-        wordCount: result.wordCount,
-        bulletPointsCount: result.bulletPoints.length
-      });
-
-      return result;
-
     } catch (error: any) {
-      console.error('❌ HTTP scraping failed:', error);
+      console.error('❌ Fallback scraping failed:', error);
       throw new Error(`HTTP scraping failed: ${error.message}`);
     }
   }
 
-  private async generateSummaryAndBulletPoints(content: string, title: string, url: string): Promise<{summary: string, bulletPoints: string[]}> {
+  private async generateSummaryAndBulletPoints(content: string, title: string, url: string): Promise<{ summary: string; bulletPoints: string[] }> {
     try {
+      // Truncate content if too long for AI processing
+      const maxContentLength = 8000;
+      const truncatedContent = content.length > maxContentLength 
+        ? content.substring(0, maxContentLength) + '...'
+        : content;
+
       const prompt = `Please analyze the following web content and provide:
-1. A concise summary (2-3 sentences)
-2. 3-5 key bullet points highlighting the most important information
 
-Content Title: ${title}
-Source URL: ${url}
-Content: ${content.substring(0, 3000)}
+1. A concise 2-3 sentence summary
+2. 5-8 key bullet points covering the main topics
 
-Please respond in this exact JSON format:
+Website: ${title}
+URL: ${url}
+
+Content:
+${truncatedContent}
+
+Please format your response as JSON:
 {
   "summary": "Your summary here",
-  "bulletPoints": ["Point 1", "Point 2", "Point 3"]
+  "bulletPoints": ["Point 1", "Point 2", "Point 3", ...]
 }`;
 
-      const aiResponse = await generateChatResponse(prompt);
-      
-      try {
-        const parsed = JSON.parse(aiResponse);
-        if (parsed.summary && Array.isArray(parsed.bulletPoints)) {
-          return {
-            summary: parsed.summary,
-            bulletPoints: parsed.bulletPoints
-          };
-        }
-      } catch (parseError) {
-        console.log('Failed to parse AI response as JSON, using fallback');
-      }
+      const aiResponse = await generateChatResponse([
+        { role: 'user', content: prompt }
+      ]);
 
-      // Fallback response
-      return {
-        summary: `Content extracted from ${title}. This document contains information scraped from the provided URL and has been processed for AI search and retrieval.`,
-        bulletPoints: [
-          'Web content extracted and converted to markdown format',
-          'Content processed for semantic search capabilities',
-          'Contains relevant information for merchant services'
-        ]
-      };
+      // Try to parse JSON response
+      try {
+        const responseText = typeof aiResponse === 'string' ? aiResponse : (aiResponse as any).content || '';
+        const parsed = JSON.parse(responseText);
+        return {
+          summary: parsed.summary || 'Content extracted from website',
+          bulletPoints: Array.isArray(parsed.bulletPoints) ? parsed.bulletPoints : []
+        };
+      } catch (parseError) {
+        // Fallback if JSON parsing fails
+        console.warn('Failed to parse AI response as JSON, using fallback');
+        return {
+          summary: `Content extracted from ${title}. This document contains information about ${url.includes('zendesk') ? 'support documentation' : 'web content'} and related topics.`,
+          bulletPoints: [
+            'Web content extracted and converted to markdown format',
+            'Source material from ' + new URL(url).hostname,
+            'Processed for search and AI retrieval',
+            'Contains relevant information for merchant services'
+          ]
+        };
+      }
     } catch (error) {
       console.error('Failed to generate AI summary:', error);
       return {
         summary: `Content extracted from ${title}. This document contains information scraped from the provided URL.`,
         bulletPoints: [
           'Web content extracted and converted to markdown format',
-          'Content available for search and reference',
+          'Source material from ' + new URL(url).hostname,
           'Processed for search and AI retrieval'
         ]
       };
