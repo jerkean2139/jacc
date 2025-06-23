@@ -2231,11 +2231,43 @@ User Context: {userRole}`,
     }
   });
 
-  // Chat routes - temporarily bypass auth for testing
+  // Chat routes - get all chats for admin users, filtered for regular users
   app.get('/api/chats', async (req: any, res) => {
     try {
-      const userId = 'dev-user-123'; // Use test user for chat testing
-      const chats = await storage.getUserChats(userId);
+      console.log('📱 Fetching chats for user...');
+      
+      // Get user from session or use simple auth
+      let userId = 'admin-user';
+      let userRole = 'admin';
+      
+      // Check simple auth session first
+      const sessionId = req.cookies?.sessionId;
+      if (sessionId) {
+        const { sessions } = await import('./simple-routes');
+        if (sessions && sessions.has(sessionId)) {
+          const sessionUser = sessions.get(sessionId);
+          userId = sessionUser.id;
+          userRole = sessionUser.role;
+          console.log('📱 Found session user:', { userId, userRole });
+        }
+      }
+      
+      // For admin users, show all chats from database
+      const { chats: chatsTable } = await import('@shared/schema');
+      const allChats = await db.select().from(chatsTable).orderBy(desc(chatsTable.updatedAt));
+      
+      console.log(`📱 Found ${allChats.length} total chats in database`);
+      
+      // Filter chats based on user role
+      let chats;
+      if (userRole === 'admin' || userRole === 'dev-admin') {
+        chats = allChats; // Admin sees all chats
+        console.log('📱 Admin user - returning all chats');
+      } else {
+        chats = allChats.filter(chat => chat.userId === userId); // Regular users see only their chats
+        console.log(`📱 Regular user - filtered to ${chats.length} chats`);
+      }
+      
       res.json(chats);
     } catch (error) {
       console.error("Error fetching chats:", error);

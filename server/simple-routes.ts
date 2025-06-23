@@ -2326,7 +2326,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Save to chat history if requested (default: true)
       if (saveToHistory) {
         try {
-          const { v4: uuidv4 } = require('uuid');
+          const { v4: uuidv4 } = await import('uuid');
           const chatId = uuidv4();
           const now = new Date();
           
