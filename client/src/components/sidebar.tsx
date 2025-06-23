@@ -29,7 +29,7 @@ import {
   FileSearch,
   Brain,
   RotateCcw,
-  HelpCircle
+  FileText
 } from "lucide-react";
 
 import type { User, Chat, Folder as FolderType } from "@shared/schema";

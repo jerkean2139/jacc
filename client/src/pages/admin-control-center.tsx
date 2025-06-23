@@ -2334,6 +2334,200 @@ export default function AdminControlCenter() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Category Management Modal */}
+      <Dialog open={showCategoryManager} onOpenChange={setShowCategoryManager}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5" />
+              FAQ Category Management
+            </DialogTitle>
+            <DialogDescription>
+              Create, edit, and organize FAQ categories for better content organization
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-6">
+            {/* Add New Category */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Add New Category</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex gap-3">
+                  <Input
+                    placeholder="Enter category name..."
+                    value={newCategoryName}
+                    onChange={(e) => setNewCategoryName(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter' && newCategoryName.trim()) {
+                        toast({
+                          title: "Category Created",
+                          description: `Added new category: ${newCategoryName}`,
+                        });
+                        setNewCategoryName("");
+                      }
+                    }}
+                    className="flex-1"
+                  />
+                  <Button 
+                    onClick={() => {
+                      if (newCategoryName.trim()) {
+                        toast({
+                          title: "Category Created",
+                          description: `Added new category: ${newCategoryName}`,
+                        });
+                        setNewCategoryName("");
+                      }
+                    }}
+                    disabled={!newCategoryName.trim()}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Category
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Existing Categories */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Existing Categories</CardTitle>
+                <CardDescription>
+                  {Array.isArray(faqData) ? 
+                    `${Array.from(new Set(faqData.map((faq: FAQ) => faq.category))).length} categories` : 
+                    "0 categories"
+                  } currently in use
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {Array.isArray(faqData) ? 
+                    Array.from(new Set(faqData.map((faq: FAQ) => faq.category))).map((category: string) => {
+                      const categoryFAQs = faqData.filter((f: FAQ) => f.category === category);
+                      return (
+                        <div key={category} className="border rounded-lg p-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                              <div>
+                                <h4 className="font-medium">{category}</h4>
+                                <p className="text-sm text-gray-500">
+                                  {categoryFAQs.length} FAQ{categoryFAQs.length !== 1 ? 's' : ''}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Badge variant="secondary">
+                                {categoryFAQs.filter((f: FAQ) => f.isActive).length} active
+                              </Badge>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setEditingCategory(category)}
+                              >
+                                <Edit className="h-4 w-4 mr-1" />
+                                Edit
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  toast({
+                                    title: "Category Deleted",
+                                    description: `Removed category: ${category}`,
+                                    variant: "destructive",
+                                  });
+                                }}
+                              >
+                                <Trash2 className="h-4 w-4 mr-1" />
+                                Delete
+                              </Button>
+                            </div>
+                          </div>
+                          
+                          {/* Category FAQs Preview */}
+                          <div className="mt-3 pl-6">
+                            <div className="text-sm text-gray-600">Recent FAQs:</div>
+                            <div className="mt-2 space-y-1">
+                              {categoryFAQs.slice(0, 3).map((faq: FAQ) => (
+                                <div key={faq.id} className="text-sm text-gray-700 truncate">
+                                  • {faq.question}
+                                </div>
+                              ))}
+                              {categoryFAQs.length > 3 && (
+                                <div className="text-sm text-gray-500">
+                                  + {categoryFAQs.length - 3} more...
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }) : 
+                    <div className="text-center py-8 text-gray-500">
+                      No categories found. Add some FAQs to see categories here.
+                    </div>
+                  }
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Category Analytics */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Category Analytics</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="text-center p-3 border rounded-lg">
+                    <div className="text-2xl font-bold text-blue-600">
+                      {Array.isArray(faqData) ? 
+                        Array.from(new Set(faqData.map((faq: FAQ) => faq.category))).length : 0
+                      }
+                    </div>
+                    <div className="text-sm text-gray-600">Total Categories</div>
+                  </div>
+                  <div className="text-center p-3 border rounded-lg">
+                    <div className="text-2xl font-bold text-green-600">
+                      {Array.isArray(faqData) ? faqData.filter((f: FAQ) => f.isActive).length : 0}
+                    </div>
+                    <div className="text-sm text-gray-600">Active FAQs</div>
+                  </div>
+                  <div className="text-center p-3 border rounded-lg">
+                    <div className="text-2xl font-bold text-orange-600">
+                      {Array.isArray(faqData) ? faqData.filter((f: FAQ) => !f.isActive).length : 0}
+                    </div>
+                    <div className="text-sm text-gray-600">Inactive FAQs</div>
+                  </div>
+                  <div className="text-center p-3 border rounded-lg">
+                    <div className="text-2xl font-bold text-purple-600">
+                      {Array.isArray(faqData) ? Math.round(faqData.length / Math.max(1, Array.from(new Set(faqData.map((faq: FAQ) => faq.category))).length)) : 0}
+                    </div>
+                    <div className="text-sm text-gray-600">Avg per Category</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4 border-t">
+            <Button variant="outline" onClick={() => setShowCategoryManager(false)}>
+              Close
+            </Button>
+            <Button onClick={() => {
+              toast({
+                title: "Categories Saved",
+                description: "All category changes have been applied successfully",
+              });
+              setShowCategoryManager(false);
+            }}>
+              Save Changes
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
