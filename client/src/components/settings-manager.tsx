@@ -496,32 +496,17 @@ export function SettingsManager() {
                 </div>
                 
                 <div>
-                  <Label>Document Retention Policy</Label>
-                  <Select 
-                    value={settings.retentionPolicyDays === -1 ? "forever" : settings.retentionPolicyDays.toString()} 
-                    onValueChange={(value) => {
-                      const days = value === "forever" ? -1 : parseInt(value);
-                      handleUpdateSetting('content-processing', 'retentionPolicyDays', days);
-                    }}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="30">30 Days</SelectItem>
-                      <SelectItem value="60">60 Days</SelectItem>
-                      <SelectItem value="90">90 Days (Recommended)</SelectItem>
-                      <SelectItem value="180">6 Months</SelectItem>
-                      <SelectItem value="365">1 Year</SelectItem>
-                      <SelectItem value="730">2 Years</SelectItem>
-                      <SelectItem value="forever">Forever (No Deletion)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {settings.retentionPolicyDays === -1 
-                      ? "Documents will be kept indefinitely" 
-                      : `Documents older than ${settings.retentionPolicyDays} days will be automatically deleted`}
-                  </p>
+                  <Label>Document Retention (days): {settings.retentionPolicyDays}</Label>
+                  <div className="px-3 py-2">
+                    <Slider
+                      value={[settings.retentionPolicyDays]}
+                      onValueChange={([value]) => handleUpdateSetting('content-processing', 'retentionPolicyDays', value)}
+                      max={365}
+                      min={30}
+                      step={30}
+                      className="w-full"
+                    />
+                  </div>
                 </div>
               </div>
               
