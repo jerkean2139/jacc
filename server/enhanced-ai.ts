@@ -231,9 +231,26 @@ export class EnhancedAIService {
       
       // Create document examples for response (show top 3)
       const topDocuments = searchResults.slice(0, 3);
-      const documentExamples = topDocuments.map(doc => 
-        `📄 **${doc.metadata?.documentName || 'Document'}** - ${doc.content.substring(0, 100)}...\n🔗 [View Document](/documents/${doc.documentId}) | [Download](/api/documents/${doc.documentId}/download)`
-      ).join('\n\n');
+      const documentExamples = topDocuments.map(doc => {
+        const docName = doc.metadata?.documentName || 'Document';
+        const docType = doc.metadata?.mimeType?.includes('pdf') ? 'PDF' : 
+                       doc.metadata?.mimeType?.includes('spreadsheet') ? 'Excel' : 
+                       doc.metadata?.mimeType?.includes('document') ? 'Word' : 'Document';
+        const snippet = doc.content.substring(0, 150).replace(/\n/g, ' ').trim();
+        
+        return `<div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin: 8px 0; background: #f9fafb;">
+<h4 style="margin: 0 0 8px 0; color: #1f2937; font-weight: 600;">📄 ${docName}</h4>
+<p style="margin: 0 0 12px 0; color: #6b7280; font-size: 14px; line-height: 1.4;">${docType} • ${snippet}...</p>
+<div style="display: flex; gap: 12px;">
+<a href="/documents/${doc.documentId}" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: #3b82f6; color: white; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: 500;" target="_blank">
+🔗 View Document
+</a>
+<a href="/api/documents/${doc.documentId}/download" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: #6b7280; color: white; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: 500;" download="${docName}">
+⬇️ Download
+</a>
+</div>
+</div>`;
+      }).join('\n');
       
       // Check if this is a conversation starter that needs engagement
       const userMessages = messages.filter(msg => msg.role === 'user');
@@ -354,8 +371,8 @@ When appropriate, suggest actions like saving payment processing information to 
       let content = response.content[0].type === 'text' ? response.content[0].text : "";
       
       // Don't append documents for conversation starters - keep them clean and engaging
-      if (!isConversationStarter && searchResults.length > 0 && !content.includes("Available Documents:")) {
-        content += `\n\n**Related Documents:**\n${documentExamples}`;
+      if (!isConversationStarter && searchResults.length > 0 && !content.includes("Related Documents:")) {
+        content += `\n\n<h2>Related Documents:</h2>\n${documentExamples}`;
       }
       
       // Extract action items and follow-up tasks
