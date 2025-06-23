@@ -2618,15 +2618,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       chatMessages.push(newMessage);
       messages.set(chatId, chatMessages);
 
-      // If it's a user message, generate AI response using OpenAI
+      // If it's a user message, generate AI response using Enhanced AI Service
       if (role === 'user') {
         try {
-          const aiResponse = await generateAIResponse(content, chatMessages, user);
+          const { enhancedAIService } = await import('./enhanced-ai');
+          const aiResponseData = await enhancedAIService.generateStandardResponse(
+            content, 
+            chatMessages.map(msg => ({ role: msg.role, content: msg.content })), 
+            { userRole: 'Sales Agent' }
+          );
           const aiResponseId = Math.random().toString(36).substring(2, 15);
           const aiMessage = {
             id: aiResponseId,
             chatId,
-            content: aiResponse,
+            content: aiResponseData.message,
             role: 'assistant',
             userId: 'system',
             createdAt: new Date().toISOString()
