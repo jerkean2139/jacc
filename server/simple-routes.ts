@@ -3302,41 +3302,41 @@ Would you like me to create a detailed proposal for this merchant?`,
   app.get('/api/leaderboard', async (req, res) => {
     try {
       const { db } = await import('./db');
-      const { sql } = await import('drizzle-orm');
+      const { users, chats, messages } = await import('@shared/schema');
+      const { sql, desc, eq } = await import('drizzle-orm');
       
       // Get chat activity by user with query+response count
-      const leaderboardResult = await db.execute(sql`
-        SELECT 
-          u.username,
-          u.email,
-          u.role,
-          COUNT(DISTINCT c.id) as total_chats,
-          COUNT(m.id) as total_messages,
-          COUNT(CASE WHEN m.role = 'user' THEN 1 END) as user_queries,
-          COUNT(CASE WHEN m.role = 'assistant' THEN 1 END) as ai_responses,
-          MAX(c.updated_at) as last_activity,
-          u.created_at as joined_date
-        FROM users u
-        LEFT JOIN chats c ON u.id = c.user_id
-        LEFT JOIN messages m ON c.id = m.chat_id
-        WHERE u.role IN ('sales-agent', 'client-admin', 'dev-admin')
-        GROUP BY u.id, u.username, u.email, u.role, u.created_at
-        ORDER BY total_messages DESC, total_chats DESC
-        LIMIT 20
-      `);
+      const leaderboardQuery = await db.select({
+        username: users.username,
+        email: users.email,
+        role: users.role,
+        totalChats: sql<number>`COUNT(DISTINCT ${chats.id})`.as('total_chats'),
+        totalMessages: sql<number>`COUNT(${messages.id})`.as('total_messages'),
+        userQueries: sql<number>`COUNT(CASE WHEN ${messages.role} = 'user' THEN 1 END)`.as('user_queries'),
+        aiResponses: sql<number>`COUNT(CASE WHEN ${messages.role} = 'assistant' THEN 1 END)`.as('ai_responses'),
+        lastActivity: sql<string>`MAX(${chats.updatedAt})`.as('last_activity'),
+        joinedDate: users.createdAt
+      })
+      .from(users)
+      .leftJoin(chats, eq(users.id, chats.userId))
+      .leftJoin(messages, eq(chats.id, messages.chatId))
+      .where(sql`${users.role} IN ('sales-agent', 'client-admin', 'dev-admin')`)
+      .groupBy(users.id, users.username, users.email, users.role, users.createdAt)
+      .orderBy(desc(sql`COUNT(${messages.id})`), desc(sql`COUNT(DISTINCT ${chats.id})`))
+      .limit(20);
 
-      const leaderboard = leaderboardResult.map((row: any, index: number) => ({
+      const leaderboard = leaderboardQuery.map((row: any, index: number) => ({
         rank: index + 1,
         username: row.username,
         email: row.email,
         role: row.role,
-        totalChats: Number(row.total_chats || 0),
-        totalMessages: Number(row.total_messages || 0),
-        userQueries: Number(row.user_queries || 0),
-        aiResponses: Number(row.ai_responses || 0),
-        lastActivity: row.last_activity,
-        joinedDate: row.joined_date,
-        activityScore: Number(row.total_messages || 0) + (Number(row.total_chats || 0) * 2)
+        totalChats: Number(row.totalChats || 0),
+        totalMessages: Number(row.totalMessages || 0),
+        userQueries: Number(row.userQueries || 0),
+        aiResponses: Number(row.aiResponses || 0),
+        lastActivity: row.lastActivity,
+        joinedDate: row.joinedDate,
+        activityScore: Number(row.totalMessages || 0) + (Number(row.totalChats || 0) * 2)
       }));
 
       res.json({ leaderboard });
