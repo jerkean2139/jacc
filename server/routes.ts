@@ -4485,7 +4485,7 @@ User Context: {userRole}`,
   });
 
   // Website scraping endpoint
-  app.post('/api/scrape-website', isAuthenticated, async (req: any, res) => {
+  app.post('/api/scrape-website', async (req: any, res) => {
     try {
       const { url } = req.body;
       

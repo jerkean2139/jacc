@@ -3425,6 +3425,41 @@ Would you like me to create a detailed proposal for this merchant?`,
   // Register chat testing system routes
   registerChatTestingRoutes(app);
 
+  // Website scraping endpoint
+  app.post('/api/scrape-website', async (req: Request, res: Response) => {
+    try {
+      const { url } = req.body;
+      
+      console.log('Website scraping request:', { url, body: req.body });
+      
+      if (!url || typeof url !== 'string') {
+        return res.status(400).json({ message: "URL is required" });
+      }
+
+      // Validate URL format
+      try {
+        new URL(url);
+      } catch (urlError) {
+        console.error('URL validation failed:', urlError);
+        return res.status(400).json({ message: "Invalid URL format" });
+      }
+
+      console.log('Starting website scraping for:', url);
+      const { websiteScrapingService } = await import('./website-scraper');
+      const scrapedContent = await websiteScrapingService.scrapeWebsite(url);
+      
+      console.log('Website scraping completed successfully');
+      res.json(scrapedContent);
+    } catch (error: any) {
+      console.error("Error scraping website:", error);
+      console.error("Error stack:", error?.stack);
+      res.status(500).json({ 
+        message: "Scraping Failed", 
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
   console.log("✅ Simple routes registered successfully");
   
   const server = createServer(app);
