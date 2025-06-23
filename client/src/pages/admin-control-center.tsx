@@ -460,7 +460,7 @@ function ChatReviewCenter() {
                     >
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
-                          <h4 className="font-medium truncate">{chat.title || 'Untitled Chat'}</h4>
+                          <h4 className="font-medium truncate">{chat.chatTitle || 'Untitled Chat'}</h4>
                           {chat.hasCorrections && (
                             <Badge variant="secondary" className="text-xs">
                               <Brain className="h-3 w-3 mr-1" />

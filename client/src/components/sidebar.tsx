@@ -28,7 +28,8 @@ import {
   Calculator,
   FileSearch,
   Brain,
-  RotateCcw
+  RotateCcw,
+  HelpCircle
 } from "lucide-react";
 
 import type { User, Chat, Folder as FolderType } from "@shared/schema";
@@ -501,12 +502,42 @@ export default function Sidebar({
           </div>
         </div>
 
+        {/* AI Tools Section */}
+        <div className="mb-6">
+          <h4 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3">
+            AI Tools
+          </h4>
+          <div className="space-y-1">
+            <a 
+              href="/prompt-customization" 
+              className="flex items-center space-x-3 p-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg cursor-pointer transition-colors"
+            >
+              <Brain className="w-4 h-4 text-purple-500" />
+              <span className="text-sm text-slate-700 dark:text-slate-300">AI Prompts</span>
+            </a>
+            <a 
+              href="/user-guide" 
+              className="flex items-center space-x-3 p-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg cursor-pointer transition-colors"
+            >
+              <HelpCircle className="w-4 h-4 text-blue-500" />
+              <span className="text-sm text-slate-700 dark:text-slate-300">Guide</span>
+            </a>
+          </div>
+        </div>
+
         {/* Business Intelligence Section */}
         <div className="mb-6">
           <h4 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3">
             Business Intelligence
           </h4>
           <div className="space-y-1">
+            <a 
+              href="/iso-amp-calculator" 
+              className="flex items-center space-x-3 p-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg cursor-pointer transition-colors"
+            >
+              <Calculator className="w-4 h-4 text-green-500" />
+              <span className="text-sm text-slate-700 dark:text-slate-300">ISO AMP</span>
+            </a>
             <a 
               href="/merchant-insights" 
               className="flex items-center space-x-3 p-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg cursor-pointer transition-colors"
@@ -517,46 +548,18 @@ export default function Sidebar({
           </div>
         </div>
 
-        {/* Knowledge Base Section - Admin Only */}
-        {user?.role === 'admin' && (
-          <div className="mb-6">
-            <h4 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3">
-              Knowledge Base
-            </h4>
-            <div className="space-y-1">
-              <a 
-                href="/documents" 
-                className="flex items-center space-x-3 p-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg cursor-pointer transition-colors"
-              >
-                <FileSearch className="w-4 h-4 text-green-500" />
-                <span className="text-sm text-slate-700 dark:text-slate-300">Document Library</span>
-              </a>
-            </div>
-          </div>
-        )}
-
-        {/* Merchant Services Calculator */}
+        {/* Knowledge Base Section */}
         <div className="mb-6">
           <h4 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3">
-            Merchant Services
+            Knowledge Base
           </h4>
           <div className="space-y-1">
-            <div 
-              className="flex items-center space-x-3 p-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg cursor-not-allowed transition-colors relative group"
-              title="Coming Soon"
-            >
-              <Calculator className="w-4 h-4 text-gray-400" />
-              <span className="text-sm text-gray-400">Rate Calculator</span>
-              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/75 rounded-lg">
-                <span className="text-white text-xs font-medium px-2 py-1 bg-black/90 rounded">Coming Soon</span>
-              </div>
-            </div>
             <a 
-              href="/pricing-management" 
+              href="/documents" 
               className="flex items-center space-x-3 p-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg cursor-pointer transition-colors"
             >
-              <Settings className="w-4 h-4 text-green-500" />
-              <span className="text-sm text-slate-700 dark:text-slate-300">Pricing Management</span>
+              <FileSearch className="w-4 h-4 text-orange-500" />
+              <span className="text-sm text-slate-700 dark:text-slate-300">Document Library</span>
             </a>
           </div>
         </div>
