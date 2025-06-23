@@ -304,6 +304,12 @@ export default function AdminControlCenter() {
     enabled: activeTab === 'training',
   });
 
+  // Fetch leaderboard data
+  const { data: leaderboardData, isLoading: leaderboardLoading } = useQuery({
+    queryKey: ['/api/leaderboard'],
+    enabled: activeTab === 'analytics',
+  });
+
   // Fetch chat reviews
   const { data: chatReviews, isLoading: chatReviewsLoading } = useQuery({
     queryKey: ['/api/admin/chat-reviews'],
