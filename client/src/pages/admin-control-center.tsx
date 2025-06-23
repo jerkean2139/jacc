@@ -306,8 +306,8 @@ export default function AdminControlCenter() {
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                      <Badge variant="secondary">{documentsData?.length || 0} documents</Badge>
-                      <Badge variant="outline">{foldersData?.length || 0} folders</Badge>
+                      <Badge variant="secondary">{Array.isArray(documentsData) ? documentsData.length : 0} documents</Badge>
+                      <Badge variant="outline">{Array.isArray(foldersData) ? foldersData.length : 0} folders</Badge>
                     </div>
                     <Button className="flex items-center gap-2">
                       <Upload className="h-4 w-4" />
@@ -316,7 +316,7 @@ export default function AdminControlCenter() {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {documentsData?.slice(0, 6).map((doc: DocumentEntry) => (
+                    {Array.isArray(documentsData) ? documentsData.slice(0, 6).map((doc: DocumentEntry) => (
                       <Card key={doc.id} className="p-4">
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex-1">
@@ -357,7 +357,7 @@ export default function AdminControlCenter() {
                           </Button>
                         </div>
                       </Card>
-                    ))}
+                    )) : null}
                   </div>
                 </div>
               )}
@@ -373,9 +373,9 @@ export default function AdminControlCenter() {
                 <MessageSquare className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{trainingData?.totalInteractions || 0}</div>
+                <div className="text-2xl font-bold">{(trainingData && typeof trainingData === 'object' && 'totalInteractions' in trainingData) ? (trainingData as any).totalInteractions : 0}</div>
                 <p className="text-xs text-muted-foreground">
-                  +{trainingData?.recentInteractions || 0} this week
+                  +{(trainingData && typeof trainingData === 'object' && 'recentInteractions' in trainingData) ? (trainingData as any).recentInteractions : 0} this week
                 </p>
               </CardContent>
             </Card>
