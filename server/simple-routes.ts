@@ -3350,6 +3350,10 @@ Would you like me to create a detailed proposal for this merchant?`,
   const { registerChatReviewRoutes } = await import('./chat-review-routes');
   registerChatReviewRoutes(app);
 
+  // Register settings routes
+  const { registerSettingsRoutes } = await import('./settings-routes');
+  registerSettingsRoutes(app);
+
   // Register chat testing system routes
   registerChatTestingRoutes(app);
 

@@ -20,6 +20,7 @@ import {
   Crown
 } from "lucide-react";
 import AchievementBadge from "./achievement-badge";
+import { LeaderboardWidget } from "./leaderboard-widget";
 import { cn } from "@/lib/utils";
 import type { UserStats, Achievement, UserAchievement } from "@shared/schema";
 
@@ -326,6 +327,9 @@ export default function UserStatsDashboard({ userId, compact = false }: UserStat
               )}
             </CardContent>
           </Card>
+
+          {/* Agent Leaderboard */}
+          <LeaderboardWidget showFullLeaderboard={false} maxEntries={5} />
         </TabsContent>
 
         <TabsContent value="unlocked">
