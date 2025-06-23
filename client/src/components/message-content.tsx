@@ -61,7 +61,7 @@ export function MessageContent({ content, className = '' }: MessageContentProps)
           <div 
             key={index}
             dangerouslySetInnerHTML={{ __html: part }}
-            className="[&>h1]:text-xl [&>h1]:font-bold [&>h1]:mb-2 [&>h2]:text-lg [&>h2]:font-semibold [&>h2]:mb-2 [&>h3]:text-base [&>h3]:font-medium [&>h3]:mb-1 [&>ul]:list-disc [&>ul]:ml-4 [&>ul]:mb-2 [&>ol]:list-decimal [&>ol]:ml-4 [&>ol]:mb-2 [&>li]:mb-1 [&>p]:mb-2 [&>strong]:font-semibold [&>em]:italic"
+            className="prose prose-slate dark:prose-invert max-w-none [&>h1]:text-xl [&>h1]:font-bold [&>h1]:mt-4 [&>h1]:mb-3 [&>h2]:text-lg [&>h2]:font-semibold [&>h2]:mt-4 [&>h2]:mb-3 [&>h3]:text-base [&>h3]:font-medium [&>h3]:mt-3 [&>h3]:mb-2 [&>ul]:list-disc [&>ul]:ml-6 [&>ul]:mb-4 [&>ul]:mt-2 [&>ol]:list-decimal [&>ol]:ml-6 [&>ol]:mb-4 [&>ol]:mt-2 [&>li]:mb-2 [&>li]:leading-relaxed [&>p]:mb-4 [&>p]:leading-relaxed [&>p]:text-sm [&>strong]:font-semibold [&>em]:italic [&>blockquote]:border-l-4 [&>blockquote]:border-blue-500 [&>blockquote]:pl-4 [&>blockquote]:italic"
           />
         );
       });
