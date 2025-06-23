@@ -246,14 +246,20 @@ export default function Sidebar({
           New Chat
         </Button>
         
-        <Button
-          onClick={() => window.location.href = '/pricing-comparison'}
-          variant="outline"
-          className="w-full text-sm bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/30"
-        >
-          <Calculator className="w-4 h-4 mr-2" />
-          Pricing Comparison
-        </Button>
+        <div className="relative group">
+          <Button
+            disabled
+            variant="outline"
+            className="w-full text-sm cursor-not-allowed opacity-60 bg-gray-50 dark:bg-gray-900/20 border-gray-200 dark:border-gray-800 text-gray-500 dark:text-gray-400"
+          >
+            <Calculator className="w-4 h-4 mr-2" />
+            Pricing Comparison
+            <span className="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-full ml-auto">Coming Soon</span>
+          </Button>
+          <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+            Coming Soon
+          </span>
+        </div>
 
 
 
