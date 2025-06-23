@@ -2327,7 +2327,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Save to chat history if requested (default: true)
       if (saveToHistory) {
         try {
-          const chatId = `chat-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
+          // Generate proper UUIDs for chat and messages
+          const { randomUUID } = await import('crypto');
+          const chatId = randomUUID();
           const now = new Date();
           
           console.log('Saving test conversation to chat history:', { chatId, userId: user.id, query: query.substring(0, 50) });
@@ -2343,7 +2345,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
           // Create user message
           await storage.createMessage({
-            id: `msg-${Date.now()}-user`,
+            id: randomUUID(),
             chatId: chatId,
             role: 'user',
             content: query,
@@ -2352,7 +2354,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
           // Create AI response message
           await storage.createMessage({
-            id: `msg-${Date.now()}-ai`,
+            id: randomUUID(),
             chatId: chatId,
             role: 'assistant',
             content: aiResponse.message,
@@ -2823,10 +2825,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { userFirstMessage, aiFirstResponse, responseQuality, userSatisfaction, trainingCategory } = req.body;
       
+      // Generate proper UUIDs for training interaction
+      const { randomUUID } = await import('crypto');
+      
       const newInteraction = {
-        id: `training-${Date.now()}`,
+        id: randomUUID(),
         userId: 'admin-user',
-        chatId: `chat-${Date.now()}`,
+        chatId: randomUUID(),
         userFirstMessage,
         aiFirstResponse,
         responseQuality,
