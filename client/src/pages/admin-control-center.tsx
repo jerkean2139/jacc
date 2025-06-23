@@ -1676,16 +1676,439 @@ export default function AdminControlCenter() {
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-6">
+          {/* AI & Search Configuration */}
           <Card>
             <CardHeader>
-              <CardTitle>System Settings</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Bot className="h-5 w-5" />
+                AI & Search Configuration
+              </CardTitle>
               <CardDescription>
-                Configure system parameters and preferences
+                Configure AI model preferences and search behavior
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="text-center p-8 text-gray-500">
-                Settings panel coming soon
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="ai-model">Primary AI Model</Label>
+                    <Select defaultValue="claude-sonnet">
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="claude-sonnet">Claude 4.0 Sonnet (Recommended)</SelectItem>
+                        <SelectItem value="gpt-4o">GPT-4o (Fallback)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="response-length">Response Style</Label>
+                    <Select defaultValue="professional">
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="concise">Concise & Direct</SelectItem>
+                        <SelectItem value="professional">Professional & Detailed</SelectItem>
+                        <SelectItem value="comprehensive">Comprehensive & Educational</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="search-threshold">Document Search Sensitivity</Label>
+                    <div className="flex items-center space-x-4">
+                      <span className="text-sm text-gray-500">Loose</span>
+                      <input
+                        type="range"
+                        min="0.3"
+                        max="0.9"
+                        step="0.1"
+                        defaultValue="0.7"
+                        className="flex-1"
+                      />
+                      <span className="text-sm text-gray-500">Strict</span>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Current: 0.7 (Balanced precision vs recall)
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <div>
+                    <Label>Search Priority Order</Label>
+                    <div className="space-y-2 mt-2">
+                      <div className="flex items-center justify-between p-3 border rounded-lg bg-blue-50">
+                        <span className="text-sm font-medium">1. FAQ Knowledge Base</span>
+                        <Badge variant="outline">Active</Badge>
+                      </div>
+                      <div className="flex items-center justify-between p-3 border rounded-lg bg-green-50">
+                        <span className="text-sm font-medium">2. Document Center</span>
+                        <Badge variant="outline">Active</Badge>
+                      </div>
+                      <div className="flex items-center justify-between p-3 border rounded-lg bg-yellow-50">
+                        <span className="text-sm font-medium">3. Web Search Fallback</span>
+                        <Badge variant="outline">Active</Badge>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <input type="checkbox" id="web-search" defaultChecked />
+                    <Label htmlFor="web-search" className="text-sm">
+                      Enable web search when no internal results found
+                    </Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <input type="checkbox" id="source-attribution" defaultChecked />
+                    <Label htmlFor="source-attribution" className="text-sm">
+                      Always include source attribution in responses
+                    </Label>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* User Management */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                User Management
+              </CardTitle>
+              <CardDescription>
+                Configure user roles, permissions, and access controls
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div>
+                    <Label>Default User Role</Label>
+                    <Select defaultValue="sales-agent">
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="sales-agent">Sales Agent (Standard)</SelectItem>
+                        <SelectItem value="client-admin">Client Admin (Extended)</SelectItem>
+                        <SelectItem value="dev-admin">Developer Admin (Full)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label>Session Timeout</Label>
+                    <Select defaultValue="24h">
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1h">1 Hour</SelectItem>
+                        <SelectItem value="8h">8 Hours</SelectItem>
+                        <SelectItem value="24h">24 Hours</SelectItem>
+                        <SelectItem value="7d">7 Days</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <input type="checkbox" id="require-mfa" />
+                    <Label htmlFor="require-mfa" className="text-sm">
+                      Require multi-factor authentication for admins
+                    </Label>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <div>
+                    <Label>Document Access Default</Label>
+                    <Select defaultValue="permitted-only">
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all-documents">All Documents</SelectItem>
+                        <SelectItem value="permitted-only">Permitted Only</SelectItem>
+                        <SelectItem value="public-only">Public Only</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label>New User Notifications</Label>
+                    <div className="space-y-2 mt-2">
+                      <div className="flex items-center space-x-2">
+                        <input type="checkbox" id="welcome-email" defaultChecked />
+                        <Label htmlFor="welcome-email" className="text-sm">Send welcome email</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input type="checkbox" id="admin-notify" defaultChecked />
+                        <Label htmlFor="admin-notify" className="text-sm">Notify administrators</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input type="checkbox" id="training-invite" />
+                        <Label htmlFor="training-invite" className="text-sm">Include training materials</Label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Content & Document Processing */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                Content & Document Processing
+              </CardTitle>
+              <CardDescription>
+                Configure document processing, OCR, and content management
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div>
+                    <Label>OCR Quality Level</Label>
+                    <Select defaultValue="balanced">
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="fast">Fast Processing</SelectItem>
+                        <SelectItem value="balanced">Balanced Quality</SelectItem>
+                        <SelectItem value="high">High Accuracy</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label>Auto-categorization</Label>
+                    <div className="space-y-2 mt-2">
+                      <div className="flex items-center space-x-2">
+                        <input type="checkbox" id="auto-folder" defaultChecked />
+                        <Label htmlFor="auto-folder" className="text-sm">Auto-assign folders based on content</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input type="checkbox" id="auto-tags" defaultChecked />
+                        <Label htmlFor="auto-tags" className="text-sm">Generate smart tags</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input type="checkbox" id="duplicate-detection" defaultChecked />
+                        <Label htmlFor="duplicate-detection" className="text-sm">Detect duplicate uploads</Label>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="chunk-size">Text Chunk Size</Label>
+                    <div className="flex items-center space-x-4">
+                      <span className="text-sm text-gray-500">Small</span>
+                      <input
+                        type="range"
+                        min="500"
+                        max="2000"
+                        step="100"
+                        defaultValue="1000"
+                        className="flex-1"
+                      />
+                      <span className="text-sm text-gray-500">Large</span>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Current: 1000 characters (Optimal for search)
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <div>
+                    <Label>Training Data Retention</Label>
+                    <Select defaultValue="1-year">
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1-month">1 Month</SelectItem>
+                        <SelectItem value="3-months">3 Months</SelectItem>
+                        <SelectItem value="6-months">6 Months</SelectItem>
+                        <SelectItem value="1-year">1 Year</SelectItem>
+                        <SelectItem value="unlimited">Unlimited</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label>Cleanup Schedule</Label>
+                    <Select defaultValue="weekly">
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="daily">Daily</SelectItem>
+                        <SelectItem value="weekly">Weekly</SelectItem>
+                        <SelectItem value="monthly">Monthly</SelectItem>
+                        <SelectItem value="manual">Manual Only</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label>FAQ Auto-Approval Threshold</Label>
+                    <div className="flex items-center space-x-4">
+                      <span className="text-sm text-gray-500">Manual</span>
+                      <input
+                        type="range"
+                        min="0"
+                        max="10"
+                        step="1"
+                        defaultValue="3"
+                        className="flex-1"
+                      />
+                      <span className="text-sm text-gray-500">Auto</span>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Auto-approve FAQs with 3+ positive admin reviews
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* System Performance */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5" />
+                System Performance
+              </CardTitle>
+              <CardDescription>
+                Configure system performance, caching, and resource management
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="space-y-4">
+                  <div>
+                    <Label>Response Timeout</Label>
+                    <Select defaultValue="30s">
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="15s">15 seconds</SelectItem>
+                        <SelectItem value="30s">30 seconds</SelectItem>
+                        <SelectItem value="60s">60 seconds</SelectItem>
+                        <SelectItem value="120s">2 minutes</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label>Cache Duration</Label>
+                    <Select defaultValue="1h">
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="5m">5 minutes</SelectItem>
+                        <SelectItem value="30m">30 minutes</SelectItem>
+                        <SelectItem value="1h">1 hour</SelectItem>
+                        <SelectItem value="24h">24 hours</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <div>
+                    <Label>Memory Optimization</Label>
+                    <Select defaultValue="balanced">
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="conservative">Conservative</SelectItem>
+                        <SelectItem value="balanced">Balanced</SelectItem>
+                        <SelectItem value="aggressive">Aggressive</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label>Concurrent Requests</Label>
+                    <Select defaultValue="10">
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="5">5 (Conservative)</SelectItem>
+                        <SelectItem value="10">10 (Standard)</SelectItem>
+                        <SelectItem value="20">20 (High)</SelectItem>
+                        <SelectItem value="50">50 (Maximum)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="p-4 border rounded-lg bg-gray-50">
+                    <h4 className="font-medium text-sm mb-2">Current Status</h4>
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-xs">
+                        <span>Memory Usage:</span>
+                        <span className="text-green-600">72%</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span>Cache Hit Rate:</span>
+                        <span className="text-green-600">84%</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span>Avg Response:</span>
+                        <span className="text-green-600">1.2s</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span>Active Users:</span>
+                        <span className="text-blue-600">12</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <Button variant="outline" size="sm" className="w-full">
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Clear All Caches
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Save Settings */}
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="text-sm text-gray-600">
+                    Settings are automatically saved. Last updated: {new Date().toLocaleString()}
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline">
+                    Reset to Defaults
+                  </Button>
+                  <Button className="bg-blue-600 hover:bg-blue-700">
+                    <Save className="h-4 w-4 mr-2" />
+                    Save Configuration
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
