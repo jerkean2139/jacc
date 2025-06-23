@@ -1986,8 +1986,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validCredentials = [
         { field: 'demo@example.com', pass: 'demo-password', user: { id: 'demo-user', username: 'tracer-user', email: 'demo@example.com', role: 'sales-agent' }},
         { field: 'tracer-user', pass: 'demo-password', user: { id: 'demo-user', username: 'tracer-user', email: 'demo@example.com', role: 'sales-agent' }},
-        { field: 'admin@jacc.com', pass: 'admin123', user: { id: 'admin-user', username: 'admin', email: 'admin@jacc.com', role: 'admin' }},
-        { field: 'admin', pass: 'admin123', user: { id: 'admin-user', username: 'admin', email: 'admin@jacc.com', role: 'admin' }},
+        { field: 'admin@jacc.com', pass: 'admin123', user: { id: 'admin-user-id', username: 'admin', email: 'admin@jacc.com', role: 'admin' }},
+        { field: 'admin', pass: 'admin123', user: { id: 'admin-user-id', username: 'admin', email: 'admin@jacc.com', role: 'admin' }},
         { field: 'demo', pass: 'demo', user: { id: 'demo-simple', username: 'demo', email: 'demo@demo.com', role: 'user' }}
       ];
       
