@@ -44,7 +44,8 @@ import {
   Zap,
   Database,
   Activity,
-  RefreshCw
+  RefreshCw,
+  FolderOpen
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 // import DocumentPreviewModal from "@/components/ui/document-preview-modal";
@@ -299,7 +300,7 @@ export default function AdminControlCenter() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <DocumentUploadManager 
+                <ThreeStepDocumentUpload 
                   foldersData={foldersData}
                   onUploadComplete={() => {
                     queryClient.invalidateQueries({ queryKey: ['/api/admin/documents'] });
