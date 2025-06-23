@@ -39,7 +39,7 @@ interface DocumentPreviewModalProps {
   onDownload: (doc: Document) => void;
 }
 
-export default function DocumentPreviewModal({
+export function DocumentPreviewModal({
   document,
   isOpen,
   onClose,

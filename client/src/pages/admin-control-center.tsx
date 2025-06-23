@@ -1,27 +1,54 @@
-import React, { useState, useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Folder, FileText, AlertTriangle, Settings, Users, BarChart3, MessageSquare, Brain, ChevronDown, Download, Edit, Send, ThumbsUp, Eye, RefreshCw, Plus, Upload, Search, Trash2, Save, X, User, Bot, Loader2, CheckCircle, AlertCircle, SkipForward } from 'lucide-react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import DocumentDragDrop from '@/components/ui/document-drag-drop';
-import DocumentPreviewModal from '@/components/ui/document-preview-modal';
-import DocumentUpload from '@/components/document-upload';
-import { DraggableDocument } from '@/components/draggable-document';
-import { DroppableFolder } from '@/components/droppable-folder';
-import { useToast } from '@/hooks/use-toast';
-import { apiRequest } from '@/lib/queryClient';
-import { SettingsManager } from '@/components/settings-manager';
+import { useState, useRef } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Progress } from "@/components/ui/progress";
+import { 
+  Users, 
+  FileText, 
+  MessageSquare, 
+  BarChart3, 
+  Settings, 
+  Upload,
+  Download,
+  Edit,
+  Trash2,
+  Plus,
+  Search,
+  Filter,
+  Folder,
+  Star,
+  Eye,
+  BookOpen,
+  HelpCircle,
+  TrendingUp,
+  Target,
+  Clock,
+  CheckCircle,
+  AlertCircle,
+  XCircle,
+  ThumbsUp,
+  ThumbsDown,
+  Brain,
+  Zap,
+  Database,
+  Activity,
+  RefreshCw
+} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import DocumentPreviewModal from "@/components/ui/document-preview-modal";
+import { SettingsManager } from "@/components/settings-manager";
 
 interface DocumentEntry {
   id: string;
@@ -43,294 +70,36 @@ interface FAQ {
 }
 
 export default function AdminControlCenter() {
-  const [activeTab, setActiveTab] = useState('documents');
-  const [trainingSubTab, setTrainingSubTab] = useState('chat-review');
-  const [expandedFolders, setExpandedFolders] = useState<string[]>([]);
-  const [previewDocument, setPreviewDocument] = useState<DocumentEntry | null>(null);
+  const [activeTab, setActiveTab] = useState("qa-knowledge");
   const [showPreviewModal, setShowPreviewModal] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  
-  // AI Simulator state
-  const [correctedResponse, setCorrectedResponse] = useState('');
-  
-  // Chat Review state
-  const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
-  const [selectedChatDetails, setSelectedChatDetails] = useState<any>(null);
+  const [previewDocument, setPreviewDocument] = useState<DocumentEntry | null>(null);
   const [showChatReviewModal, setShowChatReviewModal] = useState(false);
-  const [reviewStatus, setReviewStatus] = useState('pending');
-  const [chatReviewFilter, setChatReviewFilter] = useState('pending');
-  const [messageCorrection, setMessageCorrection] = useState('');
-  const [correctingMessageId, setCorrectingMessageId] = useState<string | null>(null);
-  const [trainingChatMessages, setTrainingChatMessages] = useState<any[]>([]);
-  const [trainingQuery, setTrainingQuery] = useState('');
-  const [isTrainingChat, setIsTrainingChat] = useState(false);
-  const [testQuery, setTestQuery] = useState('');
-  const [aiResponse, setAiResponse] = useState('');
-  const [isTestingAI, setIsTestingAI] = useState(false);
-  const [showCorrectInterface, setShowCorrectInterface] = useState(false);
-  
-  // FAQ Management state
-  const [editingFaq, setEditingFaq] = useState<any>(null);
-  const [showFaqDialog, setShowFaqDialog] = useState(false);
-  const [showCategoryDialog, setShowCategoryDialog] = useState(false);
-  const [newCategory, setNewCategory] = useState('');
-  const [editingCategory, setEditingCategory] = useState<string | null>(null);
-  const [faqForm, setFaqForm] = useState({
-    question: '',
-    answer: '',
-    category: '',
-    isActive: true
-  });
-  
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Force invalidate chat reviews cache when training tab is accessed
-  React.useEffect(() => {
-    if (activeTab === 'training') {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/chat-reviews'] });
-    }
-  }, [activeTab, queryClient]);
-
-  // Training Interactions Table Component
-  function TrainingInteractionsTable() {
-    const [cleanupLoading, setCleanupLoading] = useState(false);
-    const { data: trainingInteractions, isLoading: interactionsLoading, refetch } = useQuery({
-      queryKey: ['/api/admin/training/interactions'],
-      refetchInterval: 30000, // Refresh every 30 seconds
-    });
-
-    const handleCleanupDuplicates = async () => {
-      try {
-        setCleanupLoading(true);
-        const response = await fetch('/api/admin/training/cleanup-duplicates', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' }
-        });
-        
-        const result = await response.json();
-        
-        if (result.success) {
-          toast({
-            title: "Cleanup Complete",
-            description: result.message,
-          });
-          refetch();
-        } else {
-          throw new Error(result.error || 'Cleanup failed');
-        }
-      } catch (error) {
-        console.error('Cleanup error:', error);
-        toast({
-          title: "Cleanup Failed", 
-          description: error instanceof Error ? error.message : 'Unknown error occurred',
-          variant: "destructive"
-        });
-      } finally {
-        setCleanupLoading(false);
-      }
-    };
-
-    if (interactionsLoading) {
-      return (
-        <div className="flex items-center justify-center p-8">
-          <Loader2 className="h-8 w-8 animate-spin" />
-          <span className="ml-2">Loading training interactions...</span>
-        </div>
-      );
-    }
-
-    const interactions = (trainingInteractions as any)?.interactions || [];
-    const sourceStats = (trainingInteractions as any)?.sourceStatistics || [];
-    const recentChats = (trainingInteractions as any)?.recentChats || [];
-
-    return (
-      <div className="space-y-6">
-        {/* Source Statistics */}
-        {sourceStats.length > 0 && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {sourceStats.map((stat: any, index: number) => (
-              <div key={index} className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                <div className="text-lg font-bold text-gray-900 dark:text-gray-100">
-                  {stat.count}
-                </div>
-                <div className="text-xs text-gray-600 dark:text-gray-400 capitalize">
-                  {stat.source?.replace('_', ' ') || 'Unknown'}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Training Interactions Table */}
-        <div className="border rounded-lg">
-          <div className="flex items-center justify-between p-4 border-b">
-            <h3 className="text-lg font-semibold">Training Interactions</h3>
-            <Button
-              onClick={handleCleanupDuplicates}
-              size="sm"
-              variant="outline"
-              disabled={cleanupLoading}
-            >
-              {cleanupLoading ? 'Cleaning...' : 'Remove Duplicates'}
-            </Button>
-          </div>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[100px]">Type</TableHead>
-                <TableHead className="w-[200px]">Query</TableHead>
-                <TableHead className="w-[250px]">Response</TableHead>
-                <TableHead className="w-[100px]">Status</TableHead>
-                <TableHead className="w-[100px]">User</TableHead>
-                <TableHead className="w-[120px]">Date</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {interactions.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-gray-500">
-                    No training interactions found
-                  </TableCell>
-                </TableRow>
-              ) : (
-                interactions.slice(0, 20).map((interaction: any) => (
-                  <TableRow key={interaction.id}>
-                    <TableCell>
-                      <Badge variant={
-                        interaction.source === 'admin_correction' ? 'destructive' :
-                        interaction.source === 'admin_test' ? 'default' :
-                        'secondary'
-                      }>
-                        {interaction.source?.replace('_', ' ') || 'Unknown'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="max-w-[200px]">
-                      <div className="truncate text-sm">
-                        {interaction.query || 'No query'}
-                      </div>
-                    </TableCell>
-                    <TableCell className="max-w-[250px]">
-                      <div className="truncate text-sm">
-                        {interaction.correctedResponse || interaction.response || 'No response'}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {interaction.wasCorrect !== null ? (
-                        <Badge variant={interaction.wasCorrect ? 'default' : 'destructive'}>
-                          {interaction.wasCorrect ? 'Correct' : 'Corrected'}
-                        </Badge>
-                      ) : (
-                        <Badge variant="secondary">Pending</Badge>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-sm">
-                      {interaction.userId || 'Admin'}
-                    </TableCell>
-                    <TableCell className="text-sm">
-                      {interaction.createdAt ? 
-                        new Date(interaction.createdAt).toLocaleDateString() : 
-                        'Unknown'
-                      }
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
-
-        {/* Recent Chat Sessions */}
-        {recentChats.length > 0 && (
-          <div className="space-y-4">
-            <h4 className="text-lg font-semibold">Recent Chat Sessions</h4>
-            <div className="border rounded-lg">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Chat Title</TableHead>
-                    <TableHead>Messages</TableHead>
-                    <TableHead>User</TableHead>
-                    <TableHead>Created</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {recentChats.slice(0, 10).map((chat: any) => (
-                    <TableRow key={chat.id}>
-                      <TableCell className="max-w-[200px]">
-                        <div className="truncate">
-                          {chat.title || 'Untitled Chat'}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline">
-                          {chat.messageCount || 0}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-sm">
-                        {chat.userId || 'Unknown'}
-                      </TableCell>
-                      <TableCell className="text-sm">
-                        {chat.createdAt ? 
-                          new Date(chat.createdAt).toLocaleDateString() : 
-                          'Unknown'
-                        }
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  // Fetch documents data
-  const { data: integratedDocuments, isLoading: documentsLoading } = useQuery({
-    queryKey: ['/api/documents'],
-    enabled: activeTab === 'documents',
-  });
-
-  // Fetch FAQ data
+  // Fetch Q&A Knowledge Base data
   const { data: faqData, isLoading: faqLoading } = useQuery({
     queryKey: ['/api/admin/faq'],
-    enabled: activeTab === 'faq',
+    enabled: activeTab === "qa-knowledge"
+  });
+
+  // Fetch documents data
+  const { data: documentsData, isLoading: documentsLoading } = useQuery({
+    queryKey: ['/api/admin/documents'],
+    enabled: activeTab === "document-center"
+  });
+
+  // Fetch folders data
+  const { data: foldersData, isLoading: foldersLoading } = useQuery({
+    queryKey: ['/api/admin/folders'],
+    enabled: activeTab === "document-center"
   });
 
   // Fetch training analytics
-  const { data: trainingAnalytics, isLoading: trainingLoading } = useQuery({
+  const { data: trainingData, isLoading: trainingLoading } = useQuery({
     queryKey: ['/api/admin/training/analytics'],
-    enabled: activeTab === 'training',
+    enabled: activeTab === "training-feedback"
   });
-
-  // Fetch leaderboard data
-  const { data: leaderboardData, isLoading: leaderboardLoading } = useQuery({
-    queryKey: ['/api/leaderboard'],
-    enabled: activeTab === 'analytics',
-  });
-
-  // Fetch chat reviews
-  const { data: chatReviews, isLoading: chatReviewsLoading } = useQuery({
-    queryKey: ['/api/admin/chat-reviews'],
-    enabled: activeTab === 'training',
-    staleTime: 0, // Always fetch fresh data
-    gcTime: 0, // Don't cache the data (v5 syntax)
-  });
-
-  // Fetch chat details for review (handled manually in handleReviewChat function)
-
-  // Extract documents from the integrated structure for search and display
-  const allDocuments = integratedDocuments ? [
-    ...((integratedDocuments as any)?.folders?.flatMap((folder: any) => folder.documents || []) || []),
-    ...((integratedDocuments as any)?.unassignedDocuments || [])
-  ] : [];
-
-  const filteredDocuments = allDocuments.filter((doc: any) =>
-    doc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    doc.originalName?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
   const handlePreviewDocument = (document: DocumentEntry) => {
     setPreviewDocument(document);
@@ -338,434 +107,106 @@ export default function AdminControlCenter() {
   };
 
   const handleDownloadDocument = (doc: DocumentEntry) => {
-    const downloadUrl = `/api/documents/${doc.id}/download`;
-    window.open(downloadUrl, '_blank');
+    const link = document.createElement('a');
+    link.href = `/api/documents/download/${doc.id}`;
+    link.download = doc.originalName || doc.name;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const handleEditDocument = (document: DocumentEntry) => {
-    // Placeholder for edit functionality
-    toast({ title: 'Edit functionality coming soon' });
-  };
-
-  // FAQ Management mutations
-  const createFaqMutation = useMutation({
-    mutationFn: async (faqData: any) => {
-      const response = await fetch('/api/admin/faq', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(faqData),
-        credentials: 'include'
-      });
-      if (!response.ok) throw new Error('Failed to create FAQ');
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/faq'] });
-      setShowFaqDialog(false);
-      setFaqForm({ question: '', answer: '', category: '', isActive: true });
-      toast({ title: 'FAQ created successfully' });
-    },
-    onError: () => {
-      toast({ title: 'Error creating FAQ', variant: 'destructive' });
-    }
-  });
-
-  const updateFaqMutation = useMutation({
-    mutationFn: async ({ id, ...data }: any) => {
-      const response = await fetch(`/api/admin/faq/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-        credentials: 'include'
-      });
-      if (!response.ok) throw new Error('Failed to update FAQ');
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/faq'] });
-      setEditingFaq(null);
-      setShowFaqDialog(false);
-      toast({ title: 'FAQ updated successfully' });
-    },
-    onError: () => {
-      toast({ title: 'Error updating FAQ', variant: 'destructive' });
-    }
-  });
-
-  const deleteFaqMutation = useMutation({
-    mutationFn: async (id: number) => {
-      const response = await fetch(`/api/admin/faq/${id}`, {
-        method: 'DELETE',
-        credentials: 'include'
-      });
-      if (!response.ok) throw new Error('Failed to delete FAQ');
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/faq'] });
-      toast({ title: 'FAQ deleted successfully' });
-    },
-    onError: () => {
-      toast({ title: 'Error deleting FAQ', variant: 'destructive' });
-    }
-  });
-
-  const createCategoryMutation = useMutation({
-    mutationFn: async (categoryName: string) => {
-      const response = await fetch('/api/admin/faq/categories', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: categoryName }),
-        credentials: 'include'
-      });
-      if (!response.ok) throw new Error('Failed to create category');
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/faq'] });
-      setShowCategoryDialog(false);
-      setNewCategory('');
-      toast({ title: 'Category created successfully' });
-    },
-    onError: () => {
-      toast({ title: 'Error creating category', variant: 'destructive' });
-    }
-  });
-
-  const deleteCategoryMutation = useMutation({
-    mutationFn: async (categoryName: string) => {
-      const response = await fetch(`/api/admin/faq/categories/${encodeURIComponent(categoryName)}`, {
-        method: 'DELETE',
-        credentials: 'include'
-      });
-      if (!response.ok) throw new Error('Failed to delete category');
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/faq'] });
-      toast({ title: 'Category deleted successfully' });
-    },
-    onError: () => {
-      toast({ title: 'Error deleting category', variant: 'destructive' });
-    }
-  });
-
-  // FAQ Management handlers
-  const handleCreateFaq = () => {
-    setEditingFaq(null);
-    setFaqForm({ question: '', answer: '', category: '', isActive: true });
-    setShowFaqDialog(true);
-  };
-
-  const handleEditFaq = (faq: any) => {
-    setEditingFaq(faq);
-    setFaqForm({
-      question: faq.question,
-      answer: faq.answer,
-      category: faq.category,
-      isActive: faq.isActive
+    toast({
+      title: "Edit Document",
+      description: "Document editing functionality will be available soon.",
     });
-    setShowFaqDialog(true);
   };
 
-  const handleSaveFaq = () => {
-    if (editingFaq) {
-      updateFaqMutation.mutate({ id: editingFaq.id, ...faqForm });
-    } else {
-      createFaqMutation.mutate(faqForm);
-    }
-  };
-
-  const handleDeleteFaq = (id: number) => {
-    deleteFaqMutation.mutate(id);
-  };
-
-  const handleCreateCategory = () => {
-    if (newCategory.trim()) {
-      createCategoryMutation.mutate(newCategory.trim());
-    }
-  };
-
-  const handleDeleteCategory = (categoryName: string) => {
-    deleteCategoryMutation.mutate(categoryName);
-  };
-
-  const handleMoveDocument = async (documentId: string, targetFolderId: string | null) => {
-    try {
-      const response = await fetch(`/api/documents/${documentId}/move`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ folderId: targetFolderId }),
-        credentials: 'include',
-      });
-      
-      if (!response.ok) throw new Error('Failed to move document');
-      
-      queryClient.invalidateQueries({ queryKey: ['/api/documents'] });
-      toast({ title: 'Document moved successfully' });
-    } catch (error) {
-      toast({ 
-        title: 'Failed to move document', 
-        description: 'Please try again',
-        variant: 'destructive' 
-      });
-    }
-  };
-
-  // Chat Review handlers
-  const handleReviewChat = async (chatId: string) => {
-    setSelectedChatId(chatId);
-    setShowChatReviewModal(true);
-    try {
-      const response = await fetch(`/api/admin/chat-reviews/${chatId}`, {
-        credentials: 'include'
-      });
-      if (!response.ok) throw new Error('Failed to load chat details');
-      const chatData = await response.json();
-      setTrainingChatMessages(chatData.messages || []);
-      setSelectedChatDetails(chatData);
-    } catch (error) {
-      console.error('Error loading chat details:', error);
-      toast({ title: 'Failed to load chat details', variant: 'destructive' });
-    }
-  };
-
-  const handleSubmitTraining = async () => {
-    if (!trainingQuery.trim() || !selectedChatId) return;
+  function TrainingInteractionsTable() {
+    const interactions = trainingData?.interactions || [];
     
-    setIsTrainingChat(true);
-    try {
-      const response = await fetch('/api/admin/ai-simulator/train', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          query: trainingQuery,
-          chatId: selectedChatId,
-          context: 'chat_review'
-        }),
-        credentials: 'include'
-      });
-      
-      if (!response.ok) throw new Error('Failed to submit training');
-      
-      const result = await response.json();
-      setTrainingChatMessages(prev => [...prev, 
-        { role: 'user', content: trainingQuery, createdAt: new Date() },
-        { role: 'assistant', content: result.response, createdAt: new Date() }
-      ]);
-      setTrainingQuery('');
-      toast({ title: 'Training submitted successfully' });
-    } catch (error) {
-      toast({ title: 'Failed to submit training', variant: 'destructive' });
-    } finally {
-      setIsTrainingChat(false);
-    }
-  };
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold">Recent Training Interactions</h3>
+          <Badge variant="secondary">{interactions.length} interactions</Badge>
+        </div>
+        
+        <div className="border rounded-lg">
+          <div className="max-h-96 overflow-y-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 dark:bg-gray-800 sticky top-0">
+                <tr>
+                  <th className="text-left p-3 font-medium">User</th>
+                  <th className="text-left p-3 font-medium">Query</th>
+                  <th className="text-left p-3 font-medium">Source</th>
+                  <th className="text-left p-3 font-medium">Status</th>
+                  <th className="text-left p-3 font-medium">Time</th>
+                </tr>
+              </thead>
+              <tbody>
+                {interactions.map((interaction: any, index: number) => (
+                  <tr key={index} className="border-t hover:bg-gray-50 dark:hover:bg-gray-800">
+                    <td className="p-3">
+                      <div className="font-medium">{interaction.username || 'Unknown'}</div>
+                      <div className="text-sm text-gray-500">{interaction.userRole || 'User'}</div>
+                    </td>
+                    <td className="p-3">
+                      <div className="max-w-xs truncate">{interaction.query}</div>
+                    </td>
+                    <td className="p-3">
+                      <Badge variant={interaction.source === 'admin_test' ? 'destructive' : 'default'}>
+                        {interaction.source === 'admin_test' ? 'Admin Test' : 
+                         interaction.source === 'admin_correction' ? 'Correction' : 'User Chat'}
+                      </Badge>
+                    </td>
+                    <td className="p-3">
+                      <Badge variant={interaction.wasCorrect ? 'default' : 'secondary'}>
+                        {interaction.wasCorrect ? 'Accurate' : 'Needs Review'}
+                      </Badge>
+                    </td>
+                    <td className="p-3 text-sm text-gray-500">
+                      {new Date(interaction.timestamp).toLocaleDateString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-  const handleUpdateReviewStatus = async (status: string) => {
-    if (!selectedChatId) return;
-    
-    try {
-      const response = await fetch(`/api/admin/chat-reviews/${selectedChatId}/review`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status }),
-        credentials: 'include'
-      });
-      
-      if (!response.ok) throw new Error('Failed to update review status');
-      
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/chat-reviews'] });
-      toast({ title: `Chat marked as ${status}` });
-    } catch (error) {
-      toast({ title: 'Failed to update status', variant: 'destructive' });
-    }
-  };
-
-  // AI Simulator handlers
-  const handleTestAI = async () => {
-    if (!testQuery.trim()) return;
-    
-    setIsTestingAI(true);
-    try {
-      const response = await fetch('/api/admin/ai-simulator/test', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: testQuery }),
-        credentials: 'include',
-      });
-      
-      if (!response.ok) throw new Error('Failed to test AI');
-      
-      const data = await response.json();
-      setAiResponse(data.response);
-      setShowCorrectInterface(true);
-    } catch (error) {
-      toast({ title: 'Failed to test AI query', variant: 'destructive' });
-    } finally {
-      setIsTestingAI(false);
-    }
-  };
-
-  const handleSubmitCorrection = async () => {
-    if (!correctedResponse.trim()) return;
-    
-    try {
-      const response = await fetch('/api/admin/ai-simulator/train', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          query: testQuery,
-          originalResponse: aiResponse,
-          correctedResponse: correctedResponse,
-        }),
-        credentials: 'include',
-      });
-      
-      if (!response.ok) throw new Error('Failed to submit correction');
-      
-      toast({ title: 'Training correction submitted successfully', description: 'JACC memory has been updated with your correction' });
-      setCorrectedResponse('');
-      setShowCorrectInterface(false);
-    } catch (error) {
-      toast({ title: 'Failed to submit correction', variant: 'destructive' });
-    }
-  };
-
-  const handleMarkAsCorrect = async () => {
-    try {
-      const response = await fetch('/api/admin/ai-simulator/train', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          query: testQuery,
-          originalResponse: aiResponse,
-          feedback: 'Response marked as correct by admin',
-          wasCorrect: true
-        }),
-        credentials: 'include',
-      });
-      
-      if (!response.ok) throw new Error('Failed to mark as correct');
-      
-      toast({ 
-        title: 'Response approved successfully', 
-        description: 'JACC memory has been updated - this response quality is now learned' 
-      });
-      setShowCorrectInterface(false);
-    } catch (error) {
-      toast({ title: 'Failed to approve response', variant: 'destructive' });
-    }
-  };
-
-  // Message handlers for chat review
-  const handleApproveMessage = async (messageId: string) => {
-    try {
-      await apiRequest(`/api/admin/chat-reviews/messages/${messageId}/approve`, 'POST');
-      toast({ title: 'Message approved' });
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/chat-reviews', selectedChatId] });
-    } catch (error) {
-      toast({ title: 'Error approving message', variant: 'destructive' });
-    }
-  };
-
-  const handleCorrectMessage = async (messageId: string, correction: string) => {
-    if (!correction.trim()) return;
-    
-    try {
-      await apiRequest(`/api/admin/chat-reviews/messages/${messageId}/correct`, 'POST', { correction, chatId: selectedChatId });
-      toast({ title: 'Correction submitted for training' });
-      setMessageCorrection('');
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/chat-reviews', selectedChatId] });
-    } catch (error) {
-      toast({ title: 'Error submitting correction', variant: 'destructive' });
-    }
-  };
-
-  const handleStartTrainingChat = () => {
-    setTrainingChatMessages([{
-      role: 'assistant',
-      content: 'Hi! I am ready to learn from your feedback. Tell me about the corrections you would like to make to my responses. You can speak naturally - for example: "When users ask about pricing, you should mention our competitive rates first" or "Your response about merchant services was too technical, make it simpler."'
-    }]);
-    setIsTrainingChat(true);
-  };
-
-  // Unified training message handler for chat review
-  const handleSendTrainingMessage = async () => {
-    if (!trainingQuery.trim()) return;
-
-    const userMessage = { role: 'user', content: trainingQuery, createdAt: new Date() };
-    setTrainingChatMessages(prev => [...prev, userMessage]);
-    setTrainingQuery('');
-    setIsTrainingChat(true);
-
-    try {
-      const response = await fetch('/api/admin/ai-simulator/train', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          query: userMessage.content,
-          chatId: selectedChatId,
-          context: 'chat_review_training'
-        }),
-        credentials: 'include'
-      });
-
-      if (!response.ok) throw new Error('Failed to send training message');
-      
-      const result = await response.json();
-
-      const responseData = await response.json();
-      const aiMessage = { role: 'assistant', content: responseData.response };
-      setTrainingChatMessages(prev => [...prev, aiMessage]);
-      
-      if (responseData.trainingApplied) {
-        toast({ title: 'Training correction applied successfully' });
-      }
-    } catch (error) {
-      console.error('Training chat error:', error);
-      setTrainingChatMessages(prev => [...prev, {
-        role: 'assistant',
-        content: 'I apologize, but I encountered an error processing your training feedback. Please try again.'
-      }]);
-    } finally {
-      setIsTrainingChat(false);
-    }
-  };
-
-  // Chat Review specific handlers
-
-
-
-  const categories = Array.isArray(faqData) ? 
+  const categories = faqData ? 
     Array.from(new Set(faqData.map((faq: FAQ) => faq.category))) : [];
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold">Admin Control Center</h1>
-        <p className="text-gray-600 mt-2">Manage documents, knowledge base, and system settings</p>
+    <div className="container mx-auto p-6 max-w-7xl">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold tracking-tight">Admin Control Center</h1>
+        <p className="text-muted-foreground mt-2">
+          Manage knowledge base, documents, AI prompts, and system training
+        </p>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="documents" className="flex items-center gap-2">
-            <Folder className="h-4 w-4" />
-            Documents
+          <TabsTrigger value="qa-knowledge" className="flex items-center gap-2">
+            <HelpCircle className="h-4 w-4" />
+            Q&A Knowledge
           </TabsTrigger>
-          <TabsTrigger value="faq" className="flex items-center gap-2">
-            <MessageSquare className="h-4 w-4" />
-            Knowledge Base
+          <TabsTrigger value="document-center" className="flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            Document Center
           </TabsTrigger>
-          <TabsTrigger value="training" className="flex items-center gap-2">
-            <Brain className="h-4 w-4" />
-            Training & Review
-          </TabsTrigger>
-          <TabsTrigger value="analytics" className="flex items-center gap-2">
+          <TabsTrigger value="training-feedback" className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4" />
-            Analytics
+            Training & Feedback
+          </TabsTrigger>
+          <TabsTrigger value="chat-review" className="flex items-center gap-2">
+            <MessageSquare className="h-4 w-4" />
+            Chat Review
           </TabsTrigger>
           <TabsTrigger value="settings" className="flex items-center gap-2">
             <Settings className="h-4 w-4" />
@@ -773,631 +214,216 @@ export default function AdminControlCenter() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="documents" className="space-y-6">
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-lg font-medium">Document Management</h3>
-              <p className="text-sm text-muted-foreground">
-                Upload and organize merchant services documents for instant search in Tracer
-              </p>
-            </div>
-
-            <Tabs defaultValue="upload" className="space-y-4">
-              <TabsList>
-                <TabsTrigger value="upload">
-                  <Upload className="h-4 w-4 mr-2" />
-                  Upload Documents
-                </TabsTrigger>
-                <TabsTrigger value="manage">
-                  <FileText className="h-4 w-4 mr-2" />
-                  Manage & Organize ({allDocuments.length})
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="upload" className="space-y-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-green-600">
-                      <Upload className="h-5 w-5" />
-                      3-Step Document Upload Process
-                    </CardTitle>
-                    <CardDescription>
-                      Step 1: Select Files → Step 2: Choose Folder → Step 3: Set Permissions & Upload
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <DocumentUpload />
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="manage" className="space-y-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Document Organization</CardTitle>
-                    <div className="relative">
-                      <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        placeholder="Search documents by name, description, or category..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-10"
-                      />
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-950 rounded-lg border-2 border-dashed border-blue-200 dark:border-blue-800">
-                      <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">Drag & Drop Instructions</h4>
-                      <p className="text-sm text-blue-700 dark:text-blue-200">
-                        • Drag documents from the left panel to folders on the right to organize them
-                      </p>
-                      <p className="text-sm text-blue-700 dark:text-blue-200">
-                        • Folders will highlight when you can drop documents into them
-                      </p>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      {/* Left Side - All Documents */}
-                      <div className="space-y-4">
-                        <Card>
-                          <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                              <FileText className="h-5 w-5" />
-                              All Documents
-                              <Badge variant="secondary" className="ml-auto">
-                                {filteredDocuments.length}
-                              </Badge>
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent className="max-h-[600px] overflow-y-auto">
-                            <div className="space-y-2">
-                              {filteredDocuments.map((doc: any) => (
-                                <DraggableDocument
-                                  key={doc.id}
-                                  document={doc}
-                                  onMove={handleMoveDocument}
-                                />
-                              ))}
-                              {filteredDocuments.length === 0 && (
-                                <div className="text-center py-8 text-gray-500">
-                                  {searchQuery ? 'No documents match your search.' : 'No documents available'}
-                                </div>
-                              )}
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </div>
-
-                      {/* Right Side - Folders */}
-                      <div className="space-y-4">
-                        <Card>
-                          <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                              <Folder className="h-5 w-5" />
-                              Folders
-                              <Badge variant="secondary" className="ml-auto">
-                                {(integratedDocuments as any)?.folders?.length || 0}
-                              </Badge>
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent className="max-h-[600px] overflow-y-auto">
-                            <div className="space-y-3">
-                              {(integratedDocuments as any)?.folders?.length > 0 ? (
-                                (integratedDocuments as any)?.folders?.map((folder: any) => (
-                                  <DroppableFolder
-                                    key={folder.id}
-                                    folder={{
-                                      ...folder,
-                                      documentCount: folder.documents?.length || 0
-                                    }}
-                                    onDocumentMove={handleMoveDocument}
-                                  />
-                                ))
-                              ) : (
-                                <div className="text-center py-8">
-                                  <Folder className="mx-auto h-12 w-12 text-muted-foreground" />
-                                  <h3 className="mt-2 text-sm font-semibold text-gray-900">No folders available</h3>
-                                  <p className="mt-1 text-sm text-muted-foreground">
-                                    Contact administrator to create folders for document organization.
-                                  </p>
-                                </div>
-                              )}
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
-          </div>
-
-          {/* Document Preview Modal */}
-          <DocumentPreviewModal
-            document={previewDocument}
-            isOpen={showPreviewModal}
-            onClose={() => setShowPreviewModal(false)}
-            onDownload={handleDownloadDocument}
-          />
-        </TabsContent>
-
-        <TabsContent value="faq" className="space-y-6">
+        <TabsContent value="qa-knowledge" className="space-y-6">
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>Knowledge Base Management</CardTitle>
-                  <CardDescription>
-                    Manage FAQ entries and knowledge base content with full CRUD operations
-                  </CardDescription>
-                </div>
-                <div className="flex gap-2">
-                  <Dialog open={showCategoryDialog} onOpenChange={setShowCategoryDialog}>
-                    <DialogTrigger asChild>
-                      <Button variant="outline" size="sm">
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add Category
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Add New Category</DialogTitle>
-                        <DialogDescription>
-                          Create a new category for organizing FAQ entries
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="space-y-4">
-                        <div>
-                          <Label htmlFor="categoryName">Category Name</Label>
-                          <Input
-                            id="categoryName"
-                            value={newCategory}
-                            onChange={(e) => setNewCategory(e.target.value)}
-                            placeholder="Enter category name"
-                          />
-                        </div>
-                      </div>
-                      <div className="flex justify-end gap-2">
-                        <Button variant="outline" onClick={() => setShowCategoryDialog(false)}>
-                          Cancel
-                        </Button>
-                        <Button onClick={handleCreateCategory} disabled={!newCategory.trim()}>
-                          Create Category
-                        </Button>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                  <Button onClick={handleCreateFaq} size="sm">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add FAQ
-                  </Button>
-                </div>
-              </div>
+              <CardTitle className="flex items-center gap-2">
+                <BookOpen className="h-5 w-5" />
+                Q&A Knowledge Base
+              </CardTitle>
+              <CardDescription>
+                Manage frequently asked questions and knowledge base entries
+              </CardDescription>
             </CardHeader>
             <CardContent>
               {faqLoading ? (
-                <div className="flex items-center justify-center p-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <div className="flex items-center justify-center py-8">
+                  <RefreshCw className="h-6 w-6 animate-spin" />
                   <span className="ml-2">Loading FAQ data...</span>
                 </div>
               ) : (
-                <div className="space-y-4">
-                  {categories.map((category: string) => {
-                    const categoryFAQs = Array.isArray(faqData) ? 
-                      faqData.filter((f: FAQ) => f.category === category) : [];
-                    
-                    return (
-                      <div key={category} className="border rounded-lg">
-                        <div className="p-4 bg-gray-50 border-b">
-                          <div className="flex items-center justify-between">
-                            <h3 className="font-semibold">{category}</h3>
-                            <div className="flex items-center gap-2">
-                              <Badge variant="secondary">
-                                {categoryFAQs.length} entries
-                              </Badge>
-                              <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                  <Button variant="outline" size="sm">
-                                    <Trash2 className="h-3 w-3" />
-                                  </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                  <AlertDialogHeader>
-                                    <AlertDialogTitle>Delete Category</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                      Are you sure you want to delete the "{category}" category? This will also delete all FAQ entries in this category. This action cannot be undone.
-                                    </AlertDialogDescription>
-                                  </AlertDialogHeader>
-                                  <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction
-                                      onClick={() => handleDeleteCategory(category)}
-                                      className="bg-red-600 hover:bg-red-700"
-                                    >
-                                      Delete Category
-                                    </AlertDialogAction>
-                                  </AlertDialogFooter>
-                                </AlertDialogContent>
-                              </AlertDialog>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="p-4 space-y-2">
-                          {categoryFAQs.map((faq: FAQ) => (
-                            <div key={faq.id} className="flex items-center justify-between p-3 border rounded hover:bg-gray-50">
-                              <div className="flex-1">
-                                <p className="text-sm font-medium">{faq.question}</p>
-                                <p className="text-xs text-gray-600 mt-1 line-clamp-2">{faq.answer}</p>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Badge variant={faq.isActive ? "default" : "secondary"}>
-                                  {faq.isActive ? "Active" : "Inactive"}
-                                </Badge>
-                                <Button size="sm" variant="outline" onClick={() => handleEditFaq(faq)}>
-                                  <Edit className="h-3 w-3" />
-                                </Button>
-                                <AlertDialog>
-                                  <AlertDialogTrigger asChild>
-                                    <Button size="sm" variant="outline">
-                                      <Trash2 className="h-3 w-3" />
-                                    </Button>
-                                  </AlertDialogTrigger>
-                                  <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                      <AlertDialogTitle>Delete FAQ Entry</AlertDialogTitle>
-                                      <AlertDialogDescription>
-                                        Are you sure you want to delete this FAQ entry? This action cannot be undone.
-                                      </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                      <AlertDialogAction
-                                        onClick={() => handleDeleteFaq(faq.id)}
-                                        className="bg-red-600 hover:bg-red-700"
-                                      >
-                                        Delete FAQ
-                                      </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                  </AlertDialogContent>
-                                </AlertDialog>
-                              </div>
-                            </div>
-                          ))}
-                          {categoryFAQs.length === 0 && (
-                            <div className="text-center py-4 text-gray-500">
-                              No FAQ entries in this category
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                  {categories.length === 0 && (
-                    <div className="text-center py-8">
-                      <MessageSquare className="mx-auto h-12 w-12 text-muted-foreground" />
-                      <h3 className="mt-2 text-sm font-semibold text-gray-900">No FAQ categories</h3>
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        Start by creating a category to organize your FAQ entries.
-                      </p>
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <Badge variant="secondary">{faqData?.length || 0} total entries</Badge>
+                      <Badge variant="outline">{categories.length} categories</Badge>
                     </div>
-                  )}
+                    <Button className="flex items-center gap-2">
+                      <Plus className="h-4 w-4" />
+                      Add FAQ
+                    </Button>
+                  </div>
+
+                  <div className="space-y-4">
+                    {categories.map(category => {
+                      const categoryFAQs = faqData ? 
+                        faqData.filter((f: FAQ) => f.category === category) : [];
+                      
+                      return (
+                        <Card key={category} className="p-4">
+                          <div className="flex items-center justify-between mb-3">
+                            <h3 className="font-semibold text-lg">{category}</h3>
+                            <Badge variant="outline">{categoryFAQs.length} questions</Badge>
+                          </div>
+                          <div className="space-y-2">
+                            {categoryFAQs.map((faq: FAQ) => (
+                              <div key={faq.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                                <div className="flex-1">
+                                  <div className="font-medium">{faq.question}</div>
+                                  <div className="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
+                                    {faq.answer}
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2 ml-4">
+                                  <Badge variant={faq.isActive ? "default" : "secondary"}>
+                                    {faq.isActive ? "Active" : "Inactive"}
+                                  </Badge>
+                                  <Button variant="ghost" size="sm">
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </Card>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
             </CardContent>
           </Card>
-
-          {/* FAQ Edit/Create Dialog */}
-          <Dialog open={showFaqDialog} onOpenChange={setShowFaqDialog}>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>
-                  {editingFaq ? 'Edit FAQ Entry' : 'Create New FAQ Entry'}
-                </DialogTitle>
-                <DialogDescription>
-                  {editingFaq ? 'Update the FAQ entry details below' : 'Add a new FAQ entry to the knowledge base'}
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="question">Question</Label>
-                  <Input
-                    id="question"
-                    value={faqForm.question}
-                    onChange={(e) => setFaqForm({ ...faqForm, question: e.target.value })}
-                    placeholder="Enter the FAQ question"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="answer">Answer</Label>
-                  <Textarea
-                    id="answer"
-                    value={faqForm.answer}
-                    onChange={(e) => setFaqForm({ ...faqForm, answer: e.target.value })}
-                    placeholder="Enter the detailed answer"
-                    rows={4}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="category">Category</Label>
-                  <Select
-                    value={faqForm.category}
-                    onValueChange={(value) => setFaqForm({ ...faqForm, category: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map((category: string) => (
-                        <SelectItem key={category} value={category}>
-                          {category}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="isActive"
-                    checked={faqForm.isActive}
-                    onCheckedChange={(checked) => setFaqForm({ ...faqForm, isActive: checked })}
-                  />
-                  <Label htmlFor="isActive">Active (visible to users)</Label>
-                </div>
-              </div>
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setShowFaqDialog(false)}>
-                  Cancel
-                </Button>
-                <Button 
-                  onClick={handleSaveFaq} 
-                  disabled={!faqForm.question.trim() || !faqForm.answer.trim() || !faqForm.category}
-                >
-                  <Save className="h-4 w-4 mr-2" />
-                  {editingFaq ? 'Update FAQ' : 'Create FAQ'}
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
         </TabsContent>
 
-        <TabsContent value="training" className="space-y-6">
+        <TabsContent value="document-center" className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Brain className="h-5 w-5" />
-                Training & Review Center
+                <FileText className="h-5 w-5" />
+                Document Management Center
               </CardTitle>
               <CardDescription>
-                Review user conversations and train AI responses through corrections and feedback
+                Upload, organize, and manage training documents and resources
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Tabs value={trainingSubTab} onValueChange={setTrainingSubTab} className="space-y-4">
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="chat-review" className="flex items-center gap-2">
-                    <MessageSquare className="h-4 w-4" />
-                    Chat Review
-                  </TabsTrigger>
-                  <TabsTrigger value="ai-training" className="flex items-center gap-2">
-                    <Brain className="h-4 w-4" />
-                    AI Training
-                  </TabsTrigger>
-                </TabsList>
+              {documentsLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <RefreshCw className="h-6 w-6 animate-spin" />
+                  <span className="ml-2">Loading documents...</span>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <Badge variant="secondary">{documentsData?.length || 0} documents</Badge>
+                      <Badge variant="outline">{foldersData?.length || 0} folders</Badge>
+                    </div>
+                    <Button className="flex items-center gap-2">
+                      <Upload className="h-4 w-4" />
+                      Upload Documents
+                    </Button>
+                  </div>
 
-                <TabsContent value="chat-review" className="space-y-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center justify-between">
-                        Chat Review Center
-                        <div className="flex gap-2">
-                          <Select value={chatReviewFilter} onValueChange={setChatReviewFilter}>
-                            <SelectTrigger className="w-32">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="pending">Pending</SelectItem>
-                              <SelectItem value="approved">Approved</SelectItem>
-                              <SelectItem value="needs_correction">Needs Correction</SelectItem>
-                              <SelectItem value="all">All</SelectItem>
-                            </SelectContent>
-                          </Select>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {documentsData?.slice(0, 6).map((doc: DocumentEntry) => (
+                      <Card key={doc.id} className="p-4">
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex-1">
+                            <h4 className="font-medium truncate">{doc.originalName || doc.name}</h4>
+                            <p className="text-sm text-gray-500">{doc.mimeType}</p>
+                          </div>
+                          <Badge variant="outline" className="ml-2">
+                            {Math.round(doc.size / 1024)}KB
+                          </Badge>
                         </div>
-                      </CardTitle>
-                      <CardDescription>
-                        Review user conversations and provide feedback on AI responses
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        {chatReviewsLoading ? (
-                          <div className="flex items-center justify-center p-8">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                            <span className="ml-2">Loading conversations...</span>
-                          </div>
-                        ) : (
-                          <div className="space-y-4">
-                            {(() => {
-                              const chatReviewsArray = Array.isArray(chatReviews) ? chatReviews : [];
-                              const filteredChats = chatReviewsArray.filter((chat: any) => 
-                                chatReviewFilter === 'all' || chat.reviewStatus === chatReviewFilter
-                              );
-                              
-                              return filteredChats.length > 0 ? (
-                                filteredChats.map((chat: any) => (
-                                  <div key={chat.chatId} className="border rounded-lg p-4 space-y-3">
-                                    <div className="flex justify-between items-start">
-                                      <div>
-                                        <h4 className="font-medium text-sm">Chat: {chat.title || 'Untitled'}</h4>
-                                        <p className="text-xs text-gray-500">
-                                          {chat.messageCount} messages • {new Date(chat.lastActivity).toLocaleDateString()}
-                                        </p>
-                                      </div>
-                                      <div className="flex gap-2">
-                                        <Badge variant={chat.reviewStatus === 'approved' ? 'default' : 'secondary'}>
-                                          {chat.reviewStatus}
-                                        </Badge>
-                                        <Button 
-                                          size="sm" 
-                                          variant="outline"
-                                          onClick={() => {
-                                            setSelectedChatId(chat.chatId);
-                                            setShowChatReviewModal(true);
-                                          }}
-                                        >
-                                          <Eye className="h-4 w-4 mr-1" />
-                                          Review
-                                        </Button>
-                                      </div>
-                                    </div>
-                                  </div>
-                                ))
-                              ) : (
-                                <div className="text-center p-8 text-gray-500">
-                                  {chatReviewFilter === 'all' 
-                                    ? 'No conversations found for review' 
-                                    : `No conversations with status "${chatReviewFilter}"`
-                                  }
-                                  {chatReviewsArray.length > 0 && (
-                                    <p className="text-xs mt-2">
-                                      Total conversations: {chatReviewsArray.length}
-                                    </p>
-                                  )}
-                                </div>
-                              );
-                            })()}
-                          </div>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-
-                <TabsContent value="ai-training" className="space-y-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>AI Training Simulator</CardTitle>
-                      <CardDescription>
-                        Test AI responses and provide training corrections to improve system performance
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                      <div className="space-y-4">
-                        <div>
-                          <Label htmlFor="testQuery">Test Query</Label>
-                          <div className="flex gap-2">
-                            <Input
-                              id="testQuery"
-                              placeholder="Enter a question to test the AI response..."
-                              value={testQuery}
-                              onChange={(e) => setTestQuery(e.target.value)}
-                              className="flex-1"
-                            />
-                            <Button 
-                              onClick={handleTestAI}
-                              disabled={!testQuery.trim() || isTestingAI}
-                              className="bg-blue-600 hover:bg-blue-700"
-                            >
-                              {isTestingAI ? (
-                                <Loader2 className="h-4 w-4 animate-spin mr-1" />
-                              ) : (
-                                <Send className="h-4 w-4 mr-1" />
-                              )}
-                              Test AI
-                            </Button>
-                          </div>
+                        <div className="flex items-center gap-2 mt-3">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handlePreviewDocument(doc)}
+                            className="flex items-center gap-1"
+                          >
+                            <Eye className="h-3 w-3" />
+                            View
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDownloadDocument(doc)}
+                            className="flex items-center gap-1"
+                          >
+                            <Download className="h-3 w-3" />
+                            Download
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEditDocument(doc)}
+                            className="flex items-center gap-1"
+                          >
+                            <Edit className="h-3 w-3" />
+                            Edit
+                          </Button>
                         </div>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-                        {isTestingAI && (
-                          <div className="flex items-center justify-center p-8 border-2 border-dashed border-blue-200 rounded-lg">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                            <span className="ml-2">AI is processing your query...</span>
-                          </div>
-                        )}
+        <TabsContent value="training-feedback" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Interactions</CardTitle>
+                <MessageSquare className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{trainingData?.totalInteractions || 0}</div>
+                <p className="text-xs text-muted-foreground">
+                  +{trainingData?.recentInteractions || 0} this week
+                </p>
+              </CardContent>
+            </Card>
 
-                        {aiResponse && (
-                          <div className="space-y-4 border rounded-lg p-4 bg-gray-50 dark:bg-gray-800">
-                            <div className="flex items-center justify-between">
-                              <h4 className="font-medium flex items-center gap-2">
-                                <Bot className="h-4 w-4" />
-                                AI Response
-                              </h4>
-                              <Badge variant="outline">Test Response</Badge>
-                            </div>
-                            <div 
-                              className="prose prose-sm max-w-none dark:prose-invert leading-relaxed"
-                              dangerouslySetInnerHTML={{ __html: aiResponse }}
-                            />
-                            
-                            {!showCorrectInterface && (
-                              <div className="flex gap-2 pt-4 border-t">
-                                <Button
-                                  variant="outline"
-                                  onClick={() => setShowCorrectInterface(true)}
-                                  className="text-orange-600 border-orange-300 hover:bg-orange-50"
-                                >
-                                  <Edit className="h-4 w-4 mr-1" />
-                                  Provide Correction
-                                </Button>
-                                <Button
-                                  variant="outline"
-                                  onClick={handleMarkAsCorrect}
-                                  className="text-green-600 border-green-300 hover:bg-green-50"
-                                >
-                                  <ThumbsUp className="h-4 w-4 mr-1" />
-                                  Mark as Correct
-                                </Button>
-                              </div>
-                            )}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Accuracy Rate</CardTitle>
+                <Target className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{trainingData?.accuracyRate || 0}%</div>
+                <Progress value={trainingData?.accuracyRate || 0} className="mt-2" />
+              </CardContent>
+            </Card>
 
-                            {showCorrectInterface && (
-                              <div className="space-y-4 pt-4 border-t">
-                                <div>
-                                  <Label htmlFor="correctedResponse">Corrected Response</Label>
-                                  <Textarea
-                                    id="correctedResponse"
-                                    placeholder="Provide the correct response for training..."
-                                    value={correctedResponse}
-                                    onChange={(e) => setCorrectedResponse(e.target.value)}
-                                    rows={6}
-                                    className="mt-1"
-                                  />
-                                </div>
-                                
-                                <div className="flex gap-2">
-                                  <Button
-                                    onClick={handleSubmitCorrection}
-                                    disabled={!correctedResponse.trim()}
-                                    className="bg-blue-600 hover:bg-blue-700"
-                                  >
-                                    <Plus className="h-4 w-4 mr-1" />
-                                    Submit Training
-                                  </Button>
-                                  <Button
-                                    variant="outline"
-                                    onClick={() => {
-                                      setShowCorrectInterface(false);
-                                      setCorrectedResponse('');
-                                    }}
-                                  >
-                                    Cancel
-                                  </Button>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        )}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Corrections Made</CardTitle>
+                <CheckCircle className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{trainingData?.totalCorrections || 0}</div>
+                <p className="text-xs text-muted-foreground">
+                  {trainingData?.pendingCorrections || 0} pending review
+                </p>
+              </CardContent>
+            </Card>
+          </div>
 
-                        {!aiResponse && !isTestingAI && (
-                          <div className="text-center p-8 text-gray-500 border-2 border-dashed border-gray-200 rounded-lg">
-                            Enter a test query above to simulate AI responses and train the system
-                          </div>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-              </Tabs>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BarChart3 className="h-5 w-5" />
+                Training Analytics & Feedback
+              </CardTitle>
+              <CardDescription>
+                Monitor AI performance and training effectiveness
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {trainingLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <RefreshCw className="h-6 w-6 animate-spin" />
+                  <span className="ml-2">Loading training data...</span>
+                </div>
+              ) : (
+                <TrainingInteractionsTable />
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -1405,279 +431,29 @@ export default function AdminControlCenter() {
         <TabsContent value="chat-review" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                Chat Review Center
-                <div className="flex gap-2">
-                  <Select value={chatReviewFilter} onValueChange={setChatReviewFilter}>
-                    <SelectTrigger className="w-32">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="pending">Pending</SelectItem>
-                      <SelectItem value="approved">Approved</SelectItem>
-                      <SelectItem value="needs_correction">Needs Correction</SelectItem>
-                      <SelectItem value="all">All</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              <CardTitle className="flex items-center gap-2">
+                <MessageSquare className="h-5 w-5" />
+                Chat Review & Training Center
               </CardTitle>
               <CardDescription>
-                Review user conversations and make corrections for training
+                Review conversations and train AI responses through interactive correction
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {chatReviewsLoading ? (
-                <div className="flex items-center justify-center p-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                  <span className="ml-2">Loading chat reviews...</span>
+              <div className="flex items-center justify-center py-12">
+                <div className="text-center space-y-4">
+                  <MessageSquare className="h-12 w-12 text-gray-400 mx-auto" />
+                  <div>
+                    <h3 className="text-lg font-medium">Chat Review System</h3>
+                    <p className="text-gray-500 max-w-sm mx-auto">
+                      Review user conversations and train the AI with better responses for continuous improvement.
+                    </p>
+                  </div>
+                  <Button onClick={() => setShowChatReviewModal(true)}>
+                    Open Chat Review Center
+                  </Button>
                 </div>
-              ) : (
-                <div className="space-y-4">
-                  {Array.isArray(chatReviews) && chatReviews.length > 0 ? (
-                    chatReviews.map((chat: any) => (
-                      <div key={chat.chatId} className="border rounded-lg p-4 hover:bg-gray-50">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <h4 className="font-medium">
-                              {chat.chatTitle || `Chat ${chat.chatId.substring(0, 8)}`}
-                            </h4>
-                            <p className="text-sm text-gray-600">
-                              {chat.messageCount} messages • User: {chat.userId}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              Last updated: {new Date(chat.updatedAt).toLocaleDateString()}
-                              {chat.correctionsMade > 0 && ` • ${chat.correctionsMade} corrections`}
-                            </p>
-                          </div>
-                          <div className="flex gap-2">
-                            <Badge variant={chat.reviewStatus === 'approved' ? 'default' : 'secondary'}>
-                              {chat.reviewStatus}
-                            </Badge>
-                            <Button
-                              size="sm"
-                              onClick={() => handleReviewChat(chat.chatId)}
-                            >
-                              <Eye className="h-4 w-4 mr-1" />
-                              Review
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="text-center p-8 text-gray-500">
-                      No chat reviews available
-                    </div>
-                  )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="ai-simulator" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>AI Simulator</CardTitle>
-              <CardDescription>
-                Test AI responses and train the system with corrections
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                {/* Query Input */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Test Query</label>
-                  <div className="flex gap-2">
-                    <Textarea
-                      placeholder="Enter a test query for the AI system..."
-                      value={testQuery}
-                      onChange={(e) => setTestQuery(e.target.value)}
-                      className="flex-1"
-                      rows={3}
-                    />
-                    <Button
-                      onClick={handleTestAI}
-                      disabled={!testQuery.trim() || isTestingAI}
-                      className="px-6"
-                    >
-                      {isTestingAI ? (
-                        <RefreshCw className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Send className="h-4 w-4" />
-                      )}
-                      Test AI
-                    </Button>
-                  </div>
-                  
-                  {/* Save to History Option */}
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      id="saveToHistory"
-                      checked={true}
-                      onChange={(e) => {
-                        // Store preference in component state if needed
-                        console.log('Save to history:', e.target.checked);
-                      }}
-                      className="rounded border-gray-300"
-                    />
-                    <label htmlFor="saveToHistory" className="text-sm text-gray-600">
-                      Save test conversation to chat history
-                    </label>
-                  </div>
-                </div>
-
-                {/* AI Response */}
-                {aiResponse && (
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">AI Response</label>
-                      <div className="p-4 bg-gray-50 rounded-lg border">
-                        <div 
-                          className="text-sm [&>h1]:text-xl [&>h1]:font-bold [&>h1]:mb-2 [&>h2]:text-lg [&>h2]:font-semibold [&>h2]:mb-2 [&>h3]:text-base [&>h3]:font-medium [&>h3]:mb-1 [&>ul]:list-disc [&>ul]:ml-4 [&>ul]:mb-2 [&>ol]:list-decimal [&>ol]:ml-4 [&>ol]:mb-2 [&>li]:mb-1 [&>p]:mb-2 [&>strong]:font-semibold [&>em]:italic"
-                          dangerouslySetInnerHTML={{ __html: aiResponse }}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Correction Interface */}
-                    {showCorrectInterface && (
-                      <div className="space-y-4 p-4 bg-blue-50 rounded-lg border">
-                        <div className="flex items-center justify-between">
-                          <h4 className="font-medium text-blue-900">Train the AI</h4>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setShowCorrectInterface(false)}
-                          >
-                            Cancel
-                          </Button>
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium text-blue-900">
-                            Provide Corrected Response
-                          </label>
-                          <Textarea
-                            placeholder="Enter the correct response to train the AI..."
-                            value={correctedResponse}
-                            onChange={(e) => setCorrectedResponse(e.target.value)}
-                            rows={4}
-                          />
-                        </div>
-                        
-                        <div className="flex gap-2">
-                          <Button
-                            onClick={handleSubmitCorrection}
-                            disabled={!correctedResponse.trim()}
-                            className="bg-blue-600 hover:bg-blue-700"
-                          >
-                            <Plus className="h-4 w-4 mr-1" />
-                            Submit Training
-                          </Button>
-                          <Button
-                            variant="outline"
-                            onClick={handleMarkAsCorrect}
-                          >
-                            <ThumbsUp className="h-4 w-4 mr-1" />
-                            Mark as Correct
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {!aiResponse && !isTestingAI && (
-                  <div className="text-center p-8 text-gray-500 border-2 border-dashed border-gray-200 rounded-lg">
-                    Enter a test query above to simulate AI responses and train the system
-                  </div>
-                )}
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="analytics" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Training Analytics</CardTitle>
-              <CardDescription>
-                Real-time AI training performance and user interactions from database
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {trainingLoading ? (
-                <div className="flex items-center justify-center p-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                  <span className="ml-2">Loading training data...</span>
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                    <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                      <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">
-                        {(trainingAnalytics as any)?.totalInteractions || 0}
-                      </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">Chat Sessions</div>
-                    </div>
-                    <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                      <div className="text-2xl font-bold text-green-700 dark:text-green-300">
-                        {(trainingAnalytics as any)?.totalMessages || 0}
-                      </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">AI Responses</div>
-                    </div>
-                    <div className="text-center p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
-                      <div className="text-2xl font-bold text-red-700 dark:text-red-300">
-                        {(trainingAnalytics as any)?.correctionsSubmitted || 0}
-                      </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">Corrections</div>
-                    </div>
-                    <div className="text-center p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg">
-                      <div className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">
-                        {(trainingAnalytics as any)?.approvalsSubmitted || 0}
-                      </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">Approvals</div>
-                    </div>
-                    <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-                      <div className="text-2xl font-bold text-purple-700 dark:text-purple-300">
-                        {(trainingAnalytics as any)?.knowledgeBaseEntries || 0}
-                      </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">Knowledge Base</div>
-                    </div>
-                    <div className="text-center p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
-                      <div className="text-2xl font-bold text-orange-700 dark:text-orange-300">
-                        {(trainingAnalytics as any)?.documentsProcessed || 0}
-                      </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">Documents</div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <Badge variant="outline" className="text-xs">
-                      Data Source: {(trainingAnalytics as any)?.dataSource || 'database'}
-                    </Badge>
-                    <Badge variant="outline" className="text-xs">
-                      Last Updated: {(trainingAnalytics as any)?.lastUpdated ? 
-                        new Date((trainingAnalytics as any).lastUpdated).toLocaleString() : 'Now'}
-                    </Badge>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Training Interactions Table */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Training Interactions</CardTitle>
-              <CardDescription>
-                Detailed view of admin corrections, approvals, and training activities
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <TrainingInteractionsTable />
             </CardContent>
           </Card>
         </TabsContent>
@@ -1693,663 +469,9 @@ export default function AdminControlCenter() {
           document={previewDocument}
           isOpen={showPreviewModal}
           onClose={() => setShowPreviewModal(false)}
+          onDownload={() => handleDownloadDocument(previewDocument)}
         />
       )}
-
-      {/* Document Placement Dialog */}
-      <DocumentPlacementDialog
-        isOpen={showPlacementDialog}
-        onClose={() => setShowPlacementDialog(false)}
-        onSave={handleDocumentPlacement}
-        folders={foldersData || []}
-        documents={documentsToPlace}
-      />
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5" />
-                User Management
-              </CardTitle>
-              <CardDescription>
-                Configure user roles, permissions, and access controls
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div>
-                    <Label>Default User Role</Label>
-                    <Select defaultValue="sales-agent">
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="sales-agent">Sales Agent (Standard)</SelectItem>
-                        <SelectItem value="client-admin">Client Admin (Extended)</SelectItem>
-                        <SelectItem value="dev-admin">Developer Admin (Full)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div>
-                    <Label>Session Timeout</Label>
-                    <Select defaultValue="24h">
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="1h">1 Hour</SelectItem>
-                        <SelectItem value="8h">8 Hours</SelectItem>
-                        <SelectItem value="24h">24 Hours</SelectItem>
-                        <SelectItem value="7d">7 Days</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <input type="checkbox" id="require-mfa" />
-                    <Label htmlFor="require-mfa" className="text-sm">
-                      Require multi-factor authentication for admins
-                    </Label>
-                  </div>
-                </div>
-                
-                <div className="space-y-4">
-                  <div>
-                    <Label>Document Access Default</Label>
-                    <Select defaultValue="permitted-only">
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all-documents">All Documents</SelectItem>
-                        <SelectItem value="permitted-only">Permitted Only</SelectItem>
-                        <SelectItem value="public-only">Public Only</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div>
-                    <Label>New User Notifications</Label>
-                    <div className="space-y-2 mt-2">
-                      <div className="flex items-center space-x-2">
-                        <input type="checkbox" id="welcome-email" defaultChecked />
-                        <Label htmlFor="welcome-email" className="text-sm">Send welcome email</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <input type="checkbox" id="admin-notify" defaultChecked />
-                        <Label htmlFor="admin-notify" className="text-sm">Notify administrators</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <input type="checkbox" id="training-invite" />
-                        <Label htmlFor="training-invite" className="text-sm">Include training materials</Label>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Content & Document Processing */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5" />
-                Content & Document Processing
-              </CardTitle>
-              <CardDescription>
-                Configure document processing, OCR, and content management
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div>
-                    <Label>OCR Quality Level</Label>
-                    <Select defaultValue="balanced">
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="fast">Fast Processing</SelectItem>
-                        <SelectItem value="balanced">Balanced Quality</SelectItem>
-                        <SelectItem value="high">High Accuracy</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div>
-                    <Label>Auto-categorization</Label>
-                    <div className="space-y-2 mt-2">
-                      <div className="flex items-center space-x-2">
-                        <input type="checkbox" id="auto-folder" defaultChecked />
-                        <Label htmlFor="auto-folder" className="text-sm">Auto-assign folders based on content</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <input type="checkbox" id="auto-tags" defaultChecked />
-                        <Label htmlFor="auto-tags" className="text-sm">Generate smart tags</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <input type="checkbox" id="duplicate-detection" defaultChecked />
-                        <Label htmlFor="duplicate-detection" className="text-sm">Detect duplicate uploads</Label>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="chunk-size">Text Chunk Size</Label>
-                    <div className="flex items-center space-x-4">
-                      <span className="text-sm text-gray-500">Small</span>
-                      <input
-                        type="range"
-                        min="500"
-                        max="2000"
-                        step="100"
-                        defaultValue="1000"
-                        className="flex-1"
-                      />
-                      <span className="text-sm text-gray-500">Large</span>
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Current: 1000 characters (Optimal for search)
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="space-y-4">
-                  <div>
-                    <Label>Training Data Retention</Label>
-                    <Select defaultValue="1-year">
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="1-month">1 Month</SelectItem>
-                        <SelectItem value="3-months">3 Months</SelectItem>
-                        <SelectItem value="6-months">6 Months</SelectItem>
-                        <SelectItem value="1-year">1 Year</SelectItem>
-                        <SelectItem value="unlimited">Unlimited</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div>
-                    <Label>Cleanup Schedule</Label>
-                    <Select defaultValue="weekly">
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="daily">Daily</SelectItem>
-                        <SelectItem value="weekly">Weekly</SelectItem>
-                        <SelectItem value="monthly">Monthly</SelectItem>
-                        <SelectItem value="manual">Manual Only</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div>
-                    <Label>FAQ Auto-Approval Threshold</Label>
-                    <div className="flex items-center space-x-4">
-                      <span className="text-sm text-gray-500">Manual</span>
-                      <input
-                        type="range"
-                        min="0"
-                        max="10"
-                        step="1"
-                        defaultValue="3"
-                        className="flex-1"
-                      />
-                      <span className="text-sm text-gray-500">Auto</span>
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Auto-approve FAQs with 3+ positive admin reviews
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* AI Prompts Management */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Brain className="h-5 w-5" />
-                AI Prompts Management
-              </CardTitle>
-              <CardDescription>
-                Configure system prompts, personality settings, and AI behavior templates
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* System Prompts */}
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-medium">System Prompts</h4>
-                    <Button variant="outline" size="sm">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add New
-                    </Button>
-                  </div>
-                  
-                  <div className="space-y-3">
-                    <div className="p-4 border rounded-lg bg-blue-50">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-medium text-sm">Document Search Prompt</span>
-                        <div className="flex gap-1">
-                          <Button variant="ghost" size="sm">
-                            <Edit className="h-3 w-3" />
-                          </Button>
-                          <Badge variant="secondary">Active</Badge>
-                        </div>
-                      </div>
-                      <p className="text-xs text-gray-600 mb-2">
-                        Controls how AI searches through documents and knowledge base
-                      </p>
-                      <div className="text-xs bg-white p-2 rounded border max-h-20 overflow-y-auto">
-                        "You are JACC, an AI assistant for merchant services. Search FAQ first, then documents, then web as fallback..."
-                      </div>
-                    </div>
-                    
-                    <div className="p-4 border rounded-lg bg-green-50">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-medium text-sm">Response Formatting Prompt</span>
-                        <div className="flex gap-1">
-                          <Button variant="ghost" size="sm">
-                            <Edit className="h-3 w-3" />
-                          </Button>
-                          <Badge variant="secondary">Active</Badge>
-                        </div>
-                      </div>
-                      <p className="text-xs text-gray-600 mb-2">
-                        Defines how AI formats responses with HTML styling
-                      </p>
-                      <div className="text-xs bg-white p-2 rounded border max-h-20 overflow-y-auto">
-                        "Format responses using HTML: &lt;h1&gt;, &lt;h2&gt; for headings, &lt;ul&gt;&lt;li&gt; for lists, &lt;p&gt; for paragraphs..."
-                      </div>
-                    </div>
-                    
-                    <div className="p-4 border rounded-lg bg-yellow-50">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-medium text-sm">Error Handling Prompt</span>
-                        <div className="flex gap-1">
-                          <Button variant="ghost" size="sm">
-                            <Edit className="h-3 w-3" />
-                          </Button>
-                          <Badge variant="outline">Draft</Badge>
-                        </div>
-                      </div>
-                      <p className="text-xs text-gray-600 mb-2">
-                        How AI handles errors and unknown information
-                      </p>
-                      <div className="text-xs bg-white p-2 rounded border max-h-20 overflow-y-auto">
-                        "When information is not found in JACC Memory, clearly state limitations and offer web search..."
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Personality & Behavior */}
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-medium">Personality & Behavior</h4>
-                    <Button variant="outline" size="sm">
-                      <User className="h-4 w-4 mr-2" />
-                      User Defaults
-                    </Button>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    <div>
-                      <Label>AI Personality Style</Label>
-                      <Select defaultValue="professional-helpful">
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="professional-helpful">Professional & Helpful</SelectItem>
-                          <SelectItem value="friendly-expert">Friendly Expert</SelectItem>
-                          <SelectItem value="direct-efficient">Direct & Efficient</SelectItem>
-                          <SelectItem value="conversational">Conversational & Engaging</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    
-                    <div>
-                      <Label>Response Tone</Label>
-                      <div className="grid grid-cols-2 gap-2 mt-2">
-                        <div className="flex items-center space-x-2">
-                          <input type="radio" id="tone-formal" name="tone" value="formal" defaultChecked />
-                          <Label htmlFor="tone-formal" className="text-sm">Formal</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <input type="radio" id="tone-casual" name="tone" value="casual" />
-                          <Label htmlFor="tone-casual" className="text-sm">Casual</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <input type="radio" id="tone-technical" name="tone" value="technical" />
-                          <Label htmlFor="tone-technical" className="text-sm">Technical</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <input type="radio" id="tone-sales" name="tone" value="sales" />
-                          <Label htmlFor="tone-sales" className="text-sm">Sales-focused</Label>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <Label>Industry Expertise Level</Label>
-                      <div className="flex items-center space-x-4 mt-2">
-                        <span className="text-sm text-gray-500">Basic</span>
-                        <input
-                          type="range"
-                          min="1"
-                          max="5"
-                          step="1"
-                          defaultValue="4"
-                          className="flex-1"
-                        />
-                        <span className="text-sm text-gray-500">Expert</span>
-                      </div>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Current: Level 4 - Advanced merchant services knowledge
-                      </p>
-                    </div>
-                    
-                    <div className="space-y-3">
-                      <Label>Behavioral Settings</Label>
-                      <div className="space-y-2">
-                        <div className="flex items-center space-x-2">
-                          <input type="checkbox" id="proactive-suggestions" defaultChecked />
-                          <Label htmlFor="proactive-suggestions" className="text-sm">
-                            Offer proactive suggestions and recommendations
-                          </Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <input type="checkbox" id="ask-clarifying" defaultChecked />
-                          <Label htmlFor="ask-clarifying" className="text-sm">
-                            Ask clarifying questions when requests are vague
-                          </Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <input type="checkbox" id="include-examples" defaultChecked />
-                          <Label htmlFor="include-examples" className="text-sm">
-                            Include practical examples in explanations
-                          </Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <input type="checkbox" id="follow-up-questions" />
-                          <Label htmlFor="follow-up-questions" className="text-sm">
-                            Suggest follow-up questions after responses
-                          </Label>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Custom Prompt Templates */}
-              <div className="border-t pt-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h4 className="font-medium">Custom Prompt Templates</h4>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm">
-                      <Download className="h-4 w-4 mr-2" />
-                      Export
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      <Upload className="h-4 w-4 mr-2" />
-                      Import
-                    </Button>
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="p-4 border rounded-lg">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="font-medium text-sm">Pricing Analysis</span>
-                      <Button variant="ghost" size="sm">
-                        <Edit className="h-3 w-3" />
-                      </Button>
-                    </div>
-                    <p className="text-xs text-gray-600 mb-3">
-                      Template for analyzing merchant pricing scenarios
-                    </p>
-                    <div className="text-xs bg-gray-50 p-2 rounded max-h-16 overflow-y-auto">
-                      "When analyzing pricing, always consider interchange costs, processor markups, monthly fees..."
-                    </div>
-                  </div>
-                  
-                  <div className="p-4 border rounded-lg">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="font-medium text-sm">Objection Handling</span>
-                      <Button variant="ghost" size="sm">
-                        <Edit className="h-3 w-3" />
-                      </Button>
-                    </div>
-                    <p className="text-xs text-gray-600 mb-3">
-                      Template for handling common sales objections
-                    </p>
-                    <div className="text-xs bg-gray-50 p-2 rounded max-h-16 overflow-y-auto">
-                      "When addressing pricing objections, focus on value proposition and total cost of ownership..."
-                    </div>
-                  </div>
-                  
-                  <div className="p-4 border rounded-lg">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="font-medium text-sm">Compliance Guidance</span>
-                      <Button variant="ghost" size="sm">
-                        <Edit className="h-3 w-3" />
-                      </Button>
-                    </div>
-                    <p className="text-xs text-gray-600 mb-3">
-                      Template for PCI compliance and regulatory guidance
-                    </p>
-                    <div className="text-xs bg-gray-50 p-2 rounded max-h-16 overflow-y-auto">
-                      "For PCI compliance questions, always reference current standards and emphasize security..."
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              {/* User-Specific Prompts */}
-              <div className="border-t pt-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h4 className="font-medium">User-Specific Prompt Overrides</h4>
-                  <Button variant="outline" size="sm">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add User Override
-                  </Button>
-                </div>
-                
-                <div className="space-y-3">
-                  <div className="p-4 border rounded-lg bg-blue-50">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <User className="h-4 w-4" />
-                        <span className="font-medium text-sm">admin@jacc.com</span>
-                        <Badge variant="secondary">Dev Admin</Badge>
-                      </div>
-                      <div className="flex gap-1">
-                        <Button variant="ghost" size="sm">
-                          <Edit className="h-3 w-3" />
-                        </Button>
-                        <Button variant="ghost" size="sm">
-                          <X className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </div>
-                    <p className="text-xs text-gray-600 mb-2">
-                      Override: Technical responses with debugging information
-                    </p>
-                    <div className="text-xs bg-white p-2 rounded border max-h-16 overflow-y-auto">
-                      "For this user, include technical details, API endpoints, and debugging information in responses..."
-                    </div>
-                  </div>
-                  
-                  <div className="p-4 border rounded-lg">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <User className="h-4 w-4" />
-                        <span className="font-medium text-sm">sales@company.com</span>
-                        <Badge variant="outline">Sales Agent</Badge>
-                      </div>
-                      <div className="flex gap-1">
-                        <Button variant="ghost" size="sm">
-                          <Edit className="h-3 w-3" />
-                        </Button>
-                        <Button variant="ghost" size="sm">
-                          <X className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </div>
-                    <p className="text-xs text-gray-600 mb-2">
-                      Override: Sales-focused responses with objection handling
-                    </p>
-                    <div className="text-xs bg-white p-2 rounded border max-h-16 overflow-y-auto">
-                      "Focus on sales benefits, ROI calculations, and provide objection handling scripts..."
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* System Performance */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
-                System Performance
-              </CardTitle>
-              <CardDescription>
-                Configure system performance, caching, and resource management
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="space-y-4">
-                  <div>
-                    <Label>Response Timeout</Label>
-                    <Select defaultValue="30s">
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="15s">15 seconds</SelectItem>
-                        <SelectItem value="30s">30 seconds</SelectItem>
-                        <SelectItem value="60s">60 seconds</SelectItem>
-                        <SelectItem value="120s">2 minutes</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div>
-                    <Label>Cache Duration</Label>
-                    <Select defaultValue="1h">
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="5m">5 minutes</SelectItem>
-                        <SelectItem value="30m">30 minutes</SelectItem>
-                        <SelectItem value="1h">1 hour</SelectItem>
-                        <SelectItem value="24h">24 hours</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                
-                <div className="space-y-4">
-                  <div>
-                    <Label>Memory Optimization</Label>
-                    <Select defaultValue="balanced">
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="conservative">Conservative</SelectItem>
-                        <SelectItem value="balanced">Balanced</SelectItem>
-                        <SelectItem value="aggressive">Aggressive</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div>
-                    <Label>Concurrent Requests</Label>
-                    <Select defaultValue="10">
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="5">5 (Conservative)</SelectItem>
-                        <SelectItem value="10">10 (Standard)</SelectItem>
-                        <SelectItem value="20">20 (High)</SelectItem>
-                        <SelectItem value="50">50 (Maximum)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                
-                <div className="space-y-4">
-                  <div className="p-4 border rounded-lg bg-gray-50">
-                    <h4 className="font-medium text-sm mb-2">Current Status</h4>
-                    <div className="space-y-1">
-                      <div className="flex justify-between text-xs">
-                        <span>Memory Usage:</span>
-                        <span className="text-green-600">72%</span>
-                      </div>
-                      <div className="flex justify-between text-xs">
-                        <span>Cache Hit Rate:</span>
-                        <span className="text-green-600">84%</span>
-                      </div>
-                      <div className="flex justify-between text-xs">
-                        <span>Avg Response:</span>
-                        <span className="text-green-600">1.2s</span>
-                      </div>
-                      <div className="flex justify-between text-xs">
-                        <span>Active Users:</span>
-                        <span className="text-blue-600">12</span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <Button variant="outline" size="sm" className="w-full">
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                    Clear All Caches
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Save Settings */}
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex justify-between items-center">
-                <div>
-                  <p className="text-sm text-gray-600">
-                    Settings are automatically saved. Last updated: {new Date().toLocaleString()}
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <Button variant="outline">
-                    Reset to Defaults
-                  </Button>
-                  <Button className="bg-blue-600 hover:bg-blue-700">
-                    <Save className="h-4 w-4 mr-2" />
-                    Save Configuration
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
 
       {/* Chat Review Modal */}
       <Dialog open={showChatReviewModal} onOpenChange={setShowChatReviewModal}>
@@ -2359,232 +481,9 @@ export default function AdminControlCenter() {
               <MessageSquare className="h-5 w-5" />
               Chat Review & Training Center
             </DialogTitle>
-            <DialogDescription>
-              Review conversations and train AI responses through interactive correction
-            </DialogDescription>
           </DialogHeader>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[70vh]">
-            {/* Left Side - Conversation History */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">Conversation History</h3>
-                <Select value={chatReviewFilter} onValueChange={setChatReviewFilter}>
-                  <SelectTrigger className="w-[140px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Chats</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="approved">Approved</SelectItem>
-                    <SelectItem value="needs_correction">Needs Review</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              {/* Chat List */}
-              <div className="border rounded-lg h-[25vh] overflow-y-auto">
-                <div className="p-4 space-y-3">
-                  {Array.isArray(chatReviews) && chatReviews.length > 0 ? (
-                    chatReviews.map((chat: any) => (
-                      <div 
-                        key={chat.chatId} 
-                        className={`border rounded-lg p-3 cursor-pointer transition-colors ${
-                          selectedChatId === chat.chatId ? 'bg-blue-50 border-blue-200' : 'hover:bg-gray-50'
-                        }`}
-                        onClick={() => handleReviewChat(chat.chatId)}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <h4 className="font-medium text-sm">
-                              {chat.chatTitle || `Chat ${chat.chatId.substring(0, 8)}`}
-                            </h4>
-                            <p className="text-xs text-gray-600">
-                              {chat.messageCount} messages • {chat.userId}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              {new Date(chat.updatedAt).toLocaleDateString()}
-                              {chat.correctionsMade > 0 && ` • ${chat.correctionsMade} corrections`}
-                            </p>
-                          </div>
-                          <Badge variant={chat.reviewStatus === 'approved' ? 'default' : 'secondary'} className="text-xs">
-                            {chat.reviewStatus}
-                          </Badge>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="text-center py-8 text-gray-500">
-                      No chat reviews found for "{chatReviewFilter}" status
-                    </div>
-                  )}
-                </div>
-              </div>
-              
-              {/* Selected Chat Messages */}
-              <div className="space-y-2">
-                <h4 className="font-medium">Messages</h4>
-                <ScrollArea className="h-[35vh] border rounded-lg p-4">
-                  {trainingChatMessages.length > 0 ? (
-                    <div className="space-y-3">
-                      {trainingChatMessages.map((message: any, index: number) => (
-                        <div key={index} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                          <div className={`max-w-[85%] rounded-lg p-3 ${
-                            message.role === 'user' 
-                              ? 'bg-blue-500 text-white' 
-                              : 'bg-gray-100 text-gray-900'
-                          }`}>
-                            <div className="flex items-center gap-2 mb-1">
-                              {message.role === 'user' ? <User className="h-3 w-3" /> : <Bot className="h-3 w-3" />}
-                              <span className="text-xs font-medium">
-                                {message.role === 'user' ? 'User' : 'AI Assistant'}
-                              </span>
-                            </div>
-                            <p className="text-sm">{message.content}</p>
-                            <p className="text-xs opacity-70 mt-1">
-                              {new Date(message.createdAt).toLocaleTimeString()}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-center h-full text-gray-500">
-                      <div className="text-center">
-                        <MessageSquare className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                        <p className="text-sm">Select a chat to view conversation</p>
-                      </div>
-                    </div>
-                  )}
-                </ScrollArea>
-              </div>
-            </div>
-            
-            {/* Right Side - AI Training Chat */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">AI Training Chat</h3>
-                {selectedChatId && (
-                  <Badge variant="outline">Chat: {selectedChatId.substring(0, 8)}</Badge>
-                )}
-              </div>
-              
-              {selectedChatId ? (
-                <Card className="h-full">
-                  <CardContent className="p-4 h-full flex flex-col">
-                    {/* Training Chat Messages */}
-                    <ScrollArea className="flex-1 mb-4 border rounded-lg p-3 min-h-[40vh]">
-                      <div className="space-y-3">
-                        <div className="flex justify-start">
-                          <div className="bg-gray-100 rounded-lg p-3 max-w-[85%]">
-                            <div className="flex items-center gap-2 mb-1">
-                              <Bot className="h-3 w-3" />
-                              <span className="text-xs font-medium">AI Trainer</span>
-                            </div>
-                            <p className="text-sm">
-                              I'm here to help you train and improve AI responses. You can:
-                              <br/>• Ask how the AI should have responded differently
-                              <br/>• Provide better example responses
-                              <br/>• Explain why certain responses need improvement
-                              <br/>• Test new response strategies
-                            </p>
-                          </div>
-                        </div>
-                        
-                        {/* Show any existing training conversation */}
-                        {isTrainingChat && (
-                          <div className="flex justify-center">
-                            <div className="bg-blue-50 rounded-lg p-2">
-                              <Loader2 className="h-4 w-4 animate-spin mx-auto" />
-                              <p className="text-xs text-center mt-1">AI is learning...</p>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </ScrollArea>
-                    
-                    {/* Training Input */}
-                    <div className="space-y-3">
-                      <Textarea
-                        placeholder="Ask how the AI should respond differently, provide corrections, or explain improvements..."
-                        value={trainingQuery}
-                        onChange={(e) => setTrainingQuery(e.target.value)}
-                        className="min-h-[80px] resize-none"
-                      />
-                      <div className="flex gap-2">
-                        <Button
-                          onClick={handleSubmitTraining}
-                          disabled={!trainingQuery.trim() || isTrainingChat}
-                          className="flex-1"
-                        >
-                          {isTrainingChat ? (
-                            <>
-                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                              Training...
-                            </>
-                          ) : (
-                            <>
-                              <Send className="h-4 w-4 mr-2" />
-                              Send Training
-                            </>
-                          )}
-                        </Button>
-                        <Button
-                          variant="outline"
-                          onClick={() => {
-                            setTrainingQuery('');
-                          }}
-                          disabled={isTrainingChat}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-                      
-                      {/* Review Status Actions */}
-                      <div className="flex gap-2 pt-2 border-t">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleUpdateReviewStatus('approved')}
-                          className="text-green-600 hover:text-green-700"
-                        >
-                          <CheckCircle className="h-4 w-4 mr-1" />
-                          Approve
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleUpdateReviewStatus('needs_correction')}
-                          className="text-yellow-600 hover:text-yellow-700"
-                        >
-                          <AlertCircle className="h-4 w-4 mr-1" />
-                          Needs Work
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleUpdateReviewStatus('skipped')}
-                          className="text-gray-600 hover:text-gray-700"
-                        >
-                          <SkipForward className="h-4 w-4 mr-1" />
-                          Skip
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ) : (
-                <Card className="border-dashed h-full">
-                  <CardContent className="flex flex-col items-center justify-center h-full text-center">
-                    <Brain className="h-16 w-16 text-gray-300 mb-4" />
-                    <p className="text-lg font-medium text-gray-500 mb-2">Select a Chat to Start Training</p>
-                    <p className="text-sm text-gray-400 max-w-sm">
-                      Choose a conversation from the left to review messages and train the AI with better responses
-                    </p>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
+          <div className="p-4">
+            <p>Chat review functionality will be integrated here.</p>
           </div>
         </DialogContent>
       </Dialog>
