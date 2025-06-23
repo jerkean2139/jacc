@@ -61,7 +61,7 @@ export function MessageContent({ content, className = '' }: MessageContentProps)
           <div 
             key={index}
             dangerouslySetInnerHTML={{ __html: part }}
-            className="prose prose-slate dark:prose-invert max-w-none [&>h1]:text-xl [&>h1]:font-bold [&>h1]:mt-4 [&>h1]:mb-3 [&>h2]:text-lg [&>h2]:font-semibold [&>h2]:mt-4 [&>h2]:mb-3 [&>h3]:text-base [&>h3]:font-medium [&>h3]:mt-3 [&>h3]:mb-2 [&>ul]:list-disc [&>ul]:ml-6 [&>ul]:mb-4 [&>ul]:mt-2 [&>ol]:list-decimal [&>ol]:ml-6 [&>ol]:mb-4 [&>ol]:mt-2 [&>li]:mb-2 [&>li]:leading-relaxed [&>p]:mb-4 [&>p]:leading-relaxed [&>p]:text-sm [&>strong]:font-semibold [&>em]:italic [&>blockquote]:border-l-4 [&>blockquote]:border-blue-500 [&>blockquote]:pl-4 [&>blockquote]:italic"
+            className="prose prose-slate dark:prose-invert max-w-none leading-relaxed [&>h1]:text-xl [&>h1]:font-bold [&>h1]:mt-6 [&>h1]:mb-4 [&>h2]:text-lg [&>h2]:font-semibold [&>h2]:mt-6 [&>h2]:mb-4 [&>h3]:text-base [&>h3]:font-medium [&>h3]:mt-4 [&>h3]:mb-3 [&>ul]:list-disc [&>ul]:ml-6 [&>ul]:mb-6 [&>ul]:mt-3 [&>ol]:list-decimal [&>ol]:ml-6 [&>ol]:mb-6 [&>ol]:mt-3 [&>li]:mb-3 [&>li]:leading-relaxed [&>p]:mb-6 [&>p]:leading-relaxed [&>p]:text-base [&>strong]:font-semibold [&>em]:italic [&>br]:mb-4 [&>blockquote]:border-l-4 [&>blockquote]:border-blue-500 [&>blockquote]:pl-4 [&>blockquote]:italic [&>blockquote]:my-6"
           />
         );
       });

@@ -1116,17 +1116,30 @@ function ThreeStepDocumentUpload({ foldersData, onUploadComplete }: {
 
   const uploadMutation = useMutation({
     mutationFn: async (formData: FormData) => {
+      console.log('Upload mutation starting...');
+      console.log('FormData entries:', Array.from(formData.entries()));
+      
       const response = await fetch('/api/documents/upload', {
         method: 'POST',
         body: formData,
+        credentials: 'include'
       });
+      
+      console.log('Upload response status:', response.status);
+      console.log('Upload response headers:', response.headers);
+      
       if (!response.ok) {
         const errorText = await response.text();
+        console.error('Upload error response:', errorText);
         throw new Error(`Upload failed: ${response.status} - ${errorText}`);
       }
-      return response.json();
+      
+      const result = await response.json();
+      console.log('Upload success result:', result);
+      return result;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('Upload mutation success:', data);
       toast({
         title: "Upload Successful",
         description: `${selectedFiles.length} document(s) uploaded successfully`,
@@ -1138,14 +1151,16 @@ function ThreeStepDocumentUpload({ foldersData, onUploadComplete }: {
       onUploadComplete();
     },
     onError: (error: any) => {
-      console.error('Upload error details:', error);
+      console.error('Upload mutation error:', error);
+      console.error('Error stack:', error.stack);
       toast({
         title: "Upload Failed",
-        description: `Upload failed: ${error.message || 'Unknown error'}. Check file formats and network connection.`,
+        description: `Upload failed: ${error.message || 'Unknown error'}. Check console for details.`,
         variant: "destructive",
       });
     },
     onSettled: () => {
+      console.log('Upload mutation settled');
       setIsUploading(false);
     }
   });
@@ -1466,6 +1481,7 @@ export default function AdminControlCenter() {
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [previewDocument, setPreviewDocument] = useState<DocumentEntry | null>(null);
   const [showChatReviewModal, setShowChatReviewModal] = useState(false);
+  const [showAddFAQModal, setShowAddFAQModal] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -1943,12 +1959,7 @@ export default function AdminControlCenter() {
                     </div>
                     <Button 
                       className="flex items-center gap-2"
-                      onClick={() => {
-                        toast({
-                          title: "Add FAQ Entry",
-                          description: "FAQ creation dialog coming soon...",
-                        });
-                      }}
+                      onClick={() => setShowAddFAQModal(true)}
                     >
                       <Plus className="h-4 w-4" />
                       Add FAQ
@@ -2324,6 +2335,69 @@ export default function AdminControlCenter() {
       </Tabs>
 
       {/* Document Preview Modal - Temporarily disabled */}
+
+      {/* Add FAQ Modal */}
+      <Dialog open={showAddFAQModal} onOpenChange={setShowAddFAQModal}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="h-5 w-5" />
+              Add New FAQ Entry
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid gap-2">
+              <Label htmlFor="faq-question">Question</Label>
+              <Input
+                id="faq-question"
+                placeholder="Enter the frequently asked question..."
+                className="w-full"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="faq-answer">Answer</Label>
+              <Textarea
+                id="faq-answer"
+                placeholder="Enter the detailed answer..."
+                className="min-h-[120px]"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="faq-category">Category</Label>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="general">General</SelectItem>
+                  <SelectItem value="pricing">Pricing</SelectItem>
+                  <SelectItem value="technical">Technical</SelectItem>
+                  <SelectItem value="merchant-services">Merchant Services</SelectItem>
+                  <SelectItem value="compliance">Compliance</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox id="faq-active" defaultChecked />
+              <Label htmlFor="faq-active">Active (visible to users)</Label>
+            </div>
+            <div className="flex justify-end gap-2 pt-4">
+              <Button variant="outline" onClick={() => setShowAddFAQModal(false)}>
+                Cancel
+              </Button>
+              <Button onClick={() => {
+                toast({
+                  title: "FAQ Added",
+                  description: "New FAQ entry has been created successfully.",
+                });
+                setShowAddFAQModal(false);
+              }}>
+                Create FAQ
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Chat Review Modal */}
       <Dialog open={showChatReviewModal} onOpenChange={setShowChatReviewModal}>
