@@ -4514,7 +4514,7 @@ User Context: {userRole}`,
       console.error("Error stack:", error.stack);
       res.status(500).json({ 
         message: "Scraping Failed", 
-        error: error.message || "The string did not match the expected pattern."
+        error: error instanceof Error ? error.message : String(error)
       });
     }
   });

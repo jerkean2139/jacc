@@ -55,102 +55,218 @@ class WebsiteScrapingService {
       throw new Error(`Invalid URL format: ${url}`);
     }
     
-    let browser;
+    // Skip Puppeteer and use HTTP-only approach for better reliability
     try {
-      // Launch Puppeteer browser
-      console.log('🚀 Launching Puppeteer browser...');
-      browser = await puppeteer.launch({
-        headless: true,
-        args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-accelerated-2d-canvas',
-          '--no-first-run',
-          '--no-zygote',
-          '--single-process',
-          '--disable-gpu'
-        ]
+      console.log('🚀 Using HTTP-only scraping approach...');
+      return await this.fallbackScrape(url);
+    } catch (httpError: any) {
+      console.error('❌ HTTP scraping failed, attempting Puppeteer fallback:', httpError);
+      
+      // Only try Puppeteer as last resort
+      let browser;
+      try {
+        console.log('🔄 Attempting Puppeteer as fallback...');
+        browser = await puppeteer.launch({
+          headless: true,
+          args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-accelerated-2d-canvas',
+            '--no-first-run',
+            '--no-zygote',
+            '--single-process',
+            '--disable-gpu'
+          ]
+        });
+        console.log('✅ Browser launched successfully');
+
+        const page = await browser.newPage();
+        
+        // Set user agent to avoid blocking
+        await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
+        
+        // Navigate to the URL with timeout
+        console.log('🌐 Navigating to URL...');
+        await page.goto(url, { 
+          waitUntil: 'networkidle2', 
+          timeout: 30000 
+        });
+        console.log('✅ Page loaded successfully');
+
+        // Wait for content to load
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        // Extract HTML content
+        console.log('📄 Extracting HTML content...');
+        const htmlContent = await page.content();
+        console.log('✅ HTML content extracted, length:', htmlContent.length);
+        
+        // Parse with Cheerio
+        const $ = cheerio.load(htmlContent);
+        
+        // Extract title
+        const title = $('title').text().trim() || 
+                     $('h1').first().text().trim() || 
+                     'Scraped Website Content';
+
+        // Remove unwanted elements
+        $('script, style, nav, header, footer, aside, .advertisement, .ads, .cookie-banner').remove();
+        
+        // Extract main content (try common content selectors)
+        let mainContent = '';
+        const contentSelectors = [
+          'main',
+          '[role="main"]',
+          '.main-content',
+          '.content',
+          '.article-content',
+          '.post-content',
+          'article',
+          '.entry-content',
+          '#content',
+          '.page-content'
+        ];
+
+        for (const selector of contentSelectors) {
+          const content = $(selector).html();
+          if (content && content.trim().length > mainContent.length) {
+            mainContent = content;
+          }
+        }
+
+        // Fallback to body content if no main content found
+        if (!mainContent || mainContent.trim().length < 500) {
+          mainContent = $('body').html() || '';
+        }
+
+        // Convert to text for processing
+        const textContent = $(mainContent).text().replace(/\s+/g, ' ').trim();
+        
+        // Convert HTML to Markdown
+        const markdownContent = this.turndownService.turndown(mainContent);
+        
+        // Calculate word count
+        const wordCount = textContent.split(/\s+/).filter(word => word.length > 0).length;
+
+        // Generate summary and bullet points using AI
+        console.log('🤖 Generating AI summary and bullet points...');
+        const { summary, bulletPoints } = await this.generateSummaryAndBulletPoints(textContent, title, url);
+        console.log('✅ AI summary generated successfully');
+
+        await browser.close();
+        console.log('🎉 Puppeteer scraping completed successfully');
+
+        const result = {
+          title,
+          content: textContent,
+          markdownContent,
+          summary,
+          bulletPoints,
+          sourceUrl: url,
+          scrapedAt: new Date().toISOString(),
+          wordCount
+        };
+
+        console.log('📊 Scraping results:', {
+          title: result.title.substring(0, 50) + '...',
+          contentLength: result.content.length,
+          markdownLength: result.markdownContent.length,
+          wordCount: result.wordCount,
+          bulletPointsCount: result.bulletPoints.length
+        });
+
+        return result;
+
+    } catch (error: any) {
+      if (browser) {
+        await browser.close();
+      }
+      
+      console.error('❌ Website scraping failed:', error);
+      console.error('❌ Error details:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
       });
-      console.log('✅ Browser launched successfully');
+      
+      // Fallback to simple HTTP request if Puppeteer fails
+      try {
+        console.log('🔄 Attempting fallback scraping method...');
+        return await this.fallbackScrape(url);
+      } catch (fallbackError: any) {
+        console.error('❌ Fallback scraping also failed:', fallbackError);
+        throw new Error(`Website scraping failed: ${error.message}. Fallback also failed: ${fallbackError.message}`);
+      }
+    }
+  }
 
-      const page = await browser.newPage();
+  private async fallbackScrape(url: string): Promise<ScrapedContent> {
+    console.log('🔄 Using fallback HTTP scraping method for:', url);
+    
+    try {
+      const axios = await import('axios');
       
-      // Set user agent to avoid blocking
-      await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
-      
-      // Navigate to the URL with timeout
-      console.log('🌐 Navigating to URL...');
-      await page.goto(url, { 
-        waitUntil: 'networkidle2', 
-        timeout: 30000 
+      const response = await axios.default.get(url, {
+        timeout: 15000,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        },
+        maxRedirects: 5,
+        validateStatus: (status) => status >= 200 && status < 400
       });
-      console.log('✅ Page loaded successfully');
 
-      // Wait for content to load
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      console.log('✅ HTTP request successful, response length:', response.data.length);
 
-      // Extract HTML content
-      console.log('📄 Extracting HTML content...');
-      const htmlContent = await page.content();
-      console.log('✅ HTML content extracted, length:', htmlContent.length);
-      
-      // Parse with Cheerio
-      const $ = cheerio.load(htmlContent);
+      const $ = cheerio.load(response.data);
       
       // Extract title
       const title = $('title').text().trim() || 
                    $('h1').first().text().trim() || 
-                   'Scraped Website Content';
-
+                   'Website Content';
+      
+      console.log('📄 Extracted title:', title);
+      
       // Remove unwanted elements
       $('script, style, nav, header, footer, aside, .advertisement, .ads, .cookie-banner').remove();
       
-      // Extract main content (try common content selectors)
+      // Try to find main content area
       let mainContent = '';
       const contentSelectors = [
-        'main',
-        '[role="main"]',
-        '.main-content',
-        '.content',
-        '.article-content',
-        '.post-content',
-        'article',
-        '.entry-content',
-        '#content',
-        '.page-content'
+        'main', 'article', '.content', '.main-content', 
+        '.article-content', '.post-content', '#content'
       ];
-
+      
       for (const selector of contentSelectors) {
         const content = $(selector).html();
         if (content && content.trim().length > mainContent.length) {
           mainContent = content;
         }
       }
-
-      // Fallback to body content if no main content found
-      if (!mainContent || mainContent.trim().length < 500) {
+      
+      // Fallback to body if no main content found
+      if (!mainContent || mainContent.trim().length < 200) {
         mainContent = $('body').html() || '';
       }
-
-      // Convert to text for processing
-      const textContent = $(mainContent).text().replace(/\s+/g, ' ').trim();
       
-      // Convert HTML to Markdown
+      // Extract text content
+      const textContent = $(mainContent).text().replace(/\s+/g, ' ').trim();
+      console.log('📝 Extracted text content length:', textContent.length);
+      
+      // Convert to markdown
       const markdownContent = this.turndownService.turndown(mainContent);
+      console.log('📋 Converted to markdown, length:', markdownContent.length);
       
       // Calculate word count
       const wordCount = textContent.split(/\s+/).filter(word => word.length > 0).length;
-
-      // Generate summary and bullet points using AI
-      console.log('🤖 Generating AI summary and bullet points...');
+      console.log('🔢 Word count:', wordCount);
+      
+      // Generate summary and bullet points
       const { summary, bulletPoints } = await this.generateSummaryAndBulletPoints(textContent, title, url);
-      console.log('✅ AI summary generated successfully');
 
-      await browser.close();
-      console.log('🎉 Website scraping completed successfully');
+      console.log('✅ Fallback scraping completed successfully');
 
-      const result = {
+      return {
         title,
         content: textContent,
         markdownContent,
@@ -160,73 +276,10 @@ class WebsiteScrapingService {
         scrapedAt: new Date().toISOString(),
         wordCount
       };
-
-      console.log('📊 Scraping results:', {
-        title: result.title.substring(0, 50) + '...',
-        contentLength: result.content.length,
-        markdownLength: result.markdownContent.length,
-        wordCount: result.wordCount,
-        bulletPointsCount: result.bulletPoints.length
-      });
-
-      return result;
-
     } catch (error: any) {
-      if (browser) {
-        await browser.close();
-      }
-      
-      console.error('Website scraping failed:', error);
-      
-      // Fallback to simple HTTP request if Puppeteer fails
-      try {
-        return await this.fallbackScrape(url);
-      } catch (fallbackError) {
-        throw new Error(`Failed to scrape website: ${error.message}`);
-      }
+      console.error('❌ Fallback scraping failed:', error);
+      throw new Error(`HTTP scraping failed: ${error.message}`);
     }
-  }
-
-  private async fallbackScrape(url: string): Promise<ScrapedContent> {
-    const axios = await import('axios');
-    
-    const response = await axios.default.get(url, {
-      timeout: 15000,
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-      }
-    });
-
-    const $ = cheerio.load(response.data);
-    
-    // Extract title
-    const title = $('title').text().trim() || 'Scraped Website Content';
-    
-    // Remove unwanted elements
-    $('script, style, nav, header, footer, aside').remove();
-    
-    // Extract text content
-    const textContent = $('body').text().replace(/\s+/g, ' ').trim();
-    
-    // Convert to markdown
-    const markdownContent = this.turndownService.turndown($('body').html() || '');
-    
-    // Calculate word count
-    const wordCount = textContent.split(/\s+/).filter(word => word.length > 0).length;
-    
-    // Generate summary and bullet points
-    const { summary, bulletPoints } = await this.generateSummaryAndBulletPoints(textContent, title, url);
-
-    return {
-      title,
-      content: textContent,
-      markdownContent,
-      summary,
-      bulletPoints,
-      sourceUrl: url,
-      scrapedAt: new Date().toISOString(),
-      wordCount
-    };
   }
 
   private async generateSummaryAndBulletPoints(content: string, title: string, url: string): Promise<{ summary: string; bulletPoints: string[] }> {
