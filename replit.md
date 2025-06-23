@@ -160,6 +160,7 @@ Changelog:
 - June 23, 2025. **TOP NAVIGATION REMOVED & SIDEBAR GUIDE RESTORED**: Removed entire top navigation bar from main interface to simplify UI design. Added Guide back to sidebar as active navigation link in AI Tools section without grayed-out styling. All navigation now consolidated in left sidebar for cleaner, more streamlined user experience. Interface focuses on core functionality with single navigation pattern.
 - June 23, 2025. **MERCHANT INSIGHTS DISABLED**: Added "Coming Soon" styling to Merchant Insights section in sidebar Business Intelligence area. Both ISO AMP and Merchant Insights now consistently display disabled state with hover tooltips. All future features maintain uniform visual treatment indicating development status.
 - June 23, 2025. **MOBILE CHAT INPUT POSITIONING FIXED**: Adjusted chat dialogue positioning to appear properly above bottom navigation bar in PWA mobile view. Added `pb-20` spacing for mobile while maintaining `md:pb-4` for desktop. Both welcome screen and active chat input areas now have proper clearance above bottom navigation.
+- June 23, 2025. **PWA BOTTOM NAVIGATION "COMING SOON" STYLING COMPLETED**: Applied consistent "Coming Soon" styling to future features in mobile bottom navigation bar. Calculator, Intelligence, and Analytics tabs now display as disabled with grayed-out appearance, "Soon" badges, and hover tooltips matching desktop sidebar design. All future features maintain uniform visual treatment across desktop and mobile interfaces.
 
 ## User Preferences
 

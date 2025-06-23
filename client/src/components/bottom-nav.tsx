@@ -20,6 +20,8 @@ interface NavItem {
   icon: React.ComponentType<{ className?: string }>;
   label: string;
   badge?: string;
+  disabled?: boolean;
+  comingSoon?: boolean;
 }
 
 const navItems: NavItem[] = [
@@ -31,7 +33,9 @@ const navItems: NavItem[] = [
   {
     href: "/calculator",
     icon: Calculator,
-    label: "Calculator"
+    label: "Calculator",
+    disabled: true,
+    comingSoon: true
   },
   {
     href: "/guide",
@@ -46,12 +50,16 @@ const navItems: NavItem[] = [
   {
     href: "/vendor-intelligence",
     icon: TrendingUp,
-    label: "Intelligence"
+    label: "Intelligence",
+    disabled: true,
+    comingSoon: true
   },
   {
     href: "/competitive-intelligence",
     icon: BarChart3,
-    label: "Analytics"
+    label: "Analytics",
+    disabled: true,
+    comingSoon: true
   },
   {
     href: "/admin",
@@ -78,6 +86,34 @@ export default function BottomNav() {
           {navItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.href);
+            const isDisabled = item.disabled || item.comingSoon;
+            
+            if (isDisabled) {
+              return (
+                <div key={item.href} className="relative group">
+                  <button
+                    className={cn(
+                      "flex flex-col items-center justify-center p-2 rounded-lg transition-colors relative",
+                      "min-w-[60px] h-12 cursor-not-allowed opacity-60"
+                    )}
+                    disabled
+                  >
+                    <Icon className="w-5 h-5 mb-0.5 text-gray-400" />
+                    <span className="text-xs font-medium text-gray-400">
+                      {item.label}
+                    </span>
+                    {item.comingSoon && (
+                      <span className="absolute -top-1 -right-1 bg-gray-100 text-gray-500 text-xs px-1 py-0.5 rounded text-[8px] font-medium">
+                        Soon
+                      </span>
+                    )}
+                  </button>
+                  <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+                    Coming Soon
+                  </span>
+                </div>
+              );
+            }
             
             return (
               <Link key={item.href} href={item.href}>
