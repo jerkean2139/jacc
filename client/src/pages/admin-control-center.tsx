@@ -2103,13 +2103,13 @@ function ThreeStepDocumentUpload({ foldersData, onUploadComplete }: {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
+    <div className="space-y-4 md:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex items-center space-x-2 md:space-x-4 overflow-x-auto">
           {[1, 2, 3].map((step) => (
-            <div key={step} className="flex items-center">
+            <div key={step} className="flex items-center flex-shrink-0">
               <div className={`
-                w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium
+                w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center text-xs md:text-sm font-medium
                 ${currentStep >= step 
                   ? 'bg-blue-600 text-white' 
                   : 'bg-gray-200 text-gray-600'
@@ -2119,31 +2119,31 @@ function ThreeStepDocumentUpload({ foldersData, onUploadComplete }: {
               </div>
               {step < 3 && (
                 <div className={`
-                  w-12 h-0.5 mx-2
+                  w-6 md:w-12 h-0.5 mx-1 md:mx-2
                   ${currentStep > step ? 'bg-blue-600' : 'bg-gray-200'}
                 `} />
               )}
             </div>
           ))}
         </div>
-        <Button variant="ghost" onClick={resetUpload} className="text-sm">
+        <Button variant="ghost" onClick={resetUpload} className="text-xs md:text-sm self-start sm:self-center">
           Reset
         </Button>
       </div>
 
-      <div className="grid grid-cols-3 gap-4 text-center">
-        <div className={currentStep >= 1 ? 'text-blue-600 font-medium' : 'text-gray-500'}>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 md:gap-4 text-center">
+        <div className={`text-xs md:text-sm ${currentStep >= 1 ? 'text-blue-600 font-medium' : 'text-gray-500'}`}>
           1. Select Files
         </div>
-        <div className={currentStep >= 2 ? 'text-blue-600 font-medium' : 'text-gray-500'}>
+        <div className={`text-xs md:text-sm ${currentStep >= 2 ? 'text-blue-600 font-medium' : 'text-gray-500'}`}>
           2. Choose Folder
         </div>
-        <div className={currentStep >= 3 ? 'text-blue-600 font-medium' : 'text-gray-500'}>
+        <div className={`text-xs md:text-sm ${currentStep >= 3 ? 'text-blue-600 font-medium' : 'text-gray-500'}`}>
           3. Set Permissions
         </div>
       </div>
 
-      <div className="border rounded-lg p-6">
+      <div className="border rounded-lg p-3 md:p-6">
         {currentStep === 1 && (
           <div className="space-y-6">
             {/* File Upload Section */}
@@ -2192,20 +2192,20 @@ function ThreeStepDocumentUpload({ foldersData, onUploadComplete }: {
         {currentStep === 2 && (
           <div className="space-y-4">
             <div>
-              <h3 className="text-lg font-medium mb-2">Selected Files ({selectedFiles.length})</h3>
-              <div className="space-y-2 mb-6">
+              <h3 className="text-base md:text-lg font-medium mb-2">Selected Files ({selectedFiles.length})</h3>
+              <div className="space-y-2 mb-4 md:mb-6 max-h-32 overflow-y-auto">
                 {selectedFiles.map((file, index) => (
-                  <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                    <span className="text-sm">{file.name}</span>
-                    <Badge variant="outline">{Math.round(file.size / 1024)}KB</Badge>
+                  <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded text-xs md:text-sm">
+                    <span className="truncate flex-1 mr-2">{file.name}</span>
+                    <Badge variant="outline" className="text-xs">{Math.round(file.size / 1024)}KB</Badge>
                   </div>
                 ))}
               </div>
             </div>
 
             <div>
-              <h3 className="text-lg font-medium mb-4">Choose Destination Folder</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <h3 className="text-base md:text-lg font-medium mb-3 md:mb-4">Choose Destination Folder</h3>
+              <div className="grid grid-cols-1 gap-3">
                 <div 
                   onClick={() => handleFolderSelect("")}
                   className={`
@@ -2813,31 +2813,35 @@ export default function AdminControlCenter() {
     Array.from(new Set(faqData.map((faq: FAQ) => faq.category))) : [];
 
   return (
-    <div className="container mx-auto p-6 max-w-7xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">Admin Control Center</h1>
-        <p className="text-muted-foreground mt-2">
+    <div className="container mx-auto p-3 md:p-6 max-w-7xl">
+      <div className="mb-4 md:mb-8">
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Admin Control Center</h1>
+        <p className="text-muted-foreground mt-2 text-sm md:text-base">
           Manage knowledge base, documents, AI prompts, and system training
         </p>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="qa-knowledge" className="flex items-center gap-2">
-            <HelpCircle className="h-4 w-4" />
-            Q&A Knowledge
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 md:space-y-6">
+        <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 h-auto p-1">
+          <TabsTrigger value="qa-knowledge" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm p-2 md:p-3">
+            <HelpCircle className="h-3 w-3 md:h-4 md:w-4" />
+            <span className="hidden sm:inline">Q&A Knowledge</span>
+            <span className="sm:hidden">Q&A</span>
           </TabsTrigger>
-          <TabsTrigger value="document-center" className="flex items-center gap-2">
-            <FileText className="h-4 w-4" />
-            Document Center
+          <TabsTrigger value="document-center" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm p-2 md:p-3">
+            <FileText className="h-3 w-3 md:h-4 md:w-4" />
+            <span className="hidden sm:inline">Document Center</span>
+            <span className="sm:hidden">Docs</span>
           </TabsTrigger>
-          <TabsTrigger value="chat-review" className="flex items-center gap-2">
-            <MessageSquare className="h-4 w-4" />
-            Chat Review & Training
+          <TabsTrigger value="chat-review" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm p-2 md:p-3">
+            <MessageSquare className="h-3 w-3 md:h-4 md:w-4" />
+            <span className="hidden sm:inline">Chat Review & Training</span>
+            <span className="sm:hidden">Chat</span>
           </TabsTrigger>
-          <TabsTrigger value="settings" className="flex items-center gap-2">
-            <Settings className="h-4 w-4" />
-            Settings
+          <TabsTrigger value="settings" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm p-2 md:p-3">
+            <Settings className="h-3 w-3 md:h-4 md:w-4" />
+            <span className="hidden sm:inline">Settings</span>
+            <span className="sm:hidden">Config</span>
           </TabsTrigger>
         </TabsList>
 
