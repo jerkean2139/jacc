@@ -413,11 +413,37 @@ export default function AdminControlCenter() {
       
       if (!response.ok) throw new Error('Failed to submit correction');
       
-      toast({ title: 'Training correction submitted successfully' });
+      toast({ title: 'Training correction submitted successfully', description: 'JACC memory has been updated with your correction' });
       setCorrectedResponse('');
       setShowCorrectInterface(false);
     } catch (error) {
       toast({ title: 'Failed to submit correction', variant: 'destructive' });
+    }
+  };
+
+  const handleMarkAsCorrect = async () => {
+    try {
+      const response = await fetch('/api/admin/ai-simulator/train', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: testQuery,
+          originalResponse: aiResponse,
+          feedback: 'Response marked as correct by admin',
+          wasCorrect: true
+        }),
+        credentials: 'include',
+      });
+      
+      if (!response.ok) throw new Error('Failed to mark as correct');
+      
+      toast({ 
+        title: 'Response approved successfully', 
+        description: 'JACC memory has been updated - this response quality is now learned' 
+      });
+      setShowCorrectInterface(false);
+    } catch (error) {
+      toast({ title: 'Failed to approve response', variant: 'destructive' });
     }
   };
 
@@ -1152,10 +1178,7 @@ export default function AdminControlCenter() {
                           </Button>
                           <Button
                             variant="outline"
-                            onClick={() => {
-                              setShowCorrectInterface(false);
-                              toast({ title: 'Response marked as correct' });
-                            }}
+                            onClick={handleMarkAsCorrect}
                           >
                             <ThumbsUp className="h-4 w-4 mr-1" />
                             Mark as Correct

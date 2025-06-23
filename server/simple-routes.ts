@@ -2412,15 +2412,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const query = originalQuery || req.body.query;
       const response = originalResponse || req.body.originalResponse;
       const correction = correctedResponse || req.body.correctedResponse;
+      const wasCorrect = req.body.wasCorrect;
       
       // Validate required fields
       if (!query) {
         return res.status(400).json({ error: 'Missing required field: query' });
       }
 
+      // Import unified learning system
+      const { unifiedLearningSystem } = await import('./unified-learning-system');
+
+      // If this is marking a response as correct
+      if (wasCorrect === true) {
+        await unifiedLearningSystem.captureInteraction({
+          query: query,
+          response: response || 'Response marked as correct',
+          source: 'admin_approval',
+          userId: user.id,
+          sessionId: sessionId,
+          wasCorrect: true,
+          metadata: {
+            adminFeedback: feedback || 'Response approved by admin',
+            approvalTimestamp: new Date().toISOString(),
+            trainingType: 'positive_reinforcement'
+          }
+        });
+
+        res.json({
+          success: true,
+          message: 'Response approved and stored for learning',
+          query,
+          timestamp: new Date().toISOString()
+        });
+      }
       // If correction is provided, capture training correction
-      if (correction) {
-        const { unifiedLearningSystem } = await import('./unified-learning-system');
+      else if (correction) {
         await unifiedLearningSystem.captureInteraction({
           query: query,
           response: response || 'No original response provided',
