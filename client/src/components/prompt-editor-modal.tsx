@@ -6,10 +6,10 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiRequest } from '@/lib/queryClient';
-import { Save, MessageSquare, Copy, X } from 'lucide-react';
+import { Save, MessageSquare, Copy, X, Edit } from 'lucide-react';
 
 interface PromptTemplate {
   id: string;
@@ -38,6 +38,8 @@ export default function PromptEditorModal({
   const [category, setCategory] = useState(template?.category || 'General');
   const [content, setContent] = useState(template?.content || '');
   const [isModified, setIsModified] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [templateEnabled, setTemplateEnabled] = useState(true);
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -220,67 +222,56 @@ export default function PromptEditorModal({
           <div className="flex items-center justify-between">
             <DialogTitle className="flex items-center gap-2">
               <MessageSquare className="w-5 h-5" />
-              {template ? 'Edit Prompt Template' : 'Create Prompt Template'}
+              {template?.title || 'Prompt Template'}
             </DialogTitle>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleClose}
-              className="h-6 w-6"
-            >
-              <X className="h-4 w-4" />
-            </Button>
+            <div className="flex items-center gap-2">
+              <div className="flex items-center space-x-2">
+                <Switch
+                  checked={templateEnabled}
+                  onCheckedChange={setTemplateEnabled}
+                  id="template-enabled"
+                />
+                <Label htmlFor="template-enabled" className="text-sm">
+                  Template Enabled
+                </Label>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleClose}
+                className="h-6 w-6"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </DialogHeader>
 
         <div className="flex-1 overflow-auto space-y-6">
-          {/* Prompt Metadata */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="prompt-title">Title</Label>
-              <Input
-                id="prompt-title"
-                value={title}
-                onChange={(e) => handleTitleChange(e.target.value)}
-                placeholder="Enter prompt title..."
-                className="w-full"
-              />
+          {/* Template Info */}
+          <div className="border rounded-lg p-4 bg-gray-50 dark:bg-gray-900">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="font-medium">{template?.title}</h3>
+              <Badge variant="outline">{template?.category}</Badge>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="prompt-category">Category</Label>
-              <Input
-                id="prompt-category"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                placeholder="e.g., Sales, Analysis, Support"
-                className="w-full"
-              />
-            </div>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              {template?.description}
+            </p>
           </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="prompt-description">Description</Label>
-            <Input
-              id="prompt-description"
-              value={description}
-              onChange={(e) => handleDescriptionChange(e.target.value)}
-              placeholder="Brief description of what this prompt does..."
-              className="w-full"
-            />
-          </div>
-
-          <Separator />
 
           {/* Prompt Content Editor */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label htmlFor="prompt-content">Prompt Content</Label>
               <div className="flex items-center gap-2">
-                {isModified && (
-                  <Badge variant="secondary" className="text-xs">
-                    Modified
-                  </Badge>
-                )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsEditing(!isEditing)}
+                >
+                  <Edit className="w-3 h-3 mr-1" />
+                  {isEditing ? 'Preview' : 'Edit'}
+                </Button>
                 <Button
                   variant="outline"
                   size="sm"
@@ -292,14 +283,21 @@ export default function PromptEditorModal({
                 </Button>
               </div>
             </div>
-            <Textarea
-              id="prompt-content"
-              value={content}
-              onChange={(e) => handleContentChange(e.target.value)}
-              placeholder="Enter your prompt content here. You can use variables like {merchant_name} or {business_type} for dynamic content..."
-              className="min-h-[300px] font-mono text-sm"
-              style={{ resize: 'vertical' }}
-            />
+            
+            {isEditing ? (
+              <Textarea
+                id="prompt-content"
+                value={content}
+                onChange={(e) => handleContentChange(e.target.value)}
+                className="min-h-[300px] font-mono text-sm border-2 border-blue-200 dark:border-blue-800"
+                style={{ resize: 'vertical' }}
+              />
+            ) : (
+              <div className="min-h-[300px] p-4 border rounded-lg bg-white dark:bg-gray-800 font-mono text-sm whitespace-pre-wrap">
+                {content || 'No content available'}
+              </div>
+            )}
+            
             <p className="text-xs text-muted-foreground">
               Tip: Use curly braces for variables like {"{merchant_name}"} or {"{business_type}"}
             </p>
@@ -329,34 +327,23 @@ export default function PromptEditorModal({
             >
               Cancel
             </Button>
+          </div>
+          <div className="flex gap-2">
             <Button
               variant="outline"
+              onClick={() => setIsEditing(!isEditing)}
+              className="flex items-center gap-2"
+            >
+              <Edit className="w-4 h-4" />
+              {isEditing ? 'Preview' : 'Edit'}
+            </Button>
+            <Button
               onClick={handleSave}
-              disabled={!title.trim() || !content.trim() || savePromptMutation.isPending}
+              disabled={!content.trim() || savePromptMutation.isPending}
               className="flex items-center gap-2"
             >
               <Save className="w-4 h-4" />
               Save
-            </Button>
-          </div>
-          <div className="flex gap-2">
-            <Button
-              variant="secondary"
-              onClick={handleUseOnly}
-              disabled={!content.trim() || startChatMutation.isPending}
-              className="flex items-center gap-2"
-            >
-              <MessageSquare className="w-4 h-4" />
-              Use Only
-            </Button>
-            <Button
-              onClick={handleSaveAndUse}
-              disabled={!content.trim() || savePromptMutation.isPending || startChatMutation.isPending}
-              className="flex items-center gap-2"
-            >
-              <Save className="w-4 h-4" />
-              <MessageSquare className="w-4 h-4" />
-              Save & Use
             </Button>
           </div>
         </DialogFooter>

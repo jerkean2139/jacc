@@ -216,11 +216,14 @@ export default function Sidebar({
                       AI Training
                     </a>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <a href="/learning" className="flex items-center">
+                  <DropdownMenuItem disabled className="relative">
+                    <div className="flex items-center opacity-50">
                       <TrendingUp className="w-4 h-4 mr-2" />
                       Learning Path
-                    </a>
+                    </div>
+                    <span className="absolute right-2 text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded">
+                      Coming Soon
+                    </span>
                   </DropdownMenuItem>
                 </>
               )}

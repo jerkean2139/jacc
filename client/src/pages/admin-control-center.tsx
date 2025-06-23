@@ -712,6 +712,8 @@ function ChatReviewCenter() {
 function ComprehensiveSettingsInterface() {
   const [activeSettingsTab, setActiveSettingsTab] = useState("ai-search");
   const [activeSubTab, setActiveSubTab] = useState("configuration");
+  const [showPromptEditor, setShowPromptEditor] = useState(false);
+  const [selectedPromptTemplate, setSelectedPromptTemplate] = useState<any>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
