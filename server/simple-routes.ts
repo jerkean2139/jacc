@@ -1460,15 +1460,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`Found ${userChatInteractions.length} user_chat interactions`);
       
-      // Group by query+response combination to find duplicates
-      const seen = new Map();
+      // Enhanced cleanup: Remove dev/admin testing entries and duplicates
       const duplicateIds = [];
+      const seen = new Map();
       
       for (const interaction of userChatInteractions) {
+        // Check for dev/admin testing patterns and unknown user entries
+        const isDevTest = interaction.userId === 'admin-user' || 
+                         interaction.userId === 'dev-user' ||
+                         interaction.userId === 'unknown' ||
+                         interaction.query?.toLowerCase().includes('test') ||
+                         interaction.response?.toLowerCase().includes('testing') ||
+                         (interaction.metadata && interaction.metadata.isTest === true);
+        
+        // Check for duplicates based on query+response combination
         const key = `${interaction.query}|||${interaction.response}`;
-        if (seen.has(key)) {
+        const isDuplicate = seen.has(key);
+        
+        if (isDevTest || isDuplicate) {
           duplicateIds.push(interaction.id);
-          console.log(`Duplicate found: ${interaction.id} (User: ${interaction.userId})`);
+          console.log(`Removing ${isDevTest ? 'dev/admin test' : 'duplicate'} entry: ${interaction.id} (User: ${interaction.userId})`);
         } else {
           seen.set(key, interaction);
         }
@@ -1496,7 +1507,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           success: true,
           duplicatesRemoved: duplicateIds.length,
           remainingUserChats: remainingCount[0]?.count || 0,
-          message: `Cleaned up ${duplicateIds.length} duplicate user chat interactions while preserving user tracking`
+          message: `Cleaned up ${duplicateIds.length} dev/admin test entries and duplicates while preserving user tracking`
         });
       } else {
         res.json({
