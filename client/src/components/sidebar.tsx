@@ -524,7 +524,7 @@ export default function Sidebar({
               <span className="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-full ml-auto">Coming Soon</span>
             </div>
             <a 
-              href="/user-guide" 
+              href="/guide" 
               className="flex items-center space-x-3 p-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg cursor-pointer transition-colors"
             >
               <FileText className="w-4 h-4 text-blue-500" />
