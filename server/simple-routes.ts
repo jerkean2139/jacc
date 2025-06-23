@@ -2307,7 +2307,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // AI Simulator Test Query Endpoint
   app.post('/api/admin/ai-simulator/test', async (req: Request, res: Response) => {
     try {
-      const { query } = req.body;
+      const { query, saveToHistory = true } = req.body;
       const sessionId = req.cookies?.sessionId;
       const user = sessions.get(sessionId);
       
@@ -2322,6 +2322,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
         [],
         user.id
       );
+
+      // Save to chat history if requested (default: true)
+      if (saveToHistory) {
+        try {
+          const { v4: uuidv4 } = require('uuid');
+          const chatId = uuidv4();
+          const now = new Date();
+          
+          console.log('Saving test conversation to chat history:', { chatId, userId: user.id, query: query.substring(0, 50) });
+          
+          // Create chat record
+          await db.insert(chats).values({
+            id: chatId,
+            userId: user.id,
+            title: query.length > 50 ? query.substring(0, 47) + '...' : query,
+            createdAt: now,
+            updatedAt: now
+          });
+
+          // Create user message
+          await db.insert(messages).values({
+            id: uuidv4(),
+            chatId: chatId,
+            role: 'user',
+            content: query,
+            createdAt: now
+          });
+
+          // Create AI response message
+          await db.insert(messages).values({
+            id: uuidv4(),
+            chatId: chatId,
+            role: 'assistant',
+            content: aiResponse.message,
+            createdAt: new Date(now.getTime() + 1000) // 1 second later
+          });
+          
+          console.log('✅ Test conversation saved to chat history successfully');
+        } catch (saveError) {
+          console.error('❌ Error saving test conversation to chat history:', saveError);
+        }
+      }
 
       // Capture interaction for unified learning system
       const { unifiedLearningSystem } = await import('./unified-learning-system');
@@ -2344,7 +2386,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sources: aiResponse.sources || [],
         reasoning: aiResponse.reasoning || 'No specific reasoning available',
         timestamp: new Date().toISOString(),
-        testMode: true
+        testMode: true,
+        savedToHistory: saveToHistory
       });
     } catch (error) {
       console.error('AI Simulator test error:', error);

@@ -1083,6 +1083,23 @@ export default function AdminControlCenter() {
                       Test AI
                     </Button>
                   </div>
+                  
+                  {/* Save to History Option */}
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="saveToHistory"
+                      checked={true}
+                      onChange={(e) => {
+                        // Store preference in component state if needed
+                        console.log('Save to history:', e.target.checked);
+                      }}
+                      className="rounded border-gray-300"
+                    />
+                    <label htmlFor="saveToHistory" className="text-sm text-gray-600">
+                      Save test conversation to chat history
+                    </label>
+                  </div>
                 </div>
 
                 {/* AI Response */}
