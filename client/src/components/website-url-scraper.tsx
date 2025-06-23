@@ -58,7 +58,7 @@ export default function WebsiteURLScraper({ onScrapeComplete }: WebsiteURLScrape
 
     // Basic URL validation
     try {
-      new URL(url);
+      new URL(formattedUrl);
     } catch {
       toast({
         title: "Invalid URL",
@@ -76,7 +76,7 @@ export default function WebsiteURLScraper({ onScrapeComplete }: WebsiteURLScrape
           'Content-Type': 'application/json',
         },
         credentials: 'include',
-        body: JSON.stringify({ url }),
+        body: JSON.stringify({ url: formattedUrl }),
       });
 
       if (!response.ok) {
