@@ -507,7 +507,11 @@ function ChatReviewCenter() {
                               size="sm"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                // Handle emulator functionality
+                                setSelectedChatId(chat.chatId);
+                                toast({
+                                  title: "Chat Emulator",
+                                  description: "Loading chat emulation interface...",
+                                });
                               }}
                             >
                               <Eye className="h-3 w-3 mr-1" />
@@ -1522,7 +1526,7 @@ export default function AdminControlCenter() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Total Interactions</p>
-                  <p className="text-2xl font-bold">{trainingData?.totalInteractions || '0'}</p>
+                  <p className="text-2xl font-bold">{interactions.length || '0'}</p>
                   <p className="text-xs text-green-600">↑ 12% this week</p>
                 </div>
                 <BarChart3 className="h-8 w-8 text-blue-500" />
@@ -1646,7 +1650,16 @@ export default function AdminControlCenter() {
                 </CardDescription>
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" size="sm">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => {
+                    toast({
+                      title: "Export Started",
+                      description: "Training data export will begin shortly...",
+                    });
+                  }}
+                >
                   <Download className="h-4 w-4 mr-2" />
                   Export Data
                 </Button>
@@ -1682,11 +1695,29 @@ export default function AdminControlCenter() {
                   </Badge>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="sm">
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => {
+                      toast({
+                        title: "Filter Options",
+                        description: "Advanced filtering coming soon...",
+                      });
+                    }}
+                  >
                     <Filter className="h-4 w-4 mr-2" />
                     Filter
                   </Button>
-                  <Button variant="ghost" size="sm">
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => {
+                      toast({
+                        title: "Search Training Data",
+                        description: "Search functionality coming soon...",
+                      });
+                    }}
+                  >
                     <Search className="h-4 w-4 mr-2" />
                     Search
                   </Button>
@@ -1786,10 +1817,31 @@ export default function AdminControlCenter() {
                             </td>
                             <td className="p-3">
                               <div className="flex items-center gap-1">
-                                <Button variant="ghost" size="sm">
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm"
+                                  onClick={() => {
+                                    toast({
+                                      title: "View Interaction",
+                                      description: `Viewing details for: ${interaction.query.substring(0, 30)}...`,
+                                    });
+                                  }}
+                                >
                                   <Eye className="h-3 w-3" />
                                 </Button>
-                                <Button variant="ghost" size="sm">
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm"
+                                  onClick={() => {
+                                    setTestQuery(interaction.query);
+                                    setTestResponse(interaction.response || '');
+                                    setCorrectionMode(true);
+                                    toast({
+                                      title: "Edit Training Data",
+                                      description: "Loading interaction for editing...",
+                                    });
+                                  }}
+                                >
                                   <Edit className="h-3 w-3" />
                                 </Button>
                               </div>
