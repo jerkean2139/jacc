@@ -2566,16 +2566,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const chatId = randomUUID();
           const now = new Date();
           
-          console.log('Saving test conversation to chat history:', { chatId, userId: 'admin-user-id', query: query.substring(0, 50) });
+          console.log('Saving test conversation to chat history:', { chatId, userId: user.id, query: query.substring(0, 50) });
           
           // Generate proper title using AI service
           const { generateTitle } = await import('./openai');
-          const chatTitle = await generateTitle(query);
+          let chatTitle;
+          try {
+            chatTitle = await generateTitle(query);
+            console.log('✅ Generated chat title:', chatTitle);
+          } catch (titleError) {
+            console.error('❌ Title generation failed:', titleError);
+            // Fallback to a meaningful title based on query content
+            chatTitle = query.length > 50 ? 
+              query.substring(0, 47).trim() + '...' : 
+              query.trim() || 'AI Test Query';
+          }
           
           // Create test chat and messages directly using storage methods
           await storage.createChat({
             id: chatId,
-            userId: 'admin-user-id', // Use correct admin user ID from database
+            userId: user.id, // Use the actual logged-in user's ID
             title: chatTitle,
             createdAt: now,
             updatedAt: now
