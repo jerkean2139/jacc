@@ -45,7 +45,8 @@ import {
   Database,
   Activity,
   RefreshCw,
-  FolderOpen
+  FolderOpen,
+  Save
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 // import DocumentPreviewModal from "@/components/ui/document-preview-modal";
@@ -832,7 +833,7 @@ function ComprehensiveSettingsInterface() {
             Reset to Defaults
           </Button>
           <Button>
-            <Save className="h-4 w-4 mr-2" />
+            <CheckCircle className="h-4 w-4 mr-2" />
             Save Settings
           </Button>
         </div>
