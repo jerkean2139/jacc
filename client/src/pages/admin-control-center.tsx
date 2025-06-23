@@ -21,6 +21,7 @@ import { DraggableDocument } from '@/components/draggable-document';
 import { DroppableFolder } from '@/components/droppable-folder';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
+import { SettingsManager } from '@/components/settings-manager';
 
 interface DocumentEntry {
   id: string;
@@ -1682,105 +1683,27 @@ export default function AdminControlCenter() {
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-6">
-          {/* AI & Search Configuration */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Bot className="h-5 w-5" />
-                AI & Search Configuration
-              </CardTitle>
-              <CardDescription>
-                Configure AI model preferences and search behavior
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="ai-model">Primary AI Model</Label>
-                    <Select defaultValue="claude-sonnet">
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="claude-sonnet">Claude 4.0 Sonnet (Recommended)</SelectItem>
-                        <SelectItem value="gpt-4o">GPT-4o (Fallback)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="response-length">Response Style</Label>
-                    <Select defaultValue="professional">
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="concise">Concise & Direct</SelectItem>
-                        <SelectItem value="professional">Professional & Detailed</SelectItem>
-                        <SelectItem value="comprehensive">Comprehensive & Educational</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="search-threshold">Document Search Sensitivity</Label>
-                    <div className="flex items-center space-x-4">
-                      <span className="text-sm text-gray-500">Loose</span>
-                      <input
-                        type="range"
-                        min="0.3"
-                        max="0.9"
-                        step="0.1"
-                        defaultValue="0.7"
-                        className="flex-1"
-                      />
-                      <span className="text-sm text-gray-500">Strict</span>
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Current: 0.7 (Balanced precision vs recall)
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="space-y-4">
-                  <div>
-                    <Label>Search Priority Order</Label>
-                    <div className="space-y-2 mt-2">
-                      <div className="flex items-center justify-between p-3 border rounded-lg bg-blue-50">
-                        <span className="text-sm font-medium">1. FAQ Knowledge Base</span>
-                        <Badge variant="outline">Active</Badge>
-                      </div>
-                      <div className="flex items-center justify-between p-3 border rounded-lg bg-green-50">
-                        <span className="text-sm font-medium">2. Document Center</span>
-                        <Badge variant="outline">Active</Badge>
-                      </div>
-                      <div className="flex items-center justify-between p-3 border rounded-lg bg-yellow-50">
-                        <span className="text-sm font-medium">3. Web Search Fallback</span>
-                        <Badge variant="outline">Active</Badge>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <input type="checkbox" id="web-search" defaultChecked />
-                    <Label htmlFor="web-search" className="text-sm">
-                      Enable web search when no internal results found
-                    </Label>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <input type="checkbox" id="source-attribution" defaultChecked />
-                    <Label htmlFor="source-attribution" className="text-sm">
-                      Always include source attribution in responses
-                    </Label>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <SettingsManager />
+        </TabsContent>
+      </Tabs>
 
-          {/* User Management */}
+      {/* Document Preview Modal */}
+      {showPreviewModal && previewDocument && (
+        <DocumentPreviewModal
+          document={previewDocument}
+          isOpen={showPreviewModal}
+          onClose={() => setShowPreviewModal(false)}
+        />
+      )}
+
+      {/* Document Placement Dialog */}
+      <DocumentPlacementDialog
+        isOpen={showPlacementDialog}
+        onClose={() => setShowPlacementDialog(false)}
+        onSave={handleDocumentPlacement}
+        folders={foldersData || []}
+        documents={documentsToPlace}
+      />
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
