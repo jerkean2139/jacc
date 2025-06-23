@@ -47,7 +47,10 @@ import {
   Activity,
   RefreshCw,
   FolderOpen,
-  Save
+  Save,
+  File,
+  FileImage,
+  FileSpreadsheet
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 // import DocumentPreviewModal from "@/components/ui/document-preview-modal";
@@ -708,6 +711,84 @@ function ChatReviewCenter() {
 function ComprehensiveSettingsInterface() {
   const [activeSettingsTab, setActiveSettingsTab] = useState("ai-search");
   const [activeSubTab, setActiveSubTab] = useState("configuration");
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Fetch settings data
+  const { data: settingsData, isLoading: settingsLoading } = useQuery({
+    queryKey: ['/api/admin/settings'],
+    queryFn: () => apiRequest('/api/admin/settings')
+  });
+
+  // Fetch performance metrics
+  const { data: performanceData, isLoading: performanceLoading } = useQuery({
+    queryKey: ['/api/admin/performance'],
+    queryFn: () => apiRequest('/api/admin/performance'),
+    refetchInterval: 30000 // Refresh every 30 seconds
+  });
+
+  // Fetch active sessions
+  const { data: sessionsData, isLoading: sessionsLoading } = useQuery({
+    queryKey: ['/api/admin/sessions'],
+    queryFn: () => apiRequest('/api/admin/sessions'),
+    refetchInterval: 60000 // Refresh every minute
+  });
+
+  // Save settings mutation
+  const saveSettingsMutation = useMutation({
+    mutationFn: async ({ category, subcategory, settings }: { category: string, subcategory: string, settings: any }) => {
+      return apiRequest(`/api/admin/settings/${category}/${subcategory}`, {
+        method: 'PUT',
+        body: { settings }
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/settings'] });
+      toast({
+        title: "Settings Saved",
+        description: "Your settings have been saved successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Save Failed",
+        description: "Failed to save settings. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // End session mutation
+  const endSessionMutation = useMutation({
+    mutationFn: (sessionId: string) => {
+      return apiRequest(`/api/admin/sessions/${sessionId}`, {
+        method: 'DELETE'
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/sessions'] });
+      toast({
+        title: "Session Ended",
+        description: "User session has been terminated successfully.",
+      });
+    }
+  });
+
+  // Clear cache mutation
+  const clearCacheMutation = useMutation({
+    mutationFn: () => {
+      return apiRequest('/api/admin/cache/clear', {
+        method: 'POST'
+      });
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/performance'] });
+      toast({
+        title: "Cache Cleared",
+        description: `Cleared ${data.clearedItems} items (${data.clearedSize} MB)`,
+      });
+    }
+  });
 
   // Main settings categories for the first navigation bar
   const mainCategories = [
@@ -955,6 +1036,643 @@ function ComprehensiveSettingsInterface() {
           </div>
         );
 
+      // User Management - Sessions
+      case "user-management-sessions":
+        return (
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-lg font-medium mb-4">Session Configuration</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Session Timeout</label>
+                  <select className="w-full p-2 border rounded-lg">
+                    <option>30 minutes</option>
+                    <option>1 hour</option>
+                    <option>2 hours</option>
+                    <option>4 hours</option>
+                    <option>8 hours</option>
+                    <option>24 hours</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Remember Me Duration</label>
+                  <select className="w-full p-2 border rounded-lg">
+                    <option>7 days</option>
+                    <option>14 days</option>
+                    <option>30 days</option>
+                    <option>90 days</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-medium mb-4">Active Sessions</h3>
+              <div className="border rounded-lg">
+                <div className="p-4 bg-gray-50 border-b">
+                  <h4 className="font-medium">
+                    Current Active Sessions: {sessionsData?.sessions?.length || 0}
+                  </h4>
+                </div>
+                {sessionsLoading ? (
+                  <div className="p-8 text-center text-gray-500">Loading sessions...</div>
+                ) : (
+                  <div className="divide-y">
+                    {sessionsData?.sessions?.map((session: any, index: number) => (
+                      <div key={session.sessionId} className="p-4 flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">{session.email}</p>
+                          <p className="text-sm text-gray-500">
+                            {session.userAgent?.split(' ')[0] || 'Unknown'} • {session.ipAddress}
+                          </p>
+                          <p className="text-xs text-gray-400">
+                            Started {new Date(session.createdAt).toLocaleString()}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant={session.status === 'active' ? 'secondary' : 'outline'}>
+                            {session.status === 'active' ? 'Active' : 'Inactive'}
+                          </Badge>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => endSessionMutation.mutate(session.sessionId)}
+                            disabled={endSessionMutation.isPending}
+                          >
+                            End Session
+                          </Button>
+                        </div>
+                      </div>
+                    )) || (
+                      <div className="p-8 text-center text-gray-500">No active sessions</div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-medium mb-4">Security Settings</h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">Force logout on IP change</p>
+                    <p className="text-sm text-gray-500">Automatically end sessions when IP address changes</p>
+                  </div>
+                  <input type="checkbox" className="rounded" defaultChecked />
+                </div>
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">Concurrent session limit</p>
+                    <p className="text-sm text-gray-500">Maximum number of active sessions per user</p>
+                  </div>
+                  <select className="p-2 border rounded">
+                    <option>3</option>
+                    <option>5</option>
+                    <option>10</option>
+                    <option>Unlimited</option>
+                  </select>
+                </div>
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">Session activity logging</p>
+                    <p className="text-sm text-gray-500">Log all session creation and termination events</p>
+                  </div>
+                  <input type="checkbox" className="rounded" defaultChecked />
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      // User Management - Notifications
+      case "user-management-notifications":
+        return (
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-lg font-medium mb-4">Email Notifications</h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">Welcome emails</p>
+                    <p className="text-sm text-gray-500">Send welcome email to new users</p>
+                  </div>
+                  <input type="checkbox" className="rounded" defaultChecked />
+                </div>
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">Login streak notifications</p>
+                    <p className="text-sm text-gray-500">Notify users about streak milestones</p>
+                  </div>
+                  <input type="checkbox" className="rounded" defaultChecked />
+                </div>
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">Achievement notifications</p>
+                    <p className="text-sm text-gray-500">Email users when they earn achievements</p>
+                  </div>
+                  <input type="checkbox" className="rounded" defaultChecked />
+                </div>
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">Weekly activity reports</p>
+                    <p className="text-sm text-gray-500">Send weekly summary to managers</p>
+                  </div>
+                  <input type="checkbox" className="rounded" defaultChecked />
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-medium mb-4">Push Notifications</h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">Browser notifications</p>
+                    <p className="text-sm text-gray-500">Enable browser push notifications</p>
+                  </div>
+                  <input type="checkbox" className="rounded" />
+                </div>
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">Mobile app notifications</p>
+                    <p className="text-sm text-gray-500">Send notifications to mobile app</p>
+                  </div>
+                  <input type="checkbox" className="rounded" />
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-medium mb-4">Notification Templates</h3>
+              <div className="space-y-3">
+                <div className="border rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-medium">Welcome Email Template</h4>
+                    <Button variant="outline" size="sm">
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit
+                    </Button>
+                  </div>
+                  <p className="text-sm text-gray-600">Subject: Welcome to JACC - Your AI Assistant is Ready!</p>
+                </div>
+                <div className="border rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-medium">Streak Milestone Template</h4>
+                    <Button variant="outline" size="sm">
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit
+                    </Button>
+                  </div>
+                  <p className="text-sm text-gray-600">Subject: Congratulations! You've reached a milestone day streak!</p>
+                </div>
+                <div className="border rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-medium">Inactive User Reminder</h4>
+                    <Button variant="outline" size="sm">
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit
+                    </Button>
+                  </div>
+                  <p className="text-sm text-gray-600">Subject: We miss you! Come back to JACC</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      // Content Processing - OCR Settings
+      case "content-processing-ocr":
+        return (
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-lg font-medium mb-4">OCR Configuration</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">OCR Quality Level</label>
+                  <select className="w-full p-2 border rounded-lg">
+                    <option>Fast (Basic quality)</option>
+                    <option>Balanced (Good quality)</option>
+                    <option>High (Best quality)</option>
+                    <option>Maximum (Slowest, highest accuracy)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Language Detection</label>
+                  <select className="w-full p-2 border rounded-lg">
+                    <option>Auto-detect</option>
+                    <option>English only</option>
+                    <option>English + Spanish</option>
+                    <option>Multi-language</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-medium mb-4">Processing Options</h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">Auto-rotate images</p>
+                    <p className="text-sm text-gray-500">Automatically detect and correct image orientation</p>
+                  </div>
+                  <input type="checkbox" className="rounded" defaultChecked />
+                </div>
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">Enhance low-quality images</p>
+                    <p className="text-sm text-gray-500">Apply image enhancement for better OCR results</p>
+                  </div>
+                  <input type="checkbox" className="rounded" defaultChecked />
+                </div>
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">Extract tables</p>
+                    <p className="text-sm text-gray-500">Detect and extract table structures</p>
+                  </div>
+                  <input type="checkbox" className="rounded" />
+                </div>
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">Preserve formatting</p>
+                    <p className="text-sm text-gray-500">Maintain original document formatting when possible</p>
+                  </div>
+                  <input type="checkbox" className="rounded" defaultChecked />
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-medium mb-4">Supported File Types</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div className="p-3 border rounded-lg text-center">
+                  <FileText className="h-6 w-6 mx-auto mb-2 text-blue-500" />
+                  <p className="text-sm font-medium">PDF</p>
+                  <p className="text-xs text-gray-500">Enabled</p>
+                </div>
+                <div className="p-3 border rounded-lg text-center">
+                  <FileImage className="h-6 w-6 mx-auto mb-2 text-green-500" />
+                  <p className="text-sm font-medium">Images</p>
+                  <p className="text-xs text-gray-500">JPG, PNG, TIFF</p>
+                </div>
+                <div className="p-3 border rounded-lg text-center">
+                  <FileSpreadsheet className="h-6 w-6 mx-auto mb-2 text-orange-500" />
+                  <p className="text-sm font-medium">Spreadsheets</p>
+                  <p className="text-xs text-gray-500">CSV, XLS, XLSX</p>
+                </div>
+                <div className="p-3 border rounded-lg text-center">
+                  <File className="h-6 w-6 mx-auto mb-2 text-purple-500" />
+                  <p className="text-sm font-medium">Documents</p>
+                  <p className="text-xs text-gray-500">DOC, DOCX, TXT</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      // Content Processing - Auto-Categorization
+      case "content-processing-categorization":
+        return (
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-lg font-medium mb-4">Auto-Categorization Settings</h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">Enable auto-categorization</p>
+                    <p className="text-sm text-gray-500">Automatically assign categories to uploaded documents</p>
+                  </div>
+                  <input type="checkbox" className="rounded" defaultChecked />
+                </div>
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">Confidence threshold</p>
+                    <p className="text-sm text-gray-500">Minimum confidence required for auto-assignment</p>
+                  </div>
+                  <select className="p-2 border rounded">
+                    <option>Low (60%)</option>
+                    <option>Medium (75%)</option>
+                    <option>High (85%)</option>
+                    <option>Very High (95%)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-medium mb-4">Category Rules</h3>
+              <div className="space-y-3">
+                <div className="border rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      <h4 className="font-medium">Payment Processing</h4>
+                      <p className="text-sm text-gray-500">Keywords: payment, processing, merchant, gateway</p>
+                    </div>
+                    <Button variant="outline" size="sm">
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit Rule
+                    </Button>
+                  </div>
+                  <div className="text-xs text-gray-400">Documents matched: 45 • Accuracy: 92%</div>
+                </div>
+                <div className="border rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      <h4 className="font-medium">Compliance</h4>
+                      <p className="text-sm text-gray-500">Keywords: compliance, regulation, PCI, security</p>
+                    </div>
+                    <Button variant="outline" size="sm">
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit Rule
+                    </Button>
+                  </div>
+                  <div className="text-xs text-gray-400">Documents matched: 23 • Accuracy: 88%</div>
+                </div>
+                <div className="border rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      <h4 className="font-medium">Sales Materials</h4>
+                      <p className="text-sm text-gray-500">Keywords: sales, proposal, rates, pricing</p>
+                    </div>
+                    <Button variant="outline" size="sm">
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit Rule
+                    </Button>
+                  </div>
+                  <div className="text-xs text-gray-400">Documents matched: 67 • Accuracy: 95%</div>
+                </div>
+              </div>
+              <Button variant="outline" className="w-full mt-4">
+                <Plus className="h-4 w-4 mr-2" />
+                Add New Category Rule
+              </Button>
+            </div>
+          </div>
+        );
+
+      // Content Processing - Retention Policies
+      case "content-processing-retention":
+        return (
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-lg font-medium mb-4">Document Retention Policies</h3>
+              <div className="space-y-4">
+                <div className="border rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-medium">Default Retention Period</h4>
+                    <select className="p-2 border rounded">
+                      <option>1 year</option>
+                      <option>2 years</option>
+                      <option>5 years</option>
+                      <option>7 years</option>
+                      <option>Indefinite</option>
+                    </select>
+                  </div>
+                  <p className="text-sm text-gray-600">Documents without specific policies will follow this default retention period</p>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-medium mb-4">Category-Specific Policies</h3>
+              <div className="space-y-3">
+                <div className="border rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-medium">Financial Records</h4>
+                      <p className="text-sm text-gray-500">Tax returns, bank statements, financial reports</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm font-medium">7 years</span>
+                      <Button variant="outline" size="sm">Edit</Button>
+                    </div>
+                  </div>
+                </div>
+                <div className="border rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-medium">Compliance Documents</h4>
+                      <p className="text-sm text-gray-500">PCI compliance, regulatory filings</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm font-medium">5 years</span>
+                      <Button variant="outline" size="sm">Edit</Button>
+                    </div>
+                  </div>
+                </div>
+                <div className="border rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-medium">Sales Materials</h4>
+                      <p className="text-sm text-gray-500">Proposals, rate sheets, marketing materials</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm font-medium">2 years</span>
+                      <Button variant="outline" size="sm">Edit</Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-medium mb-4">Cleanup Actions</h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">Automatic deletion</p>
+                    <p className="text-sm text-gray-500">Automatically delete documents when retention period expires</p>
+                  </div>
+                  <input type="checkbox" className="rounded" />
+                </div>
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">Archive before deletion</p>
+                    <p className="text-sm text-gray-500">Move to archive for 30 days before permanent deletion</p>
+                  </div>
+                  <input type="checkbox" className="rounded" defaultChecked />
+                </div>
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">Admin notification</p>
+                    <p className="text-sm text-gray-500">Notify administrators before deletion</p>
+                  </div>
+                  <input type="checkbox" className="rounded" defaultChecked />
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      // System Performance - Timeouts
+      case "system-performance-timeouts":
+        return (
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-lg font-medium mb-4">Request Timeouts</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">AI Response Timeout</label>
+                  <select className="w-full p-2 border rounded-lg">
+                    <option>30 seconds</option>
+                    <option>60 seconds</option>
+                    <option>90 seconds</option>
+                    <option>120 seconds</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Document Processing Timeout</label>
+                  <select className="w-full p-2 border rounded-lg">
+                    <option>2 minutes</option>
+                    <option>5 minutes</option>
+                    <option>10 minutes</option>
+                    <option>15 minutes</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Database Query Timeout</label>
+                  <select className="w-full p-2 border rounded-lg">
+                    <option>5 seconds</option>
+                    <option>10 seconds</option>
+                    <option>15 seconds</option>
+                    <option>30 seconds</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">File Upload Timeout</label>
+                  <select className="w-full p-2 border rounded-lg">
+                    <option>2 minutes</option>
+                    <option>5 minutes</option>
+                    <option>10 minutes</option>
+                    <option>20 minutes</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-medium mb-4">Retry Configuration</h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">Automatic retries</p>
+                    <p className="text-sm text-gray-500">Automatically retry failed requests</p>
+                  </div>
+                  <input type="checkbox" className="rounded" defaultChecked />
+                </div>
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">Maximum retry attempts</p>
+                    <p className="text-sm text-gray-500">Number of retry attempts before giving up</p>
+                  </div>
+                  <select className="p-2 border rounded">
+                    <option>1</option>
+                    <option>2</option>
+                    <option>3</option>
+                    <option>5</option>
+                  </select>
+                </div>
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">Retry delay</p>
+                    <p className="text-sm text-gray-500">Time to wait between retry attempts</p>
+                  </div>
+                  <select className="p-2 border rounded">
+                    <option>1 second</option>
+                    <option>2 seconds</option>
+                    <option>5 seconds</option>
+                    <option>10 seconds</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      // System Performance - Cache Settings
+      case "system-performance-cache":
+        return (
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-lg font-medium mb-4">Cache Configuration</h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">Enable response caching</p>
+                    <p className="text-sm text-gray-500">Cache AI responses for faster delivery</p>
+                  </div>
+                  <input type="checkbox" className="rounded" defaultChecked />
+                </div>
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">Cache duration</p>
+                    <p className="text-sm text-gray-500">How long to keep cached responses</p>
+                  </div>
+                  <select className="p-2 border rounded">
+                    <option>15 minutes</option>
+                    <option>30 minutes</option>
+                    <option>1 hour</option>
+                    <option>4 hours</option>
+                    <option>24 hours</option>
+                  </select>
+                </div>
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">Document cache size</p>
+                    <p className="text-sm text-gray-500">Maximum size for document cache</p>
+                  </div>
+                  <select className="p-2 border rounded">
+                    <option>100 MB</option>
+                    <option>250 MB</option>
+                    <option>500 MB</option>
+                    <option>1 GB</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-medium mb-4">Cache Statistics</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="border rounded-lg p-4">
+                  <div className="text-2xl font-bold text-green-600">89%</div>
+                  <div className="text-sm text-gray-600">Cache Hit Rate</div>
+                  <div className="text-xs text-gray-400">Last 24 hours</div>
+                </div>
+                <div className="border rounded-lg p-4">
+                  <div className="text-2xl font-bold text-blue-600">245 MB</div>
+                  <div className="text-sm text-gray-600">Cache Size</div>
+                  <div className="text-xs text-gray-400">49% of limit</div>
+                </div>
+                <div className="border rounded-lg p-4">
+                  <div className="text-2xl font-bold text-purple-600">1,247</div>
+                  <div className="text-sm text-gray-600">Cached Items</div>
+                  <div className="text-xs text-gray-400">Active entries</div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-medium mb-4">Cache Management</h3>
+              <div className="flex gap-3">
+                <Button variant="outline">
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Clear Cache
+                </Button>
+                <Button variant="outline">
+                  <Database className="h-4 w-4 mr-2" />
+                  Rebuild Index
+                </Button>
+                <Button variant="outline">
+                  <Download className="h-4 w-4 mr-2" />
+                  Export Stats
+                </Button>
+              </div>
+            </div>
+          </div>
+        );
+
       case "system-performance-monitoring":
         return (
           <div className="space-y-6">
@@ -1011,6 +1729,33 @@ function ComprehensiveSettingsInterface() {
                     <span>92%</span>
                   </div>
                   <Progress value={92} className="h-2" />
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-medium mb-4">Alert Configuration</h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">High memory usage alerts</p>
+                    <p className="text-sm text-gray-500">Alert when memory usage exceeds 80%</p>
+                  </div>
+                  <input type="checkbox" className="rounded" defaultChecked />
+                </div>
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">Slow response alerts</p>
+                    <p className="text-sm text-gray-500">Alert when response time exceeds 5 seconds</p>
+                  </div>
+                  <input type="checkbox" className="rounded" defaultChecked />
+                </div>
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">Error rate alerts</p>
+                    <p className="text-sm text-gray-500">Alert when error rate exceeds 5%</p>
+                  </div>
+                  <input type="checkbox" className="rounded" defaultChecked />
                 </div>
               </div>
             </div>
