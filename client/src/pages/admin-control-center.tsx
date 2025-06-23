@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import PromptEditorModal from "@/components/prompt-editor-modal";
+import WebsiteURLScraper from "@/components/website-url-scraper";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -2144,26 +2145,47 @@ function ThreeStepDocumentUpload({ foldersData, onUploadComplete }: {
 
       <div className="border rounded-lg p-6">
         {currentStep === 1 && (
-          <div className="text-center space-y-4">
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8">
-              <Upload className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium mb-2">Select Files to Upload</h3>
-              <p className="text-gray-500 mb-4">
-                Choose documents, PDFs, images, or other files to add to your knowledge base
-              </p>
-              <input
-                ref={fileInputRef}
-                type="file"
-                multiple
-                onChange={handleFileSelect}
-                className="hidden"
-                accept=".pdf,.doc,.docx,.txt,.csv,.jpg,.jpeg,.png"
-              />
-              <Button onClick={() => fileInputRef.current?.click()}>
-                <Upload className="h-4 w-4 mr-2" />
-                Choose Files
-              </Button>
+          <div className="space-y-6">
+            {/* File Upload Section */}
+            <div className="text-center space-y-4">
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8">
+                <Upload className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                <h3 className="text-lg font-medium mb-2">Upload Files</h3>
+                <p className="text-gray-500 mb-4">
+                  Choose documents, PDFs, images, or other files to add to your knowledge base
+                </p>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  onChange={handleFileSelect}
+                  className="hidden"
+                  accept=".pdf,.doc,.docx,.txt,.csv,.jpg,.jpeg,.png"
+                />
+                <Button onClick={() => fileInputRef.current?.click()}>
+                  <Upload className="h-4 w-4 mr-2" />
+                  Choose Files
+                </Button>
+              </div>
             </div>
+
+            {/* Divider */}
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-white px-2 text-muted-foreground">Or</span>
+              </div>
+            </div>
+
+            {/* URL Scraping Section */}
+            <WebsiteURLScraper onScrapeComplete={(files: File[]) => {
+              setSelectedFiles(files);
+              if (files.length > 0) {
+                setCurrentStep(2);
+              }
+            }} />
           </div>
         )}
 
