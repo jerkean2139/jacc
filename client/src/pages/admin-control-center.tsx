@@ -1483,6 +1483,9 @@ export default function AdminControlCenter() {
   const [previewDocument, setPreviewDocument] = useState<DocumentEntry | null>(null);
   const [showChatReviewModal, setShowChatReviewModal] = useState(false);
   const [showAddFAQModal, setShowAddFAQModal] = useState(false);
+  const [showCategoryManager, setShowCategoryManager] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [editingCategory, setEditingCategory] = useState<any>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -2265,18 +2268,35 @@ export default function AdminControlCenter() {
             </div>
             <div className="grid gap-2">
               <Label htmlFor="faq-category">Category</Label>
-              <Select>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="general">General</SelectItem>
-                  <SelectItem value="pricing">Pricing</SelectItem>
-                  <SelectItem value="technical">Technical</SelectItem>
-                  <SelectItem value="merchant-services">Merchant Services</SelectItem>
-                  <SelectItem value="compliance">Compliance</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="flex gap-2">
+                <Select>
+                  <SelectTrigger className="flex-1">
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.isArray(faqData) ? 
+                      Array.from(new Set(faqData.map((faq: FAQ) => faq.category))).map((category: string) => (
+                        <SelectItem key={category} value={category}>{category}</SelectItem>
+                      )) : 
+                      [
+                        <SelectItem key="general" value="general">General</SelectItem>,
+                        <SelectItem key="pricing" value="pricing">Pricing</SelectItem>,
+                        <SelectItem key="technical" value="technical">Technical</SelectItem>,
+                        <SelectItem key="merchant-services" value="merchant-services">Merchant Services</SelectItem>,
+                        <SelectItem key="compliance" value="compliance">Compliance</SelectItem>
+                      ]
+                    }
+                  </SelectContent>
+                </Select>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setShowCategoryManager(true)}
+                  className="px-3"
+                >
+                  <Settings className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
             <div className="flex items-center space-x-2">
               <Checkbox id="faq-active" defaultChecked={true} />
