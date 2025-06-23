@@ -482,9 +482,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/admin/documents', async (req: Request, res: Response) => {
     try {
       const { db } = await import('./db.ts');
-      const { documents } = await import('../shared/schema.ts');
+      const { documents, folders } = await import('../shared/schema.ts');
+      const { eq } = await import('drizzle-orm');
       
-      const allDocuments = await db.select().from(documents);
+      // Get all documents with folder information
+      const allDocuments = await db
+        .select({
+          id: documents.id,
+          name: documents.name,
+          originalName: documents.originalName,
+          mimeType: documents.mimeType,
+          size: documents.size,
+          path: documents.path,
+          folderId: documents.folderId,
+          folderName: folders.name,
+          isFavorite: documents.isFavorite,
+          isPublic: documents.isPublic,
+          adminOnly: documents.adminOnly,
+          managerOnly: documents.managerOnly,
+          createdAt: documents.createdAt,
+          updatedAt: documents.updatedAt
+        })
+        .from(documents)
+        .leftJoin(folders, eq(documents.folderId, folders.id))
+        .orderBy(documents.createdAt);
+      
       console.log(`Returning ${allDocuments.length} documents for admin panel`);
       res.json(allDocuments);
     } catch (error) {
@@ -1647,6 +1669,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(allFolders);
     } catch (error) {
       console.error("Error fetching folders:", error);
+      res.status(500).json({ error: 'Failed to fetch folders' });
+    }
+  });
+
+  // Admin folders endpoint with document counts
+  app.get('/api/admin/folders', async (req: Request, res: Response) => {
+    try {
+      const { db } = await import('./db.ts');
+      const { folders, documents } = await import('../shared/schema.ts');
+      const { eq, count } = await import('drizzle-orm');
+      
+      // Get all folders with document counts
+      const foldersWithCounts = await db
+        .select({
+          id: folders.id,
+          name: folders.name,
+          userId: folders.userId,
+          vectorNamespace: folders.vectorNamespace,
+          folderType: folders.folderType,
+          priority: folders.priority,
+          createdAt: folders.createdAt,
+          updatedAt: folders.updatedAt,
+          documentCount: count(documents.id)
+        })
+        .from(folders)
+        .leftJoin(documents, eq(folders.id, documents.folderId))
+        .groupBy(folders.id)
+        .orderBy(folders.name);
+      
+      res.json(foldersWithCounts);
+    } catch (error) {
+      console.error("Error fetching admin folders:", error);
       res.status(500).json({ error: 'Failed to fetch folders' });
     }
   });
