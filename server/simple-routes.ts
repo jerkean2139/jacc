@@ -2326,42 +2326,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Save to chat history if requested (default: true)
       if (saveToHistory) {
         try {
-          const { v4: uuidv4 } = await import('uuid');
-          const chatId = uuidv4();
+          const chatId = `chat-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
           const now = new Date();
           
           console.log('Saving test conversation to chat history:', { chatId, userId: user.id, query: query.substring(0, 50) });
           
-          // Import database and schema
-          const { db } = await import('./db.js');
-          const { chats, messages } = await import('../shared/schema.js');
+          // Use the existing storage instance to create chat and messages
+          const storage = require('./storage').storage;
           
-          // Create chat record
-          await dbModule.db.insert(schemaModule.chats).values({
+          // Create a test chat record directly in memory storage
+          const chatData = {
             id: chatId,
             userId: user.id,
             title: query.length > 50 ? query.substring(0, 47) + '...' : query,
             createdAt: now,
             updatedAt: now
-          });
-
-          // Create user message
-          await dbModule.db.insert(schemaModule.messages).values({
-            id: uuidv4(),
+          };
+          
+          // Add to in-memory storage
+          if (!storage.chats) storage.chats = new Map();
+          storage.chats.set(chatId, chatData);
+          
+          // Create messages
+          const userMessageId = `msg-${Date.now()}-user`;
+          const aiMessageId = `msg-${Date.now()}-ai`;
+          
+          const userMessage = {
+            id: userMessageId,
             chatId: chatId,
             role: 'user',
             content: query,
             createdAt: now
-          });
-
-          // Create AI response message
-          await dbModule.db.insert(schemaModule.messages).values({
-            id: uuidv4(),
+          };
+          
+          const aiMessage = {
+            id: aiMessageId,
             chatId: chatId,
             role: 'assistant',
             content: aiResponse.message,
-            createdAt: new Date(now.getTime() + 1000) // 1 second later
-          });
+            createdAt: new Date(now.getTime() + 1000)
+          };
+          
+          // Add messages to storage
+          if (!storage.messages) storage.messages = new Map();
+          storage.messages.set(userMessageId, userMessage);
+          storage.messages.set(aiMessageId, aiMessage);
           
           console.log('✅ Test conversation saved to chat history successfully');
         } catch (saveError) {
