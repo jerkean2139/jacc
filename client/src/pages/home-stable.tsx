@@ -312,12 +312,21 @@ Would you like me to run a competitive analysis and show you better processing o
                   Guide
                 </Button>
               </Link>
-              <Link href="/iso-hub">
-                <Button variant="ghost" size="sm" className="gap-2">
+              <div className="relative group">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="gap-2 cursor-not-allowed opacity-60" 
+                  disabled
+                  title="Coming Soon"
+                >
                   <Calculator className="w-4 h-4" />
                   ISO-AMP
                 </Button>
-              </Link>
+                <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
+                  Coming Soon
+                </span>
+              </div>
               {user?.role === 'dev_admin' && (
                 <Link href="/admin">
                   <Button variant="ghost" size="sm" className="gap-2">
