@@ -1120,7 +1120,7 @@ function ThreeStepDocumentUpload({ foldersData, onUploadComplete }: {
       console.log('Upload mutation starting...');
       console.log('FormData entries:', Array.from(formData.entries()));
       
-      const response = await fetch('/api/documents/upload', {
+      const response = await fetch('/api/admin/documents/upload', {
         method: 'POST',
         body: formData,
         credentials: 'include'
