@@ -2332,8 +2332,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           console.log('Saving test conversation to chat history:', { chatId, userId: user.id, query: query.substring(0, 50) });
           
+          // Import database and schema
+          const { db } = await import('./db.js');
+          const { chats, messages } = await import('../shared/schema.js');
+          
           // Create chat record
-          await db.insert(chats).values({
+          await dbModule.db.insert(schemaModule.chats).values({
             id: chatId,
             userId: user.id,
             title: query.length > 50 ? query.substring(0, 47) + '...' : query,
@@ -2342,7 +2346,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
 
           // Create user message
-          await db.insert(messages).values({
+          await dbModule.db.insert(schemaModule.messages).values({
             id: uuidv4(),
             chatId: chatId,
             role: 'user',
@@ -2351,7 +2355,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
 
           // Create AI response message
-          await db.insert(messages).values({
+          await dbModule.db.insert(schemaModule.messages).values({
             id: uuidv4(),
             chatId: chatId,
             role: 'assistant',
