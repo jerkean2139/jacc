@@ -152,7 +152,17 @@ export default function ISOHub() {
         <Tabs defaultValue="analyze" className="space-y-6">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="analyze">Analyze Statement</TabsTrigger>
-            <TabsTrigger value="iso-amp">ISO-AMP</TabsTrigger>
+            <TabsTrigger 
+              value="iso-amp" 
+              disabled 
+              className="relative cursor-not-allowed group"
+              title="Coming Soon"
+            >
+              ISO-AMP
+              <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
+                Coming Soon
+              </span>
+            </TabsTrigger>
             <TabsTrigger value="proposals">Create Proposal</TabsTrigger>
           </TabsList>
 
