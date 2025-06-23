@@ -4489,6 +4489,8 @@ User Context: {userRole}`,
     try {
       const { url } = req.body;
       
+      console.log('Website scraping request:', { url, body: req.body });
+      
       if (!url || typeof url !== 'string') {
         return res.status(400).json({ message: "URL is required" });
       }
@@ -4496,19 +4498,23 @@ User Context: {userRole}`,
       // Validate URL format
       try {
         new URL(url);
-      } catch {
+      } catch (urlError) {
+        console.error('URL validation failed:', urlError);
         return res.status(400).json({ message: "Invalid URL format" });
       }
 
+      console.log('Starting website scraping for:', url);
       const { websiteScrapingService } = await import('./website-scraper');
       const scrapedContent = await websiteScrapingService.scrapeWebsite(url);
       
+      console.log('Website scraping completed successfully');
       res.json(scrapedContent);
     } catch (error) {
       console.error("Error scraping website:", error);
+      console.error("Error stack:", error.stack);
       res.status(500).json({ 
-        message: "Failed to scrape website", 
-        error: error.message 
+        message: "Scraping Failed", 
+        error: error.message || "The string did not match the expected pattern."
       });
     }
   });

@@ -44,9 +44,21 @@ class WebsiteScrapingService {
   }
 
   async scrapeWebsite(url: string): Promise<ScrapedContent> {
+    console.log('🌐 Starting website scraping for:', url);
+    
+    // Validate URL format
+    try {
+      const parsedUrl = new URL(url);
+      console.log('✅ URL validation passed:', parsedUrl.hostname);
+    } catch (urlError) {
+      console.error('❌ URL validation failed:', urlError);
+      throw new Error(`Invalid URL format: ${url}`);
+    }
+    
     let browser;
     try {
       // Launch Puppeteer browser
+      console.log('🚀 Launching Puppeteer browser...');
       browser = await puppeteer.launch({
         headless: true,
         args: [
@@ -60,6 +72,7 @@ class WebsiteScrapingService {
           '--disable-gpu'
         ]
       });
+      console.log('✅ Browser launched successfully');
 
       const page = await browser.newPage();
       
@@ -67,16 +80,20 @@ class WebsiteScrapingService {
       await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
       
       // Navigate to the URL with timeout
+      console.log('🌐 Navigating to URL...');
       await page.goto(url, { 
         waitUntil: 'networkidle2', 
         timeout: 30000 
       });
+      console.log('✅ Page loaded successfully');
 
       // Wait for content to load
       await new Promise(resolve => setTimeout(resolve, 2000));
 
       // Extract HTML content
+      console.log('📄 Extracting HTML content...');
       const htmlContent = await page.content();
+      console.log('✅ HTML content extracted, length:', htmlContent.length);
       
       // Parse with Cheerio
       const $ = cheerio.load(htmlContent);
@@ -126,11 +143,14 @@ class WebsiteScrapingService {
       const wordCount = textContent.split(/\s+/).filter(word => word.length > 0).length;
 
       // Generate summary and bullet points using AI
+      console.log('🤖 Generating AI summary and bullet points...');
       const { summary, bulletPoints } = await this.generateSummaryAndBulletPoints(textContent, title, url);
+      console.log('✅ AI summary generated successfully');
 
       await browser.close();
+      console.log('🎉 Website scraping completed successfully');
 
-      return {
+      const result = {
         title,
         content: textContent,
         markdownContent,
@@ -140,6 +160,16 @@ class WebsiteScrapingService {
         scrapedAt: new Date().toISOString(),
         wordCount
       };
+
+      console.log('📊 Scraping results:', {
+        title: result.title.substring(0, 50) + '...',
+        contentLength: result.content.length,
+        markdownLength: result.markdownContent.length,
+        wordCount: result.wordCount,
+        bulletPointsCount: result.bulletPoints.length
+      });
+
+      return result;
 
     } catch (error: any) {
       if (browser) {
