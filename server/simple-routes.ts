@@ -2332,12 +2332,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const chatId = randomUUID();
           const now = new Date();
           
-          console.log('Saving test conversation to chat history:', { chatId, userId: user.id, query: query.substring(0, 50) });
+          console.log('Saving test conversation to chat history:', { chatId, userId: 'admin-user-id', query: query.substring(0, 50) });
           
           // Create test chat and messages directly using storage methods
           await storage.createChat({
             id: chatId,
-            userId: user.id,
+            userId: 'admin-user-id', // Use correct admin user ID from database
             title: query.length > 50 ? query.substring(0, 47) + '...' : query,
             createdAt: now,
             updatedAt: now
