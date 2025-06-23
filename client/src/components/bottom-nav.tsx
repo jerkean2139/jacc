@@ -14,6 +14,7 @@ import {
   BarChart3
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/useAuth";
 
 interface NavItem {
   href: string;
@@ -22,6 +23,8 @@ interface NavItem {
   badge?: string;
   disabled?: boolean;
   comingSoon?: boolean;
+  adminOnly?: boolean;
+  hideForAdmin?: boolean;
 }
 
 const navItems: NavItem[] = [
@@ -35,7 +38,8 @@ const navItems: NavItem[] = [
     icon: Calculator,
     label: "Calculator",
     disabled: true,
-    comingSoon: true
+    comingSoon: true,
+    hideForAdmin: true
   },
   {
     href: "/guide",
@@ -52,24 +56,28 @@ const navItems: NavItem[] = [
     icon: TrendingUp,
     label: "Intelligence",
     disabled: true,
-    comingSoon: true
+    comingSoon: true,
+    hideForAdmin: true
   },
   {
     href: "/competitive-intelligence",
     icon: BarChart3,
     label: "Analytics",
     disabled: true,
-    comingSoon: true
+    comingSoon: true,
+    hideForAdmin: true
   },
   {
-    href: "/admin",
+    href: "/settings",
     icon: Settings,
-    label: "Admin"
+    label: "Settings",
+    adminOnly: true
   }
 ];
 
 export default function BottomNav() {
   const [location] = useLocation();
+  const { user } = useAuth();
 
   const isActive = (href: string) => {
     if (href === "/") {
@@ -78,12 +86,27 @@ export default function BottomNav() {
     return location.startsWith(href);
   };
 
+  // Filter navigation items based on user role
+  const filteredNavItems = navItems.filter(item => {
+    // Hide items marked as hideForAdmin for admin users
+    if (user?.role === 'dev_admin' && item.hideForAdmin) {
+      return false;
+    }
+    
+    // Show admin-only items only to admin users
+    if (item.adminOnly && user?.role !== 'dev_admin') {
+      return false;
+    }
+    
+    return true;
+  });
+
   return (
     <>
       {/* Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 md:hidden">
         <div className="flex items-center justify-around h-16 px-2">
-          {navItems.map((item) => {
+          {filteredNavItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.href);
             const isDisabled = item.disabled || item.comingSoon;

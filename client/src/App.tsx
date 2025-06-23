@@ -118,6 +118,8 @@ function Router() {
           <Route path="/admin/training" component={AdminControlCenter} />
           <Route path="/admin-training" component={AdminControlCenter} />
           <Route path="/admin/ai-config" component={AIConfigurationPage} />
+          {/* PWA Settings route for mobile admin view */}
+          <Route path="/settings" component={AdminControlCenter} />
           <Route path="/admin/chat-testing" component={ChatTesting} />
           <Route path="/login" component={Landing} />
         </>

@@ -161,6 +161,7 @@ Changelog:
 - June 23, 2025. **MERCHANT INSIGHTS DISABLED**: Added "Coming Soon" styling to Merchant Insights section in sidebar Business Intelligence area. Both ISO AMP and Merchant Insights now consistently display disabled state with hover tooltips. All future features maintain uniform visual treatment indicating development status.
 - June 23, 2025. **MOBILE CHAT INPUT POSITIONING FIXED**: Adjusted chat dialogue positioning to appear properly above bottom navigation bar in PWA mobile view. Added `pb-20` spacing for mobile while maintaining `md:pb-4` for desktop. Both welcome screen and active chat input areas now have proper clearance above bottom navigation.
 - June 23, 2025. **PWA BOTTOM NAVIGATION "COMING SOON" STYLING COMPLETED**: Applied consistent "Coming Soon" styling to future features in mobile bottom navigation bar. Calculator, Intelligence, and Analytics tabs now display as disabled with grayed-out appearance, "Soon" badges, and hover tooltips matching desktop sidebar design. All future features maintain uniform visual treatment across desktop and mobile interfaces.
+- June 23, 2025. **PWA ADMIN NAVIGATION OPTIMIZED**: Streamlined PWA bottom navigation for admin users to show only essential tabs (Guide, Home, Settings) while hiding Calculator and Intelligence tabs to prevent overflow. Implemented role-based filtering with Settings tab routing to full AdminControlCenter containing all AI configuration options. Admin PWA experience now focuses on core functionality with clean 3-tab interface.
 
 ## User Preferences
 
