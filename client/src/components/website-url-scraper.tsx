@@ -50,6 +50,12 @@ export default function WebsiteURLScraper({ onScrapeComplete }: WebsiteURLScrape
       return;
     }
 
+    // Fix URL format if needed
+    let formattedUrl = url.trim();
+    if (!formattedUrl.startsWith('http://') && !formattedUrl.startsWith('https://')) {
+      formattedUrl = 'https://' + formattedUrl;
+    }
+
     // Basic URL validation
     try {
       new URL(url);
