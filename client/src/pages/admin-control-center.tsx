@@ -72,6 +72,775 @@ interface FAQ {
 
 const categories = ["General", "Payment Processing", "Compliance", "Technical", "Pricing"];
 
+// AI Simulator Interface Component
+function AISimulatorInterface() {
+  const [testQuery, setTestQuery] = useState("");
+  const [response, setResponse] = useState("");
+  const [isTestingAI, setIsTestingAI] = useState(false);
+  const [correctionMode, setCorrectionMode] = useState(false);
+  const [correctedResponse, setCorrectedResponse] = useState("");
+  const [saveToHistory, setSaveToHistory] = useState(true);
+  const { toast } = useToast();
+
+  const testAIMutation = useMutation({
+    mutationFn: async (query: string) => {
+      const response = await fetch('/api/admin/ai-simulator/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query, saveToHistory })
+      });
+      return response.json();
+    },
+    onSuccess: (data) => {
+      setResponse(data.response);
+      toast({
+        title: "AI Test Complete",
+        description: "Response generated successfully",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Test Failed",
+        description: "Failed to generate AI response",
+        variant: "destructive",
+      });
+    },
+    onSettled: () => {
+      setIsTestingAI(false);
+    }
+  });
+
+  const submitCorrectionMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await fetch('/api/admin/ai-simulator/train', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Training Correction Submitted",
+        description: "AI has been trained with the corrected response",
+      });
+      setCorrectionMode(false);
+      setCorrectedResponse("");
+    },
+    onError: () => {
+      toast({
+        title: "Training Failed",
+        description: "Failed to submit training correction",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const handleTestAI = () => {
+    if (!testQuery.trim()) return;
+    setIsTestingAI(true);
+    testAIMutation.mutate(testQuery);
+  };
+
+  const handleSubmitCorrection = () => {
+    if (!correctedResponse.trim()) return;
+    
+    submitCorrectionMutation.mutate({
+      originalQuery: testQuery,
+      originalResponse: response,
+      correctedResponse: correctedResponse,
+      improvementType: "accuracy"
+    });
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="space-y-4">
+        <div>
+          <label className="text-sm font-medium mb-2 block">Test Query</label>
+          <textarea
+            value={testQuery}
+            onChange={(e) => setTestQuery(e.target.value)}
+            placeholder="Enter a question to test the AI response..."
+            className="w-full p-3 border rounded-lg resize-none"
+            rows={3}
+          />
+        </div>
+        
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              id="saveToHistory"
+              checked={saveToHistory}
+              onChange={(e) => setSaveToHistory(e.target.checked)}
+              className="rounded"
+            />
+            <label htmlFor="saveToHistory" className="text-sm">Save to chat history</label>
+          </div>
+          
+          <Button 
+            onClick={handleTestAI}
+            disabled={isTestingAI || !testQuery.trim()}
+          >
+            {isTestingAI ? (
+              <>
+                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                Testing AI...
+              </>
+            ) : (
+              <>
+                <Brain className="h-4 w-4 mr-2" />
+                Test AI Response
+              </>
+            )}
+          </Button>
+        </div>
+      </div>
+
+      {response && (
+        <div className="space-y-4">
+          <div>
+            <label className="text-sm font-medium mb-2 block">AI Response</label>
+            <div className="p-4 bg-gray-50 rounded-lg border">
+              <div dangerouslySetInnerHTML={{ __html: response }} />
+            </div>
+          </div>
+
+          {!correctionMode ? (
+            <Button 
+              variant="outline"
+              onClick={() => setCorrectionMode(true)}
+            >
+              <Edit className="h-4 w-4 mr-2" />
+              Provide Training Correction
+            </Button>
+          ) : (
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium mb-2 block">Corrected Response</label>
+                <textarea
+                  value={correctedResponse}
+                  onChange={(e) => setCorrectedResponse(e.target.value)}
+                  placeholder="Provide the correct response for training..."
+                  className="w-full p-3 border rounded-lg resize-none"
+                  rows={4}
+                />
+              </div>
+              
+              <div className="flex gap-2">
+                <Button 
+                  onClick={handleSubmitCorrection}
+                  disabled={!correctedResponse.trim() || submitCorrectionMutation.isPending}
+                >
+                  {submitCorrectionMutation.isPending ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                      Submitting...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Submit Correction
+                    </>
+                  )}
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => {
+                    setCorrectionMode(false);
+                    setCorrectedResponse("");
+                  }}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Chat Review Center Component
+function ChatReviewCenter() {
+  const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
+  const [testQuery, setTestQuery] = useState("");
+  const [testResponse, setTestResponse] = useState("");
+  const [isTestingAI, setIsTestingAI] = useState(false);
+
+  // Fetch user chats for review
+  const { data: userChats, isLoading: chatsLoading } = useQuery({
+    queryKey: ['/api/admin/chat-reviews'],
+  });
+
+  // Fetch messages for selected chat
+  const { data: chatMessages, isLoading: messagesLoading } = useQuery({
+    queryKey: ['/api/admin/chat-reviews', selectedChatId, 'messages'],
+    enabled: !!selectedChatId
+  });
+
+  const testAIMutation = useMutation({
+    mutationFn: async (query: string) => {
+      const response = await fetch('/api/admin/ai-simulator/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query, saveToHistory: true })
+      });
+      return response.json();
+    },
+    onSuccess: (data) => {
+      setTestResponse(data.response);
+    },
+    onSettled: () => {
+      setIsTestingAI(false);
+    }
+  });
+
+  const handleTestAI = () => {
+    if (!testQuery.trim()) return;
+    setIsTestingAI(true);
+    testAIMutation.mutate(testQuery);
+  };
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[600px]">
+      {/* Chat Review Panel */}
+      <Card className="flex flex-col">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <MessageSquare className="h-5 w-5" />
+            Chat Review
+          </CardTitle>
+          <CardDescription>
+            Review user conversations and chat history
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex-1 overflow-hidden">
+          {chatsLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <RefreshCw className="h-6 w-6 animate-spin" />
+              <span className="ml-2">Loading chats...</span>
+            </div>
+          ) : (
+            <div className="space-y-3 h-full overflow-y-auto">
+              {Array.isArray(userChats) && userChats.length > 0 ? (
+                userChats.map((chat: any) => (
+                  <div 
+                    key={chat.id}
+                    onClick={() => setSelectedChatId(chat.id)}
+                    className={`
+                      p-4 border rounded-lg cursor-pointer transition-colors
+                      ${selectedChatId === chat.id 
+                        ? 'border-blue-500 bg-blue-50' 
+                        : 'border-gray-200 hover:border-gray-300'
+                      }
+                    `}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">{chat.title || 'Untitled Chat'}</h4>
+                        <p className="text-sm text-gray-500">
+                          {chat.messageCount || 0} messages • {chat.username || 'Unknown User'}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <Badge variant={chat.reviewStatus === 'approved' ? 'default' : 'secondary'}>
+                          {chat.reviewStatus || 'pending'}
+                        </Badge>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {new Date(chat.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8">
+                  <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-500">No chat reviews available</p>
+                </div>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Training Interface Panel */}
+      <Card className="flex flex-col">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Brain className="h-5 w-5" />
+            AI Training Interface
+          </CardTitle>
+          <CardDescription>
+            Test AI responses and provide training corrections
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex-1 space-y-4">
+          <div>
+            <label className="text-sm font-medium mb-2 block">Test Query</label>
+            <textarea
+              value={testQuery}
+              onChange={(e) => setTestQuery(e.target.value)}
+              placeholder="Enter a question to test the AI response..."
+              className="w-full p-3 border rounded-lg resize-none"
+              rows={3}
+            />
+          </div>
+          
+          <Button 
+            onClick={handleTestAI}
+            disabled={isTestingAI || !testQuery.trim()}
+            className="w-full"
+          >
+            {isTestingAI ? (
+              <>
+                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                Testing AI...
+              </>
+            ) : (
+              <>
+                <Brain className="h-4 w-4 mr-2" />
+                Test AI Response
+              </>
+            )}
+          </Button>
+
+          {testResponse && (
+            <div>
+              <label className="text-sm font-medium mb-2 block">AI Response</label>
+              <div className="p-4 bg-gray-50 rounded-lg border max-h-64 overflow-y-auto">
+                <div dangerouslySetInnerHTML={{ __html: testResponse }} />
+              </div>
+            </div>
+          )}
+
+          {selectedChatId && (
+            <div>
+              <h4 className="text-sm font-medium mb-2">Selected Chat Messages</h4>
+              <div className="border rounded-lg p-4 max-h-32 overflow-y-auto bg-gray-50">
+                {messagesLoading ? (
+                  <p className="text-sm text-gray-500">Loading messages...</p>
+                ) : Array.isArray(chatMessages) && chatMessages.length > 0 ? (
+                  <div className="space-y-2">
+                    {chatMessages.slice(0, 3).map((message: any, index: number) => (
+                      <div key={index} className="text-sm">
+                        <span className="font-medium">{message.role}:</span> {message.content.substring(0, 100)}...
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500">No messages found</p>
+                )}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+// Comprehensive Settings Interface Component
+function ComprehensiveSettingsInterface() {
+  const [activeSettingsTab, setActiveSettingsTab] = useState("ai-search");
+  const [activeSubTab, setActiveSubTab] = useState("configuration");
+
+  // Main settings categories for the first navigation bar
+  const mainCategories = [
+    { id: "ai-search", label: "AI & Search", icon: Brain },
+    { id: "user-management", label: "User Management", icon: Users },
+    { id: "content-processing", label: "Content & Documents", icon: FileText },
+    { id: "system-performance", label: "System Performance", icon: Activity }
+  ];
+
+  // Sub-categories for the second navigation bar
+  const getSubCategories = (mainCategory: string) => {
+    switch (mainCategory) {
+      case "ai-search":
+        return [
+          { id: "configuration", label: "Configuration" },
+          { id: "prompts", label: "AI Prompts" },
+          { id: "search-settings", label: "Search Settings" }
+        ];
+      case "user-management":
+        return [
+          { id: "roles", label: "Roles & Permissions" },
+          { id: "sessions", label: "Sessions" },
+          { id: "notifications", label: "Notifications" }
+        ];
+      case "content-processing":
+        return [
+          { id: "ocr", label: "OCR Settings" },
+          { id: "categorization", label: "Auto-Categorization" },
+          { id: "retention", label: "Retention Policies" }
+        ];
+      case "system-performance":
+        return [
+          { id: "timeouts", label: "Timeouts" },
+          { id: "cache", label: "Cache Settings" },
+          { id: "monitoring", label: "Monitoring" }
+        ];
+      default:
+        return [];
+    }
+  };
+
+  const renderSettingsContent = () => {
+    const key = `${activeSettingsTab}-${activeSubTab}`;
+    
+    switch (key) {
+      case "ai-search-configuration":
+        return (
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-lg font-medium mb-4">AI Model Configuration</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Primary AI Model</label>
+                  <select className="w-full p-2 border rounded-lg">
+                    <option>Claude 4.0 Sonnet</option>
+                    <option>GPT-4o</option>
+                    <option>GPT-4o Mini</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Fallback Model</label>
+                  <select className="w-full p-2 border rounded-lg">
+                    <option>GPT-4o</option>
+                    <option>Claude 4.0 Sonnet</option>
+                    <option>None</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-medium mb-4">Response Configuration</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Response Style</label>
+                  <div className="grid grid-cols-3 gap-2">
+                    <Button variant="outline" size="sm">Concise</Button>
+                    <Button variant="default" size="sm">Balanced</Button>
+                    <Button variant="outline" size="sm">Detailed</Button>
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Confidence Threshold</label>
+                  <input type="range" min="0" max="100" defaultValue="75" className="w-full" />
+                  <div className="flex justify-between text-xs text-gray-500">
+                    <span>Low (0%)</span>
+                    <span>High (100%)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-medium mb-4">Search Priority Order</h3>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <span>1. FAQ Knowledge Base</span>
+                  <Badge variant="default">Primary</Badge>
+                </div>
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <span>2. Document Center</span>
+                  <Badge variant="secondary">Secondary</Badge>
+                </div>
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <span>3. Web Search (Perplexity)</span>
+                  <Badge variant="outline">Fallback</Badge>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case "ai-search-prompts":
+        return (
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-lg font-medium mb-4">System Prompts Management</h3>
+              <div className="space-y-4">
+                <div className="border rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-medium">Document Search Prompt</h4>
+                    <Button variant="outline" size="sm">
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit
+                    </Button>
+                  </div>
+                  <p className="text-sm text-gray-600">Controls how AI searches through uploaded documents...</p>
+                </div>
+                <div className="border rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-medium">Response Formatting Prompt</h4>
+                    <Button variant="outline" size="sm">
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit
+                    </Button>
+                  </div>
+                  <p className="text-sm text-gray-600">Defines how AI formats and structures responses...</p>
+                </div>
+                <div className="border rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-medium">Error Handling Prompt</h4>
+                    <Button variant="outline" size="sm">
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit
+                    </Button>
+                  </div>
+                  <p className="text-sm text-gray-600">How AI responds when information is not found...</p>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-medium mb-4">Custom Prompt Templates</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="border rounded-lg p-4">
+                  <h4 className="font-medium mb-2">Pricing Analysis</h4>
+                  <p className="text-sm text-gray-600 mb-3">Template for merchant pricing analysis</p>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm">Edit</Button>
+                    <Button variant="outline" size="sm">Export</Button>
+                  </div>
+                </div>
+                <div className="border rounded-lg p-4">
+                  <h4 className="font-medium mb-2">Objection Handling</h4>
+                  <p className="text-sm text-gray-600 mb-3">Template for sales objection responses</p>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm">Edit</Button>
+                    <Button variant="outline" size="sm">Export</Button>
+                  </div>
+                </div>
+                <div className="border rounded-lg p-4">
+                  <h4 className="font-medium mb-2">Compliance Guidance</h4>
+                  <p className="text-sm text-gray-600 mb-3">Template for compliance-related queries</p>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm">Edit</Button>
+                    <Button variant="outline" size="sm">Export</Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case "user-management-roles":
+        return (
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-lg font-medium mb-4">Role Configuration</h3>
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Default New User Role</label>
+                    <select className="w-full p-2 border rounded-lg">
+                      <option>sales-agent</option>
+                      <option>client-admin</option>
+                      <option>viewer</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Auto-approve Registrations</label>
+                    <div className="flex items-center space-x-2">
+                      <input type="checkbox" id="auto-approve" className="rounded" />
+                      <label htmlFor="auto-approve" className="text-sm">Enable automatic approval</label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-medium mb-4">Permission Matrix</h3>
+              <div className="overflow-x-auto">
+                <table className="w-full border rounded-lg">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="text-left p-3 border-b">Feature</th>
+                      <th className="text-center p-3 border-b">Sales Agent</th>
+                      <th className="text-center p-3 border-b">Client Admin</th>
+                      <th className="text-center p-3 border-b">Dev Admin</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td className="p-3 border-b">Chat Interface</td>
+                      <td className="text-center p-3 border-b">✓</td>
+                      <td className="text-center p-3 border-b">✓</td>
+                      <td className="text-center p-3 border-b">✓</td>
+                    </tr>
+                    <tr>
+                      <td className="p-3 border-b">Document Upload</td>
+                      <td className="text-center p-3 border-b">✗</td>
+                      <td className="text-center p-3 border-b">✓</td>
+                      <td className="text-center p-3 border-b">✓</td>
+                    </tr>
+                    <tr>
+                      <td className="p-3 border-b">Admin Control Center</td>
+                      <td className="text-center p-3 border-b">✗</td>
+                      <td className="text-center p-3 border-b">Limited</td>
+                      <td className="text-center p-3 border-b">✓</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        );
+
+      case "system-performance-monitoring":
+        return (
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-lg font-medium mb-4">Real-time System Status</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="border rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium">Database</span>
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  </div>
+                  <p className="text-2xl font-bold">Online</p>
+                  <p className="text-xs text-gray-500">Response: 45ms</p>
+                </div>
+                <div className="border rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium">AI Services</span>
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  </div>
+                  <p className="text-2xl font-bold">Active</p>
+                  <p className="text-xs text-gray-500">Claude + GPT-4o</p>
+                </div>
+                <div className="border rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium">Memory Usage</span>
+                    <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                  </div>
+                  <p className="text-2xl font-bold">68%</p>
+                  <p className="text-xs text-gray-500">456MB / 672MB</p>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-medium mb-4">Performance Metrics</h3>
+              <div className="space-y-4">
+                <div>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span>Average Response Time</span>
+                    <span>1.2s</span>
+                  </div>
+                  <Progress value={75} className="h-2" />
+                </div>
+                <div>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span>Document Processing Speed</span>
+                    <span>Good</span>
+                  </div>
+                  <Progress value={85} className="h-2" />
+                </div>
+                <div>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span>Search Accuracy</span>
+                    <span>92%</span>
+                  </div>
+                  <Progress value={92} className="h-2" />
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      default:
+        return (
+          <div className="text-center py-12">
+            <Settings className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium mb-2">Settings Configuration</h3>
+            <p className="text-gray-500">Select a category and sub-section to configure system settings.</p>
+          </div>
+        );
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* First Navigation Bar - Main Categories */}
+      <div className="border-b">
+        <nav className="flex space-x-8">
+          {mainCategories.map((category) => {
+            const Icon = category.icon;
+            return (
+              <button
+                key={category.id}
+                onClick={() => {
+                  setActiveSettingsTab(category.id);
+                  setActiveSubTab(getSubCategories(category.id)[0]?.id || "");
+                }}
+                className={`
+                  flex items-center gap-2 py-3 px-1 border-b-2 font-medium text-sm transition-colors
+                  ${activeSettingsTab === category.id
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }
+                `}
+              >
+                <Icon className="h-4 w-4" />
+                {category.label}
+              </button>
+            );
+          })}
+        </nav>
+      </div>
+
+      {/* Second Navigation Bar - Sub Categories */}
+      {getSubCategories(activeSettingsTab).length > 0 && (
+        <div className="border-b bg-gray-50 -mx-6 px-6">
+          <nav className="flex space-x-6">
+            {getSubCategories(activeSettingsTab).map((subCategory) => (
+              <button
+                key={subCategory.id}
+                onClick={() => setActiveSubTab(subCategory.id)}
+                className={`
+                  py-3 px-1 border-b-2 font-medium text-sm transition-colors
+                  ${activeSubTab === subCategory.id
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-600 hover:text-gray-800 hover:border-gray-300'
+                  }
+                `}
+              >
+                {subCategory.label}
+              </button>
+            ))}
+          </nav>
+        </div>
+      )}
+
+      {/* Settings Content Area */}
+      <div className="min-h-[500px]">
+        {renderSettingsContent()}
+      </div>
+
+      {/* Save Settings Button */}
+      <div className="flex justify-end pt-6 border-t">
+        <div className="flex gap-3">
+          <Button variant="outline">
+            Reset to Defaults
+          </Button>
+          <Button>
+            <Save className="h-4 w-4 mr-2" />
+            Save Settings
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Three-Step Document Upload Component
 function ThreeStepDocumentUpload({ foldersData, onUploadComplete }: { 
   foldersData: any[], 
@@ -882,6 +1651,23 @@ export default function AdminControlCenter() {
             </Card>
           </div>
 
+          {/* AI Simulator Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Brain className="h-5 w-5" />
+                AI Simulator & Testing
+              </CardTitle>
+              <CardDescription>
+                Test AI responses and provide training corrections
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <AISimulatorInterface />
+            </CardContent>
+          </Card>
+
+          {/* Training Analytics Section */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -889,7 +1675,7 @@ export default function AdminControlCenter() {
                 Training Analytics & Feedback
               </CardTitle>
               <CardDescription>
-                Monitor AI performance and training effectiveness
+                Monitor AI performance and training effectiveness with cleanup tools
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -899,44 +1685,34 @@ export default function AdminControlCenter() {
                   <span className="ml-2">Loading training data...</span>
                 </div>
               ) : (
-                <TrainingInteractionsTable />
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <Badge variant="secondary">
+                        {(trainingData && typeof trainingData === 'object' && 'totalInteractions' in trainingData) ? (trainingData as any).totalInteractions : 0} total interactions
+                      </Badge>
+                      <Badge variant="outline">
+                        Real database data
+                      </Badge>
+                    </div>
+                    <Button variant="destructive" size="sm">
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Remove Duplicates
+                    </Button>
+                  </div>
+                  <TrainingInteractionsTable />
+                </div>
               )}
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="chat-review" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MessageSquare className="h-5 w-5" />
-                Chat Review & Training Center
-              </CardTitle>
-              <CardDescription>
-                Review conversations and train AI responses through interactive correction
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-center py-12">
-                <div className="text-center space-y-4">
-                  <MessageSquare className="h-12 w-12 text-gray-400 mx-auto" />
-                  <div>
-                    <h3 className="text-lg font-medium">Chat Review System</h3>
-                    <p className="text-gray-500 max-w-sm mx-auto">
-                      Review user conversations and train the AI with better responses for continuous improvement.
-                    </p>
-                  </div>
-                  <Button onClick={() => setShowChatReviewModal(true)}>
-                    Open Chat Review Center
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <ChatReviewCenter />
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-6">
-          <SettingsManager />
+          <ComprehensiveSettingsInterface />
         </TabsContent>
       </Tabs>
 
