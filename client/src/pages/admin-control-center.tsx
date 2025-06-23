@@ -952,22 +952,68 @@ function ComprehensiveSettingsInterface() {
                   <h4 className="font-medium mb-2">Pricing Analysis</h4>
                   <p className="text-sm text-gray-600 mb-3">Template for merchant pricing analysis</p>
                   <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => {
+                        setSelectedPromptTemplate({
+                          id: 'pricing-analysis',
+                          title: 'Pricing Analysis',
+                          description: 'Template for merchant pricing analysis',
+                          category: 'Sales',
+                          content: 'As a payment processing expert, analyze the following merchant information and provide a comprehensive pricing comparison:\n\nMerchant Business Type: {business_type}\nMonthly Volume: {monthly_volume}\nAverage Transaction: {average_transaction}\nCurrent Processor: {current_processor}\n\nProvide:\n1. Current cost analysis\n2. Competitive pricing options\n3. Potential savings\n4. Recommended processor\n5. Implementation timeline'
+                        });
+                        setShowPromptEditor(true);
+                      }}
+                    >
+                      Use Template
+                    </Button>
                     <Button variant="outline" size="sm">Edit</Button>
-                    <Button variant="outline" size="sm">Export</Button>
                   </div>
                 </div>
                 <div className="border rounded-lg p-4">
                   <h4 className="font-medium mb-2">Objection Handling</h4>
                   <p className="text-sm text-gray-600 mb-3">Template for sales objection responses</p>
                   <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => {
+                        setSelectedPromptTemplate({
+                          id: 'objection-handling',
+                          title: 'Objection Handling',
+                          description: 'Template for sales objection responses',
+                          category: 'Sales',
+                          content: 'Help me respond to this merchant objection professionally and persuasively:\n\nMerchant Objection: {objection_text}\nMerchant Business: {business_type}\nCurrent Situation: {current_situation}\n\nProvide:\n1. Acknowledgment of their concern\n2. Evidence-based response\n3. Value proposition\n4. Next steps\n5. Follow-up strategy\n\nTone: Professional, empathetic, solution-focused'
+                        });
+                        setShowPromptEditor(true);
+                      }}
+                    >
+                      Use Template
+                    </Button>
                     <Button variant="outline" size="sm">Edit</Button>
-                    <Button variant="outline" size="sm">Export</Button>
                   </div>
                 </div>
                 <div className="border rounded-lg p-4">
                   <h4 className="font-medium mb-2">Compliance Guidance</h4>
                   <p className="text-sm text-gray-600 mb-3">Template for compliance-related queries</p>
                   <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => {
+                        setSelectedPromptTemplate({
+                          id: 'compliance-guidance',
+                          title: 'Compliance Guidance',
+                          description: 'Template for compliance-related queries',
+                          category: 'Compliance',
+                          content: 'Provide compliance guidance for this payment processing scenario:\n\nBusiness Type: {business_type}\nTransaction Type: {transaction_type}\nRegulatory Concern: {compliance_question}\nIndustry: {industry}\n\nProvide:\n1. Applicable regulations\n2. Compliance requirements\n3. Risk assessment\n4. Implementation steps\n5. Documentation needed\n\nEnsure all guidance follows current PCI DSS, PSD2, and relevant industry standards.'
+                        });
+                        setShowPromptEditor(true);
+                      }}
+                    >
+                      Use Template
+                    </Button>
                     <Button variant="outline" size="sm">Edit</Button>
                     <Button variant="outline" size="sm">Export</Button>
                   </div>
@@ -2312,6 +2358,11 @@ export default function AdminControlCenter() {
   const [showCategoryManager, setShowCategoryManager] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [editingCategory, setEditingCategory] = useState<any>(null);
+  
+  // Prompt editor modal states
+  const [showPromptEditor, setShowPromptEditor] = useState(false);
+  const [selectedPromptTemplate, setSelectedPromptTemplate] = useState<any>(null);
+  
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -3354,6 +3405,13 @@ export default function AdminControlCenter() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Prompt Editor Modal */}
+      <PromptEditorModal
+        open={showPromptEditor}
+        onOpenChange={setShowPromptEditor}
+        template={selectedPromptTemplate}
+      />
     </div>
   );
 }
