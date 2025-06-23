@@ -29,7 +29,7 @@ export function LeaderboardWidget({ showFullLeaderboard = false, maxEntries = 5 
     refetchInterval: 60000, // Refresh every minute
   });
 
-  const agents = leaderboardData?.leaderboard || [];
+  const agents = (leaderboardData && typeof leaderboardData === 'object' && 'leaderboard' in leaderboardData && Array.isArray((leaderboardData as any).leaderboard)) ? (leaderboardData as any).leaderboard : [];
   const displayAgents = showFullLeaderboard ? agents : agents.slice(0, maxEntries);
 
   if (isLoading) {

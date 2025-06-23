@@ -123,7 +123,7 @@ export default function AdminControlCenter() {
   };
 
   function TrainingInteractionsTable() {
-    const interactions = Array.isArray(trainingData?.interactions) ? trainingData.interactions : [];
+    const interactions = (trainingData && typeof trainingData === 'object' && 'interactions' in trainingData && Array.isArray((trainingData as any).interactions)) ? (trainingData as any).interactions : [];
     
     return (
       <div className="space-y-4">
@@ -386,8 +386,8 @@ export default function AdminControlCenter() {
                 <Target className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{trainingData?.accuracyRate || 0}%</div>
-                <Progress value={trainingData?.accuracyRate || 0} className="mt-2" />
+                <div className="text-2xl font-bold">{(trainingData && typeof trainingData === 'object' && 'accuracyRate' in trainingData) ? (trainingData as any).accuracyRate : 0}%</div>
+                <Progress value={(trainingData && typeof trainingData === 'object' && 'accuracyRate' in trainingData) ? (trainingData as any).accuracyRate : 0} className="mt-2" />
               </CardContent>
             </Card>
 
@@ -397,9 +397,9 @@ export default function AdminControlCenter() {
                 <CheckCircle className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{trainingData?.totalCorrections || 0}</div>
+                <div className="text-2xl font-bold">{(trainingData && typeof trainingData === 'object' && 'totalCorrections' in trainingData) ? (trainingData as any).totalCorrections : 0}</div>
                 <p className="text-xs text-muted-foreground">
-                  {trainingData?.pendingCorrections || 0} pending review
+                  {(trainingData && typeof trainingData === 'object' && 'pendingCorrections' in trainingData) ? (trainingData as any).pendingCorrections : 0} pending review
                 </p>
               </CardContent>
             </Card>
