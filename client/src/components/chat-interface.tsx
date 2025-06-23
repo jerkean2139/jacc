@@ -561,7 +561,7 @@ With these details, I'll create a customized proposal highlighting value proposi
         </div>
 
         {/* Enhanced Input Box for New Chat */}
-        <div className="border-t border-slate-200 dark:border-slate-700 p-4 pb-safe md:pb-4">
+        <div className="border-t border-slate-200 dark:border-slate-700 p-4 pb-20 md:pb-4">
           {/* File Upload Area */}
           {showFileUpload && (
             <div className="mb-4 max-w-4xl mx-auto">
@@ -771,7 +771,7 @@ With these details, I'll create a customized proposal highlighting value proposi
       )}
 
       {/* Chat Input */}
-      <div className="border-t border-slate-200 dark:border-slate-700 p-4 pb-safe md:pb-4">
+      <div className="border-t border-slate-200 dark:border-slate-700 p-4 pb-20 md:pb-4">
         {/* Input Box */}
         <div className="flex items-end space-x-3 max-w-4xl mx-auto">
           <div className="flex-1 relative">
