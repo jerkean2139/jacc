@@ -406,15 +406,25 @@ export default function Sidebar({
             <h4 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
               Chat Categories
             </h4>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="w-5 h-5"
-              onClick={() => setCreatingFolder(true)}
-              title="Create new chat category"
-            >
-              <FolderPlus className="w-3 h-3" />
-            </Button>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="w-5 h-5"
+                onClick={() => setCreatingFolder(true)}
+                title="Create new chat category"
+              >
+                <FolderPlus className="w-3 h-3" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="w-5 h-5"
+                title="Manage categories"
+              >
+                <Settings className="w-3 h-3 text-slate-400" />
+              </Button>
+            </div>
           </div>
 
           {creatingFolder && (
@@ -508,13 +518,11 @@ export default function Sidebar({
             AI Tools
           </h4>
           <div className="space-y-1">
-            <a 
-              href="/prompt-customization" 
-              className="flex items-center space-x-3 p-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg cursor-pointer transition-colors"
-            >
-              <Brain className="w-4 h-4 text-purple-500" />
-              <span className="text-sm text-slate-700 dark:text-slate-300">AI Prompts</span>
-            </a>
+            <div className="flex items-center space-x-3 p-2 rounded-lg cursor-not-allowed opacity-50">
+              <Brain className="w-4 h-4 text-gray-400" />
+              <span className="text-sm text-gray-400">AI Prompts</span>
+              <span className="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-full ml-auto">Coming Soon</span>
+            </div>
             <a 
               href="/user-guide" 
               className="flex items-center space-x-3 p-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg cursor-pointer transition-colors"
@@ -554,13 +562,11 @@ export default function Sidebar({
             Knowledge Base
           </h4>
           <div className="space-y-1">
-            <a 
-              href="/documents" 
-              className="flex items-center space-x-3 p-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg cursor-pointer transition-colors"
-            >
-              <FileSearch className="w-4 h-4 text-orange-500" />
-              <span className="text-sm text-slate-700 dark:text-slate-300">Document Library</span>
-            </a>
+            <div className="flex items-center space-x-3 p-2 rounded-lg cursor-not-allowed opacity-50">
+              <FileSearch className="w-4 h-4 text-gray-400" />
+              <span className="text-sm text-gray-400">Document Library</span>
+              <span className="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-full ml-auto">Coming Soon</span>
+            </div>
           </div>
         </div>
       </ScrollArea>

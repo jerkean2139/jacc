@@ -580,7 +580,7 @@ With these details, I'll create a customized proposal highlighting value proposi
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyPress}
                 placeholder="Ask JACC anything about rates, documents, or client questions..."
-                className="auto-resize border-slate-300 dark:border-slate-600 rounded-xl pr-28 min-h-[50px] max-h-[120px] resize-none focus:ring-green-500 focus:border-green-500"
+                className="auto-resize border-slate-300 dark:border-slate-600 rounded-xl pr-28 min-h-[50px] max-h-[120px] resize-none focus:ring-blue-500 focus:border-blue-500 shadow-sm"
                 disabled={sendMessageMutation.isPending}
               />
               
