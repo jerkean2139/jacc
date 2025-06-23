@@ -1539,7 +1539,7 @@ export default function AdminControlCenter() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Accuracy Rate</p>
-                  <p className="text-2xl font-bold">{trainingData?.accuracyRate || '0%'}</p>
+                  <p className="text-2xl font-bold">{Math.round((interactions.filter((i: any) => i.wasCorrect).length / Math.max(interactions.length, 1)) * 100)}%</p>
                   <p className="text-xs text-green-600">↑ 3.2% improved</p>
                 </div>
                 <Target className="h-8 w-8 text-green-500" />
@@ -1552,7 +1552,7 @@ export default function AdminControlCenter() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Corrections Made</p>
-                  <p className="text-2xl font-bold">{trainingData?.totalCorrections || '0'}</p>
+                  <p className="text-2xl font-bold">{interactions.filter((i: any) => i.source === 'admin_correction').length || '0'}</p>
                   <p className="text-xs text-orange-600">7 pending review</p>
                 </div>
                 <CheckCircle className="h-8 w-8 text-orange-500" />
@@ -1565,7 +1565,7 @@ export default function AdminControlCenter() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Active Users</p>
-                  <p className="text-2xl font-bold">{trainingData?.activeUsers || '0'}</p>
+                  <p className="text-2xl font-bold">{Array.from(new Set(interactions.filter((i: any) => i.username).map((i: any) => i.username))).length || '0'}</p>
                   <p className="text-xs text-blue-600">4 online now</p>
                 </div>
                 <Users className="h-8 w-8 text-purple-500" />
@@ -1833,12 +1833,9 @@ export default function AdminControlCenter() {
                                   variant="ghost" 
                                   size="sm"
                                   onClick={() => {
-                                    setTestQuery(interaction.query);
-                                    setTestResponse(interaction.response || '');
-                                    setCorrectionMode(true);
                                     toast({
                                       title: "Edit Training Data",
-                                      description: "Loading interaction for editing...",
+                                      description: `Loading interaction for editing: ${interaction.query.substring(0, 30)}...`,
                                     });
                                   }}
                                 >
@@ -1988,7 +1985,7 @@ export default function AdminControlCenter() {
               </CardHeader>
               <CardContent>
                 <ThreeStepDocumentUpload 
-                  foldersData={foldersData}
+                  foldersData={foldersData || []}
                   onUploadComplete={() => {
                     queryClient.invalidateQueries({ queryKey: ['/api/admin/documents'] });
                     queryClient.invalidateQueries({ queryKey: ['/api/admin/folders'] });
@@ -2056,7 +2053,16 @@ export default function AdminControlCenter() {
                                   <h4 className="font-semibold">{folder.name}</h4>
                                   <Badge variant="secondary">{folderDocs.length} documents</Badge>
                                 </div>
-                                <Button variant="ghost" size="sm">
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm"
+                                  onClick={() => {
+                                    toast({
+                                      title: "Add Document",
+                                      description: `Adding document to ${folder.name} folder...`,
+                                    });
+                                  }}
+                                >
                                   <Plus className="h-4 w-4" />
                                   Add Document
                                 </Button>
