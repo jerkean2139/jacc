@@ -133,17 +133,19 @@ function AppContent() {
   return (
     <GamificationProvider userId={user?.id}>
       <DragDropProvider>
-        <Toaster />
-        <PWAStatus />
-        <OfflineIndicator />
-        <div className="hidden md:block">
-          <ContextualHelp />
+        <div className="min-h-screen bg-background safe-top safe-bottom">
+          <Toaster />
+          <PWAStatus />
+          <OfflineIndicator />
+          <div className="hidden md:block">
+            <ContextualHelp />
+          </div>
+          <InteractiveTutorial />
+          <OnboardingWalkthrough />
+          <PWAInstallPrompt />
+          <Router />
+          <BottomNav />
         </div>
-        <InteractiveTutorial />
-        <OnboardingWalkthrough />
-        <PWAInstallPrompt />
-        <Router />
-        <BottomNav />
       </DragDropProvider>
     </GamificationProvider>
   );
