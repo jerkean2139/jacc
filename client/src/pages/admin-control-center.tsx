@@ -1985,7 +1985,7 @@ export default function AdminControlCenter() {
               </CardHeader>
               <CardContent>
                 <ThreeStepDocumentUpload 
-                  foldersData={foldersData || []}
+                  foldersData={(foldersData as any[]) || []}
                   onUploadComplete={() => {
                     queryClient.invalidateQueries({ queryKey: ['/api/admin/documents'] });
                     queryClient.invalidateQueries({ queryKey: ['/api/admin/folders'] });
