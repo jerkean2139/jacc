@@ -1164,7 +1164,14 @@ function ThreeStepDocumentUpload({ foldersData, onUploadComplete }: {
   };
 
   const handleUpload = async () => {
-    if (selectedFiles.length === 0) return;
+    if (selectedFiles.length === 0) {
+      toast({
+        title: "No Files Selected",
+        description: "Please select files to upload",
+        variant: "destructive",
+      });
+      return;
+    }
 
     setIsUploading(true);
     const formData = new FormData();
@@ -1177,6 +1184,12 @@ function ThreeStepDocumentUpload({ foldersData, onUploadComplete }: {
       formData.append('folderId', selectedFolder);
     }
     formData.append('permissions', permissions);
+
+    console.log('Starting upload with:', {
+      fileCount: selectedFiles.length,
+      folder: selectedFolder,
+      permissions
+    });
 
     uploadMutation.mutate(formData);
   };
