@@ -1911,7 +1911,7 @@ export default function AdminControlCenter() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="qa-knowledge" className="flex items-center gap-2">
             <HelpCircle className="h-4 w-4" />
             Q&A Knowledge
@@ -1920,13 +1920,9 @@ export default function AdminControlCenter() {
             <FileText className="h-4 w-4" />
             Document Center
           </TabsTrigger>
-          <TabsTrigger value="training-feedback" className="flex items-center gap-2">
-            <BarChart3 className="h-4 w-4" />
-            Training & Feedback
-          </TabsTrigger>
           <TabsTrigger value="chat-review" className="flex items-center gap-2">
             <MessageSquare className="h-4 w-4" />
-            Chat Review
+            Chat Review & Training
           </TabsTrigger>
           <TabsTrigger value="settings" className="flex items-center gap-2">
             <Settings className="h-4 w-4" />
@@ -2228,102 +2224,6 @@ export default function AdminControlCenter() {
               </CardContent>
             </Card>
           </div>
-        </TabsContent>
-
-        <TabsContent value="training-feedback" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Interactions</CardTitle>
-                <MessageSquare className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{(trainingData && typeof trainingData === 'object' && 'totalInteractions' in trainingData) ? (trainingData as any).totalInteractions : 0}</div>
-                <p className="text-xs text-muted-foreground">
-                  +{(trainingData && typeof trainingData === 'object' && 'recentInteractions' in trainingData) ? (trainingData as any).recentInteractions : 0} this week
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Accuracy Rate</CardTitle>
-                <Target className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{(trainingData && typeof trainingData === 'object' && 'accuracyRate' in trainingData) ? (trainingData as any).accuracyRate : 0}%</div>
-                <Progress value={(trainingData && typeof trainingData === 'object' && 'accuracyRate' in trainingData) ? (trainingData as any).accuracyRate : 0} className="mt-2" />
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Corrections Made</CardTitle>
-                <CheckCircle className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{(trainingData && typeof trainingData === 'object' && 'totalCorrections' in trainingData) ? (trainingData as any).totalCorrections : 0}</div>
-                <p className="text-xs text-muted-foreground">
-                  {(trainingData && typeof trainingData === 'object' && 'pendingCorrections' in trainingData) ? (trainingData as any).pendingCorrections : 0} pending review
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* AI Simulator Section */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Brain className="h-5 w-5" />
-                AI Simulator & Testing
-              </CardTitle>
-              <CardDescription>
-                Test AI responses and provide training corrections
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <AISimulatorInterface />
-            </CardContent>
-          </Card>
-
-          {/* Training Analytics Section */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5" />
-                Training Analytics & Feedback
-              </CardTitle>
-              <CardDescription>
-                Monitor AI performance and training effectiveness with cleanup tools
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {trainingLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <RefreshCw className="h-6 w-6 animate-spin" />
-                  <span className="ml-2">Loading training data...</span>
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <Badge variant="secondary">
-                        {(trainingData && typeof trainingData === 'object' && 'totalInteractions' in trainingData) ? (trainingData as any).totalInteractions : 0} total interactions
-                      </Badge>
-                      <Badge variant="outline">
-                        Real database data
-                      </Badge>
-                    </div>
-                    <Button variant="destructive" size="sm">
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Remove Duplicates
-                    </Button>
-                  </div>
-                  <TrainingInteractionsTable />
-                </div>
-              )}
-            </CardContent>
-          </Card>
         </TabsContent>
 
         <TabsContent value="chat-review" className="space-y-6">
