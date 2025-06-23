@@ -85,10 +85,42 @@ export default function AdminControlCenter() {
 
   // Training Interactions Table Component
   function TrainingInteractionsTable() {
-    const { data: trainingInteractions, isLoading: interactionsLoading } = useQuery({
+    const [cleanupLoading, setCleanupLoading] = useState(false);
+    const { data: trainingInteractions, isLoading: interactionsLoading, refetch } = useQuery({
       queryKey: ['/api/admin/training/interactions'],
       refetchInterval: 30000, // Refresh every 30 seconds
     });
+
+    const handleCleanupDuplicates = async () => {
+      try {
+        setCleanupLoading(true);
+        const response = await fetch('/api/admin/training/cleanup-duplicates', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          toast({
+            title: "Cleanup Complete",
+            description: result.message,
+          });
+          refetch();
+        } else {
+          throw new Error(result.error || 'Cleanup failed');
+        }
+      } catch (error) {
+        console.error('Cleanup error:', error);
+        toast({
+          title: "Cleanup Failed", 
+          description: error instanceof Error ? error.message : 'Unknown error occurred',
+          variant: "destructive"
+        });
+      } finally {
+        setCleanupLoading(false);
+      }
+    };
 
     if (interactionsLoading) {
       return (
@@ -123,6 +155,17 @@ export default function AdminControlCenter() {
 
         {/* Training Interactions Table */}
         <div className="border rounded-lg">
+          <div className="flex items-center justify-between p-4 border-b">
+            <h3 className="text-lg font-semibold">Training Interactions</h3>
+            <Button
+              onClick={handleCleanupDuplicates}
+              size="sm"
+              variant="outline"
+              disabled={cleanupLoading}
+            >
+              {cleanupLoading ? 'Cleaning...' : 'Remove Duplicates'}
+            </Button>
+          </div>
           <Table>
             <TableHeader>
               <TableRow>
