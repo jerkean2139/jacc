@@ -43,6 +43,7 @@ interface FAQ {
 
 export default function AdminControlCenter() {
   const [activeTab, setActiveTab] = useState('documents');
+  const [trainingSubTab, setTrainingSubTab] = useState('chat-review');
   const [expandedFolders, setExpandedFolders] = useState<string[]>([]);
   const [previewDocument, setPreviewDocument] = useState<DocumentEntry | null>(null);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
@@ -733,7 +734,7 @@ export default function AdminControlCenter() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-7">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="documents" className="flex items-center gap-2">
             <Folder className="h-4 w-4" />
             Documents
@@ -742,17 +743,9 @@ export default function AdminControlCenter() {
             <MessageSquare className="h-4 w-4" />
             Knowledge Base
           </TabsTrigger>
-          <TabsTrigger value="chat-review" className="flex items-center gap-2">
-            <MessageSquare className="h-4 w-4" />
-            Chat Review
-          </TabsTrigger>
-          <TabsTrigger value="ai-simulator" className="flex items-center gap-2">
-            <Brain className="h-4 w-4" />
-            AI Simulator
-          </TabsTrigger>
           <TabsTrigger value="training" className="flex items-center gap-2">
             <Brain className="h-4 w-4" />
-            Training
+            Training & Review
           </TabsTrigger>
           <TabsTrigger value="analytics" className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4" />
@@ -1155,82 +1148,227 @@ export default function AdminControlCenter() {
         <TabsContent value="training" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Training Analytics</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Brain className="h-5 w-5" />
+                Training & Review Center
+              </CardTitle>
               <CardDescription>
-                Real-time AI training performance and user interactions from database
+                Review user conversations and train AI responses through corrections and feedback
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {trainingLoading ? (
-                <div className="flex items-center justify-center p-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                  <span className="ml-2">Loading training data...</span>
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                    <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                      <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">
-                        {(trainingAnalytics as any)?.totalInteractions || 0}
-                      </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">Chat Sessions</div>
-                    </div>
-                    <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                      <div className="text-2xl font-bold text-green-700 dark:text-green-300">
-                        {(trainingAnalytics as any)?.totalMessages || 0}
-                      </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">AI Responses</div>
-                    </div>
-                    <div className="text-center p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
-                      <div className="text-2xl font-bold text-red-700 dark:text-red-300">
-                        {(trainingAnalytics as any)?.correctionsSubmitted || 0}
-                      </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">Corrections</div>
-                    </div>
-                    <div className="text-center p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg">
-                      <div className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">
-                        {(trainingAnalytics as any)?.approvalsSubmitted || 0}
-                      </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">Approvals</div>
-                    </div>
-                    <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-                      <div className="text-2xl font-bold text-purple-700 dark:text-purple-300">
-                        {(trainingAnalytics as any)?.knowledgeBaseEntries || 0}
-                      </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">Knowledge Base</div>
-                    </div>
-                    <div className="text-center p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
-                      <div className="text-2xl font-bold text-orange-700 dark:text-orange-300">
-                        {(trainingAnalytics as any)?.documentsProcessed || 0}
-                      </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">Documents</div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <Badge variant="outline" className="text-xs">
-                      Data Source: {(trainingAnalytics as any)?.dataSource || 'database'}
-                    </Badge>
-                    <Badge variant="outline" className="text-xs">
-                      Last Updated: {(trainingAnalytics as any)?.lastUpdated ? 
-                        new Date((trainingAnalytics as any).lastUpdated).toLocaleString() : 'Now'}
-                    </Badge>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+              <Tabs value={trainingSubTab} onValueChange={setTrainingSubTab} className="space-y-4">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="chat-review" className="flex items-center gap-2">
+                    <MessageSquare className="h-4 w-4" />
+                    Chat Review
+                  </TabsTrigger>
+                  <TabsTrigger value="ai-training" className="flex items-center gap-2">
+                    <Brain className="h-4 w-4" />
+                    AI Training
+                  </TabsTrigger>
+                </TabsList>
 
-          {/* Training Interactions Table */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Training Interactions</CardTitle>
-              <CardDescription>
-                Detailed view of admin corrections, approvals, and training activities
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <TrainingInteractionsTable />
+                <TabsContent value="chat-review" className="space-y-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center justify-between">
+                        Chat Review Center
+                        <div className="flex gap-2">
+                          <Select value={chatReviewFilter} onValueChange={setChatReviewFilter}>
+                            <SelectTrigger className="w-32">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="pending">Pending</SelectItem>
+                              <SelectItem value="approved">Approved</SelectItem>
+                              <SelectItem value="needs_correction">Needs Correction</SelectItem>
+                              <SelectItem value="all">All</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardTitle>
+                      <CardDescription>
+                        Review user conversations and provide feedback on AI responses
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {chatReviewsLoading ? (
+                          <div className="flex items-center justify-center p-8">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                            <span className="ml-2">Loading conversations...</span>
+                          </div>
+                        ) : (
+                          <div className="space-y-4">
+                            {chatReviews && chatReviews.length > 0 ? (
+                              chatReviews
+                                .filter((chat: any) => chatReviewFilter === 'all' || chat.reviewStatus === chatReviewFilter)
+                                .map((chat: any) => (
+                                  <div key={chat.chatId} className="border rounded-lg p-4 space-y-3">
+                                    <div className="flex justify-between items-start">
+                                      <div>
+                                        <h4 className="font-medium text-sm">Chat: {chat.title || 'Untitled'}</h4>
+                                        <p className="text-xs text-gray-500">
+                                          {chat.messageCount} messages • {new Date(chat.lastActivity).toLocaleDateString()}
+                                        </p>
+                                      </div>
+                                      <div className="flex gap-2">
+                                        <Badge variant={chat.reviewStatus === 'approved' ? 'default' : 'secondary'}>
+                                          {chat.reviewStatus}
+                                        </Badge>
+                                        <Button 
+                                          size="sm" 
+                                          variant="outline"
+                                          onClick={() => {
+                                            setSelectedChatId(chat.chatId);
+                                            setShowChatReviewModal(true);
+                                          }}
+                                        >
+                                          <Eye className="h-4 w-4 mr-1" />
+                                          Review
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))
+                            ) : (
+                              <div className="text-center p-8 text-gray-500">
+                                No conversations found for review
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="ai-training" className="space-y-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>AI Training Simulator</CardTitle>
+                      <CardDescription>
+                        Test AI responses and provide training corrections to improve system performance
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="testQuery">Test Query</Label>
+                          <div className="flex gap-2">
+                            <Input
+                              id="testQuery"
+                              placeholder="Enter a question to test the AI response..."
+                              value={testQuery}
+                              onChange={(e) => setTestQuery(e.target.value)}
+                              className="flex-1"
+                            />
+                            <Button 
+                              onClick={handleTestAI}
+                              disabled={!testQuery.trim() || isTestingAI}
+                              className="bg-blue-600 hover:bg-blue-700"
+                            >
+                              {isTestingAI ? (
+                                <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                              ) : (
+                                <Send className="h-4 w-4 mr-1" />
+                              )}
+                              Test AI
+                            </Button>
+                          </div>
+                        </div>
+
+                        {isTestingAI && (
+                          <div className="flex items-center justify-center p-8 border-2 border-dashed border-blue-200 rounded-lg">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                            <span className="ml-2">AI is processing your query...</span>
+                          </div>
+                        )}
+
+                        {aiResponse && (
+                          <div className="space-y-4 border rounded-lg p-4 bg-gray-50 dark:bg-gray-800">
+                            <div className="flex items-center justify-between">
+                              <h4 className="font-medium flex items-center gap-2">
+                                <Bot className="h-4 w-4" />
+                                AI Response
+                              </h4>
+                              <Badge variant="outline">Test Response</Badge>
+                            </div>
+                            <div 
+                              className="prose prose-sm max-w-none dark:prose-invert leading-relaxed"
+                              dangerouslySetInnerHTML={{ __html: aiResponse }}
+                            />
+                            
+                            {!showCorrectInterface && (
+                              <div className="flex gap-2 pt-4 border-t">
+                                <Button
+                                  variant="outline"
+                                  onClick={() => setShowCorrectInterface(true)}
+                                  className="text-orange-600 border-orange-300 hover:bg-orange-50"
+                                >
+                                  <Edit className="h-4 w-4 mr-1" />
+                                  Provide Correction
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  onClick={handleMarkAsCorrect}
+                                  className="text-green-600 border-green-300 hover:bg-green-50"
+                                >
+                                  <ThumbsUp className="h-4 w-4 mr-1" />
+                                  Mark as Correct
+                                </Button>
+                              </div>
+                            )}
+
+                            {showCorrectInterface && (
+                              <div className="space-y-4 pt-4 border-t">
+                                <div>
+                                  <Label htmlFor="correctedResponse">Corrected Response</Label>
+                                  <Textarea
+                                    id="correctedResponse"
+                                    placeholder="Provide the correct response for training..."
+                                    value={correctedResponse}
+                                    onChange={(e) => setCorrectedResponse(e.target.value)}
+                                    rows={6}
+                                    className="mt-1"
+                                  />
+                                </div>
+                                
+                                <div className="flex gap-2">
+                                  <Button
+                                    onClick={handleSubmitCorrection}
+                                    disabled={!correctedResponse.trim()}
+                                    className="bg-blue-600 hover:bg-blue-700"
+                                  >
+                                    <Plus className="h-4 w-4 mr-1" />
+                                    Submit Training
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    onClick={() => {
+                                      setShowCorrectInterface(false);
+                                      setCorrectedResponse('');
+                                    }}
+                                  >
+                                    Cancel
+                                  </Button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {!aiResponse && !isTestingAI && (
+                          <div className="text-center p-8 text-gray-500 border-2 border-dashed border-gray-200 rounded-lg">
+                            Enter a test query above to simulate AI responses and train the system
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              </Tabs>
             </CardContent>
           </Card>
         </TabsContent>
@@ -1435,15 +1573,82 @@ export default function AdminControlCenter() {
         <TabsContent value="analytics" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>System Analytics</CardTitle>
+              <CardTitle>Training Analytics</CardTitle>
               <CardDescription>
-                Overview of system performance and usage metrics
+                Real-time AI training performance and user interactions from database
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center p-8 text-gray-500">
-                Analytics dashboard coming soon
-              </div>
+              {trainingLoading ? (
+                <div className="flex items-center justify-center p-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  <span className="ml-2">Loading training data...</span>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                    <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                      <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">
+                        {(trainingAnalytics as any)?.totalInteractions || 0}
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Chat Sessions</div>
+                    </div>
+                    <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                      <div className="text-2xl font-bold text-green-700 dark:text-green-300">
+                        {(trainingAnalytics as any)?.totalMessages || 0}
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">AI Responses</div>
+                    </div>
+                    <div className="text-center p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                      <div className="text-2xl font-bold text-red-700 dark:text-red-300">
+                        {(trainingAnalytics as any)?.correctionsSubmitted || 0}
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Corrections</div>
+                    </div>
+                    <div className="text-center p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg">
+                      <div className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">
+                        {(trainingAnalytics as any)?.approvalsSubmitted || 0}
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Approvals</div>
+                    </div>
+                    <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                      <div className="text-2xl font-bold text-purple-700 dark:text-purple-300">
+                        {(trainingAnalytics as any)?.knowledgeBaseEntries || 0}
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Knowledge Base</div>
+                    </div>
+                    <div className="text-center p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+                      <div className="text-2xl font-bold text-orange-700 dark:text-orange-300">
+                        {(trainingAnalytics as any)?.documentsProcessed || 0}
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Documents</div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <Badge variant="outline" className="text-xs">
+                      Data Source: {(trainingAnalytics as any)?.dataSource || 'database'}
+                    </Badge>
+                    <Badge variant="outline" className="text-xs">
+                      Last Updated: {(trainingAnalytics as any)?.lastUpdated ? 
+                        new Date((trainingAnalytics as any).lastUpdated).toLocaleString() : 'Now'}
+                    </Badge>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Training Interactions Table */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Training Interactions</CardTitle>
+              <CardDescription>
+                Detailed view of admin corrections, approvals, and training activities
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <TrainingInteractionsTable />
             </CardContent>
           </Card>
         </TabsContent>
