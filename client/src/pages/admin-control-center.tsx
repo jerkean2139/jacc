@@ -286,83 +286,216 @@ export default function AdminControlCenter() {
         </TabsContent>
 
         <TabsContent value="document-center" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5" />
-                Document Management Center
-              </CardTitle>
-              <CardDescription>
-                Upload, organize, and manage training documents and resources
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {documentsLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <RefreshCw className="h-6 w-6 animate-spin" />
-                  <span className="ml-2">Loading documents...</span>
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <Badge variant="secondary">{Array.isArray(documentsData) ? documentsData.length : 0} documents</Badge>
-                      <Badge variant="outline">{Array.isArray(foldersData) ? foldersData.length : 0} folders</Badge>
-                    </div>
-                    <Button className="flex items-center gap-2">
-                      <Upload className="h-4 w-4" />
-                      Upload Documents
-                    </Button>
-                  </div>
+          <div className="space-y-6">
+            {/* Document Upload Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Upload className="h-5 w-5" />
+                  3-Step Document Upload Process
+                </CardTitle>
+                <CardDescription>
+                  Upload documents with proper folder organization and permissions
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <DocumentUploadManager 
+                  foldersData={foldersData}
+                  onUploadComplete={() => {
+                    queryClient.invalidateQueries({ queryKey: ['/api/admin/documents'] });
+                    queryClient.invalidateQueries({ queryKey: ['/api/admin/folders'] });
+                  }}
+                />
+              </CardContent>
+            </Card>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {Array.isArray(documentsData) ? documentsData.slice(0, 6).map((doc: DocumentEntry) => (
-                      <Card key={doc.id} className="p-4">
-                        <div className="flex items-start justify-between mb-2">
-                          <div className="flex-1">
-                            <h4 className="font-medium truncate">{doc.originalName || doc.name}</h4>
-                            <p className="text-sm text-gray-500">{doc.mimeType}</p>
-                          </div>
-                          <Badge variant="outline" className="ml-2">
-                            {Math.round(doc.size / 1024)}KB
-                          </Badge>
-                        </div>
-                        <div className="flex items-center gap-2 mt-3">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handlePreviewDocument(doc)}
-                            className="flex items-center gap-1"
-                          >
-                            <Eye className="h-3 w-3" />
-                            View
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleDownloadDocument(doc)}
-                            className="flex items-center gap-1"
-                          >
-                            <Download className="h-3 w-3" />
-                            Download
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleEditDocument(doc)}
-                            className="flex items-center gap-1"
-                          >
-                            <Edit className="h-3 w-3" />
-                            Edit
-                          </Button>
-                        </div>
-                      </Card>
-                    )) : null}
+            {/* Document Management Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="h-5 w-5" />
+                  Document Management Center
+                </CardTitle>
+                <CardDescription>
+                  Manage documents across {Array.isArray(foldersData) ? foldersData.length : 0} folders with {Array.isArray(documentsData) ? documentsData.length : 0} total documents
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {documentsLoading || foldersLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <RefreshCw className="h-6 w-6 animate-spin" />
+                    <span className="ml-2">Loading documents...</span>
                   </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                ) : (
+                  <div className="space-y-6">
+                    {/* Summary Stats */}
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      <Card className="p-4">
+                        <div className="text-2xl font-bold">{Array.isArray(documentsData) ? documentsData.length : 0}</div>
+                        <div className="text-sm text-gray-600">Total Documents</div>
+                      </Card>
+                      <Card className="p-4">
+                        <div className="text-2xl font-bold">{Array.isArray(foldersData) ? foldersData.length : 0}</div>
+                        <div className="text-sm text-gray-600">Folders</div>
+                      </Card>
+                      <Card className="p-4">
+                        <div className="text-2xl font-bold">
+                          {Array.isArray(documentsData) ? documentsData.filter((d: any) => d.folderId).length : 0}
+                        </div>
+                        <div className="text-sm text-gray-600">Organized</div>
+                      </Card>
+                      <Card className="p-4">
+                        <div className="text-2xl font-bold">
+                          {Array.isArray(documentsData) ? documentsData.filter((d: any) => !d.folderId).length : 0}
+                        </div>
+                        <div className="text-sm text-gray-600">Unassigned</div>
+                      </Card>
+                    </div>
+
+                    {/* Folders with Documents */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold">Documents by Folder</h3>
+                      {Array.isArray(foldersData) ? foldersData.map((folder: any) => {
+                        const folderDocs = Array.isArray(documentsData) ? 
+                          documentsData.filter((doc: any) => doc.folderId === folder.id) : [];
+                        
+                        return (
+                          <Card key={folder.id} className="overflow-hidden">
+                            <div className="p-4 bg-gray-50 dark:bg-gray-800 border-b">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  <FolderOpen className="h-5 w-5" />
+                                  <h4 className="font-semibold">{folder.name}</h4>
+                                  <Badge variant="secondary">{folderDocs.length} documents</Badge>
+                                </div>
+                                <Button variant="ghost" size="sm">
+                                  <Plus className="h-4 w-4" />
+                                  Add Document
+                                </Button>
+                              </div>
+                              {folder.description && (
+                                <p className="text-sm text-gray-600 mt-2">{folder.description}</p>
+                              )}
+                            </div>
+                            {folderDocs.length > 0 && (
+                              <div className="p-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                  {folderDocs.slice(0, 6).map((doc: any) => (
+                                    <div key={doc.id} className="border rounded-lg p-3">
+                                      <div className="flex items-start justify-between mb-2">
+                                        <div className="flex-1 min-w-0">
+                                          <h5 className="font-medium truncate text-sm">{doc.originalName || doc.name}</h5>
+                                          <p className="text-xs text-gray-500">{doc.mimeType}</p>
+                                        </div>
+                                        <Badge variant="outline" className="ml-2 text-xs">
+                                          {Math.round(doc.size / 1024)}KB
+                                        </Badge>
+                                      </div>
+                                      <div className="flex items-center gap-1">
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          onClick={() => handlePreviewDocument(doc)}
+                                          className="flex items-center gap-1 text-xs px-2 py-1 h-7"
+                                        >
+                                          <Eye className="h-3 w-3" />
+                                          View
+                                        </Button>
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          onClick={() => handleDownloadDocument(doc)}
+                                          className="flex items-center gap-1 text-xs px-2 py-1 h-7"
+                                        >
+                                          <Download className="h-3 w-3" />
+                                          Download
+                                        </Button>
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          onClick={() => handleEditDocument(doc)}
+                                          className="flex items-center gap-1 text-xs px-2 py-1 h-7"
+                                        >
+                                          <Edit className="h-3 w-3" />
+                                          Edit
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                                {folderDocs.length > 6 && (
+                                  <div className="mt-3 text-center">
+                                    <Button variant="ghost" size="sm">
+                                      View all {folderDocs.length} documents
+                                    </Button>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </Card>
+                        );
+                      }) : null}
+
+                      {/* Unassigned Documents */}
+                      {Array.isArray(documentsData) && documentsData.filter((d: any) => !d.folderId).length > 0 && (
+                        <Card>
+                          <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border-b">
+                            <div className="flex items-center gap-2">
+                              <Folder className="h-5 w-5" />
+                              <h4 className="font-semibold">Unassigned Documents</h4>
+                              <Badge variant="destructive">
+                                {documentsData.filter((d: any) => !d.folderId).length} documents
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-gray-600 mt-2">
+                              Documents that need to be organized into folders
+                            </p>
+                          </div>
+                          <div className="p-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                              {documentsData.filter((d: any) => !d.folderId).slice(0, 6).map((doc: any) => (
+                                <div key={doc.id} className="border rounded-lg p-3">
+                                  <div className="flex items-start justify-between mb-2">
+                                    <div className="flex-1 min-w-0">
+                                      <h5 className="font-medium truncate text-sm">{doc.originalName || doc.name}</h5>
+                                      <p className="text-xs text-gray-500">{doc.mimeType}</p>
+                                    </div>
+                                    <Badge variant="outline" className="ml-2 text-xs">
+                                      {Math.round(doc.size / 1024)}KB
+                                    </Badge>
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => handlePreviewDocument(doc)}
+                                      className="flex items-center gap-1 text-xs px-2 py-1 h-7"
+                                    >
+                                      <Eye className="h-3 w-3" />
+                                      View
+                                    </Button>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => handleEditDocument(doc)}
+                                      className="flex items-center gap-1 text-xs px-2 py-1 h-7"
+                                    >
+                                      <Edit className="h-3 w-3" />
+                                      Assign
+                                    </Button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </Card>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
 
         <TabsContent value="training-feedback" className="space-y-6">
