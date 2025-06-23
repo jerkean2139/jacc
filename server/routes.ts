@@ -4484,6 +4484,35 @@ User Context: {userRole}`,
     }
   });
 
+  // Website scraping endpoint
+  app.post('/api/scrape-website', isAuthenticated, async (req: any, res) => {
+    try {
+      const { url } = req.body;
+      
+      if (!url || typeof url !== 'string') {
+        return res.status(400).json({ message: "URL is required" });
+      }
+
+      // Validate URL format
+      try {
+        new URL(url);
+      } catch {
+        return res.status(400).json({ message: "Invalid URL format" });
+      }
+
+      const { websiteScrapingService } = await import('./website-scraper');
+      const scrapedContent = await websiteScrapingService.scrapeWebsite(url);
+      
+      res.json(scrapedContent);
+    } catch (error) {
+      console.error("Error scraping website:", error);
+      res.status(500).json({ 
+        message: "Failed to scrape website", 
+        error: error.message 
+      });
+    }
+  });
+
   // Document search endpoint
   app.get('/api/drive/search', async (req: any, res) => {
     try {
