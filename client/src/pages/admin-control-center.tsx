@@ -84,6 +84,13 @@ export default function AdminControlCenter() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Force invalidate chat reviews cache when training tab is accessed
+  React.useEffect(() => {
+    if (activeTab === 'training') {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/chat-reviews'] });
+    }
+  }, [activeTab, queryClient]);
+
   // Training Interactions Table Component
   function TrainingInteractionsTable() {
     const [cleanupLoading, setCleanupLoading] = useState(false);
@@ -300,7 +307,9 @@ export default function AdminControlCenter() {
   // Fetch chat reviews
   const { data: chatReviews, isLoading: chatReviewsLoading } = useQuery({
     queryKey: ['/api/admin/chat-reviews'],
-    enabled: activeTab === 'chat-review',
+    enabled: activeTab === 'training',
+    staleTime: 0, // Always fetch fresh data
+    gcTime: 0, // Don't cache the data (v5 syntax)
   });
 
   // Fetch chat details for review (handled manually in handleReviewChat function)
@@ -1201,10 +1210,14 @@ export default function AdminControlCenter() {
                           </div>
                         ) : (
                           <div className="space-y-4">
-                            {chatReviews && chatReviews.length > 0 ? (
-                              chatReviews
-                                .filter((chat: any) => chatReviewFilter === 'all' || chat.reviewStatus === chatReviewFilter)
-                                .map((chat: any) => (
+                            {(() => {
+                              const chatReviewsArray = Array.isArray(chatReviews) ? chatReviews : [];
+                              const filteredChats = chatReviewsArray.filter((chat: any) => 
+                                chatReviewFilter === 'all' || chat.reviewStatus === chatReviewFilter
+                              );
+                              
+                              return filteredChats.length > 0 ? (
+                                filteredChats.map((chat: any) => (
                                   <div key={chat.chatId} className="border rounded-lg p-4 space-y-3">
                                     <div className="flex justify-between items-start">
                                       <div>
@@ -1232,11 +1245,20 @@ export default function AdminControlCenter() {
                                     </div>
                                   </div>
                                 ))
-                            ) : (
-                              <div className="text-center p-8 text-gray-500">
-                                No conversations found for review
-                              </div>
-                            )}
+                              ) : (
+                                <div className="text-center p-8 text-gray-500">
+                                  {chatReviewFilter === 'all' 
+                                    ? 'No conversations found for review' 
+                                    : `No conversations with status "${chatReviewFilter}"`
+                                  }
+                                  {chatReviewsArray.length > 0 && (
+                                    <p className="text-xs mt-2">
+                                      Total conversations: {chatReviewsArray.length}
+                                    </p>
+                                  )}
+                                </div>
+                              );
+                            })()}
                           </div>
                         )}
                       </div>
