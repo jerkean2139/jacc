@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Progress } from "@/components/ui/progress";
 import { 
@@ -2378,7 +2379,7 @@ export default function AdminControlCenter() {
               </Select>
             </div>
             <div className="flex items-center space-x-2">
-              <Checkbox id="faq-active" defaultChecked />
+              <Checkbox id="faq-active" defaultChecked={true} />
               <Label htmlFor="faq-active">Active (visible to users)</Label>
             </div>
             <div className="flex justify-end gap-2 pt-4">
