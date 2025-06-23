@@ -242,46 +242,28 @@ export function SettingsManager() {
 
   return (
     <Tabs defaultValue="ai-search" className="space-y-6">
-      <TabsList className="grid w-full grid-cols-6 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 border border-slate-200 dark:border-slate-700 p-1">
-        <TabsTrigger 
-          value="ai-search" 
-          className="flex items-center gap-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white hover:bg-blue-100 dark:hover:bg-blue-800/50 transition-all duration-200 ease-in-out transform hover:scale-105 hover:shadow-md"
-        >
+      <TabsList className="grid w-full grid-cols-6">
+        <TabsTrigger value="ai-search" className="flex items-center gap-2">
           <Bot className="h-4 w-4" />
           AI & Search
         </TabsTrigger>
-        <TabsTrigger 
-          value="user-management" 
-          className="flex items-center gap-2 data-[state=active]:bg-green-600 data-[state=active]:text-white hover:bg-green-100 dark:hover:bg-green-800/50 transition-all duration-200 ease-in-out transform hover:scale-105 hover:shadow-md"
-        >
+        <TabsTrigger value="user-management" className="flex items-center gap-2">
           <Users className="h-4 w-4" />
           Users
         </TabsTrigger>
-        <TabsTrigger 
-          value="content-processing" 
-          className="flex items-center gap-2 data-[state=active]:bg-purple-600 data-[state=active]:text-white hover:bg-purple-100 dark:hover:bg-purple-800/50 transition-all duration-200 ease-in-out transform hover:scale-105 hover:shadow-md"
-        >
+        <TabsTrigger value="content-processing" className="flex items-center gap-2">
           <FileText className="h-4 w-4" />
           Content
         </TabsTrigger>
-        <TabsTrigger 
-          value="performance" 
-          className="flex items-center gap-2 data-[state=active]:bg-orange-600 data-[state=active]:text-white hover:bg-orange-100 dark:hover:bg-orange-800/50 transition-all duration-200 ease-in-out transform hover:scale-105 hover:shadow-md"
-        >
+        <TabsTrigger value="performance" className="flex items-center gap-2">
           <Settings className="h-4 w-4" />
           Performance
         </TabsTrigger>
-        <TabsTrigger 
-          value="ai-prompts" 
-          className="flex items-center gap-2 data-[state=active]:bg-indigo-600 data-[state=active]:text-white hover:bg-indigo-100 dark:hover:bg-indigo-800/50 transition-all duration-200 ease-in-out transform hover:scale-105 hover:shadow-md"
-        >
+        <TabsTrigger value="ai-prompts" className="flex items-center gap-2">
           <MessageSquare className="h-4 w-4" />
           AI Prompts
         </TabsTrigger>
-        <TabsTrigger 
-          value="system-status" 
-          className="flex items-center gap-2 data-[state=active]:bg-red-600 data-[state=active]:text-white hover:bg-red-100 dark:hover:bg-red-800/50 transition-all duration-200 ease-in-out transform hover:scale-105 hover:shadow-md"
-        >
+        <TabsTrigger value="system-status" className="flex items-center gap-2">
           <Monitor className="h-4 w-4" />
           Status
         </TabsTrigger>
