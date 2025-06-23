@@ -298,9 +298,11 @@ ${faqResults.length > 0 ? `✅ Found ${faqResults.length} matches in FAQ Knowled
   webSearchResults ? `❌ Nothing found in JACC Memory (FAQ + Documents). Searched the web and found information that may be helpful.` :
   `❌ No relevant information found in internal systems or web search.`}
 
-**RESPONSE FORMAT - ALWAYS USE HTML STYLING:**
+**RESPONSE FORMAT - ALWAYS USE HTML STYLING WITH PROPER SPACING:**
 
 <p>[One sentence direct answer]</p>
+
+<br>
 
 <h2>Key Points:</h2>
 <ul>
@@ -309,6 +311,8 @@ ${faqResults.length > 0 ? `✅ Found ${faqResults.length} matches in FAQ Knowled
 <li>[Main point 3]</li>
 </ul>
 
+<br>
+
 <p>[One brief paragraph of explanation if needed]</p>
 
 ${webSearchResults ? `<p><strong>Note:</strong> This information comes from external web sources since nothing was found in our internal JACC Memory (FAQ knowledge base and document center).</p>` : ''}
@@ -316,10 +320,11 @@ ${webSearchResults ? `<p><strong>Note:</strong> This information comes from exte
 **CRITICAL FORMATTING RULES:**
 - Use HTML tags instead of markdown: <h1>, <h2>, <h3> for headings
 - Use <ul><li> for bullet points instead of ** asterisks
-- Use <p> tags for paragraphs
+- Use <p> tags for paragraphs with <br> tags for proper spacing
 - Use <strong> for bold text instead of **bold**
 - Use <em> for emphasis instead of *italics*
 - Start every response with <p>[direct answer]</p>
+- Add <br> tags between major sections for readability
 - Use exactly 3 <li> items maximum for key information
 - Keep total response under 150 words
 - NO repetition of information
@@ -811,7 +816,7 @@ When appropriate, suggest actions like saving payment processing information to 
     try {
       const { db } = await import('./db');
       const { faqKnowledgeBase } = await import('../shared/schema');
-      const { or, ilike, eq } = await import('drizzle-orm');
+      const { or, ilike, eq, and } = await import('drizzle-orm');
       
       // Search active FAQ entries for relevant matches
       const faqMatches = await db
@@ -823,8 +828,7 @@ When appropriate, suggest actions like saving payment processing information to 
             ilike(faqKnowledgeBase.answer, `%${query}%`),
             ilike(faqKnowledgeBase.tags, `%${query}%`)
           )
-        )
-        .where(eq(faqKnowledgeBase.isActive, true));
+        );
       
       console.log(`Found ${faqMatches.length} FAQ matches for: "${query}"`);
       return faqMatches;

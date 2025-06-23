@@ -1138,9 +1138,10 @@ function ThreeStepDocumentUpload({ foldersData, onUploadComplete }: {
       onUploadComplete();
     },
     onError: (error: any) => {
+      console.error('Upload error details:', error);
       toast({
         title: "Upload Failed",
-        description: error.message || "Failed to upload documents",
+        description: `Upload failed: ${error.message || 'Unknown error'}. Check file formats and network connection.`,
         variant: "destructive",
       });
     },
