@@ -5,6 +5,7 @@ import multer from "multer";
 import fs from "fs";
 import { eq, desc, sql, and, or, ilike } from 'drizzle-orm';
 import { registerChatTestingRoutes } from './chat-testing-system';
+import { storage } from './storage';
 // PDF parsing and OCR will be imported dynamically
 import { fromPath } from "pdf2pic";
 import OpenAI from "openai";
