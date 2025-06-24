@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Edit3, Trash2, MessageSquare, Mail, TrendingUp, Users, Home, ChevronRight, Wand2, Cloud, Tag, Camera, Monitor, BarChart, MapPin, Presentation, HelpCircle } from "lucide-react";
+import { Plus, Edit3, Trash2, MessageSquare, Mail, TrendingUp, Users, Home, ChevronRight, Wand2, Cloud, Tag, Camera, Monitor, BarChart, MapPin, Presentation, HelpCircle, Send, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
 import PromptTutorial, { PromptTooltip } from "@/components/prompt-tutorial";
@@ -378,8 +378,139 @@ export default function PromptCustomization() {
     return <div className="flex items-center justify-center p-8">Loading prompts...</div>;
   }
 
+  // Split-screen prompt tester component
+  const PromptTester = () => {
+    const [currentMessage, setCurrentMessage] = useState(testPromptContent);
+    const [testMessages, setTestMessages] = useState<Array<{id: string, content: string, isUser: boolean}>>([]);
+    const [isLoading, setIsLoading] = useState(false);
+
+    const sendTestMessage = async () => {
+      if (!currentMessage.trim()) return;
+      
+      const userMessage = {
+        id: Date.now().toString(),
+        content: currentMessage,
+        isUser: true
+      };
+      
+      setTestMessages(prev => [...prev, userMessage]);
+      setIsLoading(true);
+      
+      try {
+        const response = await apiRequest("POST", "/api/chats/new", {
+          message: currentMessage
+        });
+        
+        const aiMessage = {
+          id: (Date.now() + 1).toString(),
+          content: response.response || "Test response received",
+          isUser: false
+        };
+        
+        setTestMessages(prev => [...prev, aiMessage]);
+      } catch (error) {
+        console.error("Test message error:", error);
+        const errorMessage = {
+          id: (Date.now() + 1).toString(),
+          content: "Error testing prompt. Please try again.",
+          isUser: false
+        };
+        setTestMessages(prev => [...prev, errorMessage]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-6xl h-[80vh] flex">
+          {/* Left Panel - Template Editor */}
+          <div className="w-1/2 p-6 border-r">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Template: {testPromptTitle}</h3>
+              <Button variant="ghost" size="sm" onClick={() => setShowPromptTester(false)}>
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+            <div className="space-y-4 h-full flex flex-col">
+              <Label htmlFor="prompt-content">Edit and test your prompt:</Label>
+              <Textarea
+                id="prompt-content"
+                value={currentMessage}
+                onChange={(e) => setCurrentMessage(e.target.value)}
+                className="flex-1 min-h-[200px]"
+                placeholder="Enter your prompt to test..."
+              />
+              <Button onClick={sendTestMessage} disabled={isLoading} className="w-full">
+                <Send className="w-4 h-4 mr-2" />
+                {isLoading ? "Testing..." : "Test with JACC"}
+              </Button>
+            </div>
+          </div>
+          
+          {/* Right Panel - Chat Interface */}
+          <div className="w-1/2 p-6 flex flex-col">
+            <h3 className="text-lg font-semibold mb-4">Test Results</h3>
+            <div className="flex-1 overflow-auto space-y-4 mb-4">
+              {testMessages.length === 0 ? (
+                <div className="text-center text-muted-foreground py-8">
+                  Click "Test with JACC" to see how your prompt performs
+                </div>
+              ) : (
+                testMessages.map((message) => (
+                  <div key={message.id} className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-[80%] p-3 rounded-lg ${
+                      message.isUser 
+                        ? 'bg-primary text-primary-foreground' 
+                        : 'bg-muted'
+                    }`}>
+                      <p className="text-sm leading-relaxed">{message.content}</p>
+                    </div>
+                  </div>
+                ))
+              )}
+              {isLoading && (
+                <div className="flex justify-start">
+                  <div className="bg-muted p-3 rounded-lg">
+                    <p className="text-sm">JACC is thinking...</p>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setTestMessages([])}>
+                Clear Chat
+              </Button>
+              <Button 
+                onClick={() => {
+                  // Save as new prompt
+                  setFormData({
+                    name: testPromptTitle,
+                    writingStyle: "Template-based",
+                    systemRules: "AI prompt template",
+                    promptTemplate: currentMessage,
+                    category: "general",
+                    isDefault: false,
+                    tags: ["tested", "template"]
+                  });
+                  setShowPromptTester(false);
+                  setIsEditing(true);
+                }}
+              >
+                Save as Prompt
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="container mx-auto p-6 space-y-6">
+      {/* Prompt Tester Modal */}
+      {showPromptTester && <PromptTester />}
+      
       {/* Breadcrumb Navigation */}
       <nav className="flex items-center text-sm text-muted-foreground mb-4">
         <Link href="/" className="flex items-center hover:text-foreground transition-colors">
