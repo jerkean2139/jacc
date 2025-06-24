@@ -403,16 +403,16 @@ export default function PromptCustomization() {
         
         const aiMessage = {
           id: (Date.now() + 1).toString(),
-          content: response.response || "Test response received",
+          content: response.response || response.message || "I received your prompt. How can I help you today?",
           isUser: false
         };
         
         setTestMessages(prev => [...prev, aiMessage]);
       } catch (error) {
-        console.error("Test message error:", error);
+        console.error("AI request error:", error);
         const errorMessage = {
           id: (Date.now() + 1).toString(),
-          content: "Error testing prompt. Please try again.",
+          content: "I'm having trouble connecting right now. Please try again in a moment.",
           isUser: false
         };
         setTestMessages(prev => [...prev, errorMessage]);
@@ -475,7 +475,7 @@ export default function PromptCustomization() {
             <div className="flex-1 overflow-auto space-y-4 mb-4">
               {testMessages.length === 0 ? (
                 <div className="text-center text-muted-foreground py-8">
-                  Click "Test with JACC" to see how your prompt performs
+                  Click "Ask JACC" to test your prompt and see how the AI responds
                 </div>
               ) : (
                 testMessages.map((message) => (
