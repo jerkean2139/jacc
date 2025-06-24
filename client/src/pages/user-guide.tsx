@@ -72,7 +72,6 @@ export default function UserGuide() {
         <span>/</span>
         <span className="text-foreground font-medium">User Guide</span>
       </div>
-
       <div className="text-center space-y-4">
         <div className="flex items-center justify-center gap-3">
           <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
@@ -84,7 +83,6 @@ export default function UserGuide() {
           Complete onboarding and training guide for Tracer Co Card's AI-powered merchant services assistant
         </p>
       </div>
-
       {/* Role Selection */}
       <Card>
         <CardHeader>
@@ -123,7 +121,6 @@ export default function UserGuide() {
           </div>
         </CardContent>
       </Card>
-
       {/* Role-Specific Content */}
       <Tabs defaultValue="getting-started" className="space-y-6">
         <TabsList className="grid w-full grid-cols-5">
@@ -155,7 +152,7 @@ export default function UserGuide() {
               </Alert>
 
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold">What is Tracer?</h3>
+                <h3 className="text-lg font-semibold">What is JACC?</h3>
                 <p className="text-muted-foreground">
                   Tracer is Tracer Co Card's comprehensive AI-powered platform that combines:
                 </p>
