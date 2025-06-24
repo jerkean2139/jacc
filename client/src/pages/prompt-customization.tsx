@@ -678,14 +678,23 @@ export default function PromptCustomization() {
                               </p>
                             </div>
                           </div>
-                          <Button
-                            variant={exists ? "secondary" : "default"}
-                            size="sm"
-                            disabled={exists}
-                            onClick={() => createDefaultPrompt(template)}
-                          >
-                            {exists ? "Added" : "Use Template"}
-                          </Button>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => testTemplate(template)}
+                            >
+                              Test
+                            </Button>
+                            <Button
+                              variant={exists ? "secondary" : "default"}
+                              size="sm"
+                              disabled={exists}
+                              onClick={() => createDefaultPrompt(template)}
+                            >
+                              {exists ? "Added" : "Use Template"}
+                            </Button>
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
@@ -729,14 +738,23 @@ export default function PromptCustomization() {
                               </p>
                             </div>
                           </div>
-                          <Button
-                            variant={exists ? "secondary" : "default"}
-                            size="sm"
-                            disabled={exists}
-                            onClick={() => createDefaultPrompt(template)}
-                          >
-                            {exists ? "Added" : "Use Template"}
-                          </Button>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => testTemplate(template)}
+                            >
+                              Test
+                            </Button>
+                            <Button
+                              variant={exists ? "secondary" : "default"}
+                              size="sm"
+                              disabled={exists}
+                              onClick={() => createDefaultPrompt(template)}
+                            >
+                              {exists ? "Added" : "Use Template"}
+                            </Button>
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
@@ -773,14 +791,23 @@ export default function PromptCustomization() {
                               </p>
                             </div>
                           </div>
-                          <Button
-                            variant={exists ? "secondary" : "default"}
-                            size="sm"
-                            disabled={exists}
-                            onClick={() => createDefaultPrompt(template)}
-                          >
-                            {exists ? "Added" : "Use Template"}
-                          </Button>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => testTemplate(template)}
+                            >
+                              Test
+                            </Button>
+                            <Button
+                              variant={exists ? "secondary" : "default"}
+                              size="sm"
+                              disabled={exists}
+                              onClick={() => createDefaultPrompt(template)}
+                            >
+                              {exists ? "Added" : "Use Template"}
+                            </Button>
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
