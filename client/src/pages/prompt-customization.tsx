@@ -397,13 +397,25 @@ export default function PromptCustomization() {
       setIsLoading(true);
       
       try {
-        const response = await apiRequest("POST", "/api/chats/new", {
-          message: currentMessage
+        // First create a new chat if we don't have one
+        const chatResponse = await apiRequest("POST", "/api/chats/new", {
+          message: "Test chat for prompt testing"
+        });
+        
+        const chatId = chatResponse.chat?.id;
+        if (!chatId) {
+          throw new Error("Failed to create test chat");
+        }
+        
+        // Now send the actual message to get AI response
+        const messageResponse = await apiRequest("POST", `/api/chats/${chatId}/messages`, {
+          content: currentMessage,
+          role: 'user'
         });
         
         const aiMessage = {
           id: (Date.now() + 1).toString(),
-          content: response.response || response.message || "I received your prompt. How can I help you today?",
+          content: messageResponse.data?.aiMessage?.content || messageResponse.data?.response?.message || "I received your prompt and processed it successfully.",
           isUser: false
         };
         
@@ -412,7 +424,7 @@ export default function PromptCustomization() {
         console.error("AI request error:", error);
         const errorMessage = {
           id: (Date.now() + 1).toString(),
-          content: "I'm having trouble connecting right now. Please try again in a moment.",
+          content: "I'm having trouble processing your prompt right now. Please try again in a moment.",
           isUser: false
         };
         setTestMessages(prev => [...prev, errorMessage]);
