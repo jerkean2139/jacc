@@ -441,10 +441,31 @@ export default function PromptCustomization() {
                 className="flex-1 min-h-[200px]"
                 placeholder="Enter your prompt to test..."
               />
-              <Button onClick={sendTestMessage} disabled={isLoading} className="w-full">
-                <Send className="w-4 h-4 mr-2" />
-                {isLoading ? "Testing..." : "Test with JACC"}
-              </Button>
+              <div className="flex gap-2">
+                <Button onClick={sendTestMessage} disabled={isLoading} className="flex-1">
+                  <Send className="w-4 h-4 mr-2" />
+                  {isLoading ? "Testing..." : "Ask JACC"}
+                </Button>
+                <Button 
+                  onClick={() => {
+                    // Save as new prompt
+                    setFormData({
+                      name: testPromptTitle,
+                      writingStyle: "Template-based",
+                      systemRules: "AI prompt template",
+                      promptTemplate: currentMessage,
+                      category: "general",
+                      isDefault: false,
+                      tags: ["tested", "template"]
+                    });
+                    setShowPromptTester(false);
+                    setIsEditing(true);
+                  }}
+                  className="flex-1"
+                >
+                  Save as Prompt
+                </Button>
+              </div>
             </div>
           </div>
           
@@ -480,24 +501,6 @@ export default function PromptCustomization() {
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => setTestMessages([])}>
                 Clear Chat
-              </Button>
-              <Button 
-                onClick={() => {
-                  // Save as new prompt
-                  setFormData({
-                    name: testPromptTitle,
-                    writingStyle: "Template-based",
-                    systemRules: "AI prompt template",
-                    promptTemplate: currentMessage,
-                    category: "general",
-                    isDefault: false,
-                    tags: ["tested", "template"]
-                  });
-                  setShowPromptTester(false);
-                  setIsEditing(true);
-                }}
-              >
-                Save as Prompt
               </Button>
             </div>
           </div>
