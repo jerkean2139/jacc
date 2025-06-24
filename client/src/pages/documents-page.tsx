@@ -42,14 +42,21 @@ export default function DocumentsPage() {
       return folder.documents.filter((doc: any) => {
         if (isAdmin) return true; // Admins see all documents
         // Regular users only see documents that are not admin-only
-        return !doc.adminOnly;
+        return !doc.admin_only;
       });
     }) || []),
     ...(documentsData.unassignedDocuments?.filter((doc: any) => {
       if (isAdmin) return true; // Admins see all documents
-      return !doc.adminOnly; // Regular users only see non-admin documents
+      return !doc.admin_only; // Regular users only see non-admin documents
     }) || [])
   ] : [];
+
+  // Map the document structure to ensure consistent field names
+  const normalizedDocuments = documents.map((doc: any) => ({
+    ...doc,
+    folderId: doc.folder_id || doc.folderId,
+    adminOnly: doc.admin_only || doc.adminOnly
+  }));
 
   // Delete document mutation
   const deleteMutation = useMutation({
@@ -103,8 +110,9 @@ export default function DocumentsPage() {
     await moveMutation.mutateAsync({ documentId, folderId: targetFolderId });
   };
 
-  const filteredDocuments = documents.filter(doc =>
+  const filteredDocuments = normalizedDocuments.filter(doc =>
     doc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    doc.original_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     doc.originalName?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -141,7 +149,7 @@ export default function DocumentsPage() {
           )}
           <TabsTrigger value="manage">
             <FileText className="h-4 w-4 mr-2" />
-            {isAdmin ? 'All Documents' : 'Documents'} ({documents.length})
+            {isAdmin ? 'All Documents' : 'Documents'} ({normalizedDocuments.length})
           </TabsTrigger>
           <TabsTrigger value="folders">
             <Folder className="h-4 w-4 mr-2" />
@@ -218,13 +226,16 @@ export default function DocumentsPage() {
               {folders.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {folders.map((folder) => {
-                    const documentsInFolder = documents.filter(doc => doc.folderId === folder.id);
+                    // Get document count from the integrated API response
+                    const folderFromAPI = documentsData?.folders?.find((f: any) => f.id === folder.id);
+                    const documentCount = folderFromAPI?.document_count || 0;
+                    
                     return (
                       <DroppableFolder
                         key={folder.id}
                         folder={{
                           ...folder,
-                          documentCount: documentsInFolder.length
+                          documentCount: documentCount
                         }}
                         onDocumentMove={handleDocumentMove}
                       />
