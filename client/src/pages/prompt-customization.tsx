@@ -203,6 +203,9 @@ const DEFAULT_PROMPTS = [
 export default function PromptCustomization() {
   const [selectedPrompt, setSelectedPrompt] = useState<UserPrompt | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [showPromptTester, setShowPromptTester] = useState(false);
+  const [testPromptContent, setTestPromptContent] = useState("");
+  const [testPromptTitle, setTestPromptTitle] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     writingStyle: "",
@@ -355,6 +358,12 @@ export default function PromptCustomization() {
       tags: ['template', defaultPrompt.category]
     };
     createPromptMutation.mutate(promptData);
+  };
+
+  const testTemplate = (template: any) => {
+    setTestPromptContent(`${template.systemRules}\n\n${template.promptTemplate}`);
+    setTestPromptTitle(template.name);
+    setShowPromptTester(true);
   };
 
   const getCategoryIcon = (category: string) => {
