@@ -11,7 +11,8 @@ import {
   MessageSquare,
   Trophy,
   TrendingUp,
-  BarChart3
+  BarChart3,
+  FileText
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
@@ -40,6 +41,11 @@ const navItems: NavItem[] = [
     disabled: true,
     comingSoon: true,
     hideForAdmin: true
+  },
+  {
+    href: "/documents",
+    icon: FileText,
+    label: "Documents"
   },
   {
     href: "/guide",
