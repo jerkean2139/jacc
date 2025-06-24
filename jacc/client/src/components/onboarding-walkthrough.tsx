@@ -45,12 +45,13 @@ export default function OnboardingWalkthrough() {
   // Check if user has completed onboarding
   useEffect(() => {
     const onboardingStatus = localStorage.getItem(`jacc-onboarding-${user?.id}`);
-    if (!onboardingStatus && user) {
-      // Show onboarding for new users after a brief delay
-      setTimeout(() => setIsOpen(true), 1000);
-    } else {
-      setHasSeenOnboarding(true);
-    }
+    // Always set as seen onboarding to prevent popup - only show via manual trigger
+    setHasSeenOnboarding(true);
+    
+    // DISABLED: No automatic popups - only show if explicitly requested
+    // if (!onboardingStatus && user) {
+    //   setTimeout(() => setIsOpen(true), 1000);
+    // }
   }, [user]);
 
   const steps: OnboardingStep[] = [

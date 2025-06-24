@@ -50,12 +50,12 @@ export default function OnboardingWalkthrough() {
     // Always set as seen onboarding to prevent popup - only show via manual trigger
     setHasSeenOnboarding(true);
     
-    // Only show onboarding if explicitly requested by user (never auto-show)
-    if (onboardingStatus === 'show_requested' && user) {
-      setTimeout(() => setIsOpen(true), 1000);
-      // Clear the request flag
-      localStorage.setItem(`jacc-onboarding-${user?.id}`, 'completed');
-    }
+    // DISABLED: No automatic popups whatsoever
+    // Only manual triggers allowed via user interface buttons
+    // if (onboardingStatus === 'show_requested' && user) {
+    //   setTimeout(() => setIsOpen(true), 1000);
+    //   localStorage.setItem(`jacc-onboarding-${user?.id}`, 'completed');
+    // }
   }, [user]);
 
   const steps: OnboardingStep[] = [
