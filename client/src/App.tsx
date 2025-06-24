@@ -95,6 +95,7 @@ function Router() {
             </>
           )}
           <Route path="/prompts" component={PromptCustomization} />
+          <Route path="/prompt-customization" component={PromptCustomization} />
           <Route path="/merchant-insights" component={MerchantInsights} />
           <Route path="/leaderboard" component={GamificationPage} />
           <Route path="/help" component={HelpPage} />

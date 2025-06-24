@@ -527,11 +527,13 @@ export default function Sidebar({
             AI Tools
           </h4>
           <div className="space-y-1">
-            <div className="flex items-center space-x-3 p-2 rounded-lg cursor-not-allowed opacity-50">
-              <Brain className="w-4 h-4 text-gray-400" />
-              <span className="text-sm text-gray-400">AI Prompts</span>
-              <span className="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-full ml-auto">Coming Soon</span>
-            </div>
+            <a 
+              href="/prompt-customization" 
+              className="flex items-center space-x-3 p-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg cursor-pointer transition-colors"
+            >
+              <Brain className="w-4 h-4 text-blue-500" />
+              <span className="text-sm text-slate-700 dark:text-slate-300">AI Prompts</span>
+            </a>
             <a 
               href="/guide" 
               className="flex items-center space-x-3 p-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg cursor-pointer transition-colors"
