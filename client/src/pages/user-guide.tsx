@@ -346,12 +346,19 @@ function SalesAgentOnboarding() {
                 <span className="text-sm font-semibold text-green-600 dark:text-green-400">2</span>
               </div>
               <div>
-                <h3 className="font-semibold">Explore the Interface</h3>
-                <p className="text-muted-foreground text-sm">Familiarize yourself with the chat interface, sidebar navigation, and rate calculator.</p>
-                <div className="mt-2 flex gap-2">
-                  <Badge variant="outline">Chat Interface</Badge>
-                  <Badge variant="outline">Calculator</Badge>
-                  <Badge variant="outline">Voice Features</Badge>
+                <h3 className="font-semibold">Learn JACC's Search Capabilities</h3>
+                <p className="text-muted-foreground text-sm">JACC searches in this order: FAQ Knowledge Base → Document Center → Web Search</p>
+                <div className="mt-3 space-y-2">
+                  <div className="p-3 bg-blue-50 dark:bg-blue-950 rounded-lg">
+                    <h4 className="font-medium text-sm mb-2">Step-by-Step: How to Ask JACC Questions</h4>
+                    <ol className="text-xs space-y-1 text-muted-foreground">
+                      <li>1. Type your question in the chat box (e.g., "What are Clover's processing rates?")</li>
+                      <li>2. JACC first searches the FAQ Knowledge Base for instant answers</li>
+                      <li>3. If not found, JACC searches your Document Center (contracts, rate sheets, guides)</li>
+                      <li>4. If still not found, JACC searches the web and adds "Nothing found in JACC Memory"</li>
+                      <li>5. All answers show sources so you know where information came from</li>
+                    </ol>
+                  </div>
                 </div>
               </div>
             </div>
@@ -361,11 +368,21 @@ function SalesAgentOnboarding() {
                 <span className="text-sm font-semibold text-green-600 dark:text-green-400">3</span>
               </div>
               <div>
-                <h3 className="font-semibold">Practice Rate Calculations</h3>
-                <p className="text-muted-foreground text-sm">Run through sample merchant scenarios using the rate calculator.</p>
-                <Button size="sm" className="mt-2">
-                  Try Calculator <ArrowRight className="w-4 h-4 ml-1" />
-                </Button>
+                <h3 className="font-semibold">Master AI Prompts for Better Responses</h3>
+                <p className="text-muted-foreground text-sm">Use AI Prompts to customize how JACC responds to your specific needs.</p>
+                <div className="mt-3 space-y-2">
+                  <div className="p-3 bg-purple-50 dark:bg-purple-950 rounded-lg">
+                    <h4 className="font-medium text-sm mb-2">Step-by-Step: Using AI Prompts</h4>
+                    <ol className="text-xs space-y-1 text-muted-foreground">
+                      <li>1. Click "AI Prompts" in the sidebar</li>
+                      <li>2. Choose a template: Pricing Analysis, Objection Handling, or Compliance Guidance</li>
+                      <li>3. Click "Use Template" to load it into the editor</li>
+                      <li>4. Customize the prompt for your business style</li>
+                      <li>5. Save your changes - JACC will now use your custom prompt in chat</li>
+                      <li>6. Test it by asking JACC a question that matches your prompt category</li>
+                    </ol>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -374,8 +391,21 @@ function SalesAgentOnboarding() {
                 <span className="text-sm font-semibold text-green-600 dark:text-green-400">4</span>
               </div>
               <div>
-                <h3 className="font-semibold">Voice Setup</h3>
-                <p className="text-muted-foreground text-sm">Test microphone access and voice commands for hands-free operation.</p>
+                <h3 className="font-semibold">Access Your Document Center</h3>
+                <p className="text-muted-foreground text-sm">Find processor contracts, rate sheets, and training materials instantly.</p>
+                <div className="mt-3 space-y-2">
+                  <div className="p-3 bg-orange-50 dark:bg-orange-950 rounded-lg">
+                    <h4 className="font-medium text-sm mb-2">Step-by-Step: Using Document Center</h4>
+                    <ol className="text-xs space-y-1 text-muted-foreground">
+                      <li>1. Click "Document Center" in the sidebar or bottom navigation</li>
+                      <li>2. Browse by folders: Admin (40), Clearent (18), MiCamp (13), etc.</li>
+                      <li>3. Use the search bar to find specific documents quickly</li>
+                      <li>4. Click any document to view or download it</li>
+                      <li>5. Documents are organized by processor and content type</li>
+                      <li>6. Ask JACC about any document: "What does the Clover contract say about rates?"</li>
+                    </ol>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -384,8 +414,20 @@ function SalesAgentOnboarding() {
                 <span className="text-sm font-semibold text-green-600 dark:text-green-400">5</span>
               </div>
               <div>
-                <h3 className="font-semibold">Start Selling</h3>
-                <p className="text-muted-foreground text-sm">Begin using JACC with real prospects. Ask questions and generate proposals.</p>
+                <h3 className="font-semibold">Practice with Real Sales Scenarios</h3>
+                <p className="text-muted-foreground text-sm">Test JACC with actual prospect questions to build confidence.</p>
+                <div className="mt-3 space-y-2">
+                  <div className="p-3 bg-green-50 dark:bg-green-950 rounded-lg">
+                    <h4 className="font-medium text-sm mb-2">Example Questions to Try:</h4>
+                    <ul className="text-xs space-y-1 text-muted-foreground">
+                      <li>• "What are the best POS systems for restaurants?"</li>
+                      <li>• "Compare Clover vs Square processing rates"</li>
+                      <li>• "What compliance requirements do I need to mention?"</li>
+                      <li>• "How do I handle rate objections from merchants?"</li>
+                      <li>• "What's included in the Shift4 equipment package?"</li>
+                    </ul>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
