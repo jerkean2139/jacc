@@ -14,6 +14,7 @@ import InteractiveTutorial from "@/components/interactive-tutorial";
 // import OnboardingWalkthrough from "@/components/onboarding-walkthrough"; // DISABLED - No automatic popups
 import PWAInstallPrompt from "@/components/pwa-install-prompt";
 import BottomNav from "@/components/bottom-nav";
+import "@/utils/clear-popup-flags"; // Auto-clear popup flags on app load
 
 import Landing from "@/pages/landing";
 import LoginPage from "@/pages/login";
