@@ -153,9 +153,7 @@ export default function UserGuide() {
 
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold">What is JACC?</h3>
-                <p className="text-muted-foreground">
-                  Tracer is Tracer Co Card's comprehensive AI-powered platform that combines:
-                </p>
+                <p className="text-muted-foreground">JACC  is Tracer Co Card's comprehensive AI-powered Assistant that combines:</p>
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
