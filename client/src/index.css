@@ -177,6 +177,25 @@
   .navy-primary {
     background-color: hsl(var(--navy-700));
   }
+
+  /* Hide scrollbar but allow scrolling for webkit browsers */
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* Internet Explorer 10+ */
+    scrollbar-width: none;  /* Firefox */
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;  /* Safari and Chrome */
+  }
+
+  /* Bottom navigation scrolling styles */
+  .bottom-nav-scroll {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .bottom-nav-scroll::-webkit-scrollbar {
+    display: none;
+  }
   
   .navy-primary:hover {
     background-color: hsl(var(--navy-800));

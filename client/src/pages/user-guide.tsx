@@ -190,41 +190,12 @@ export default function UserGuide() {
 
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold">System Requirements</h3>
-                <div className="grid md:grid-cols-3 gap-4">
-                  <Card>
-                    <CardContent className="p-4">
-                      <h4 className="font-semibold mb-2">Desktop</h4>
-                      <ul className="text-sm space-y-1 text-muted-foreground">
-                        <li>Chrome 90+</li>
-                        <li>Firefox 88+</li>
-                        <li>Safari 14+</li>
-                        <li>Edge 90+</li>
-                      </ul>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardContent className="p-4">
-                      <h4 className="font-semibold mb-2">Mobile</h4>
-                      <ul className="text-sm space-y-1 text-muted-foreground">
-                        <li>iOS 14+ (Safari)</li>
-                        <li>Android 8+ (Chrome)</li>
-                        <li>PWA support</li>
-                        <li>Offline capable</li>
-                      </ul>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardContent className="p-4">
-                      <h4 className="font-semibold mb-2">Features</h4>
-                      <ul className="text-sm space-y-1 text-muted-foreground">
-                        <li>Microphone access</li>
-                        <li>Stable internet</li>
-                        <li>Notification support</li>
-                        <li>File upload capable</li>
-                      </ul>
-                    </CardContent>
-                  </Card>
-                </div>
+                <Alert>
+                  <Zap className="h-4 w-4" />
+                  <AlertDescription>
+                    Works on most modern devices (2019+). Chrome, Safari, or Edge recommended.
+                  </AlertDescription>
+                </Alert>
               </div>
             </CardContent>
           </Card>
