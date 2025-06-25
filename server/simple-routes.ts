@@ -2058,14 +2058,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { vendorName, title, url, type, category, tags, autoUpdate, updateFrequency } = req.body;
       const [vendorUrl] = await db.insert(vendorUrls).values({
         vendorName,
-        title,
+        urlTitle: title,
         url,
-        type,
+        urlType: type,
         category,
-        tags: JSON.stringify(tags || []),
+        tags: tags || [],
         autoUpdate: autoUpdate || false,
         updateFrequency: updateFrequency || 'weekly',
-        isActive: true
+        isActive: true,
+        createdBy: req.session?.user?.id || 'admin-user-id'
       }).returning();
       res.json(vendorUrl);
     } catch (error) {
@@ -2081,11 +2082,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const [vendorUrl] = await db.update(vendorUrls)
         .set({
           vendorName,
-          title,
+          urlTitle: title,
           url,
-          type,
+          urlType: type,
           category,
-          tags: JSON.stringify(tags || []),
+          tags: tags || [],
           autoUpdate: autoUpdate || false,
           updateFrequency: updateFrequency || 'weekly',
           updatedAt: new Date()

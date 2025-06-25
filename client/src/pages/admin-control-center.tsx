@@ -2672,21 +2672,20 @@ export default function AdminControlCenter() {
   const [emulationMessages, setEmulationMessages] = useState<any[]>([]);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const [showCategoryManager, setShowCategoryManager] = useState(false);
-  const [newCategoryName, setNewCategoryName] = useState("");
-  const [editingCategory, setEditingCategory] = useState<any>(null);
   const [newQuestion, setNewQuestion] = useState("");
   const [newAnswer, setNewAnswer] = useState("");
   const [newCategory, setNewCategory] = useState("general");
   
   // FAQ Category Management State
   const [showCategoryDialog, setShowCategoryDialog] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
   const [newCategoryDescription, setNewCategoryDescription] = useState("");
   const [newCategoryColor, setNewCategoryColor] = useState("#3B82F6");
   const [newCategoryIcon, setNewCategoryIcon] = useState("HelpCircle");
+  const [editingCategory, setEditingCategory] = useState<any>(null);
   
   // Vendor URL Management State
   const [showVendorUrlDialog, setShowVendorUrlDialog] = useState(false);
-  const [editingVendorUrl, setEditingVendorUrl] = useState<any>(null);
   const [newVendorName, setNewVendorName] = useState("");
   const [newUrlTitle, setNewUrlTitle] = useState("");
   const [newUrl, setNewUrl] = useState("");
@@ -2695,10 +2694,28 @@ export default function AdminControlCenter() {
   const [newVendorTags, setNewVendorTags] = useState("");
   const [autoUpdate, setAutoUpdate] = useState(false);
   const [updateFrequency, setUpdateFrequency] = useState("weekly");
+  const [editingVendorUrl, setEditingVendorUrl] = useState<any>(null);
   
   // Prompt editor modal states
   const [showPromptEditor, setShowPromptEditor] = useState(false);
   const [selectedPromptTemplate, setSelectedPromptTemplate] = useState<any>(null);
+  
+  // Category management state
+  const [showCategoryDialog, setShowCategoryDialog] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [newCategoryDescription, setNewCategoryDescription] = useState("");
+  const [newCategoryColor, setNewCategoryColor] = useState("#3B82F6");
+  const [newCategoryIcon, setNewCategoryIcon] = useState("HelpCircle");
+  const [editingCategory, setEditingCategory] = useState<any>(null);
+  
+  // Vendor URL management state
+  const [showVendorUrlDialog, setShowVendorUrlDialog] = useState(false);
+  const [newVendorName, setNewVendorName] = useState("");
+  const [newUrlTitle, setNewUrlTitle] = useState("");
+  const [newUrl, setNewUrl] = useState("");
+  const [newUrlType, setNewUrlType] = useState("help_guide");
+  const [newVendorCategory, setNewVendorCategory] = useState("");
+  const [editingVendorUrl, setEditingVendorUrl] = useState<any>(null);
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
