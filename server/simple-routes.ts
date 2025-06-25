@@ -2079,6 +2079,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         autoUpdate: autoUpdate || false,
         updateFrequency: updateFrequency || 'weekly',
         isActive: true,
+        createdBy: 'admin-user-id',
         createdBy: req.session?.user?.id || 'admin-user-id'
       }).returning();
       res.json(vendorUrl);
