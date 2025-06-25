@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import DocumentDragDrop from '@/components/ui/document-drag-drop';
 import DocumentPreviewModal from '@/components/ui/document-preview-modal';
+import DocumentUpload from '@/components/document-upload';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
@@ -296,6 +297,29 @@ export default function AdminControlCenter() {
       }
 
       const result = await response.json();
+      
+      // If weekly updates enabled, schedule the URL
+      if (enableWeeklyUpdates) {
+        try {
+          const scheduleResponse = await fetch('/api/admin/scheduled-urls', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+              url: formattedUrl,
+              type: 'knowledge_base',
+              frequency: 'weekly',
+              enabled: true
+            }),
+          });
+          
+          if (scheduleResponse.ok) {
+            console.log('URL scheduled for weekly updates');
+          }
+        } catch (scheduleError) {
+          console.warn('Failed to schedule URL for weekly updates:', scheduleError);
+        }
+      }
       
       // Convert scraped content into FAQ entries
       if (result.bulletPoints && result.bulletPoints.length > 0) {
@@ -920,11 +944,13 @@ export default function AdminControlCenter() {
                   </Card>
                 </div>
                 
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                  <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium mb-2">Document Upload Area</h3>
-                  <p className="text-gray-500">Drag and drop files or click to browse</p>
-                </div>
+                <DocumentUpload onUploadComplete={() => {
+                  queryClient.invalidateQueries({ queryKey: ['/api/documents'] });
+                  toast({
+                    title: "Upload Complete",
+                    description: "Documents have been uploaded successfully",
+                  });
+                }} />
               </div>
             </CardContent>
           </Card>
