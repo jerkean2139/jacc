@@ -306,6 +306,7 @@ function ChatReviewCenter() {
   const [updateFrequency, setUpdateFrequency] = useState("weekly");
   
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Fetch user chats for review
   const { data: userChats, isLoading: chatsLoading } = useQuery({
@@ -361,6 +362,78 @@ function ChatReviewCenter() {
       });
       setCorrectionMode(false);
       setCorrectedResponse("");
+    }
+  });
+
+  // FAQ Category Mutations
+  const createCategoryMutation = useMutation({
+    mutationFn: async (data: any) => apiRequest('/api/admin/faq-categories', 'POST', data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/faq-categories'] });
+      setShowCategoryDialog(false);
+      resetCategoryForm();
+      toast({ title: "Category Created", description: "FAQ category has been created successfully" });
+    }
+  });
+
+  const updateCategoryMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: any }) => 
+      apiRequest(`/api/admin/faq-categories/${id}`, 'PUT', data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/faq-categories'] });
+      setShowCategoryDialog(false);
+      resetCategoryForm();
+      toast({ title: "Category Updated", description: "FAQ category has been updated successfully" });
+    }
+  });
+
+  const deleteCategoryMutation = useMutation({
+    mutationFn: async (id: number) => apiRequest(`/api/admin/faq-categories/${id}`, 'DELETE'),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/faq-categories'] });
+      toast({ title: "Category Deleted", description: "FAQ category has been deleted successfully" });
+    }
+  });
+
+  // Vendor URL Mutations
+  const createVendorUrlMutation = useMutation({
+    mutationFn: async (data: any) => apiRequest('/api/admin/vendor-urls', 'POST', data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/vendor-urls'] });
+      setShowVendorUrlDialog(false);
+      resetVendorUrlForm();
+      toast({ title: "Vendor URL Added", description: "Vendor URL has been added successfully" });
+    }
+  });
+
+  const updateVendorUrlMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: any }) => 
+      apiRequest(`/api/admin/vendor-urls/${id}`, 'PUT', data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/vendor-urls'] });
+      setShowVendorUrlDialog(false);
+      resetVendorUrlForm();
+      toast({ title: "Vendor URL Updated", description: "Vendor URL has been updated successfully" });
+    }
+  });
+
+  const deleteVendorUrlMutation = useMutation({
+    mutationFn: async (id: string) => apiRequest(`/api/admin/vendor-urls/${id}`, 'DELETE'),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/vendor-urls'] });
+      toast({ title: "Vendor URL Deleted", description: "Vendor URL has been deleted successfully" });
+    }
+  });
+
+  const scrapeVendorUrlMutation = useMutation({
+    mutationFn: async (id: string) => apiRequest(`/api/admin/scrape-vendor-url/${id}`, 'POST'),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/vendor-urls'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/documents'] });
+      toast({ 
+        title: "Scraping Complete", 
+        description: `Successfully scraped ${data.wordCount} words and created document` 
+      });
     }
   });
 
@@ -2638,6 +2711,93 @@ export default function AdminControlCenter() {
     });
   };
 
+  // Helper functions for form management
+  const resetCategoryForm = () => {
+    setNewCategoryName("");
+    setNewCategoryDescription("");
+    setNewCategoryColor("#3B82F6");
+    setNewCategoryIcon("HelpCircle");
+    setEditingCategory(null);
+  };
+
+  const resetVendorUrlForm = () => {
+    setNewVendorName("");
+    setNewUrlTitle("");
+    setNewUrl("");
+    setNewUrlType("help_guide");
+    setNewVendorCategory("");
+    setNewVendorTags("");
+    setAutoUpdate(false);
+    setUpdateFrequency("weekly");
+    setEditingVendorUrl(null);
+  };
+
+  const openCategoryDialog = (category?: any) => {
+    if (category) {
+      setEditingCategory(category);
+      setNewCategoryName(category.name);
+      setNewCategoryDescription(category.description || "");
+      setNewCategoryColor(category.color || "#3B82F6");
+      setNewCategoryIcon(category.icon || "HelpCircle");
+    } else {
+      resetCategoryForm();
+    }
+    setShowCategoryDialog(true);
+  };
+
+  const openVendorUrlDialog = (vendorUrl?: any) => {
+    if (vendorUrl) {
+      setEditingVendorUrl(vendorUrl);
+      setNewVendorName(vendorUrl.vendorName);
+      setNewUrlTitle(vendorUrl.urlTitle);
+      setNewUrl(vendorUrl.url);
+      setNewUrlType(vendorUrl.urlType);
+      setNewVendorCategory(vendorUrl.category || "");
+      setNewVendorTags(vendorUrl.tags?.join(", ") || "");
+      setAutoUpdate(vendorUrl.autoUpdate || false);
+      setUpdateFrequency(vendorUrl.updateFrequency || "weekly");
+    } else {
+      resetVendorUrlForm();
+    }
+    setShowVendorUrlDialog(true);
+  };
+
+  const handleSaveCategory = () => {
+    const data = {
+      name: newCategoryName,
+      description: newCategoryDescription,
+      color: newCategoryColor,
+      icon: newCategoryIcon,
+      displayOrder: editingCategory?.displayOrder || 0
+    };
+
+    if (editingCategory) {
+      updateCategoryMutation.mutate({ id: editingCategory.id, data });
+    } else {
+      createCategoryMutation.mutate(data);
+    }
+  };
+
+  const handleSaveVendorUrl = () => {
+    const data = {
+      vendorName: newVendorName,
+      urlTitle: newUrlTitle,
+      url: newUrl,
+      urlType: newUrlType,
+      category: newVendorCategory,
+      tags: newVendorTags.split(",").map(tag => tag.trim()).filter(Boolean),
+      autoUpdate: autoUpdate,
+      updateFrequency: updateFrequency,
+      isActive: true
+    };
+
+    if (editingVendorUrl) {
+      updateVendorUrlMutation.mutate({ id: editingVendorUrl.id, data });
+    } else {
+      createVendorUrlMutation.mutate(data);
+    }
+  };
+
   function TrainingInteractionsTable() {
     const interactions = (trainingData && typeof trainingData === 'object' && 'interactions' in trainingData && Array.isArray((trainingData as any).interactions)) ? (trainingData as any).interactions : [];
     const queryClient = useQueryClient();
@@ -3065,13 +3225,189 @@ export default function AdminControlCenter() {
                       <Badge variant="secondary">{Array.isArray(faqData) ? faqData.length : 0} total entries</Badge>
                       <Badge variant="outline">{categories.length} categories</Badge>
                     </div>
-                    <Button 
-                      className="flex items-center gap-2"
-                      onClick={() => setShowAddFAQModal(true)}
-                    >
-                      <Plus className="h-4 w-4" />
-                      Add FAQ
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button 
+                        variant="outline"
+                        className="flex items-center gap-2"
+                        onClick={() => openCategoryDialog()}
+                      >
+                        <FolderPlus className="h-4 w-4" />
+                        Manage Categories
+                      </Button>
+                      <Button 
+                        className="flex items-center gap-2"
+                        onClick={() => setShowAddFAQModal(true)}
+                      >
+                        <Plus className="h-4 w-4" />
+                        Add FAQ
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* FAQ Categories Management Section */}
+                  <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="font-medium flex items-center gap-2">
+                        <FolderOpen className="h-4 w-4" />
+                        FAQ Categories ({(faqCategories || []).length})
+                      </h3>
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => openCategoryDialog()}
+                      >
+                        <Plus className="h-3 w-3 mr-1" />
+                        Add Category
+                      </Button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {categoriesLoading ? (
+                        <div className="col-span-full flex justify-center py-4">
+                          <RefreshCw className="h-4 w-4 animate-spin" />
+                        </div>
+                      ) : (faqCategories || []).map((category: any) => (
+                        <div key={category.id} className="border rounded-lg p-3 bg-white dark:bg-gray-800">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <div 
+                                className="w-3 h-3 rounded-full" 
+                                style={{ backgroundColor: category.color }}
+                              />
+                              <span className="font-medium text-sm">{category.name}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Button 
+                                size="sm" 
+                                variant="ghost"
+                                onClick={() => openCategoryDialog(category)}
+                              >
+                                <Edit className="h-3 w-3" />
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                variant="ghost"
+                                onClick={() => deleteCategoryMutation.mutate(category.id)}
+                                disabled={deleteCategoryMutation.isPending}
+                              >
+                                <Trash2 className="h-3 w-3 text-red-500" />
+                              </Button>
+                            </div>
+                          </div>
+                          {category.description && (
+                            <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">{category.description}</p>
+                          )}
+                          <Badge variant="secondary" className="text-xs">
+                            {categories.filter(cat => cat === category.name).length || 0} FAQs
+                          </Badge>
+                        </div>
+                      ))}
+                      {(!faqCategories || faqCategories.length === 0) && !categoriesLoading && (
+                        <div className="col-span-full text-center py-6">
+                          <FolderOpen className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                          <p className="text-sm text-gray-600 dark:text-gray-400">No categories created yet</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Vendor URL Database Management Section */}
+                  <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="font-medium flex items-center gap-2">
+                        <Globe className="h-4 w-4" />
+                        Vendor URL Database ({(vendorUrls || []).length})
+                      </h3>
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => openVendorUrlDialog()}
+                      >
+                        <Plus className="h-3 w-3 mr-1" />
+                        Add Vendor URL
+                      </Button>
+                    </div>
+                    <div className="space-y-3">
+                      {urlsLoading ? (
+                        <div className="flex justify-center py-4">
+                          <RefreshCw className="h-4 w-4 animate-spin" />
+                        </div>
+                      ) : (vendorUrls || []).map((vendorUrl: any) => (
+                        <div key={vendorUrl.id} className="border rounded-lg p-3 bg-white dark:bg-gray-800">
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-medium text-sm">{vendorUrl.vendorName}</span>
+                                <Badge variant="secondary" className="text-xs">{vendorUrl.urlType}</Badge>
+                                {vendorUrl.autoUpdate && (
+                                  <Badge variant="default" className="text-xs">Auto-Update</Badge>
+                                )}
+                              </div>
+                              <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{vendorUrl.urlTitle}</p>
+                              <a 
+                                href={vendorUrl.url} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="text-xs text-blue-600 hover:underline truncate block max-w-md"
+                              >
+                                {vendorUrl.url}
+                              </a>
+                              <div className="flex items-center gap-2 mt-2">
+                                <span className="text-xs text-gray-500">
+                                  Last scraped: {vendorUrl.lastScraped ? 
+                                    new Date(vendorUrl.lastScraped).toLocaleDateString() : 'Never'}
+                                </span>
+                                {vendorUrl.tags && vendorUrl.tags.length > 0 && (
+                                  <div className="flex gap-1">
+                                    {vendorUrl.tags.slice(0, 2).map((tag: string, idx: number) => (
+                                      <Badge key={idx} variant="outline" className="text-xs">{tag}</Badge>
+                                    ))}
+                                    {vendorUrl.tags.length > 2 && (
+                                      <span className="text-xs text-gray-500">+{vendorUrl.tags.length - 2}</span>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-1 ml-4">
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => scrapeVendorUrlMutation.mutate(vendorUrl.id)}
+                                disabled={scrapeVendorUrlMutation.isPending}
+                              >
+                                {scrapeVendorUrlMutation.isPending ? (
+                                  <RefreshCw className="h-3 w-3 animate-spin" />
+                                ) : (
+                                  <Download className="h-3 w-3" />
+                                )}
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                variant="ghost"
+                                onClick={() => openVendorUrlDialog(vendorUrl)}
+                              >
+                                <Edit className="h-3 w-3" />
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                variant="ghost"
+                                onClick={() => deleteVendorUrlMutation.mutate(vendorUrl.id)}
+                                disabled={deleteVendorUrlMutation.isPending}
+                              >
+                                <Trash2 className="h-3 w-3 text-red-500" />
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                      {(!vendorUrls || vendorUrls.length === 0) && !urlsLoading && (
+                        <div className="text-center py-6">
+                          <Globe className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                          <p className="text-sm text-gray-600 dark:text-gray-400">No vendor URLs configured yet</p>
+                          <p className="text-xs text-gray-500 mt-1">Add URLs to automatically scrape vendor documentation</p>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   <div className="space-y-4">
