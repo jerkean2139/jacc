@@ -51,6 +51,8 @@ import {
   ToggleLeft,
   ToggleRight,
   FolderOpen,
+  FolderPlus,
+  Globe,
   Save,
   File,
   FileImage,
@@ -147,6 +149,171 @@ function AISimulatorInterface() {
       });
     }
   });
+
+  // Category management mutations
+  const createCategoryMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await fetch('/api/admin/faq-categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/faq-categories'] });
+      toast({ title: "Category Created", description: "New FAQ category has been created successfully." });
+      resetCategoryForm();
+      setShowCategoryDialog(false);
+    }
+  });
+
+  const updateCategoryMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string, data: any }) => {
+      const response = await fetch(`/api/admin/faq-categories/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/faq-categories'] });
+      toast({ title: "Category Updated", description: "FAQ category has been updated successfully." });
+      resetCategoryForm();
+      setShowCategoryDialog(false);
+    }
+  });
+
+  const deleteCategoryMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/admin/faq-categories/${id}`, {
+        method: 'DELETE'
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/faq-categories'] });
+      toast({ title: "Category Deleted", description: "FAQ category has been deleted successfully." });
+    }
+  });
+
+  // Vendor URL management mutations
+  const createVendorUrlMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await fetch('/api/admin/vendor-urls', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/vendor-urls'] });
+      toast({ title: "Vendor URL Added", description: "New vendor URL has been added successfully." });
+      resetVendorUrlForm();
+      setShowVendorUrlDialog(false);
+    }
+  });
+
+  const updateVendorUrlMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string, data: any }) => {
+      const response = await fetch(`/api/admin/vendor-urls/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/vendor-urls'] });
+      toast({ title: "Vendor URL Updated", description: "Vendor URL has been updated successfully." });
+      resetVendorUrlForm();
+      setShowVendorUrlDialog(false);
+    }
+  });
+
+  const deleteVendorUrlMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/admin/vendor-urls/${id}`, {
+        method: 'DELETE'
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/vendor-urls'] });
+      toast({ title: "Vendor URL Deleted", description: "Vendor URL has been deleted successfully." });
+    }
+  });
+
+  const scrapeVendorUrlMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/admin/vendor-urls/${id}/scrape`, {
+        method: 'POST'
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/vendor-urls'] });
+      toast({ title: "Content Scraped", description: "Vendor URL content has been scraped and processed successfully." });
+    }
+  });
+
+  // Reset helper functions
+  const resetCategoryForm = () => {
+    setNewCategoryName("");
+    setNewCategoryDescription("");
+    setNewCategoryColor("#3B82F6");
+    setNewCategoryIcon("HelpCircle");
+    setEditingCategory(null);
+  };
+
+  const resetVendorUrlForm = () => {
+    setNewVendorName("");
+    setNewUrlTitle("");
+    setNewUrl("");
+    setNewUrlType("help_guide");
+    setNewVendorCategory("");
+    setNewVendorTags("");
+    setAutoUpdate(false);
+    setUpdateFrequency("weekly");
+    setEditingVendorUrl(null);
+  };
+
+  // Handler functions
+  const handleSaveCategory = () => {
+    const data = {
+      name: newCategoryName,
+      description: newCategoryDescription,
+      color: newCategoryColor,
+      icon: newCategoryIcon
+    };
+
+    if (editingCategory) {
+      updateCategoryMutation.mutate({ id: editingCategory.id, data });
+    } else {
+      createCategoryMutation.mutate(data);
+    }
+  };
+
+  const handleSaveVendorUrl = () => {
+    const data = {
+      vendorName: newVendorName,
+      title: newUrlTitle,
+      url: newUrl,
+      type: newUrlType,
+      category: newVendorCategory,
+      tags: newVendorTags.split(',').map((tag: any) => tag.trim()).filter(Boolean),
+      autoUpdate: autoUpdate,
+      updateFrequency: updateFrequency
+    };
+
+    if (editingVendorUrl) {
+      updateVendorUrlMutation.mutate({ id: editingVendorUrl.id, data });
+    } else {
+      createVendorUrlMutation.mutate(data);
+    }
+  };
 
   const handleTestAI = () => {
     if (!testQuery.trim()) return;
@@ -4168,6 +4335,199 @@ export default function AdminControlCenter() {
             }}>
               Save Changes
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* FAQ Category Dialog */}
+      <Dialog open={showCategoryDialog} onOpenChange={setShowCategoryDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FolderPlus className="h-5 w-5" />
+              {editingCategory ? 'Edit Category' : 'Add New Category'}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid gap-2">
+              <Label htmlFor="category-name">Category Name</Label>
+              <Input
+                id="category-name"
+                value={newCategoryName}
+                onChange={(e) => setNewCategoryName(e.target.value)}
+                placeholder="Enter category name..."
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="category-description">Description (Optional)</Label>
+              <Textarea
+                id="category-description"
+                value={newCategoryDescription}
+                onChange={(e) => setNewCategoryDescription(e.target.value)}
+                placeholder="Enter category description..."
+                className="min-h-[60px]"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="category-color">Color</Label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    id="category-color"
+                    value={newCategoryColor}
+                    onChange={(e) => setNewCategoryColor(e.target.value)}
+                    className="w-8 h-8 rounded border"
+                  />
+                  <span className="text-sm text-gray-600">{newCategoryColor}</span>
+                </div>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="category-icon">Icon</Label>
+                <Select value={newCategoryIcon} onValueChange={setNewCategoryIcon}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="HelpCircle">Help Circle</SelectItem>
+                    <SelectItem value="FileText">File Text</SelectItem>
+                    <SelectItem value="Settings">Settings</SelectItem>
+                    <SelectItem value="Users">Users</SelectItem>
+                    <SelectItem value="Shield">Shield</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 pt-4">
+              <Button variant="outline" onClick={() => setShowCategoryDialog(false)}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleSaveCategory}
+                disabled={!newCategoryName.trim()}
+              >
+                {editingCategory ? 'Update' : 'Create'} Category
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Vendor URL Dialog */}
+      <Dialog open={showVendorUrlDialog} onOpenChange={setShowVendorUrlDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Globe className="h-5 w-5" />
+              {editingVendorUrl ? 'Edit Vendor URL' : 'Add Vendor URL'}
+            </DialogTitle>
+            <DialogDescription>
+              Configure vendor URLs for automatic content scraping and training
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="vendor-name">Vendor Name</Label>
+                <Input
+                  id="vendor-name"
+                  value={newVendorName}
+                  onChange={(e) => setNewVendorName(e.target.value)}
+                  placeholder="e.g., Shift4, Authorize.Net"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="url-type">URL Type</Label>
+                <Select value={newUrlType} onValueChange={setNewUrlType}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="help_guide">Help Guide</SelectItem>
+                    <SelectItem value="documentation">Documentation</SelectItem>
+                    <SelectItem value="support_center">Support Center</SelectItem>
+                    <SelectItem value="knowledge_base">Knowledge Base</SelectItem>
+                    <SelectItem value="api_docs">API Documentation</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="url-title">URL Title</Label>
+              <Input
+                id="url-title"
+                value={newUrlTitle}
+                onChange={(e) => setNewUrlTitle(e.target.value)}
+                placeholder="e.g., Shift4 Help Center - Getting Started"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="vendor-url">URL</Label>
+              <Input
+                id="vendor-url"
+                value={newUrl}
+                onChange={(e) => setNewUrl(e.target.value)}
+                placeholder="https://shift4.zendesk.com/hc/en-us"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="vendor-category">Category (Optional)</Label>
+                <Input
+                  id="vendor-category"
+                  value={newVendorCategory}
+                  onChange={(e) => setNewVendorCategory(e.target.value)}
+                  placeholder="e.g., POS Systems, Payment Processing"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="vendor-tags">Tags (Optional)</Label>
+                <Input
+                  id="vendor-tags"
+                  value={newVendorTags}
+                  onChange={(e) => setNewVendorTags(e.target.value)}
+                  placeholder="tag1, tag2, tag3"
+                />
+              </div>
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="auto-update"
+                  checked={autoUpdate}
+                  onChange={(e) => setAutoUpdate(e.target.checked)}
+                  className="rounded"
+                />
+                <Label htmlFor="auto-update">Enable automatic content updates</Label>
+              </div>
+              {autoUpdate && (
+                <div className="ml-6 grid gap-2">
+                  <Label htmlFor="update-frequency">Update Frequency</Label>
+                  <Select value={updateFrequency} onValueChange={setUpdateFrequency}>
+                    <SelectTrigger className="w-48">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="daily">Daily</SelectItem>
+                      <SelectItem value="weekly">Weekly</SelectItem>
+                      <SelectItem value="monthly">Monthly</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </div>
+            <div className="flex justify-end gap-2 pt-4">
+              <Button variant="outline" onClick={() => setShowVendorUrlDialog(false)}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleSaveVendorUrl}
+                disabled={!newVendorName.trim() || !newUrl.trim() || !newUrlTitle.trim()}
+              >
+                {editingVendorUrl ? 'Update' : 'Add'} URL
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
