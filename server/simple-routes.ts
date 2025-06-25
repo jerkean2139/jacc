@@ -3206,13 +3206,30 @@ Would you like me to create a detailed proposal for this merchant?`,
         const { db } = await import('./db');
         const { faqKnowledgeBase } = await import('@shared/schema');
 
+        // Determine category based on content
+        let category = 'general';
+        const queryLower = query.toLowerCase();
+        if (queryLower.includes('rate') || queryLower.includes('pricing') || queryLower.includes('fee')) {
+          category = 'pricing';
+        } else if (queryLower.includes('processor') || queryLower.includes('payment') || queryLower.includes('merchant')) {
+          category = 'processors';
+        } else if (queryLower.includes('pos') || queryLower.includes('terminal') || queryLower.includes('hardware')) {
+          category = 'hardware';
+        } else if (queryLower.includes('contract') || queryLower.includes('agreement') || queryLower.includes('terms')) {
+          category = 'contracts';
+        }
+
         await db.insert(faqKnowledgeBase).values({
           question: query,
           answer: correctedResponse,
+          category: category,
           priority: 10,
           isActive: true
         });
+
+        console.log(`✅ Training correction added to knowledge base: ${category} category`);
       } catch (dbError) {
+        console.error('Failed to add to knowledge base:', dbError);
         console.log('Training correction logged locally:', { query: query.substring(0, 50), corrected: true });
       }
 

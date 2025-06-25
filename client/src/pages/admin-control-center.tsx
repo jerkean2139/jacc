@@ -359,7 +359,8 @@ function ChatReviewCenter() {
       originalQuery: testQuery,
       originalResponse: testResponse,
       correctedResponse: correctedResponse,
-      improvementType: "accuracy"
+      improvementType: "accuracy",
+      addToKnowledgeBase: true
     });
   };
 

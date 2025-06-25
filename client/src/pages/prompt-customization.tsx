@@ -567,18 +567,7 @@ export default function PromptCustomization() {
                 <span className="sm:hidden">Setup</span>
               </Button>
             </PromptTooltip>
-            <PromptTooltip content="Save your prompts to the cloud for access across devices">
-              <Button 
-                variant="outline" 
-                onClick={() => syncMutation.mutate()} 
-                disabled={syncMutation.isPending}
-                className="gap-2 text-sm"
-              >
-                <Cloud className="w-4 h-4" />
-                <span className="hidden sm:inline">{syncMutation.isPending ? "Syncing..." : "Sync"}</span>
-                <span className="sm:hidden">{syncMutation.isPending ? "..." : "Sync"}</span>
-              </Button>
-            </PromptTooltip>
+
             <PromptTooltip content="Create a custom prompt from scratch">
               <Button onClick={() => setIsEditing(true)} className="gap-2 text-sm">
                 <Plus className="w-4 h-4" />
