@@ -239,6 +239,23 @@ export const documents = pgTable("documents", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Scheduled URLs for automatic scraping
+export const scheduledUrls = pgTable("scheduled_urls", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  url: text("url").notNull(),
+  type: varchar("type", { length: 50 }).notNull(), // 'knowledge_base', 'document_center'
+  frequency: varchar("frequency", { length: 20 }).notNull().default("weekly"), // 'daily', 'weekly', 'monthly'
+  enabled: boolean("enabled").notNull().default(true),
+  lastScraped: timestamp("last_scraped"),
+  nextScheduled: timestamp("next_scheduled"),
+  scrapeCount: integer("scrape_count").notNull().default(0),
+  lastStatus: varchar("last_status", { length: 20 }).default("pending"), // 'success', 'failed', 'pending'
+  lastError: text("last_error"),
+  createdBy: varchar("created_by").notNull().references(() => users.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // User favorites (chats, documents, etc.)
 export const favorites = pgTable("favorites", {
   id: uuid("id").primaryKey().defaultRandom(),

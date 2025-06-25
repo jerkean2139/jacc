@@ -23,7 +23,8 @@ import {
   trainingInteractions,
   messageCorrections,
   chatReviews,
-  userAchievements
+  userAchievements,
+  scheduledUrls
 } from '@shared/schema';
 // PDF parsing and OCR will be imported dynamically
 import { fromPath } from "pdf2pic";
@@ -2052,6 +2053,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error deleting FAQ category:', error);
       res.status(500).json({ error: 'Failed to delete FAQ category' });
+    }
+  });
+
+  // Scheduled URLs endpoints for weekly URL scraping
+  app.post('/api/admin/scheduled-urls', async (req, res) => {
+    try {
+      const { url, type, frequency, enabled } = req.body;
+      const userId = req.session?.user?.id || 'admin-user-id';
+
+      // Calculate next scheduled time (7 days from now for weekly)
+      const nextScheduled = new Date();
+      if (frequency === 'weekly') {
+        nextScheduled.setDate(nextScheduled.getDate() + 7);
+      } else if (frequency === 'daily') {
+        nextScheduled.setDate(nextScheduled.getDate() + 1);
+      } else if (frequency === 'monthly') {
+        nextScheduled.setMonth(nextScheduled.getMonth() + 1);
+      }
+
+      const [newScheduledUrl] = await db.insert(scheduledUrls).values({
+        url,
+        type: type || 'knowledge_base',
+        frequency: frequency || 'weekly',
+        enabled: enabled !== false,
+        nextScheduled,
+        createdBy: userId,
+      }).returning();
+
+      res.json({
+        success: true,
+        scheduledUrl: newScheduledUrl,
+        message: `URL scheduled for ${frequency || 'weekly'} updates`
+      });
+
+    } catch (error) {
+      console.error('Error creating scheduled URL:', error);
+      res.status(500).json({ error: 'Failed to schedule URL' });
+    }
+  });
+
+  app.get('/api/admin/scheduled-urls', async (req, res) => {
+    try {
+      const urls = await db.select().from(scheduledUrls)
+        .orderBy(scheduledUrls.createdAt);
+      res.json(urls);
+    } catch (error) {
+      console.error('Error fetching scheduled URLs:', error);
+      res.status(500).json({ error: 'Failed to fetch scheduled URLs' });
     }
   });
 

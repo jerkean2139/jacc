@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Checkbox } from '@/components/ui/checkbox';
 import { 
   Settings, Database, MessageSquare, Brain, PlayCircle, CheckCircle, XCircle, 
   AlertTriangle, Clock, TrendingUp, Zap, Globe, Search, FileText, Eye, Download,
