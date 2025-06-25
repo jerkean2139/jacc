@@ -444,33 +444,15 @@ function AISimulatorInterface() {
 
 // Enhanced Chat Review Center Component
 function ChatReviewCenter() {
+  // Chat Review State Variables
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const [testQuery, setTestQuery] = useState("");
   const [testResponse, setTestResponse] = useState("");
+  const [response, setResponse] = useState("");
   const [isTestingAI, setIsTestingAI] = useState(false);
   const [correctionMode, setCorrectionMode] = useState(false);
   const [correctedResponse, setCorrectedResponse] = useState("");
   const [approvalFeedback, setApprovalFeedback] = useState("");
-  
-  // FAQ Category Management State
-  const [showCategoryDialog, setShowCategoryDialog] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<any>(null);
-  const [newCategoryName, setNewCategoryName] = useState("");
-  const [newCategoryDescription, setNewCategoryDescription] = useState("");
-  const [newCategoryColor, setNewCategoryColor] = useState("#3B82F6");
-  const [newCategoryIcon, setNewCategoryIcon] = useState("HelpCircle");
-  
-  // Vendor URL Management State
-  const [showVendorUrlDialog, setShowVendorUrlDialog] = useState(false);
-  const [editingVendorUrl, setEditingVendorUrl] = useState<any>(null);
-  const [newVendorName, setNewVendorName] = useState("");
-  const [newUrlTitle, setNewUrlTitle] = useState("");
-  const [newUrl, setNewUrl] = useState("");
-  const [newUrlType, setNewUrlType] = useState("help_guide");
-  const [newVendorCategory, setNewVendorCategory] = useState("");
-  const [newVendorTags, setNewVendorTags] = useState("");
-  const [autoUpdate, setAutoUpdate] = useState(false);
-  const [updateFrequency, setUpdateFrequency] = useState("weekly");
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
