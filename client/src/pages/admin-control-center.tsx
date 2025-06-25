@@ -90,6 +90,7 @@ function AISimulatorInterface() {
   const [correctedResponse, setCorrectedResponse] = useState("");
   const [saveToHistory, setSaveToHistory] = useState(true);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const testAIMutation = useMutation({
     mutationFn: async (query: string) => {
@@ -143,61 +144,6 @@ function AISimulatorInterface() {
         title: "Training Failed",
         description: "Failed to submit training correction",
         variant: "destructive",
-      });
-    }
-  });
-
-  // FAQ Management Mutations
-  const editFAQMutation = useMutation({
-    mutationFn: async ({ id, updates }: { id: number, updates: any }) => {
-      const response = await fetch(`/api/admin/faq/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updates)
-      });
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/faq'] });
-      toast({
-        title: "FAQ Updated",
-        description: "FAQ entry has been updated successfully",
-      });
-      setShowEditFAQModal(false);
-      setEditingFAQ(null);
-    }
-  });
-
-  const deleteFAQMutation = useMutation({
-    mutationFn: async (id: number) => {
-      const response = await fetch(`/api/admin/faq/${id}`, {
-        method: 'DELETE'
-      });
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/faq'] });
-      toast({
-        title: "FAQ Deleted",
-        description: "FAQ entry has been deleted successfully",
-      });
-    }
-  });
-
-  const toggleFAQMutation = useMutation({
-    mutationFn: async ({ id, isActive }: { id: number, isActive: boolean }) => {
-      const response = await fetch(`/api/admin/faq/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isActive })
-      });
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/faq'] });
-      toast({
-        title: "FAQ Status Updated",
-        description: "FAQ entry status has been updated",
       });
     }
   });
@@ -2546,6 +2492,100 @@ export default function AdminControlCenter() {
     });
   };
 
+  // FAQ mutations
+  const toggleFAQMutation = useMutation({
+    mutationFn: async ({ id, isActive }: { id: number; isActive: boolean }) => {
+      const response = await fetch(`/api/admin/faq/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isActive })
+      });
+      if (!response.ok) throw new Error('Failed to toggle FAQ');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/faq'] });
+      toast({
+        title: "FAQ Updated",
+        description: "FAQ status has been updated successfully",
+      });
+    }
+  });
+
+  const deleteFAQMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await fetch(`/api/admin/faq/${id}`, {
+        method: 'DELETE'
+      });
+      if (!response.ok) throw new Error('Failed to delete FAQ');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/faq'] });
+      toast({
+        title: "FAQ Deleted",
+        description: "FAQ entry has been deleted successfully",
+      });
+    }
+  });
+
+  const editFAQMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: any }) => {
+      const response = await fetch(`/api/admin/faq/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      if (!response.ok) throw new Error('Failed to update FAQ');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/faq'] });
+      setShowEditFAQModal(false);
+      setEditingFAQ(null);
+      toast({
+        title: "FAQ Updated",
+        description: "FAQ entry has been updated successfully",
+      });
+    }
+  });
+
+  // FAQ handler functions
+  const handleEditFAQ = (faq: any) => {
+    setEditingFAQ(faq);
+    setNewQuestion(faq.question);
+    setNewAnswer(faq.answer);
+    setNewCategory(faq.category);
+    setShowEditFAQModal(true);
+  };
+
+  const handleUpdateFAQ = () => {
+    if (!editingFAQ || !newQuestion.trim() || !newAnswer.trim()) {
+      toast({
+        title: "Error",
+        description: "Please fill in both question and answer",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    editFAQMutation.mutate({
+      id: editingFAQ.id,
+      data: {
+        question: newQuestion,
+        answer: newAnswer,
+        category: newCategory,
+        isActive: editingFAQ.isActive
+      }
+    });
+  };
+
+  const handleDeleteFAQ = (faqId: number) => {
+    if (confirm('Are you sure you want to delete this FAQ entry?')) {
+      deleteFAQMutation.mutate(faqId);
+    }
+  };
+
   // Chat emulation functionality
   const loadChatForEmulation = (chat: any) => {
     setSelectedChatId(chat.chatId);
@@ -3437,14 +3477,115 @@ export default function AdminControlCenter() {
               <Button variant="outline" onClick={() => setShowAddFAQModal(false)}>
                 Cancel
               </Button>
-              <Button onClick={() => {
-                toast({
-                  title: "FAQ Added",
-                  description: "New FAQ entry has been created successfully.",
-                });
-                setShowAddFAQModal(false);
+              <Button onClick={async () => {
+                if (newQuestion.trim() && newAnswer.trim()) {
+                  try {
+                    const response = await fetch('/api/admin/faq', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        question: newQuestion,
+                        answer: newAnswer,
+                        category: newCategory,
+                        priority: 5,
+                        isActive: true
+                      })
+                    });
+                    
+                    if (response.ok) {
+                      queryClient.invalidateQueries({ queryKey: ['/api/admin/faq'] });
+                      toast({
+                        title: "FAQ Added",
+                        description: "New FAQ entry has been created successfully.",
+                      });
+                      setShowAddFAQModal(false);
+                      setNewQuestion("");
+                      setNewAnswer("");
+                      setNewCategory("general");
+                    }
+                  } catch (error) {
+                    toast({
+                      title: "Error",
+                      description: "Failed to create FAQ entry",
+                      variant: "destructive",
+                    });
+                  }
+                }
               }}>
                 Create FAQ
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit FAQ Modal */}
+      <Dialog open={showEditFAQModal} onOpenChange={setShowEditFAQModal}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit className="h-5 w-5" />
+              Edit FAQ Entry
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid gap-2">
+              <Label htmlFor="edit-faq-question">Question</Label>
+              <Input
+                id="edit-faq-question"
+                value={newQuestion}
+                onChange={(e) => setNewQuestion(e.target.value)}
+                placeholder="Enter the frequently asked question..."
+                className="w-full"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="edit-faq-answer">Answer</Label>
+              <Textarea
+                id="edit-faq-answer"
+                value={newAnswer}
+                onChange={(e) => setNewAnswer(e.target.value)}
+                placeholder="Enter the detailed answer..."
+                className="min-h-[120px]"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="edit-faq-category">Category</Label>
+              <Select value={newCategory} onValueChange={setNewCategory}>
+                <SelectTrigger className="flex-1">
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.isArray(faqData) ? 
+                    Array.from(new Set(faqData.map((faq: FAQ) => faq.category))).map((category: string) => (
+                      <SelectItem key={category} value={category}>{category}</SelectItem>
+                    )) : 
+                    [
+                      <SelectItem key="general" value="general">General</SelectItem>,
+                      <SelectItem key="pricing" value="pricing">Pricing</SelectItem>,
+                      <SelectItem key="technical" value="technical">Technical</SelectItem>,
+                      <SelectItem key="merchant-services" value="merchant-services">Merchant Services</SelectItem>,
+                      <SelectItem key="compliance" value="compliance">Compliance</SelectItem>
+                    ]
+                  }
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex justify-end gap-2 pt-4">
+              <Button variant="outline" onClick={() => {
+                setShowEditFAQModal(false);
+                setEditingFAQ(null);
+                setNewQuestion("");
+                setNewAnswer("");
+                setNewCategory("general");
+              }}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleUpdateFAQ}
+                disabled={editFAQMutation.isPending}
+              >
+                {editFAQMutation.isPending ? "Updating..." : "Update FAQ"}
               </Button>
             </div>
           </div>
