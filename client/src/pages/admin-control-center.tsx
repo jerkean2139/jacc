@@ -16,7 +16,7 @@ import {
   AlertTriangle, Clock, TrendingUp, Zap, Globe, Search, FileText, Eye, Download,
   Edit, Trash2, Save, Plus, Folder, FolderOpen, Upload, Users, Activity,
   BarChart3, Timer, ChevronDown, ChevronRight, Target, BookOpen, ThumbsUp,
-  ThumbsDown, Star, Copy, AlertCircle, ArrowRight, User, Bot, RefreshCw
+  ThumbsDown, Star, Copy, AlertCircle, ArrowRight, User, Bot, RefreshCw, Calendar
 } from 'lucide-react';
 import DocumentDragDrop from '@/components/ui/document-drag-drop';
 import DocumentPreviewModal from '@/components/ui/document-preview-modal';
@@ -92,6 +92,8 @@ export default function AdminControlCenter() {
   // URL Scraping for Knowledge Base
   const [scrapeUrl, setScrapeUrl] = useState('');
   const [isScrapingForKnowledge, setIsScrapingForKnowledge] = useState(false);
+  const [enableWeeklyUpdates, setEnableWeeklyUpdates] = useState(false);
+  const [scheduledUrls, setScheduledUrls] = useState<string[]>([]);
   const [correctionText, setCorrectionText] = useState("");
   const [isSubmittingCorrection, setIsSubmittingCorrection] = useState(false);
 
@@ -322,12 +324,38 @@ export default function AdminControlCenter() {
         });
       }
 
+      // If weekly updates are enabled, save URL for recurring scraping
+      if (enableWeeklyUpdates) {
+        try {
+          await fetch('/api/admin/scheduled-urls', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ 
+              url: formattedUrl,
+              type: 'knowledge_base',
+              frequency: 'weekly',
+              enabled: true
+            }),
+          });
+          
+          setScheduledUrls(prev => [...prev, formattedUrl]);
+          toast({
+            title: "URL Scheduled for Weekly Updates",
+            description: `${formattedUrl} will be scraped weekly and added to knowledge base`,
+          });
+        } catch (scheduleError) {
+          console.error('Failed to schedule URL:', scheduleError);
+        }
+      }
+
       toast({
         title: "Content Added to Knowledge Base",
-        description: `Successfully created FAQ entries from ${result.title}`,
+        description: `Successfully created FAQ entries from ${result.title}${enableWeeklyUpdates ? ' (scheduled for weekly updates)' : ''}`,
       });
       
       setScrapeUrl('');
+      setEnableWeeklyUpdates(false);
     } catch (error) {
       toast({
         title: "Scraping Failed",
@@ -710,6 +738,20 @@ export default function AdminControlCenter() {
                         className="mt-1"
                       />
                     </div>
+                    
+                    {/* Weekly Updates Checkbox */}
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="enableWeeklyUpdates"
+                        checked={enableWeeklyUpdates}
+                        onCheckedChange={(checked) => setEnableWeeklyUpdates(checked as boolean)}
+                      />
+                      <Label htmlFor="enableWeeklyUpdates" className="text-sm text-green-700 flex items-center gap-1">
+                        <Calendar className="h-4 w-4" />
+                        Schedule weekly updates for this URL
+                      </Label>
+                    </div>
+                    
                     <Button 
                       onClick={handleScrapeForKnowledge}
                       disabled={!scrapeUrl.trim() || isScrapingForKnowledge}
@@ -725,6 +767,7 @@ export default function AdminControlCenter() {
                         <>
                           <Download className="w-4 h-4 mr-2" />
                           Scrape & Add to Knowledge Base
+                          {enableWeeklyUpdates && ' (Weekly)'}
                         </>
                       )}
                     </Button>
