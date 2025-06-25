@@ -486,17 +486,53 @@ export const webSearchLogs = pgTable("web_search_logs", {
 
 
 
+// FAQ Categories for structured organization
+export const faqCategories = pgTable("faq_categories", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 100 }).notNull().unique(),
+  description: text("description"),
+  color: varchar("color", { length: 7 }).default("#3B82F6"), // Hex color code
+  icon: varchar("icon", { length: 50 }).default("HelpCircle"), // Lucide icon name
+  displayOrder: integer("display_order").default(0),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // FAQ Knowledge Base for structured Q&A content
 export const faqKnowledgeBase = pgTable("faq_knowledge_base", {
   id: serial("id").primaryKey(),
   question: text("question").notNull(),
   answer: text("answer").notNull(),
   category: varchar("category").notNull(), // pos, integration, support, contact, etc.
+  categoryId: integer("category_id").references(() => faqCategories.id, { onDelete: "set null" }),
   tags: text("tags").array().default([]),
   priority: integer("priority").default(1),
   isActive: boolean("is_active").default(true),
   lastUpdated: timestamp("last_updated").defaultNow(),
   createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Vendor URL Management for automatic training
+export const vendorUrls = pgTable("vendor_urls", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  vendorName: varchar("vendor_name", { length: 100 }).notNull(),
+  urlTitle: varchar("url_title", { length: 200 }).notNull(),
+  url: text("url").notNull(),
+  urlType: varchar("url_type", { length: 50 }).notNull(), // help_guide, support, documentation, api
+  category: varchar("category", { length: 100 }), // Same as FAQ categories
+  tags: text("tags").array().default([]),
+  isActive: boolean("is_active").default(true),
+  autoUpdate: boolean("auto_update").default(false), // Enable automatic content updates
+  updateFrequency: varchar("update_frequency", { length: 20 }).default("weekly"), // daily, weekly, monthly
+  lastScraped: timestamp("last_scraped"),
+  lastContentHash: varchar("last_content_hash", { length: 64 }), // SHA256 of content
+  scrapingStatus: varchar("scraping_status", { length: 20 }).default("pending"), // pending, success, failed
+  errorMessage: text("error_message"),
+  wordCount: integer("word_count").default(0),
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // Admin logging table for tracking all first user chat requests
@@ -1250,13 +1286,31 @@ export const insertLeaderboardSchema = createInsertSchema(leaderboards).omit({
   createdAt: true,
 });
 
+export const insertFaqCategorySchema = createInsertSchema(faqCategories).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export const insertFaqSchema = createInsertSchema(faqKnowledgeBase).omit({
   id: true,
   createdAt: true,
   lastUpdated: true,
 });
 
-// Removed duplicate gamification types
+export const insertVendorUrlSchema = createInsertSchema(vendorUrls).omit({
+  id: true,
+  lastScraped: true,
+  lastContentHash: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Types for new features
+export type FaqCategory = typeof faqCategories.$inferSelect;
+export type InsertFaqCategory = z.infer<typeof insertFaqCategorySchema>;
+export type VendorUrl = typeof vendorUrls.$inferSelect;
+export type InsertVendorUrl = z.infer<typeof insertVendorUrlSchema>;
 export type FaqEntry = typeof faqKnowledgeBase.$inferSelect;
 export type InsertFaq = z.infer<typeof insertFaqSchema>;
 
