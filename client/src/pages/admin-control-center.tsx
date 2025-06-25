@@ -428,6 +428,24 @@ function ChatReviewCenter() {
     approveChatMutation.mutate(selectedChatId);
   };
 
+  const loadChatForEmulation = (chat: any) => {
+    setSelectedChatId(chat.chatId);
+    // Load messages when chat is selected
+    if (chatMessages && Array.isArray(chatMessages)) {
+      setEmulationMessages(chatMessages);
+      setShowChatEmulation(true);
+    } else {
+      toast({
+        title: "Loading Chat",
+        description: "Chat messages are being loaded for emulation...",
+      });
+      // Trigger chat messages fetch and open modal after delay
+      setTimeout(() => {
+        setShowChatEmulation(true);
+      }, 1000);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Enhanced Analytics Dashboard */}
@@ -559,6 +577,17 @@ function ChatReviewCenter() {
                           <div className="flex gap-2">
                             <Button 
                               size="sm" 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                loadChatForEmulation(chat);
+                              }}
+                            >
+                              <MessageSquare className="h-4 w-4 mr-2" />
+                              Emulate Chat
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleApproveChat();
@@ -3261,8 +3290,8 @@ export default function AdminControlCenter() {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 max-h-[60vh] overflow-y-auto">
-            {emulationMessages.length > 0 ? (
-              emulationMessages.map((message: any, index: number) => (
+            {chatMessages && Array.isArray(chatMessages) && chatMessages.length > 0 ? (
+              chatMessages.map((message: any, index: number) => (
                 <div key={index} className={`p-3 rounded-lg ${
                   message.role === 'user' ? 'bg-blue-50 ml-12' : 'bg-gray-50 mr-12'
                 }`}>
@@ -3282,7 +3311,9 @@ export default function AdminControlCenter() {
                 </div>
               ))
             ) : (
-              <p className="text-center text-gray-500 py-8">Loading chat messages...</p>
+              <p className="text-center text-gray-500 py-8">
+                {messagesLoading ? 'Loading chat messages...' : 'No messages found in this chat'}
+              </p>
             )}
           </div>
           <div className="flex justify-end gap-2 pt-4">
