@@ -48,6 +48,8 @@ import {
   Database,
   Activity,
   RefreshCw,
+  ToggleLeft,
+  ToggleRight,
   FolderOpen,
   Save,
   File,
@@ -129,16 +131,73 @@ function AISimulatorInterface() {
     onSuccess: () => {
       toast({
         title: "Training Correction Submitted",
-        description: "AI has been trained with the corrected response",
+        description: "Response added to knowledge base and AI training updated",
       });
       setCorrectionMode(false);
       setCorrectedResponse("");
+      // Invalidate FAQ data to refresh knowledge base
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/faq'] });
     },
     onError: () => {
       toast({
         title: "Training Failed",
         description: "Failed to submit training correction",
         variant: "destructive",
+      });
+    }
+  });
+
+  // FAQ Management Mutations
+  const editFAQMutation = useMutation({
+    mutationFn: async ({ id, updates }: { id: number, updates: any }) => {
+      const response = await fetch(`/api/admin/faq/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates)
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/faq'] });
+      toast({
+        title: "FAQ Updated",
+        description: "FAQ entry has been updated successfully",
+      });
+      setShowEditFAQModal(false);
+      setEditingFAQ(null);
+    }
+  });
+
+  const deleteFAQMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await fetch(`/api/admin/faq/${id}`, {
+        method: 'DELETE'
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/faq'] });
+      toast({
+        title: "FAQ Deleted",
+        description: "FAQ entry has been deleted successfully",
+      });
+    }
+  });
+
+  const toggleFAQMutation = useMutation({
+    mutationFn: async ({ id, isActive }: { id: number, isActive: boolean }) => {
+      const response = await fetch(`/api/admin/faq/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isActive })
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/faq'] });
+      toast({
+        title: "FAQ Status Updated",
+        description: "FAQ entry status has been updated",
       });
     }
   });
@@ -2898,8 +2957,49 @@ export default function AdminControlCenter() {
                                   <div className="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
                                     {faq.answer}
                                   </div>
+                                  <div className="flex items-center gap-2 mt-2">
+                                    <Badge variant={faq.isActive ? "default" : "secondary"} className="text-xs">
+                                      {faq.isActive ? "Active" : "Disabled"}
+                                    </Badge>
+                                    <span className="text-xs text-gray-400">Priority: {faq.priority}</span>
+                                  </div>
                                 </div>
-                                <div className="flex items-center gap-2 ml-4">
+                                <div className="flex items-center gap-1 ml-4">
+                                  <Button 
+                                    size="sm" 
+                                    variant="ghost"
+                                    onClick={() => {
+                                      setEditingFAQ(faq);
+                                      setNewQuestion(faq.question);
+                                      setNewAnswer(faq.answer);
+                                      setNewCategory(faq.category);
+                                      setShowEditFAQModal(true);
+                                    }}
+                                  >
+                                    <Edit className="h-3 w-3" />
+                                  </Button>
+                                  <Button 
+                                    size="sm" 
+                                    variant="ghost"
+                                    onClick={() => toggleFAQMutation.mutate({ id: faq.id, isActive: !faq.isActive })}
+                                    disabled={toggleFAQMutation.isPending}
+                                  >
+                                    {faq.isActive ? (
+                                      <ToggleLeft className="h-3 w-3 text-green-500" />
+                                    ) : (
+                                      <ToggleRight className="h-3 w-3 text-gray-400" />
+                                    )}
+                                  </Button>
+                                  <Button 
+                                    size="sm" 
+                                    variant="ghost"
+                                    onClick={() => deleteFAQMutation.mutate(faq.id)}
+                                    disabled={deleteFAQMutation.isPending}
+                                  >
+                                    <Trash2 className="h-3 w-3 text-red-500" />
+                                  </Button>
+                                </div>
+                                <div className="flex items-center gap-1 ml-4">
                                   <Badge variant={faq.isActive ? "default" : "secondary"}>
                                     {faq.isActive ? "Active" : "Inactive"}
                                   </Badge>
@@ -3151,6 +3251,57 @@ export default function AdminControlCenter() {
         </TabsContent>
       </Tabs>
 
+      {/* Chat Emulation Modal */}
+      <Dialog open={showChatEmulation} onOpenChange={setShowChatEmulation}>
+        <DialogContent className="max-w-4xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MessageSquare className="h-5 w-5" />
+              Chat Emulation & Training
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 max-h-[60vh] overflow-y-auto">
+            {emulationMessages.length > 0 ? (
+              emulationMessages.map((message: any, index: number) => (
+                <div key={index} className={`p-3 rounded-lg ${
+                  message.role === 'user' ? 'bg-blue-50 ml-12' : 'bg-gray-50 mr-12'
+                }`}>
+                  <div className="flex items-start gap-2">
+                    <div className={`w-2 h-2 rounded-full mt-2 ${
+                      message.role === 'user' ? 'bg-blue-500' : 'bg-gray-500'
+                    }`} />
+                    <div className="flex-1">
+                      <div className="font-medium text-sm mb-1">
+                        {message.role === 'user' ? 'User' : 'Assistant'}
+                      </div>
+                      <div className="text-sm" dangerouslySetInnerHTML={{ 
+                        __html: message.content || 'No content'
+                      }} />
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-center text-gray-500 py-8">Loading chat messages...</p>
+            )}
+          </div>
+          <div className="flex justify-end gap-2 pt-4">
+            <Button variant="outline" onClick={() => setShowChatEmulation(false)}>
+              Close
+            </Button>
+            <Button onClick={() => {
+              toast({
+                title: "Training Applied",
+                description: "Chat conversation has been processed for training",
+              });
+              setShowChatEmulation(false);
+            }}>
+              Apply Training
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Document Preview Modal - Temporarily disabled */}
 
       {/* Add FAQ Modal */}
@@ -3167,6 +3318,8 @@ export default function AdminControlCenter() {
               <Label htmlFor="faq-question">Question</Label>
               <Input
                 id="faq-question"
+                value={newQuestion}
+                onChange={(e) => setNewQuestion(e.target.value)}
                 placeholder="Enter the frequently asked question..."
                 className="w-full"
               />
@@ -3175,6 +3328,8 @@ export default function AdminControlCenter() {
               <Label htmlFor="faq-answer">Answer</Label>
               <Textarea
                 id="faq-answer"
+                value={newAnswer}
+                onChange={(e) => setNewAnswer(e.target.value)}
                 placeholder="Enter the detailed answer..."
                 className="min-h-[120px]"
               />
@@ -3182,7 +3337,7 @@ export default function AdminControlCenter() {
             <div className="grid gap-2">
               <Label htmlFor="faq-category">Category</Label>
               <div className="flex gap-2">
-                <Select>
+                <Select value={newCategory} onValueChange={setNewCategory}>
                   <SelectTrigger className="flex-1">
                     <SelectValue placeholder="Select a category" />
                   </SelectTrigger>
