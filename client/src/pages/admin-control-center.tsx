@@ -88,6 +88,10 @@ export default function AdminControlCenter() {
   // Chat Review Center States
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const [selectedChatDetails, setSelectedChatDetails] = useState<any>(null);
+  
+  // URL Scraping for Knowledge Base
+  const [scrapeUrl, setScrapeUrl] = useState('');
+  const [isScrapingForKnowledge, setIsScrapingForKnowledge] = useState(false);
   const [correctionText, setCorrectionText] = useState("");
   const [isSubmittingCorrection, setIsSubmittingCorrection] = useState(false);
 
@@ -247,6 +251,93 @@ export default function AdminControlCenter() {
 
   const faqCategories = Array.isArray(faqData) ? 
     Array.from(new Set(faqData.map((faq: FAQ) => faq.category))) : [];
+
+  // URL Scraping for Knowledge Base
+  const handleScrapeForKnowledge = async () => {
+    if (!scrapeUrl.trim()) {
+      toast({
+        title: "URL Required",
+        description: "Please enter a valid website URL to scrape",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    let formattedUrl = scrapeUrl.trim();
+    if (!formattedUrl.startsWith('http://') && !formattedUrl.startsWith('https://')) {
+      formattedUrl = 'https://' + formattedUrl;
+    }
+
+    try {
+      new URL(formattedUrl);
+    } catch {
+      toast({
+        title: "Invalid URL",
+        description: "Please enter a valid URL",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsScrapingForKnowledge(true);
+    try {
+      const response = await fetch('/api/scrape-website', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ url: formattedUrl }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Scraping failed: ${response.status}`);
+      }
+
+      const result = await response.json();
+      
+      // Convert scraped content into FAQ entries
+      if (result.bulletPoints && result.bulletPoints.length > 0) {
+        for (const point of result.bulletPoints.slice(0, 5)) { // Limit to 5 entries
+          const question = `What does ${result.title} say about: ${point.split('.')[0]}?`;
+          const answer = `Based on ${result.title}: ${point}`;
+          
+          await createFAQMutation.mutateAsync({
+            question,
+            answer,
+            category: 'integration',
+            priority: 5,
+            isActive: true
+          });
+        }
+      } else {
+        // Create a single FAQ from the summary
+        const question = `What information is available about ${result.title}?`;
+        const answer = result.summary || result.content.substring(0, 500) + '...';
+        
+        await createFAQMutation.mutateAsync({
+          question,
+          answer,
+          category: 'general',
+          priority: 5,
+          isActive: true
+        });
+      }
+
+      toast({
+        title: "Content Added to Knowledge Base",
+        description: `Successfully created FAQ entries from ${result.title}`,
+      });
+      
+      setScrapeUrl('');
+    } catch (error) {
+      toast({
+        title: "Scraping Failed",
+        description: "Unable to scrape content from the provided URL",
+        variant: "destructive",
+      });
+    } finally {
+      setIsScrapingForKnowledge(false);
+    }
+  };
 
   const handleApproveChat = () => {
     if (!selectedChatId) return;
@@ -596,6 +687,49 @@ export default function AdminControlCenter() {
                   <Plus className="w-4 h-4 mr-2" />
                   {createFAQMutation.isPending ? 'Creating...' : 'Add FAQ Entry'}
                 </Button>
+
+                <Separator className="my-4" />
+
+                {/* URL Scraping for Knowledge Base */}
+                <div className="border rounded-lg p-4 bg-green-50 dark:bg-green-950/20">
+                  <h4 className="font-medium mb-3 flex items-center gap-2">
+                    <Globe className="w-4 h-4 text-green-600" />
+                    Add from Website URL
+                  </h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                    Scrape content from a website URL and convert it into Q&A entries
+                  </p>
+                  <div className="space-y-3">
+                    <div>
+                      <Label htmlFor="scrape-url" className="text-sm font-medium">Website URL</Label>
+                      <Input
+                        id="scrape-url"
+                        value={scrapeUrl}
+                        onChange={(e) => setScrapeUrl(e.target.value)}
+                        placeholder="https://support.example.com/article"
+                        className="mt-1"
+                      />
+                    </div>
+                    <Button 
+                      onClick={handleScrapeForKnowledge}
+                      disabled={!scrapeUrl.trim() || isScrapingForKnowledge}
+                      className="w-full bg-green-600 hover:bg-green-700"
+                      variant="default"
+                    >
+                      {isScrapingForKnowledge ? (
+                        <>
+                          <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                          Scraping Content...
+                        </>
+                      ) : (
+                        <>
+                          <Download className="w-4 h-4 mr-2" />
+                          Scrape & Add to Knowledge Base
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
               </CardContent>
             </Card>
 
