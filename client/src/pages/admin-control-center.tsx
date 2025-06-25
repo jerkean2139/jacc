@@ -2700,23 +2700,6 @@ export default function AdminControlCenter() {
   const [showPromptEditor, setShowPromptEditor] = useState(false);
   const [selectedPromptTemplate, setSelectedPromptTemplate] = useState<any>(null);
   
-  // Category management state
-  const [showCategoryDialog, setShowCategoryDialog] = useState(false);
-  const [newCategoryName, setNewCategoryName] = useState("");
-  const [newCategoryDescription, setNewCategoryDescription] = useState("");
-  const [newCategoryColor, setNewCategoryColor] = useState("#3B82F6");
-  const [newCategoryIcon, setNewCategoryIcon] = useState("HelpCircle");
-  const [editingCategory, setEditingCategory] = useState<any>(null);
-  
-  // Vendor URL management state
-  const [showVendorUrlDialog, setShowVendorUrlDialog] = useState(false);
-  const [newVendorName, setNewVendorName] = useState("");
-  const [newUrlTitle, setNewUrlTitle] = useState("");
-  const [newUrl, setNewUrl] = useState("");
-  const [newUrlType, setNewUrlType] = useState("help_guide");
-  const [newVendorCategory, setNewVendorCategory] = useState("");
-  const [editingVendorUrl, setEditingVendorUrl] = useState<any>(null);
-  
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
