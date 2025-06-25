@@ -2874,7 +2874,40 @@ export default function AdminControlCenter() {
     setEditingVendorUrl(null);
   };
 
-  // Handler functions (primary definitions only)
+  // Handler functions for category and vendor URL management
+  const handleSaveCategory = () => {
+    const data = {
+      name: newCategoryName,
+      description: newCategoryDescription,
+      color: newCategoryColor,
+      icon: newCategoryIcon
+    };
+
+    if (editingCategory) {
+      updateCategoryMutation.mutate({ id: editingCategory.id, data });
+    } else {
+      createCategoryMutation.mutate(data);
+    }
+  };
+
+  const handleSaveVendorUrl = () => {
+    const data = {
+      vendorName: newVendorName,
+      title: newUrlTitle,
+      url: newUrl,
+      type: newUrlType,
+      category: newVendorCategory,
+      tags: newVendorTags.split(',').map((tag: string) => tag.trim()).filter(Boolean),
+      autoUpdate: autoUpdate,
+      updateFrequency: updateFrequency
+    };
+
+    if (editingVendorUrl) {
+      updateVendorUrlMutation.mutate({ id: editingVendorUrl.id, data });
+    } else {
+      createVendorUrlMutation.mutate(data);
+    }
+  };
 
   const handlePreviewDocument = (document: DocumentEntry) => {
     setPreviewDocument(document);
