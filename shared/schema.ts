@@ -511,6 +511,7 @@ export const faqKnowledgeBase = pgTable("faq_knowledge_base", {
   isActive: boolean("is_active").default(true),
   lastUpdated: timestamp("last_updated").defaultNow(),
   createdAt: timestamp("created_at").defaultNow(),
+  createdBy: varchar("created_by").default("admin"),
 });
 
 // Vendor URL Management for automatic training

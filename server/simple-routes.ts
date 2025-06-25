@@ -1128,7 +1128,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { db } = await import('./db.ts');
       const { faqKnowledgeBase } = await import('../shared/schema.ts');
       
-      const allFAQs = await db.select().from(faqKnowledgeBase).orderBy(faqKnowledgeBase.priority);
+      const allFAQs = await db.select({
+        id: faqKnowledgeBase.id,
+        question: faqKnowledgeBase.question,
+        answer: faqKnowledgeBase.answer,
+        category: faqKnowledgeBase.category,
+        tags: faqKnowledgeBase.tags,
+        priority: faqKnowledgeBase.priority,
+        isActive: faqKnowledgeBase.isActive,
+        lastUpdated: faqKnowledgeBase.lastUpdated,
+        createdAt: faqKnowledgeBase.createdAt,
+        categoryId: faqKnowledgeBase.categoryId,
+        createdBy: faqKnowledgeBase.createdBy
+      }).from(faqKnowledgeBase).orderBy(faqKnowledgeBase.priority);
       console.log(`Returning ${allFAQs.length} FAQ entries for admin panel`);
       res.json(allFAQs);
     } catch (error) {
@@ -2055,12 +2067,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/admin/vendor-urls', async (req, res) => {
     try {
-      const { vendorName, title, url, type, category, tags, autoUpdate, updateFrequency } = req.body;
+      const { vendorName, urlTitle, title, url, urlType, type, category, tags, autoUpdate, updateFrequency } = req.body;
       const [vendorUrl] = await db.insert(vendorUrls).values({
         vendorName,
-        urlTitle: title,
+        urlTitle: urlTitle || title, // Support both field names
         url,
-        urlType: type,
+        urlType: urlType || type, // Support both field names
         category,
         tags: tags || [],
         autoUpdate: autoUpdate || false,
