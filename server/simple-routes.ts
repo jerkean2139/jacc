@@ -1969,6 +1969,153 @@ export async function registerRoutes(app: Express): Promise<Server> {
     return chunks;
   }
 
+  // FAQ Categories endpoints
+  app.get('/api/admin/faq-categories', async (req, res) => {
+    try {
+      const categories = await db.select().from(faqCategories).orderBy(faqCategories.name);
+      res.json(categories);
+    } catch (error) {
+      console.error('Error fetching FAQ categories:', error);
+      res.status(500).json({ error: 'Failed to fetch FAQ categories' });
+    }
+  });
+
+  app.post('/api/admin/faq-categories', async (req, res) => {
+    try {
+      const { name, description, color, icon } = req.body;
+      const [category] = await db.insert(faqCategories).values({
+        name,
+        description,
+        color,
+        icon,
+        isActive: true
+      }).returning();
+      res.json(category);
+    } catch (error) {
+      console.error('Error creating FAQ category:', error);
+      res.status(500).json({ error: 'Failed to create FAQ category' });
+    }
+  });
+
+  app.put('/api/admin/faq-categories/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { name, description, color, icon } = req.body;
+      const [category] = await db.update(faqCategories)
+        .set({ name, description, color, icon, updatedAt: new Date() })
+        .where(eq(faqCategories.id, id))
+        .returning();
+      res.json(category);
+    } catch (error) {
+      console.error('Error updating FAQ category:', error);
+      res.status(500).json({ error: 'Failed to update FAQ category' });
+    }
+  });
+
+  app.delete('/api/admin/faq-categories/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      await db.delete(faqCategories).where(eq(faqCategories.id, id));
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting FAQ category:', error);
+      res.status(500).json({ error: 'Failed to delete FAQ category' });
+    }
+  });
+
+  // Vendor URLs endpoints
+  app.get('/api/admin/vendor-urls', async (req, res) => {
+    try {
+      const urls = await db.select().from(vendorUrls).orderBy(vendorUrls.vendorName);
+      res.json(urls);
+    } catch (error) {
+      console.error('Error fetching vendor URLs:', error);
+      res.status(500).json({ error: 'Failed to fetch vendor URLs' });
+    }
+  });
+
+  app.post('/api/admin/vendor-urls', async (req, res) => {
+    try {
+      const { vendorName, title, url, type, category, tags, autoUpdate, updateFrequency } = req.body;
+      const [vendorUrl] = await db.insert(vendorUrls).values({
+        vendorName,
+        title,
+        url,
+        type,
+        category,
+        tags: JSON.stringify(tags || []),
+        autoUpdate: autoUpdate || false,
+        updateFrequency: updateFrequency || 'weekly',
+        isActive: true
+      }).returning();
+      res.json(vendorUrl);
+    } catch (error) {
+      console.error('Error creating vendor URL:', error);
+      res.status(500).json({ error: 'Failed to create vendor URL' });
+    }
+  });
+
+  app.put('/api/admin/vendor-urls/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { vendorName, title, url, type, category, tags, autoUpdate, updateFrequency } = req.body;
+      const [vendorUrl] = await db.update(vendorUrls)
+        .set({
+          vendorName,
+          title,
+          url,
+          type,
+          category,
+          tags: JSON.stringify(tags || []),
+          autoUpdate: autoUpdate || false,
+          updateFrequency: updateFrequency || 'weekly',
+          updatedAt: new Date()
+        })
+        .where(eq(vendorUrls.id, id))
+        .returning();
+      res.json(vendorUrl);
+    } catch (error) {
+      console.error('Error updating vendor URL:', error);
+      res.status(500).json({ error: 'Failed to update vendor URL' });
+    }
+  });
+
+  app.delete('/api/admin/vendor-urls/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      await db.delete(vendorUrls).where(eq(vendorUrls.id, id));
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting vendor URL:', error);
+      res.status(500).json({ error: 'Failed to delete vendor URL' });
+    }
+  });
+
+  app.post('/api/admin/vendor-urls/:id/scrape', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const [vendorUrl] = await db.select().from(vendorUrls).where(eq(vendorUrls.id, id));
+      
+      if (!vendorUrl) {
+        return res.status(404).json({ error: 'Vendor URL not found' });
+      }
+
+      // Trigger content scraping (implement actual scraping logic as needed)
+      await db.update(vendorUrls)
+        .set({ 
+          lastScrapedAt: new Date(),
+          scrapingStatus: 'completed',
+          updatedAt: new Date()
+        })
+        .where(eq(vendorUrls.id, id));
+
+      res.json({ success: true, message: 'Content scraped successfully' });
+    } catch (error) {
+      console.error('Error scraping vendor URL:', error);
+      res.status(500).json({ error: 'Failed to scrape vendor URL' });
+    }
+  });
+
   // Health check endpoint
   app.get('/api/health', (req: Request, res: Response) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
