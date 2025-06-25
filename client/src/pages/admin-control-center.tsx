@@ -64,6 +64,8 @@ export default function AdminControlCenter() {
   const [newAnswer, setNewAnswer] = useState('');
   const [newCategory, setNewCategory] = useState('general');
   const [newPriority, setNewPriority] = useState(1);
+  const [openKnowledgeCategories, setOpenKnowledgeCategories] = useState<string[]>([]);
+  const [editingFAQ, setEditingFAQ] = useState<FAQ | null>(null);
 
   // State for creating new prompt templates
   const [showCreatePrompt, setShowCreatePrompt] = useState(false);
@@ -204,6 +206,47 @@ export default function AdminControlCenter() {
       setIsSubmittingCorrection(false);
     }
   };
+
+  const deleteFAQMutation = useMutation({
+    mutationFn: (faqId: number) => apiRequest(`/api/admin/faq/${faqId}`, {
+      method: 'DELETE',
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/faq'] });
+      toast({ title: 'FAQ deleted successfully' });
+    },
+  });
+
+  // Helper functions for FAQ management
+  const toggleKnowledgeCategory = (category: string) => {
+    setOpenKnowledgeCategories(prev => 
+      prev.includes(category) 
+        ? prev.filter(c => c !== category)
+        : [...prev, category]
+    );
+  };
+
+  const handleEditFAQ = (faq: FAQ) => {
+    setEditingFAQ(faq);
+    setNewQuestion(faq.question);
+    setNewAnswer(faq.answer);
+    setNewCategory(faq.category);
+    setNewPriority(faq.priority);
+  };
+
+  const handleDeleteFAQ = (faqId: number) => {
+    if (confirm('Are you sure you want to delete this FAQ entry?')) {
+      deleteFAQMutation.mutate(faqId);
+    }
+  };
+
+  // Filtered data for FAQ management
+  const filteredFAQs = Array.isArray(faqData) ? faqData.filter((faq: FAQ) => {
+    return faq.question && faq.answer;
+  }) : [];
+
+  const faqCategories = Array.isArray(faqData) ? 
+    Array.from(new Set(faqData.map((faq: FAQ) => faq.category))) : [];
 
   const handleApproveChat = () => {
     if (!selectedChatId) return;
@@ -473,100 +516,184 @@ export default function AdminControlCenter() {
         </TabsList>
 
         <TabsContent value="knowledge" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Q&A Knowledge Base</CardTitle>
-              <CardDescription>Manage FAQ entries and knowledge base content</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Card>
-                    <CardContent className="p-4">
-                      <div className="flex items-center gap-2">
-                        <BookOpen className="h-4 w-4 text-blue-500" />
-                        <div>
-                          <p className="text-sm text-gray-600">FAQ Entries</p>
-                          <p className="text-xl font-bold">{faqData.length}</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardContent className="p-4">
-                      <div className="flex items-center gap-2">
-                        <Target className="h-4 w-4 text-green-500" />
-                        <div>
-                          <p className="text-sm text-gray-600">Active Entries</p>
-                          <p className="text-xl font-bold">{faqData.filter((f: FAQ) => f.isActive).length}</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardContent className="p-4">
-                      <div className="flex items-center gap-2">
-                        <Plus className="h-4 w-4 text-purple-500" />
-                        <div>
-                          <p className="text-sm text-gray-600">Ready to Add</p>
-                          <p className="text-xl font-bold">✓</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold">Q&A Knowledge Base Management</h2>
+            <Badge variant="secondary">
+              {Array.isArray(faqData) ? faqData.length : 0} entries
+            </Badge>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card className="border-2 border-blue-500">
+              <CardHeader>
+                <CardTitle className="text-blue-600">📝 Add New FAQ Entry</CardTitle>
+                <CardDescription>Create comprehensive Q&A entries for the knowledge base</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label className="text-sm font-medium">Question</Label>
+                  <Input 
+                    placeholder="What is the processing fee for restaurants?"
+                    className="mt-1"
+                    value={newQuestion}
+                    onChange={(e) => setNewQuestion(e.target.value)}
+                  />
                 </div>
 
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Create New FAQ Entry</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="question">Question</Label>
-                      <Input
-                        id="question"
-                        value={newQuestion}
-                        onChange={(e) => setNewQuestion(e.target.value)}
-                        placeholder="Enter the FAQ question..."
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="category">Category</Label>
-                      <Select value={newCategory} onValueChange={setNewCategory}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="general">General</SelectItem>
-                          <SelectItem value="pricing">Pricing</SelectItem>
-                          <SelectItem value="technical">Technical</SelectItem>
-                          <SelectItem value="support">Support</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <div>
-                    <Label htmlFor="answer">Answer</Label>
-                    <Textarea
-                      id="answer"
-                      value={newAnswer}
-                      onChange={(e) => setNewAnswer(e.target.value)}
-                      placeholder="Enter the comprehensive answer..."
-                      rows={4}
-                    />
-                  </div>
-                  <Button 
-                    onClick={() => createFAQMutation.mutate({
-                      question: newQuestion,
-                      answer: newAnswer,
-                      category: newCategory,
-                      priority: newPriority,
-                      isActive: true
-                    })}
-                    disabled={!newQuestion.trim() || !newAnswer.trim() || createFAQMutation.isPending}
-                  >
-                    {createFAQMutation.isPending ? 'Creating...' : 'Create FAQ Entry'}
-                  </Button>
+                <div>
+                  <Label className="text-sm font-medium">Answer</Label>
+                  <Textarea 
+                    placeholder="Processing fees for restaurants typically range from 2.3% to 3.5% depending on the card type..."
+                    className="mt-1 min-h-[100px]"
+                    value={newAnswer}
+                    onChange={(e) => setNewAnswer(e.target.value)}
+                  />
                 </div>
-              </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-sm font-medium">Category</Label>
+                    <Select value={newCategory} onValueChange={setNewCategory}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="general">General</SelectItem>
+                        <SelectItem value="pricing">Pricing</SelectItem>
+                        <SelectItem value="technical">Technical</SelectItem>
+                        <SelectItem value="compliance">Compliance</SelectItem>
+                        <SelectItem value="integration">Integration</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium">Priority</Label>
+                    <Select value={newPriority.toString()} onValueChange={(value) => setNewPriority(parseInt(value))}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1">High Priority</SelectItem>
+                        <SelectItem value="2">Medium Priority</SelectItem>
+                        <SelectItem value="3">Low Priority</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <Button 
+                  onClick={() => createFAQMutation.mutate({
+                    question: newQuestion,
+                    answer: newAnswer,
+                    category: newCategory,
+                    priority: newPriority,
+                    isActive: true
+                  })}
+                  className="w-full bg-blue-600 hover:bg-blue-700"
+                  disabled={!newQuestion.trim() || !newAnswer.trim() || createFAQMutation.isPending}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  {createFAQMutation.isPending ? 'Creating...' : 'Add FAQ Entry'}
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>📚 Knowledge Base Categories</CardTitle>
+                <CardDescription>Browse and manage FAQ categories</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ScrollArea className="h-[300px]">
+                  <div className="space-y-3">
+                    {faqCategories.map((category) => {
+                      const count = Array.isArray(faqData) ? faqData.filter((f: FAQ) => f.category === category).length : 0;
+                      const categoryFAQs = Array.isArray(faqData) ? faqData.filter((f: FAQ) => f.category === category) : [];
+                      const isOpen = openKnowledgeCategories.includes(category);
+                      
+                      return (
+                        <Collapsible key={category} open={isOpen} onOpenChange={() => toggleKnowledgeCategory(category)}>
+                          <CollapsibleTrigger asChild>
+                            <div className="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                              <div className="flex items-center gap-3">
+                                {isOpen ? <ChevronDown className="w-4 h-4 text-blue-500" /> : <ChevronRight className="w-4 h-4 text-blue-500" />}
+                                <BookOpen className="w-4 h-4 text-blue-500" />
+                                <span className="font-medium capitalize">{category}</span>
+                              </div>
+                              <Badge variant="secondary">{count}</Badge>
+                            </div>
+                          </CollapsibleTrigger>
+                          <CollapsibleContent className="mt-2 ml-6 space-y-2">
+                            {categoryFAQs.map((faq: FAQ) => (
+                              <div key={faq.id} className="p-2 bg-gray-50 rounded text-sm">
+                                <div className="font-medium text-gray-800">{faq.question}</div>
+                                <div className="text-gray-600 mt-1">{faq.answer.length > 100 ? faq.answer.substring(0, 100) + '...' : faq.answer}</div>
+                                <div className="flex items-center gap-2 mt-2">
+                                  <Button size="sm" variant="ghost" onClick={() => handleEditFAQ(faq)}>
+                                    <Edit className="w-3 h-3 mr-1" />
+                                    Edit
+                                  </Button>
+                                  <Button size="sm" variant="ghost" onClick={() => handleDeleteFAQ(faq.id)}>
+                                    <Trash2 className="w-3 h-3 mr-1 text-red-500" />
+                                    Delete
+                                  </Button>
+                                </div>
+                              </div>
+                            ))}
+                          </CollapsibleContent>
+                        </Collapsible>
+                      );
+                    })}
+                  </div>
+                </ScrollArea>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent FAQ Entries</CardTitle>
+              <CardDescription>Latest additions to the knowledge base</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ScrollArea className="h-[400px]">
+                <div className="space-y-3">
+                  {filteredFAQs.map((faq: FAQ) => (
+                    <Card key={faq.id} className="border">
+                      <CardContent className="pt-4">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <h4 className="font-medium mb-2">{faq.question}</h4>
+                            <p className="text-sm text-gray-600 mb-3">{faq.answer}</p>
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline" className="text-xs">{faq.category}</Badge>
+                              <Badge variant={faq.priority === 1 ? "destructive" : faq.priority === 2 ? "default" : "secondary"} className="text-xs">
+                                Priority {faq.priority}
+                              </Badge>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1 ml-4">
+                            <Button size="sm" variant="ghost" onClick={() => handleEditFAQ(faq)}>
+                              <Edit className="w-3 h-3" />
+                            </Button>
+                            <Button size="sm" variant="ghost" onClick={() => handleDeleteFAQ(faq.id)}>
+                              <Trash2 className="w-3 h-3 text-red-500" />
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                  {filteredFAQs.length === 0 && (
+                    <div className="text-center py-8 text-gray-500">
+                      <MessageSquare className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                      <p>No FAQ entries found</p>
+                      <p className="text-sm">Create your first entry above</p>
+                    </div>
+                  )}
+                </div>
+              </ScrollArea>
             </CardContent>
           </Card>
         </TabsContent>
