@@ -464,71 +464,13 @@ export default function AdminControlCenter() {
         <p className="text-gray-600 mt-2">Manage AI training, document processing, and system oversight</p>
       </div>
       
-      <Tabs defaultValue="chat-reviews" className="space-y-6">
+      <Tabs defaultValue="knowledge" className="space-y-6">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="chat-reviews">Chat Review & Training</TabsTrigger>
-          <TabsTrigger value="documents">Document Center</TabsTrigger>
           <TabsTrigger value="knowledge">Q&A Knowledge</TabsTrigger>
+          <TabsTrigger value="documents">Document Center</TabsTrigger>
+          <TabsTrigger value="chat-training">Chat & AI Training</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
-
-        <TabsContent value="chat-reviews" className="space-y-6">
-          <ChatReviewCenter />
-        </TabsContent>
-
-        <TabsContent value="documents" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Document Management</CardTitle>
-              <CardDescription>Upload and manage documents for AI training</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Card>
-                    <CardContent className="p-4">
-                      <div className="flex items-center gap-2">
-                        <FileText className="h-4 w-4 text-blue-500" />
-                        <div>
-                          <p className="text-sm text-gray-600">Total Documents</p>
-                          <p className="text-xl font-bold">{documentsData.length}</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardContent className="p-4">
-                      <div className="flex items-center gap-2">
-                        <Folder className="h-4 w-4 text-green-500" />
-                        <div>
-                          <p className="text-sm text-gray-600">Folders</p>
-                          <p className="text-xl font-bold">{foldersData.length}</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardContent className="p-4">
-                      <div className="flex items-center gap-2">
-                        <Upload className="h-4 w-4 text-purple-500" />
-                        <div>
-                          <p className="text-sm text-gray-600">Upload Ready</p>
-                          <p className="text-xl font-bold">✓</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-                
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                  <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium mb-2">Document Upload Area</h3>
-                  <p className="text-gray-500">Drag and drop files or click to browse</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
 
         <TabsContent value="knowledge" className="space-y-6">
           <Card>
@@ -627,6 +569,64 @@ export default function AdminControlCenter() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="documents" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Document Management</CardTitle>
+              <CardDescription>Upload and manage documents for AI training</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Card>
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-blue-500" />
+                        <div>
+                          <p className="text-sm text-gray-600">Total Documents</p>
+                          <p className="text-xl font-bold">{documentsData.length}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-2">
+                        <Folder className="h-4 w-4 text-green-500" />
+                        <div>
+                          <p className="text-sm text-gray-600">Folders</p>
+                          <p className="text-xl font-bold">{foldersData.length}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-2">
+                        <Upload className="h-4 w-4 text-purple-500" />
+                        <div>
+                          <p className="text-sm text-gray-600">Upload Ready</p>
+                          <p className="text-xl font-bold">✓</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+                
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                  <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium mb-2">Document Upload Area</h3>
+                  <p className="text-gray-500">Drag and drop files or click to browse</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="chat-training" className="space-y-6">
+          <ChatReviewCenter />
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-6">
