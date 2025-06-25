@@ -2475,9 +2475,17 @@ export default function AdminControlCenter() {
   const [previewDocument, setPreviewDocument] = useState<DocumentEntry | null>(null);
   const [showChatReviewModal, setShowChatReviewModal] = useState(false);
   const [showAddFAQModal, setShowAddFAQModal] = useState(false);
+  const [showEditFAQModal, setShowEditFAQModal] = useState(false);
+  const [editingFAQ, setEditingFAQ] = useState<any>(null);
+  const [showChatEmulation, setShowChatEmulation] = useState(false);
+  const [emulationMessages, setEmulationMessages] = useState<any[]>([]);
+  const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const [showCategoryManager, setShowCategoryManager] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [editingCategory, setEditingCategory] = useState<any>(null);
+  const [newQuestion, setNewQuestion] = useState("");
+  const [newAnswer, setNewAnswer] = useState("");
+  const [newCategory, setNewCategory] = useState("general");
   
   // Prompt editor modal states
   const [showPromptEditor, setShowPromptEditor] = useState(false);
@@ -2496,6 +2504,13 @@ export default function AdminControlCenter() {
   const { data: documentsData, isLoading: documentsLoading } = useQuery({
     queryKey: ['/api/admin/documents'],
     enabled: activeTab === "document-center"
+  });
+
+  // Fetch chat messages for emulation
+  const { data: chatMessages, isLoading: messagesLoading } = useQuery({
+    queryKey: ['/api/chats', selectedChatId, 'messages'],
+    queryFn: () => fetch(`/api/chats/${selectedChatId}/messages`).then(res => res.json()),
+    enabled: !!selectedChatId
   });
 
   // Fetch folders data
@@ -2529,6 +2544,23 @@ export default function AdminControlCenter() {
       title: "Edit Document",
       description: "Document editing functionality will be available soon.",
     });
+  };
+
+  // Chat emulation functionality
+  const loadChatForEmulation = (chat: any) => {
+    setSelectedChatId(chat.chatId);
+    if (chatMessages && Array.isArray(chatMessages)) {
+      setEmulationMessages(chatMessages);
+      setShowChatEmulation(true);
+    } else {
+      toast({
+        title: "Loading Chat",
+        description: "Chat messages are being loaded for emulation...",
+      });
+      setTimeout(() => {
+        setShowChatEmulation(true);
+      }, 1000);
+    }
   };
 
   function TrainingInteractionsTable() {
