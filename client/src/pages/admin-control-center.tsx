@@ -2678,6 +2678,24 @@ export default function AdminControlCenter() {
   const [newAnswer, setNewAnswer] = useState("");
   const [newCategory, setNewCategory] = useState("general");
   
+  // FAQ Category Management State
+  const [showCategoryDialog, setShowCategoryDialog] = useState(false);
+  const [newCategoryDescription, setNewCategoryDescription] = useState("");
+  const [newCategoryColor, setNewCategoryColor] = useState("#3B82F6");
+  const [newCategoryIcon, setNewCategoryIcon] = useState("HelpCircle");
+  
+  // Vendor URL Management State
+  const [showVendorUrlDialog, setShowVendorUrlDialog] = useState(false);
+  const [editingVendorUrl, setEditingVendorUrl] = useState<any>(null);
+  const [newVendorName, setNewVendorName] = useState("");
+  const [newUrlTitle, setNewUrlTitle] = useState("");
+  const [newUrl, setNewUrl] = useState("");
+  const [newUrlType, setNewUrlType] = useState("help_guide");
+  const [newVendorCategory, setNewVendorCategory] = useState("");
+  const [newVendorTags, setNewVendorTags] = useState("");
+  const [autoUpdate, setAutoUpdate] = useState(false);
+  const [updateFrequency, setUpdateFrequency] = useState("weekly");
+  
   // Prompt editor modal states
   const [showPromptEditor, setShowPromptEditor] = useState(false);
   const [selectedPromptTemplate, setSelectedPromptTemplate] = useState<any>(null);
@@ -2715,6 +2733,181 @@ export default function AdminControlCenter() {
     queryKey: ['/api/admin/training/analytics'],
     enabled: activeTab === "training-feedback"
   });
+
+  // Fetch FAQ categories
+  const { data: faqCategories, isLoading: categoriesLoading } = useQuery({
+    queryKey: ['/api/admin/faq-categories'],
+  });
+
+  // Fetch vendor URLs
+  const { data: vendorUrls, isLoading: urlsLoading } = useQuery({
+    queryKey: ['/api/admin/vendor-urls'],
+  });
+
+  // Category management mutations
+  const createCategoryMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await fetch('/api/admin/faq-categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/faq-categories'] });
+      toast({ title: "Category Created", description: "New FAQ category has been created successfully." });
+      resetCategoryForm();
+      setShowCategoryDialog(false);
+    }
+  });
+
+  const updateCategoryMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string, data: any }) => {
+      const response = await fetch(`/api/admin/faq-categories/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/faq-categories'] });
+      toast({ title: "Category Updated", description: "FAQ category has been updated successfully." });
+      resetCategoryForm();
+      setShowCategoryDialog(false);
+    }
+  });
+
+  const deleteCategoryMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/admin/faq-categories/${id}`, {
+        method: 'DELETE'
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/faq-categories'] });
+      toast({ title: "Category Deleted", description: "FAQ category has been deleted successfully." });
+    }
+  });
+
+  // Vendor URL management mutations
+  const createVendorUrlMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await fetch('/api/admin/vendor-urls', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/vendor-urls'] });
+      toast({ title: "Vendor URL Added", description: "New vendor URL has been added successfully." });
+      resetVendorUrlForm();
+      setShowVendorUrlDialog(false);
+    }
+  });
+
+  const updateVendorUrlMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string, data: any }) => {
+      const response = await fetch(`/api/admin/vendor-urls/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/vendor-urls'] });
+      toast({ title: "Vendor URL Updated", description: "Vendor URL has been updated successfully." });
+      resetVendorUrlForm();
+      setShowVendorUrlDialog(false);
+    }
+  });
+
+  const deleteVendorUrlMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/admin/vendor-urls/${id}`, {
+        method: 'DELETE'
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/vendor-urls'] });
+      toast({ title: "Vendor URL Deleted", description: "Vendor URL has been deleted successfully." });
+    }
+  });
+
+  const scrapeVendorUrlMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/admin/vendor-urls/${id}/scrape`, {
+        method: 'POST'
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/vendor-urls'] });
+      toast({ title: "Content Scraped", description: "Vendor URL content has been scraped and processed successfully." });
+    }
+  });
+
+  // Reset helper functions
+  const resetCategoryForm = () => {
+    setNewCategoryName("");
+    setNewCategoryDescription("");
+    setNewCategoryColor("#3B82F6");
+    setNewCategoryIcon("HelpCircle");
+    setEditingCategory(null);
+  };
+
+  const resetVendorUrlForm = () => {
+    setNewVendorName("");
+    setNewUrlTitle("");
+    setNewUrl("");
+    setNewUrlType("help_guide");
+    setNewVendorCategory("");
+    setNewVendorTags("");
+    setAutoUpdate(false);
+    setUpdateFrequency("weekly");
+    setEditingVendorUrl(null);
+  };
+
+  // Handler functions
+  const handleSaveCategory = () => {
+    const data = {
+      name: newCategoryName,
+      description: newCategoryDescription,
+      color: newCategoryColor,
+      icon: newCategoryIcon
+    };
+
+    if (editingCategory) {
+      updateCategoryMutation.mutate({ id: editingCategory.id, data });
+    } else {
+      createCategoryMutation.mutate(data);
+    }
+  };
+
+  const handleSaveVendorUrl = () => {
+    const data = {
+      vendorName: newVendorName,
+      title: newUrlTitle,
+      url: newUrl,
+      type: newUrlType,
+      category: newVendorCategory,
+      tags: newVendorTags.split(',').map((tag: string) => tag.trim()).filter(Boolean),
+      autoUpdate: autoUpdate,
+      updateFrequency: updateFrequency
+    };
+
+    if (editingVendorUrl) {
+      updateVendorUrlMutation.mutate({ id: editingVendorUrl.id, data });
+    } else {
+      createVendorUrlMutation.mutate(data);
+    }
+  };
 
   const handlePreviewDocument = (document: DocumentEntry) => {
     setPreviewDocument(document);
@@ -2860,26 +3053,7 @@ export default function AdminControlCenter() {
     });
   };
 
-  // Helper functions for form management
-  const resetCategoryForm = () => {
-    setNewCategoryName("");
-    setNewCategoryDescription("");
-    setNewCategoryColor("#3B82F6");
-    setNewCategoryIcon("HelpCircle");
-    setEditingCategory(null);
-  };
-
-  const resetVendorUrlForm = () => {
-    setNewVendorName("");
-    setNewUrlTitle("");
-    setNewUrl("");
-    setNewUrlType("help_guide");
-    setNewVendorCategory("");
-    setNewVendorTags("");
-    setAutoUpdate(false);
-    setUpdateFrequency("weekly");
-    setEditingVendorUrl(null);
-  };
+  // Helper functions for form management (removed duplicates)
 
   const openCategoryDialog = (category?: any) => {
     if (category) {
@@ -2911,41 +3085,7 @@ export default function AdminControlCenter() {
     setShowVendorUrlDialog(true);
   };
 
-  const handleSaveCategory = () => {
-    const data = {
-      name: newCategoryName,
-      description: newCategoryDescription,
-      color: newCategoryColor,
-      icon: newCategoryIcon,
-      displayOrder: editingCategory?.displayOrder || 0
-    };
-
-    if (editingCategory) {
-      updateCategoryMutation.mutate({ id: editingCategory.id, data });
-    } else {
-      createCategoryMutation.mutate(data);
-    }
-  };
-
-  const handleSaveVendorUrl = () => {
-    const data = {
-      vendorName: newVendorName,
-      urlTitle: newUrlTitle,
-      url: newUrl,
-      urlType: newUrlType,
-      category: newVendorCategory,
-      tags: newVendorTags.split(",").map(tag => tag.trim()).filter(Boolean),
-      autoUpdate: autoUpdate,
-      updateFrequency: updateFrequency,
-      isActive: true
-    };
-
-    if (editingVendorUrl) {
-      updateVendorUrlMutation.mutate({ id: editingVendorUrl.id, data });
-    } else {
-      createVendorUrlMutation.mutate(data);
-    }
-  };
+  // Removed duplicate function declarations
 
   function TrainingInteractionsTable() {
     const interactions = (trainingData && typeof trainingData === 'object' && 'interactions' in trainingData && Array.isArray((trainingData as any).interactions)) ? (trainingData as any).interactions : [];
