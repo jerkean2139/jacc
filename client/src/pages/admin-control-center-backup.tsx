@@ -1,4 +1,2 @@
-// Backup of current admin control center for recovery
-export default function AdminControlCenterBackup() {
-  return <div>Backup component</div>;
-}
+// Backup of the corrupted admin-control-center.tsx file
+// This file was corrupted during edits and needs to be restored

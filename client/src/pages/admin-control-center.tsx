@@ -695,7 +695,7 @@ function ChatReviewCenter() {
 
       {/* Split-Screen Chat Review & Training Interface */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6" style={{ height: '700px' }}>
-        {/* Enhanced Chat Review Panel */}
+        {/* Chat List Panel */}
         <Card className="flex flex-col">
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
@@ -703,12 +703,22 @@ function ChatReviewCenter() {
                 <MessageSquare className="h-5 w-5" />
                 Chat Review Center
               </div>
-              <Badge variant="outline">
-                {Array.isArray(userChats) ? userChats.length : 0} conversations
-              </Badge>
+              <div className="flex items-center gap-2">
+                <Badge variant="outline">
+                  {Array.isArray(userChats) ? userChats.length : 0} conversations
+                </Badge>
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => setShowReports(!showReports)}
+                >
+                  <BarChart3 className="h-4 w-4 mr-1" />
+                  Reports
+                </Button>
+              </div>
             </CardTitle>
             <CardDescription>
-              Review user conversations with built-in emulator functionality
+              Select a chat to review user question and AI response
             </CardDescription>
           </CardHeader>
           <CardContent className="flex-1 overflow-hidden">
@@ -733,15 +743,7 @@ function ChatReviewCenter() {
                       `}
                     >
                       <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-medium truncate">{chat.chatTitle || 'Untitled Chat'}</h4>
-                          {chat.hasCorrections && (
-                            <Badge variant="secondary" className="text-xs">
-                              <Brain className="h-3 w-3 mr-1" />
-                              Training
-                            </Badge>
-                          )}
-                        </div>
+                        <h4 className="font-medium truncate">{chat.chatTitle || 'Untitled Chat'}</h4>
                         <Badge variant={chat.reviewStatus === 'approved' ? 'default' : 'secondary'}>
                           {chat.reviewStatus === 'approved' ? (
                             <ThumbsUp className="h-3 w-3 mr-1" />
@@ -762,59 +764,6 @@ function ChatReviewCenter() {
                           <p className="text-xs">{new Date(chat.createdAt).toLocaleTimeString()}</p>
                         </div>
                       </div>
-
-                      {selectedChatId === chat.chatId && (
-                        <div className="mt-4 pt-3 border-t space-y-2">
-                          <div className="flex gap-2">
-                            <Button 
-                              size="sm" 
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                loadChatForEmulation(chat);
-                              }}
-                            >
-                              <MessageSquare className="h-4 w-4 mr-2" />
-                              Emulate Chat
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleApproveChat();
-                              }}
-                              disabled={chat.reviewStatus === 'approved'}
-                            >
-                              <ThumbsUp className="h-3 w-3 mr-1" />
-                              {chat.reviewStatus === 'approved' ? 'Approved' : 'Approve'}
-                            </Button>
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedChatId(chat.chatId);
-                                toast({
-                                  title: "Chat Emulator",
-                                  description: "Loading chat emulation interface...",
-                                });
-                              }}
-                            >
-                              <Eye className="h-3 w-3 mr-1" />
-                              Emulate
-                            </Button>
-                          </div>
-                          
-                          <textarea
-                            value={approvalFeedback}
-                            onChange={(e) => setApprovalFeedback(e.target.value)}
-                            placeholder="Add feedback or notes for this conversation..."
-                            className="w-full p-2 text-sm border rounded resize-none"
-                            rows={2}
-                            onClick={(e) => e.stopPropagation()}
-                          />
-                        </div>
-                      )}
                     </div>
                   ))
                 ) : (
@@ -829,144 +778,267 @@ function ChatReviewCenter() {
           </CardContent>
         </Card>
 
-        {/* Enhanced AI Training Interface */}
+        {/* Chat Review & Training Panel */}
         <Card className="flex flex-col">
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Brain className="h-5 w-5" />
-                AI Training Interface
+                {selectedChatId ? 'Review & Train AI' : 'Select Chat to Review'}
               </div>
-              <Badge variant="outline" className="text-green-600">
-                Live Testing
-              </Badge>
+              {selectedChatId && selectedChatDetails && (
+                <Badge variant="secondary">
+                  <MessageSquare className="h-3 w-3 mr-1" />
+                  Chat Selected
+                </Badge>
+              )}
             </CardTitle>
             <CardDescription>
-              Test AI responses and provide training corrections with chat integration
+              {selectedChatId 
+                ? 'Review the user question and AI response. Approve if correct or provide training corrections.'
+                : 'Select a chat from the left panel to view the conversation and provide AI training feedback.'
+              }
             </CardDescription>
           </CardHeader>
-          <CardContent className="flex-1 space-y-4">
-            {/* Test Query Section */}
-            <div>
-              <label className="text-sm font-medium mb-2 block">Test Query</label>
-              <textarea
-                value={testQuery}
-                onChange={(e) => setTestQuery(e.target.value)}
-                placeholder="Enter a question to test the AI response..."
-                className="w-full p-3 border rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                rows={3}
-              />
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="saveToHistory"
-                  defaultChecked={true}
-                  className="rounded"
-                />
-                <label htmlFor="saveToHistory" className="text-sm">Save to chat history</label>
-              </div>
-              
-              <Button 
-                onClick={handleTestAI}
-                disabled={isTestingAI || !testQuery.trim()}
-              >
-                {isTestingAI ? (
-                  <>
-                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                    Testing...
-                  </>
-                ) : (
-                  <>
-                    <Brain className="h-4 w-4 mr-2" />
-                    Test AI
-                  </>
-                )}
-              </Button>
-            </div>
-
-            {/* AI Response Section */}
-            {testResponse && (
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium mb-2 block">AI Response</label>
-                  <div className="p-4 bg-gray-50 rounded-lg border max-h-64 overflow-y-auto">
-                    <div dangerouslySetInnerHTML={{ __html: testResponse }} />
+          <CardContent className="flex-1 overflow-hidden">
+            {selectedChatId ? (
+              <div className="space-y-4 h-full">
+                {messagesLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <RefreshCw className="h-6 w-6 animate-spin" />
+                    <span className="ml-2">Loading conversation...</span>
                   </div>
-                </div>
-
-                {!correctionMode ? (
-                  <Button 
-                    variant="outline"
-                    onClick={() => setCorrectionMode(true)}
-                    className="w-full"
-                  >
-                    <Edit className="h-4 w-4 mr-2" />
-                    Provide Training Correction
-                  </Button>
-                ) : (
-                  <div className="space-y-3">
-                    <div>
-                      <label className="text-sm font-medium mb-2 block">Corrected Response</label>
-                      <textarea
-                        value={correctedResponse}
-                        onChange={(e) => setCorrectedResponse(e.target.value)}
-                        placeholder="Provide the correct response for training..."
-                        className="w-full p-3 border rounded-lg resize-none focus:ring-2 focus:ring-blue-500"
-                        rows={4}
-                      />
+                ) : selectedChatDetails ? (
+                  <div className="space-y-4 h-full flex flex-col">
+                    {/* User Question */}
+                    <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        <User className="h-4 w-4 text-blue-600" />
+                        <span className="font-medium text-blue-800">User Question</span>
+                      </div>
+                      <div className="text-sm text-blue-900">
+                        {selectedChatDetails.userMessage || 'No user message found'}
+                      </div>
                     </div>
-                    
-                    <div className="flex gap-2">
+
+                    {/* AI Response */}
+                    <div className="bg-gray-50 border-l-4 border-gray-500 p-4 rounded-r-lg flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Bot className="h-4 w-4 text-gray-600" />
+                        <span className="font-medium text-gray-800">AI Response</span>
+                      </div>
+                      <div className="text-sm text-gray-900 max-h-40 overflow-y-auto">
+                        <div dangerouslySetInnerHTML={{ 
+                          __html: selectedChatDetails.aiResponse || 'No AI response found'
+                        }} />
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex gap-2 pt-3 border-t">
                       <Button 
-                        onClick={handleSubmitCorrection}
-                        disabled={!correctedResponse.trim() || submitCorrectionMutation.isPending}
-                        className="flex-1"
+                        onClick={handleApproveChat}
+                        className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
+                        disabled={approveChatMutation.isPending}
                       >
-                        {submitCorrectionMutation.isPending ? (
-                          <>
-                            <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                            Submitting...
-                          </>
-                        ) : (
-                          <>
-                            <CheckCircle className="h-4 w-4 mr-2" />
-                            Submit Correction
-                          </>
-                        )}
+                        <ThumbsUp className="h-4 w-4" />
+                        {approveChatMutation.isPending ? 'Approving...' : 'Approve Response'}
                       </Button>
                       <Button 
                         variant="outline"
-                        onClick={() => {
-                          setCorrectionMode(false);
-                          setCorrectedResponse("");
-                        }}
+                        onClick={() => setCorrectionMode(!correctionMode)}
+                        className="flex items-center gap-2"
                       >
-                        Cancel
+                        <Edit className="h-4 w-4" />
+                        Provide Correction
                       </Button>
                     </div>
+
+                    {/* Correction Interface */}
+                    {correctionMode && (
+                      <div className="space-y-3 p-4 bg-yellow-50 border rounded-lg">
+                        <div className="flex items-center gap-2 mb-2">
+                          <AlertTriangle className="h-4 w-4 text-yellow-600" />
+                          <span className="font-medium text-yellow-800">Training Correction</span>
+                        </div>
+                        <textarea
+                          value={correctionText}
+                          onChange={(e) => setCorrectionText(e.target.value)}
+                          placeholder="Provide the corrected AI response that should have been given to this user question..."
+                          className="w-full p-3 border rounded-lg resize-none"
+                          rows={6}
+                        />
+                        <div className="flex gap-2">
+                          <Button 
+                            onClick={handleSubmitCorrection}
+                            disabled={isSubmittingCorrection || !correctionText.trim()}
+                            className="bg-orange-600 hover:bg-orange-700"
+                          >
+                            {isSubmittingCorrection ? (
+                              <>
+                                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                                Submitting...
+                              </>
+                            ) : (
+                              <>
+                                <Save className="h-4 w-4 mr-2" />
+                                Save Correction
+                              </>
+                            )}
+                          </Button>
+                          <Button 
+                            variant="outline"
+                            onClick={() => {
+                              setCorrectionMode(false);
+                              setCorrectionText("");
+                            }}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Reports Section */}
+                    {showReports && (
+                      <div className="mt-4 p-4 bg-gray-50 border rounded-lg">
+                        <div className="flex items-center justify-between mb-3">
+                          <h4 className="font-medium flex items-center gap-2">
+                            <BarChart3 className="h-4 w-4" />
+                            Chat Review Reports
+                          </h4>
+                          <Select value={reportFilter} onValueChange={setReportFilter}>
+                            <SelectTrigger className="w-32">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="all">All Chats</SelectItem>
+                              <SelectItem value="approved">Approved</SelectItem>
+                              <SelectItem value="pending">Pending</SelectItem>
+                              <SelectItem value="corrected">With Corrections</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span>Total Reviews:</span>
+                            <span className="font-medium">{Array.isArray(userChats) ? userChats.length : 0}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Approved:</span>
+                            <span className="font-medium text-green-600">
+                              {Array.isArray(userChats) ? userChats.filter((c: any) => c.reviewStatus === 'approved').length : 0}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Pending Review:</span>
+                            <span className="font-medium text-yellow-600">
+                              {Array.isArray(userChats) ? userChats.filter((c: any) => c.reviewStatus !== 'approved').length : 0}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium mb-2">No conversation data</h3>
+                    <p className="text-gray-500">Unable to load messages for this chat</p>
                   </div>
                 )}
               </div>
+            ) : (
+              <div className="flex items-center justify-center h-full">
+                <div className="text-center">
+                  <MessageSquare className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-600 mb-2">Select a Chat to Review</h3>
+                  <p className="text-gray-500 max-w-xs">
+                    Choose a conversation from the left panel to view the user question and AI response for review and training
+                  </p>
+                </div>
+              </div>
             )}
+          </CardContent>
+        </Card>
+      </div>
 
-            {/* Selected Chat Context */}
-            {selectedChatId && (
-              <div className="border-t pt-4">
-                <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
-                  <MessageSquare className="h-4 w-4" />
-                  Selected Chat Context
-                </h4>
-                <div className="border rounded-lg p-3 bg-gray-50 max-h-32 overflow-y-auto">
-                  {messagesLoading ? (
-                    <p className="text-sm text-gray-500">Loading messages...</p>
-                  ) : Array.isArray(chatMessages) && chatMessages.length > 0 ? (
-                    <div className="space-y-2">
-                      {chatMessages.slice(0, 3).map((message: any, index: number) => (
-                        <div key={index} className="text-sm">
-                          <span className={`font-medium ${message.role === 'user' ? 'text-blue-600' : 'text-green-600'}`}>
+      {/* Enhanced Training Analytics */}
+      <div className="mt-6">
+        <TrainingInteractionsTable />
+      </div>
+    );
+  }
+
+  // Helper mutation functions for ChatReviewCenter
+  const approveChatMutation = useMutation({
+    mutationFn: async (chatId: string) => {
+      const response = await fetch(`/api/admin/chat-reviews/${chatId}/approve`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          feedback: 'Chat approved by admin',
+          reviewStatus: 'approved'
+        })
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/chat-reviews'] });
+      toast({
+        title: "Chat Approved",
+        description: "AI response approved and added to training data",
+      });
+    }
+  });
+
+  const handleSubmitCorrection = async () => {
+    if (!correctionText.trim() || !selectedChatDetails) return;
+    
+    setIsSubmittingCorrection(true);
+    
+    try {
+      const response = await fetch('/api/admin/ai-simulator/train', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          originalQuery: selectedChatDetails.userMessage,
+          originalResponse: selectedChatDetails.aiResponse,
+          correctedResponse: correctionText,
+          improvementType: "admin_correction",
+          addToKnowledgeBase: true,
+          chatId: selectedChatId
+        })
+      });
+      
+      if (response.ok) {
+        await queryClient.invalidateQueries({ queryKey: ['/api/admin/chat-reviews'] });
+        toast({
+          title: "Training Correction Submitted",
+          description: "AI has been trained with the corrected response and will learn from this feedback",
+        });
+        setCorrectionMode(false);
+        setCorrectionText("");
+      } else {
+        throw new Error('Failed to submit correction');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to submit training correction",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmittingCorrection(false);
+    }
+  };
+
+  const handleApproveChat = () => {
+    if (!selectedChatId) return;
+    approveChatMutation.mutate(selectedChatId);
+  };
+
+  function TrainingInteractionsTable() {
                             {message.role === 'user' ? 'User' : 'Assistant'}:
                           </span> 
                           <span className="ml-2">{message.content ? message.content.substring(0, 100) + '...' : 'No content'}</span>
