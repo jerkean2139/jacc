@@ -1163,7 +1163,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         category: category || 'general',
         tags: tags || [],
         isActive: isActive !== undefined ? isActive : true,
-        priority: priority || 1
+        priority: priority || 1,
+        createdBy: 'admin'
       };
 
       await db.insert(faqKnowledgeBase).values(newFAQ);
