@@ -284,11 +284,42 @@ function ChatReviewCenter() {
   const [correctionMode, setCorrectionMode] = useState(false);
   const [correctedResponse, setCorrectedResponse] = useState("");
   const [approvalFeedback, setApprovalFeedback] = useState("");
+  
+  // FAQ Category Management State
+  const [showCategoryDialog, setShowCategoryDialog] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<any>(null);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [newCategoryDescription, setNewCategoryDescription] = useState("");
+  const [newCategoryColor, setNewCategoryColor] = useState("#3B82F6");
+  const [newCategoryIcon, setNewCategoryIcon] = useState("HelpCircle");
+  
+  // Vendor URL Management State
+  const [showVendorUrlDialog, setShowVendorUrlDialog] = useState(false);
+  const [editingVendorUrl, setEditingVendorUrl] = useState<any>(null);
+  const [newVendorName, setNewVendorName] = useState("");
+  const [newUrlTitle, setNewUrlTitle] = useState("");
+  const [newUrl, setNewUrl] = useState("");
+  const [newUrlType, setNewUrlType] = useState("help_guide");
+  const [newVendorCategory, setNewVendorCategory] = useState("");
+  const [newVendorTags, setNewVendorTags] = useState("");
+  const [autoUpdate, setAutoUpdate] = useState(false);
+  const [updateFrequency, setUpdateFrequency] = useState("weekly");
+  
   const { toast } = useToast();
 
   // Fetch user chats for review
   const { data: userChats, isLoading: chatsLoading } = useQuery({
     queryKey: ['/api/admin/chat-reviews'],
+  });
+
+  // Fetch FAQ categories
+  const { data: faqCategories, isLoading: categoriesLoading } = useQuery({
+    queryKey: ['/api/admin/faq-categories'],
+  });
+
+  // Fetch vendor URLs
+  const { data: vendorUrls, isLoading: urlsLoading } = useQuery({
+    queryKey: ['/api/admin/vendor-urls'],
   });
 
   // Fetch messages for selected chat

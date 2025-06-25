@@ -3477,6 +3477,302 @@ Would you like me to create a detailed proposal for this merchant?`,
     }
   });
 
+  // FAQ Categories Management API
+  app.get('/api/admin/faq-categories', async (req: Request, res: Response) => {
+    try {
+      const { db } = await import('./db');
+      const { faqCategories } = await import('@shared/schema');
+      
+      const categories = await db.select().from(faqCategories).orderBy(faqCategories.displayOrder);
+      res.json(categories);
+    } catch (error) {
+      console.error('Error fetching FAQ categories:', error);
+      res.status(500).json({ error: 'Failed to fetch categories' });
+    }
+  });
+
+  app.post('/api/admin/faq-categories', async (req: Request, res: Response) => {
+    try {
+      const { db } = await import('./db');
+      const { faqCategories, insertFaqCategorySchema } = await import('@shared/schema');
+      
+      const validatedData = insertFaqCategorySchema.parse(req.body);
+      const [newCategory] = await db.insert(faqCategories).values(validatedData).returning();
+      
+      res.json(newCategory);
+    } catch (error) {
+      console.error('Error creating FAQ category:', error);
+      res.status(500).json({ error: 'Failed to create category' });
+    }
+  });
+
+  app.put('/api/admin/faq-categories/:id', async (req: Request, res: Response) => {
+    try {
+      const { db } = await import('./db');
+      const { faqCategories, insertFaqCategorySchema } = await import('@shared/schema');
+      
+      const categoryId = parseInt(req.params.id);
+      const validatedData = insertFaqCategorySchema.parse(req.body);
+      
+      const [updatedCategory] = await db
+        .update(faqCategories)
+        .set({ ...validatedData, updatedAt: new Date() })
+        .where(eq(faqCategories.id, categoryId))
+        .returning();
+      
+      res.json(updatedCategory);
+    } catch (error) {
+      console.error('Error updating FAQ category:', error);
+      res.status(500).json({ error: 'Failed to update category' });
+    }
+  });
+
+  app.delete('/api/admin/faq-categories/:id', async (req: Request, res: Response) => {
+    try {
+      const { db } = await import('./db');
+      const { faqCategories } = await import('@shared/schema');
+      
+      const categoryId = parseInt(req.params.id);
+      await db.delete(faqCategories).where(eq(faqCategories.id, categoryId));
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting FAQ category:', error);
+      res.status(500).json({ error: 'Failed to delete category' });
+    }
+  });
+
+  // Vendor URLs Management API
+  app.get('/api/admin/vendor-urls', async (req: Request, res: Response) => {
+    try {
+      const { db } = await import('./db');
+      const { vendorUrls } = await import('@shared/schema');
+      
+      const urls = await db.select().from(vendorUrls).orderBy(vendorUrls.vendorName, vendorUrls.urlTitle);
+      res.json(urls);
+    } catch (error) {
+      console.error('Error fetching vendor URLs:', error);
+      res.status(500).json({ error: 'Failed to fetch vendor URLs' });
+    }
+  });
+
+  app.post('/api/admin/vendor-urls', async (req: Request, res: Response) => {
+    try {
+      const { db } = await import('./db');
+      const { vendorUrls, insertVendorUrlSchema } = await import('@shared/schema');
+      
+      const sessionId = req.cookies?.sessionId;
+      const userId = sessionId && sessions.has(sessionId) ? sessions.get(sessionId).id : 'admin-user-id';
+      
+      const validatedData = insertVendorUrlSchema.parse(req.body);
+      const [newUrl] = await db.insert(vendorUrls).values({
+        ...validatedData,
+        createdBy: userId
+      }).returning();
+      
+      res.json(newUrl);
+    } catch (error) {
+      console.error('Error creating vendor URL:', error);
+      res.status(500).json({ error: 'Failed to create vendor URL' });
+    }
+  });
+
+  app.put('/api/admin/vendor-urls/:id', async (req: Request, res: Response) => {
+    try {
+      const { db } = await import('./db');
+      const { vendorUrls, insertVendorUrlSchema } = await import('@shared/schema');
+      
+      const urlId = req.params.id;
+      const validatedData = insertVendorUrlSchema.parse(req.body);
+      
+      const [updatedUrl] = await db
+        .update(vendorUrls)
+        .set({ ...validatedData, updatedAt: new Date() })
+        .where(eq(vendorUrls.id, urlId))
+        .returning();
+      
+      res.json(updatedUrl);
+    } catch (error) {
+      console.error('Error updating vendor URL:', error);
+      res.status(500).json({ error: 'Failed to update vendor URL' });
+    }
+  });
+
+  app.delete('/api/admin/vendor-urls/:id', async (req: Request, res: Response) => {
+    try {
+      const { db } = await import('./db');
+      const { vendorUrls } = await import('@shared/schema');
+      
+      const urlId = req.params.id;
+      await db.delete(vendorUrls).where(eq(vendorUrls.id, urlId));
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting vendor URL:', error);
+      res.status(500).json({ error: 'Failed to delete vendor URL' });
+    }
+  });
+
+  // Enhanced website scraping with vendor URL integration
+  app.post('/api/admin/scrape-vendor-url/:id', async (req: Request, res: Response) => {
+    try {
+      const { db } = await import('./db');
+      const { vendorUrls, documents } = await import('@shared/schema');
+      
+      const urlId = req.params.id;
+      const [vendorUrl] = await db.select().from(vendorUrls).where(eq(vendorUrls.id, urlId));
+      
+      if (!vendorUrl) {
+        return res.status(404).json({ error: 'Vendor URL not found' });
+      }
+
+      // Import scraping modules
+      const puppeteer = await import('puppeteer');
+      const cheerio = await import('cheerio');
+      const TurndownService = (await import('turndown')).default;
+      const crypto = await import('crypto');
+
+      console.log(`Scraping vendor URL: ${vendorUrl.url}`);
+      
+      let browser;
+      let scrapedContent = '';
+      let wordCount = 0;
+      
+      try {
+        // HTTP request approach first
+        const response = await axios.get(vendorUrl.url, {
+          timeout: 30000,
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+          }
+        });
+        
+        const $ = cheerio.load(response.data);
+        
+        // Remove unwanted elements
+        $('script, style, nav, header, footer, aside, .navigation, .menu, .sidebar').remove();
+        
+        // Extract main content
+        const contentSelectors = [
+          'main', 'article', '.content', '.main-content', 
+          '#content', '#main', '.post-content', '.entry-content',
+          '.article-content', '.page-content', 'body'
+        ];
+        
+        let extractedText = '';
+        for (const selector of contentSelectors) {
+          const element = $(selector);
+          if (element.length && element.text().trim().length > 100) {
+            extractedText = element.html() || '';
+            break;
+          }
+        }
+        
+        if (!extractedText) {
+          extractedText = $('body').html() || '';
+        }
+        
+        // Convert to markdown
+        const turndownService = new TurndownService({
+          headingStyle: 'atx',
+          codeBlockStyle: 'fenced'
+        });
+        
+        scrapedContent = turndownService.turndown(extractedText);
+        wordCount = scrapedContent.split(/\s+/).filter(word => word.length > 0).length;
+        
+      } catch (httpError) {
+        console.log('HTTP request failed, trying Puppeteer...', httpError);
+        
+        // Fallback to Puppeteer
+        browser = await puppeteer.launch({
+          headless: true,
+          args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+        });
+        
+        const page = await browser.newPage();
+        await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36');
+        await page.goto(vendorUrl.url, { waitUntil: 'networkidle0', timeout: 30000 });
+        
+        const content = await page.evaluate(() => {
+          const removeElements = document.querySelectorAll('script, style, nav, header, footer, aside, .navigation, .menu, .sidebar');
+          removeElements.forEach(el => el.remove());
+          
+          const selectors = ['main', 'article', '.content', '.main-content', '#content', '#main', '.post-content'];
+          for (const selector of selectors) {
+            const element = document.querySelector(selector);
+            if (element && element.textContent && element.textContent.trim().length > 100) {
+              return element.innerHTML;
+            }
+          }
+          return document.body.innerHTML;
+        });
+        
+        const turndownService = new TurndownService({
+          headingStyle: 'atx',
+          codeBlockStyle: 'fenced'
+        });
+        
+        scrapedContent = turndownService.turndown(content);
+        wordCount = scrapedContent.split(/\s+/).filter(word => word.length > 0).length;
+      }
+      
+      if (browser) {
+        await browser.close();
+      }
+      
+      // Generate content hash
+      const contentHash = crypto.createHash('sha256').update(scrapedContent).digest('hex');
+      
+      // Update vendor URL record
+      await db.update(vendorUrls).set({
+        lastScraped: new Date(),
+        lastContentHash: contentHash,
+        scrapingStatus: 'success',
+        wordCount: wordCount,
+        errorMessage: null,
+        updatedAt: new Date()
+      }).where(eq(vendorUrls.id, urlId));
+      
+      // Create document from scraped content
+      const sessionId = req.cookies?.sessionId;
+      const userId = sessionId && sessions.has(sessionId) ? sessions.get(sessionId).id : 'admin-user-id';
+      
+      const documentName = `${vendorUrl.vendorName}-${vendorUrl.urlTitle}.md`;
+      const documentContent = `# ${vendorUrl.urlTitle}\n\n**Source:** ${vendorUrl.url}\n**Vendor:** ${vendorUrl.vendorName}\n**Scraped:** ${new Date().toISOString()}\n\n---\n\n${scrapedContent}`;
+      
+      // Save as document
+      const documentPath = `uploads/${documentName}`;
+      await fs.promises.writeFile(documentPath, documentContent);
+      
+      const [newDocument] = await db.insert(documents).values({
+        name: documentName,
+        originalName: documentName,
+        mimeType: 'text/markdown',
+        size: Buffer.byteLength(documentContent, 'utf8'),
+        path: documentPath,
+        userId: userId,
+        category: vendorUrl.category || 'vendor_documentation',
+        tags: [...(vendorUrl.tags || []), 'auto_scraped', 'vendor_url'],
+        processorType: vendorUrl.vendorName.toLowerCase(),
+        isPublic: true,
+        adminOnly: false
+      }).returning();
+      
+      res.json({
+        success: true,
+        vendorUrl: vendorUrl,
+        document: newDocument,
+        wordCount: wordCount,
+        contentHash: contentHash
+      });
+      
+    } catch (error) {
+      console.error('Error scraping vendor URL:', error);
+      res.status(500).json({ error: 'Failed to scrape vendor URL' });
+    }
+  });
+
   console.log("✅ Simple routes registered successfully");
   
   const server = createServer(app);
