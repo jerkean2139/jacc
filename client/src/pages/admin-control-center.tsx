@@ -149,27 +149,37 @@ export default function AdminControlCenter() {
 
   // Update chat details whenever chatMessages changes
   useEffect(() => {
-    if (chatMessages && chatMessages.length > 0) {
-      const userMessage = chatMessages.find((m: any) => m.role === 'user')?.content || '';
-      const aiResponse = chatMessages.find((m: any) => m.role === 'assistant')?.content || '';
+    if (selectedChatId && chatMessages) {
+      console.log('Processing chat messages:', { 
+        chatId: selectedChatId, 
+        messageCount: chatMessages.length,
+        messages: chatMessages 
+      });
       
-      setSelectedChatDetails({
-        userMessage,
-        aiResponse,
-        messages: chatMessages
-      });
-      console.log('Chat details loaded:', { 
-        messageCount: chatMessages.length, 
-        hasUserMessage: !!userMessage, 
-        hasAiResponse: !!aiResponse,
-        chatId: selectedChatId 
-      });
-    } else if (selectedChatId && !messagesLoading) {
-      // If no messages found for selected chat, clear details
-      setSelectedChatDetails(null);
-      console.log('No messages found for chat:', selectedChatId);
+      if (chatMessages.length > 0) {
+        const userMessage = chatMessages.find((m: any) => m.role === 'user')?.content || '';
+        const aiResponse = chatMessages.find((m: any) => m.role === 'assistant')?.content || '';
+        
+        setSelectedChatDetails({
+          userMessage,
+          aiResponse,
+          messages: chatMessages
+        });
+        console.log('Chat details updated:', { 
+          hasUserMessage: !!userMessage, 
+          hasAiResponse: !!aiResponse,
+          userMessageLength: userMessage.length,
+          aiResponseLength: aiResponse.length
+        });
+      } else {
+        setSelectedChatDetails({
+          userMessage: 'No user message in this conversation',
+          aiResponse: 'No AI response in this conversation',
+          messages: []
+        });
+      }
     }
-  }, [chatMessages, selectedChatId, messagesLoading]);
+  }, [chatMessages, selectedChatId]);
 
   // Mutations
   const createFAQMutation = useMutation({
