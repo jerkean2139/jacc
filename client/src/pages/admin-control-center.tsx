@@ -102,9 +102,16 @@ export default function AdminControlCenter() {
   const [isSubmittingCorrection, setIsSubmittingCorrection] = useState(false);
 
   // Data queries
-  const { data: faqData = [] } = useQuery({
+  const { data: faqData = [], isLoading: faqLoading, error: faqError } = useQuery({
     queryKey: ['/api/admin/faq'],
     retry: false,
+    onSuccess: (data) => {
+      console.log('FAQ Data loaded:', data?.length || 0, 'entries');
+      console.log('FAQ Categories found:', Array.from(new Set(data?.map((f: FAQ) => f.category) || [])));
+    },
+    onError: (error) => {
+      console.error('FAQ loading error:', error);
+    }
   });
 
   const { data: documentsData = [] } = useQuery({
@@ -119,6 +126,15 @@ export default function AdminControlCenter() {
 
   const { data: userChats, isLoading: chatsLoading } = useQuery({
     queryKey: ['/api/admin/chat-reviews'],
+    onSuccess: (data) => {
+      console.log('Chat Reviews loaded:', data?.length || 0, 'chats');
+      // Auto-select first chat if none selected
+      if (!selectedChatId && Array.isArray(data) && data.length > 0) {
+        const firstChat = data[0];
+        console.log('Auto-selecting first chat:', firstChat.chatId);
+        setSelectedChatId(firstChat.chatId);
+      }
+    }
   });
 
   const { data: chatMessages, isLoading: messagesLoading } = useQuery({
