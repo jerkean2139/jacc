@@ -18,6 +18,7 @@ import {
   Edit, Trash2, Save, Plus, Folder, FolderOpen, Upload, Users, Activity,
   BarChart3, Timer, ChevronDown, ChevronRight, Target, BookOpen, ThumbsUp,
   ThumbsDown, Star, Copy, AlertCircle, ArrowRight, User, Bot, RefreshCw, Calendar,
+  Archive,
   Scan
 } from 'lucide-react';
 import DocumentDragDrop from '@/components/ui/document-drag-drop';
@@ -96,6 +97,7 @@ export default function AdminControlCenter() {
   // Chat Review Center States
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const [selectedChatDetails, setSelectedChatDetails] = useState<any>(null);
+  const [chatReviewTab, setChatReviewTab] = useState<string>("active");
   
   // URL Scraping for Knowledge Base
   const [scrapeUrl, setScrapeUrl] = useState('');
@@ -551,10 +553,10 @@ export default function AdminControlCenter() {
         </div>
 
         {/* Split-Screen Chat Review Interface */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6" style={{ height: '600px' }}>
-          {/* Chat List Panel */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6" style={{ height: '700px' }}>
+          {/* Chat List Panel with Tabs */}
           <Card className="flex flex-col">
-            <CardHeader>
+            <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2">
                 <MessageSquare className="h-5 w-5" />
                 Chat Review Center
@@ -563,61 +565,90 @@ export default function AdminControlCenter() {
                 Select a chat to review user question and AI response
               </CardDescription>
             </CardHeader>
-            <CardContent className="flex-1 overflow-hidden">
+            
+            {/* Chat Review Tabs */}
+            <div className="px-6 pb-3">
+              <Tabs value={chatReviewTab} onValueChange={setChatReviewTab} className="w-full">
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="active" className="text-xs">
+                    Active ({Array.isArray(userChats) ? userChats.filter((c: any) => c.reviewStatus !== 'archived').length : 0})
+                  </TabsTrigger>
+                  <TabsTrigger value="pending" className="text-xs">
+                    Pending ({Array.isArray(userChats) ? userChats.filter((c: any) => c.reviewStatus === 'pending').length : 0})
+                  </TabsTrigger>
+                  <TabsTrigger value="archived" className="text-xs">
+                    Archived ({Array.isArray(userChats) ? userChats.filter((c: any) => c.reviewStatus === 'archived').length : 0})
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
+
+            <CardContent className="flex-1 overflow-hidden px-6 pt-0">
               {chatsLoading ? (
                 <div className="flex items-center justify-center py-8">
                   <RefreshCw className="h-6 w-6 animate-spin" />
                   <span className="ml-2">Loading chat reviews...</span>
                 </div>
               ) : (
-                <ScrollArea className="h-full">
-                  <div className="space-y-3">
-                    {Array.isArray(userChats) && userChats.length > 0 ? (
-                      userChats.map((chat: any) => (
-                        <div 
-                          key={chat.chatId}
-                          onClick={() => setSelectedChatId(chat.chatId)}
-                          className={`
-                            p-4 border rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md
-                            ${selectedChatId === chat.chatId 
-                              ? 'border-blue-500 bg-blue-50 shadow-sm' 
-                              : 'border-gray-200 hover:border-gray-300'
-                            }
-                          `}
-                        >
-                          <div className="flex items-center justify-between mb-2">
-                            <h4 className="font-medium truncate">{chat.title || 'Untitled Chat'}</h4>
-                            <Badge variant={chat.reviewStatus === 'approved' ? 'default' : 'secondary'}>
-                              {chat.reviewStatus === 'approved' ? (
-                                <ThumbsUp className="h-3 w-3 mr-1" />
-                              ) : (
-                                <Clock className="h-3 w-3 mr-1" />
-                              )}
-                              {chat.reviewStatus || 'pending'}
-                            </Badge>
-                          </div>
-                          
-                          <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
-                            <div>
-                              <p><span className="font-medium">{chat.messageCount || 0}</span> messages</p>
-                              <p>{chat.userName || 'Unknown User'}</p>
+                <div className="h-full">
+                  <ScrollArea className="h-full">
+                    <div className="space-y-3 pr-4">
+                      {Array.isArray(userChats) && userChats.length > 0 ? (
+                        userChats
+                          .filter((chat: any) => {
+                            if (chatReviewTab === 'active') return chat.reviewStatus !== 'archived';
+                            if (chatReviewTab === 'pending') return chat.reviewStatus === 'pending';
+                            if (chatReviewTab === 'archived') return chat.reviewStatus === 'archived';
+                            return true;
+                          })
+                          .map((chat: any) => (
+                            <div 
+                              key={chat.chatId}
+                              onClick={() => setSelectedChatId(chat.chatId)}
+                              className={`
+                                p-3 border rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md
+                                ${selectedChatId === chat.chatId 
+                                  ? 'border-blue-500 bg-blue-50 shadow-sm' 
+                                  : 'border-gray-200 hover:border-gray-300'
+                                }
+                              `}
+                            >
+                              <div className="flex items-center justify-between mb-2">
+                                <h4 className="font-medium truncate text-sm">{chat.title || 'Untitled Chat'}</h4>
+                                <Badge variant={chat.reviewStatus === 'approved' ? 'default' : 'secondary'} className="text-xs">
+                                  {chat.reviewStatus === 'approved' ? (
+                                    <ThumbsUp className="h-3 w-3 mr-1" />
+                                  ) : chat.reviewStatus === 'archived' ? (
+                                    <Archive className="h-3 w-3 mr-1" />
+                                  ) : (
+                                    <Clock className="h-3 w-3 mr-1" />
+                                  )}
+                                  {chat.reviewStatus || 'pending'}
+                                </Badge>
+                              </div>
+                              
+                              <div className="grid grid-cols-2 gap-4 text-xs text-gray-600">
+                                <div>
+                                  <p><span className="font-medium">{chat.messageCount || 0}</span> messages</p>
+                                  <p>{chat.userName || 'Unknown User'}</p>
+                                </div>
+                                <div className="text-right">
+                                  <p>{new Date(chat.createdAt).toLocaleDateString()}</p>
+                                  <p className="text-xs">{new Date(chat.createdAt).toLocaleTimeString()}</p>
+                                </div>
+                              </div>
                             </div>
-                            <div className="text-right">
-                              <p>{new Date(chat.createdAt).toLocaleDateString()}</p>
-                              <p className="text-xs">{new Date(chat.createdAt).toLocaleTimeString()}</p>
-                            </div>
-                          </div>
+                          ))
+                      ) : (
+                        <div className="text-center py-12">
+                          <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                          <h3 className="text-lg font-medium mb-2">No Chat Reviews</h3>
+                          <p className="text-gray-500">User conversations will appear here for review and training</p>
                         </div>
-                      ))
-                    ) : (
-                      <div className="text-center py-12">
-                        <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                        <h3 className="text-lg font-medium mb-2">No Chat Reviews</h3>
-                        <p className="text-gray-500">User conversations will appear here for review and training</p>
-                      </div>
-                    )}
-                  </div>
-                </ScrollArea>
+                      )}
+                    </div>
+                  </ScrollArea>
+                </div>
               )}
             </CardContent>
           </Card>
