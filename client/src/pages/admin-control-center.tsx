@@ -158,9 +158,16 @@ export default function AdminControlCenter() {
         aiResponse,
         messages: chatMessages
       });
+      console.log('Chat details loaded:', { 
+        messageCount: chatMessages.length, 
+        hasUserMessage: !!userMessage, 
+        hasAiResponse: !!aiResponse,
+        chatId: selectedChatId 
+      });
     } else if (selectedChatId && !messagesLoading) {
       // If no messages found for selected chat, clear details
       setSelectedChatDetails(null);
+      console.log('No messages found for chat:', selectedChatId);
     }
   }, [chatMessages, selectedChatId, messagesLoading]);
 
