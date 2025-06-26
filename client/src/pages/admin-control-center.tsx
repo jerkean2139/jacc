@@ -942,163 +942,59 @@ export default function AdminControlCenter() {
             </Badge>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* 3-Step Document Upload */}
-            <Card className="border-2 border-green-500">
-              <CardHeader>
-                <CardTitle className="text-green-600">📁 3-Step Document Upload</CardTitle>
-                <CardDescription>Folder assignment → Permission assignment → Upload with analysis</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label className="text-sm font-medium">Step 1: Select Folder</Label>
-                  <Select value={uploadSelectedFolder} onValueChange={setUploadSelectedFolder}>
-                    <SelectTrigger className="mt-1">
-                      <SelectValue placeholder="Choose destination folder" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {foldersData?.map((folder: any) => (
-                        <SelectItem key={folder.id} value={folder.id}>
-                          {folder.name}
-                        </SelectItem>
-                      ))}
-                      <SelectItem value="new-folder">+ Create New Folder</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label className="text-sm font-medium">Step 2: Set Permissions</Label>
-                  <Select value={selectedPermissions} onValueChange={setSelectedPermissions}>
-                    <SelectTrigger className="mt-1">
-                      <SelectValue placeholder="Choose access level" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="admin">Admin Only</SelectItem>
-                      <SelectItem value="all-users">All Users</SelectItem>
-                      <SelectItem value="managers">Managers & Admins</SelectItem>
-                      <SelectItem value="agents">Agents & Above</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label className="text-sm font-medium">Step 3: Upload Documents</Label>
-                  <div className="space-y-3 mt-2">
-                    <div>
-                      <Label htmlFor="file-upload" className="text-sm text-gray-700">
-                        Individual Files
-                      </Label>
-                      <Input 
-                        id="file-upload"
-                        type="file"
-                        multiple
-                        className="mt-1"
-                        onChange={(e) => setSelectedFiles(e.target.files)}
-                        accept=".pdf,.doc,.docx,.txt,.csv,.md"
-                      />
-                    </div>
-                    
-                    <div className="text-center text-gray-400">
-                      OR
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="folder-upload" className="text-sm text-gray-700">
-                        Entire Folder
-                      </Label>
-                      <Input
-                        id="folder-upload"
-                        type="file"
-                        /* @ts-ignore */
-                        webkitdirectory=""
-                        directory=""
-                        multiple
-                        className="mt-1"
-                        onChange={(e) => setSelectedFiles(e.target.files)}
-                        accept=".pdf,.doc,.docx,.txt,.csv,.md"
-                      />
-                    </div>
-
-                    {selectedFiles && selectedFiles.length > 0 && (
-                      <div className="p-3 bg-green-50 rounded-lg">
-                        <p className="text-sm text-green-700 font-medium">
-                          {selectedFiles.length} file(s) selected
-                        </p>
-                        <p className="text-xs text-green-600 mt-1">
-                          Folder: {uploadSelectedFolder ? foldersData?.find(f => f.id === uploadSelectedFolder)?.name : 'None selected'}
-                        </p>
-                        <p className="text-xs text-green-600">
-                          Access: {selectedPermissions || 'None selected'}
-                        </p>
-                      </div>
-                    )}
+          {/* Document Statistics Dashboard */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-blue-500" />
+                  <div>
+                    <p className="text-sm text-gray-600">Total Documents</p>
+                    <p className="text-xl font-bold">{documentsData.length}</p>
                   </div>
                 </div>
-
-                <Button 
-                  className="w-full bg-green-600 hover:bg-green-700"
-                  disabled={!selectedPermissions || !uploadSelectedFolder || !selectedFiles || selectedFiles.length === 0}
-                  onClick={() => {
-                    toast({
-                      title: "Processing Upload",
-                      description: "Documents are being processed with the specified folder and permissions",
-                    });
-                  }}
-                >
-                  <Upload className="w-4 h-4 mr-2" />
-                  Upload {selectedFiles ? selectedFiles.length : 0} Document(s)
-                </Button>
               </CardContent>
             </Card>
-
-            {/* Document Statistics */}
-            <Card className="border-2 border-blue-500">
-              <CardHeader>
-                <CardTitle className="text-blue-600">📊 Document Statistics</CardTitle>
-                <CardDescription>Current document library overview</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-4 bg-blue-50 rounded-lg">
-                    <FileText className="h-8 w-8 text-blue-500 mx-auto mb-2" />
-                    <p className="text-2xl font-bold text-blue-600">{documentsData.length}</p>
-                    <p className="text-sm text-blue-700">Total Documents</p>
-                  </div>
-                  <div className="text-center p-4 bg-green-50 rounded-lg">
-                    <Folder className="h-8 w-8 text-green-500 mx-auto mb-2" />
-                    <p className="text-2xl font-bold text-green-600">{foldersData.length}</p>
-                    <p className="text-sm text-green-700">Folders</p>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2">
+                  <Folder className="h-4 w-4 text-green-500" />
+                  <div>
+                    <p className="text-sm text-gray-600">Folders</p>
+                    <p className="text-xl font-bold">{foldersData.length}</p>
                   </div>
                 </div>
-
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Storage Used</span>
-                    <span className="font-medium">2.4 GB / 10 GB</span>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2">
+                  <Upload className="h-4 w-4 text-purple-500" />
+                  <div>
+                    <p className="text-sm text-gray-600">Storage Used</p>
+                    <p className="text-xl font-bold">2.4 GB</p>
                   </div>
-                  <Progress value={24} className="h-2" />
                 </div>
-
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Processing Queue</span>
-                    <span className="font-medium">0 pending</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span>Last Upload</span>
-                    <span className="font-medium">2 hours ago</span>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                  <div>
+                    <p className="text-sm text-gray-600">Upload Ready</p>
+                    <p className="text-xl font-bold">✓</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Advanced Document Upload Component */}
-          <Card className="border-2 border-purple-500">
+          {/* Complete Document Upload System with 3-Step Process */}
+          <Card className="border-2 border-green-500">
             <CardHeader>
-              <CardTitle className="text-purple-600">🔧 Advanced Upload System</CardTitle>
-              <CardDescription>Full-featured document upload with drag & drop and placement dialog</CardDescription>
+              <CardTitle className="text-green-600">📁 Document Upload Center</CardTitle>
+              <CardDescription>Complete 3-step process: Select Files → Choose Folder → Set Permissions → Upload</CardDescription>
             </CardHeader>
             <CardContent>
               <DocumentUpload onUploadComplete={() => {
