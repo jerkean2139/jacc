@@ -23,7 +23,7 @@ import { semanticChunkingService } from "./semantic-chunking";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-import { insertMessageSchema, insertChatSchema, insertFolderSchema, insertDocumentSchema, insertAdminSettingsSchema, faqKnowledgeBase, aiTrainingFeedback, messages, qaKnowledgeBase, userPrompts } from "@shared/schema";
+import { insertMessageSchema, insertChatSchema, insertFolderSchema, insertDocumentSchema, insertAdminSettingsSchema, faqKnowledgeBase, aiTrainingFeedback, messages, qaKnowledgeBase, userPrompts, chats } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc } from "drizzle-orm";
 import { setupOAuthHelper } from "./oauth-helper";
@@ -3871,18 +3871,21 @@ User Context: {userRole}`,
     try {
       const { sql, eq, desc, count } = await import('drizzle-orm');
       
-      const chatReviews = await db.select({
-        chatId: chats.id,
-        title: chats.title,
-        userId: chats.userId,
-        createdAt: chats.createdAt,
-        messageCount: count(messages.id).as('messageCount'),
-        reviewStatus: sql<string>`CASE WHEN ${chats.isArchived} THEN 'approved' ELSE 'pending' END`.as('reviewStatus')
-      })
-      .from(chats)
-      .leftJoin(messages, eq(chats.id, messages.chatId))
-      .groupBy(chats.id, chats.title, chats.userId, chats.createdAt, chats.isArchived)
-      .orderBy(desc(chats.createdAt));
+      const allChats = await db.select().from(chats).orderBy(desc(chats.createdAt));
+      
+      const chatReviews = [];
+      for (const chat of allChats) {
+        const messageCount = await db.select({ count: count() }).from(messages).where(eq(messages.chatId, chat.id));
+        
+        chatReviews.push({
+          chatId: chat.id,
+          title: chat.title,
+          userId: chat.userId,
+          createdAt: chat.createdAt,
+          messageCount: messageCount[0]?.count || 0,
+          reviewStatus: chat.isArchived ? 'approved' : 'pending'
+        });
+      }
       
       console.log(`Returning ${chatReviews.length} chat reviews for admin panel`);
       res.json(chatReviews);
