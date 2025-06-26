@@ -95,6 +95,7 @@ export default function AdminControlCenter() {
   const [scrapeUrl, setScrapeUrl] = useState('');
   const [isScrapingForKnowledge, setIsScrapingForKnowledge] = useState(false);
   const [enableWeeklyUpdates, setEnableWeeklyUpdates] = useState(false);
+  const [settingsTab, setSettingsTab] = useState("ai-search");
   const [scheduledUrls, setScheduledUrls] = useState<string[]>([]);
   const [correctionText, setCorrectionText] = useState("");
   const [isSubmittingCorrection, setIsSubmittingCorrection] = useState(false);
@@ -961,74 +962,383 @@ export default function AdminControlCenter() {
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>System Settings</CardTitle>
-              <CardDescription>Configure AI behavior and system parameters</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-lg font-semibold mb-4">AI Configuration</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Card>
-                      <CardContent className="p-4">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Brain className="h-4 w-4 text-purple-500" />
-                          <span className="font-medium">Response Quality</span>
-                        </div>
-                        <p className="text-sm text-gray-600">Current: High Precision</p>
-                      </CardContent>
-                    </Card>
-                    <Card>
-                      <CardContent className="p-4">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Settings className="h-4 w-4 text-gray-500" />
-                          <span className="font-medium">Model Configuration</span>
-                        </div>
-                        <p className="text-sm text-gray-600">Claude 4.0 Sonnet Active</p>
-                      </CardContent>
-                    </Card>
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            {/* Main Categories */}
+            <div className="lg:col-span-1">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Settings Categories</CardTitle>
+                </CardHeader>
+                <CardContent className="p-2">
+                  <div className="space-y-1">
+                    <Button 
+                      variant={settingsTab === "ai-search" ? "default" : "ghost"} 
+                      className="w-full justify-start text-sm"
+                      onClick={() => setSettingsTab("ai-search")}
+                    >
+                      <Brain className="w-4 h-4 mr-2" />
+                      AI & Search
+                    </Button>
+                    <Button 
+                      variant={settingsTab === "user-mgmt" ? "default" : "ghost"} 
+                      className="w-full justify-start text-sm"
+                      onClick={() => setSettingsTab("user-mgmt")}
+                    >
+                      <Users className="w-4 h-4 mr-2" />
+                      User Management
+                    </Button>
+                    <Button 
+                      variant={settingsTab === "content-docs" ? "default" : "ghost"} 
+                      className="w-full justify-start text-sm"
+                      onClick={() => setSettingsTab("content-docs")}
+                    >
+                      <FileText className="w-4 h-4 mr-2" />
+                      Content & Documents
+                    </Button>
+                    <Button 
+                      variant={settingsTab === "system-perf" ? "default" : "ghost"} 
+                      className="w-full justify-start text-sm"
+                      onClick={() => setSettingsTab("system-perf")}
+                    >
+                      <Activity className="w-4 h-4 mr-2" />
+                      System Performance
+                    </Button>
                   </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Settings Content */}
+            <div className="lg:col-span-3">
+              {settingsTab === "ai-search" && (
+                <div className="space-y-6">
+                  {/* AI Prompts Management */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Brain className="w-5 h-5 text-purple-500" />
+                        AI Prompts Management
+                      </CardTitle>
+                      <CardDescription>Configure AI behavior and prompt templates</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      {/* System Prompts */}
+                      <div>
+                        <h4 className="font-semibold mb-3 flex items-center gap-2">
+                          <Settings className="w-4 h-4" />
+                          System Prompts
+                        </h4>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <Card className="border-blue-200">
+                            <CardContent className="p-4">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="font-medium text-sm">Document Search</span>
+                                <Button size="sm" variant="outline">
+                                  <Edit className="w-3 h-3" />
+                                </Button>
+                              </div>
+                              <p className="text-xs text-gray-600">Controls how AI searches documents</p>
+                            </CardContent>
+                          </Card>
+                          <Card className="border-green-200">
+                            <CardContent className="p-4">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="font-medium text-sm">Response Formatting</span>
+                                <Button size="sm" variant="outline">
+                                  <Edit className="w-3 h-3" />
+                                </Button>
+                              </div>
+                              <p className="text-xs text-gray-600">Manages response structure and style</p>
+                            </CardContent>
+                          </Card>
+                          <Card className="border-red-200">
+                            <CardContent className="p-4">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="font-medium text-sm">Error Handling</span>
+                                <Button size="sm" variant="outline">
+                                  <Edit className="w-3 h-3" />
+                                </Button>
+                              </div>
+                              <p className="text-xs text-gray-600">Defines error response behavior</p>
+                            </CardContent>
+                          </Card>
+                        </div>
+                      </div>
+
+                      <Separator />
+
+                      {/* Personality & Behavior */}
+                      <div>
+                        <h4 className="font-semibold mb-3 flex items-center gap-2">
+                          <User className="w-4 h-4" />
+                          Personality & Behavior
+                        </h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div className="space-y-4">
+                            <div>
+                              <Label className="text-sm font-medium">AI Response Style</Label>
+                              <Select>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Professional & Helpful" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="professional">Professional & Helpful</SelectItem>
+                                  <SelectItem value="technical">Technical & Detailed</SelectItem>
+                                  <SelectItem value="conversational">Conversational & Friendly</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div>
+                              <Label className="text-sm font-medium">Response Tone</Label>
+                              <Select>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Balanced" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="formal">Formal</SelectItem>
+                                  <SelectItem value="balanced">Balanced</SelectItem>
+                                  <SelectItem value="casual">Casual</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                          <div className="space-y-4">
+                            <div>
+                              <Label className="text-sm font-medium mb-2 block">Expertise Level</Label>
+                              <div className="px-3 py-2 border rounded">Advanced</div>
+                            </div>
+                            <div className="space-y-2">
+                              <Label className="text-sm font-medium">Behavioral Options</Label>
+                              <div className="space-y-2">
+                                <div className="flex items-center space-x-2">
+                                  <input type="checkbox" id="proactive" defaultChecked />
+                                  <Label htmlFor="proactive" className="text-sm">Proactive suggestions</Label>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <input type="checkbox" id="detailed" defaultChecked />
+                                  <Label htmlFor="detailed" className="text-sm">Detailed explanations</Label>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <Separator />
+
+                      {/* Custom Prompt Templates */}
+                      <div>
+                        <h4 className="font-semibold mb-3 flex items-center gap-2">
+                          <FileText className="w-4 h-4" />
+                          Custom Prompt Templates
+                        </h4>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <Card className="border-purple-200">
+                            <CardContent className="p-4">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="font-medium text-sm">Pricing Analysis</span>
+                                <div className="flex gap-1">
+                                  <Button size="sm" variant="outline">
+                                    <Edit className="w-3 h-3" />
+                                  </Button>
+                                  <Button size="sm" variant="outline">
+                                    <Download className="w-3 h-3" />
+                                  </Button>
+                                </div>
+                              </div>
+                              <p className="text-xs text-gray-600 mb-2">Merchant rate comparison template</p>
+                              <Badge variant="outline" className="text-xs">Active</Badge>
+                            </CardContent>
+                          </Card>
+                          <Card className="border-orange-200">
+                            <CardContent className="p-4">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="font-medium text-sm">Objection Handling</span>
+                                <div className="flex gap-1">
+                                  <Button size="sm" variant="outline">
+                                    <Edit className="w-3 h-3" />
+                                  </Button>
+                                  <Button size="sm" variant="outline">
+                                    <Download className="w-3 h-3" />
+                                  </Button>
+                                </div>
+                              </div>
+                              <p className="text-xs text-gray-600 mb-2">Sales objection responses</p>
+                              <Badge variant="outline" className="text-xs">Active</Badge>
+                            </CardContent>
+                          </Card>
+                          <Card className="border-teal-200">
+                            <CardContent className="p-4">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="font-medium text-sm">Compliance Guidance</span>
+                                <div className="flex gap-1">
+                                  <Button size="sm" variant="outline">
+                                    <Edit className="w-3 h-3" />
+                                  </Button>
+                                  <Button size="sm" variant="outline">
+                                    <Download className="w-3 h-3" />
+                                  </Button>
+                                </div>
+                              </div>
+                              <p className="text-xs text-gray-600 mb-2">Regulatory compliance help</p>
+                              <Badge variant="outline" className="text-xs">Active</Badge>
+                            </CardContent>
+                          </Card>
+                        </div>
+                        <div className="mt-4 flex gap-2">
+                          <Button variant="outline" size="sm">
+                            <Plus className="w-4 h-4 mr-2" />
+                            Create Template
+                          </Button>
+                          <Button variant="outline" size="sm">
+                            <Upload className="w-4 h-4 mr-2" />
+                            Import Template
+                          </Button>
+                        </div>
+                      </div>
+
+                      <Separator />
+
+                      {/* User-Specific Overrides */}
+                      <div>
+                        <h4 className="font-semibold mb-3 flex items-center gap-2">
+                          <Users className="w-4 h-4" />
+                          User-Specific Prompt Overrides
+                        </h4>
+                        <div className="space-y-3">
+                          <Card className="border-indigo-200">
+                            <CardContent className="p-4">
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <span className="font-medium text-sm">Dev Admin Role</span>
+                                  <p className="text-xs text-gray-600">Technical responses with system details</p>
+                                </div>
+                                <Button size="sm" variant="outline">
+                                  <Edit className="w-3 h-3" />
+                                </Button>
+                              </div>
+                            </CardContent>
+                          </Card>
+                          <Card className="border-emerald-200">
+                            <CardContent className="p-4">
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <span className="font-medium text-sm">Sales Agent Role</span>
+                                  <p className="text-xs text-gray-600">Sales-focused responses with market insights</p>
+                                </div>
+                                <Button size="sm" variant="outline">
+                                  <Edit className="w-3 h-3" />
+                                </Button>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Model Configuration */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Model Configuration</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <Label className="text-sm font-medium">Primary Model</Label>
+                          <Select>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Claude 4.0 Sonnet" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="claude-4-sonnet">Claude 4.0 Sonnet</SelectItem>
+                              <SelectItem value="gpt-4o">GPT-4o</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label className="text-sm font-medium">Search Sensitivity</Label>
+                          <Select>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Balanced" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="high">High Precision</SelectItem>
+                              <SelectItem value="balanced">Balanced</SelectItem>
+                              <SelectItem value="broad">Broad Search</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
-                
-                <Separator />
-                
-                <div>
-                  <h3 className="text-lg font-semibold mb-4">System Performance</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <Card>
-                      <CardContent className="p-4">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Activity className="h-4 w-4 text-green-500" />
-                          <span className="font-medium">System Status</span>
-                        </div>
-                        <p className="text-sm text-green-600">All Systems Operational</p>
-                      </CardContent>
-                    </Card>
-                    <Card>
-                      <CardContent className="p-4">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Database className="h-4 w-4 text-blue-500" />
-                          <span className="font-medium">Database</span>
-                        </div>
-                        <p className="text-sm text-blue-600">Connected & Optimized</p>
-                      </CardContent>
-                    </Card>
-                    <Card>
-                      <CardContent className="p-4">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Zap className="h-4 w-4 text-yellow-500" />
-                          <span className="font-medium">Performance</span>
-                        </div>
-                        <p className="text-sm text-yellow-600">Excellent</p>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              )}
+
+              {settingsTab === "system-perf" && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>System Performance</CardTitle>
+                    <CardDescription>Monitor and configure system performance</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <Card>
+                        <CardContent className="p-4">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Activity className="h-4 w-4 text-green-500" />
+                            <span className="font-medium">System Status</span>
+                          </div>
+                          <p className="text-sm text-green-600">All Systems Operational</p>
+                        </CardContent>
+                      </Card>
+                      <Card>
+                        <CardContent className="p-4">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Database className="h-4 w-4 text-blue-500" />
+                            <span className="font-medium">Database</span>
+                          </div>
+                          <p className="text-sm text-blue-600">Connected & Optimized</p>
+                        </CardContent>
+                      </Card>
+                      <Card>
+                        <CardContent className="p-4">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Zap className="h-4 w-4 text-yellow-500" />
+                            <span className="font-medium">Performance</span>
+                          </div>
+                          <p className="text-sm text-yellow-600">Excellent</p>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Other setting tabs would go here */}
+              {settingsTab === "user-mgmt" && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>User Management</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-600">User management settings coming soon...</p>
+                  </CardContent>
+                </Card>
+              )}
+
+              {settingsTab === "content-docs" && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Content & Documents</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-600">Content and document settings coming soon...</p>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
