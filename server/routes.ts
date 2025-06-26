@@ -23,7 +23,7 @@ import { semanticChunkingService } from "./semantic-chunking";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-import { insertMessageSchema, insertChatSchema, insertFolderSchema, insertDocumentSchema, insertAdminSettingsSchema, faqKnowledgeBase, aiTrainingFeedback, messages, qaKnowledgeBase, userPrompts, chats } from "@shared/schema";
+import { insertMessageSchema, insertChatSchema, insertFolderSchema, insertDocumentSchema, insertAdminSettingsSchema, faqKnowledgeBase, aiTrainingFeedback, messages, qaKnowledgeBase, userPrompts, chats, users, folders, documents } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc } from "drizzle-orm";
 import { setupOAuthHelper } from "./oauth-helper";
@@ -2296,17 +2296,36 @@ User Context: {userRole}`,
 
   app.get('/api/chats/:chatId/messages', async (req: any, res) => {
     try {
-      const userId = 'dev-user-123'; // Use test user for chat testing
       const { chatId } = req.params;
       
-      // Verify chat belongs to user
+      // Get user from session
+      let userId = 'dev-user-123';
+      let userRole = 'sales-agent';
+      
+      // Check simple auth session first
+      const sessionId = req.cookies?.sessionId;
+      if (sessionId) {
+        const { sessions } = await import('./simple-routes');
+        if (sessions && sessions.has(sessionId)) {
+          const sessionUser = sessions.get(sessionId);
+          userId = sessionUser.id;
+          userRole = sessionUser.role;
+        }
+      }
+      
+      // Verify chat exists
       const chat = await storage.getChat(chatId);
-      if (!chat || chat.userId !== userId) {
+      if (!chat) {
+        return res.status(404).json({ message: "Chat not found" });
+      }
+      
+      // Admin users can access all chats, regular users only their own
+      if (userRole !== 'admin' && chat.userId !== userId) {
         return res.status(404).json({ message: "Chat not found" });
       }
       
       const messages = await storage.getChatMessages(chatId);
-      console.log(`API: Sending ${messages.length} messages to frontend for chat ${chatId}`);
+      console.log(`API: Sending ${messages.length} messages to frontend for chat ${chatId} (user: ${userId}, role: ${userRole})`);
       res.json(messages);
     } catch (error) {
       console.error("Error fetching messages:", error);
