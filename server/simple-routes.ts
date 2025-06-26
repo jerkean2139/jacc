@@ -2206,6 +2206,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Session storage for logged in users
   const sessions = new Map<string, any>();
+  
+  // Export sessions for use in other route files
+  export { sessions };
 
   // Login endpoint
   app.post('/api/login', async (req: Request, res: Response) => {
@@ -2214,8 +2217,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const loginField = username || email;
       
       const validCredentials = [
-        { field: 'demo@example.com', pass: 'demo-password', user: { id: 'demo-user', username: 'tracer-user', email: 'demo@example.com', role: 'sales-agent' }},
-        { field: 'tracer-user', pass: 'demo-password', user: { id: 'demo-user', username: 'tracer-user', email: 'demo@example.com', role: 'sales-agent' }},
+        { field: 'demo@example.com', pass: 'demo-password', user: { id: 'demo-user-id', username: 'tracer-user', email: 'demo@example.com', role: 'sales-agent' }},
+        { field: 'tracer-user', pass: 'demo-password', user: { id: 'demo-user-id', username: 'tracer-user', email: 'demo@example.com', role: 'sales-agent' }},
         { field: 'admin@jacc.com', pass: 'admin123', user: { id: 'admin-user-id', username: 'admin', email: 'admin@jacc.com', role: 'admin' }},
         { field: 'admin', pass: 'admin123', user: { id: 'admin-user-id', username: 'admin', email: 'admin@jacc.com', role: 'admin' }},
         { field: 'demo', pass: 'demo', user: { id: 'demo-simple', username: 'demo', email: 'demo@demo.com', role: 'user' }}
@@ -3036,7 +3039,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       userId = sessions.get(sessionId).id;
     } else {
       // Use demo user for testing when no session exists
-      userId = 'demo-user';
+      userId = 'demo-user-id';
     }
     
     const userChats = Array.from(chats.values()).filter(chat => chat.userId === userId);
