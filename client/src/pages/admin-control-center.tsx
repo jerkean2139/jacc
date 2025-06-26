@@ -329,18 +329,40 @@ export default function AdminControlCenter() {
     mutationFn: async (chatId: string) => {
       const response = await fetch(`/api/admin/chat-reviews/${chatId}/approve`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          feedback: 'Chat approved by admin',
+          reviewStatus: 'approved'
+        })
       });
       if (!response.ok) throw new Error('Failed to approve chat');
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data, chatId) => {
+      // Invalidate all related queries to refresh the data
       queryClient.invalidateQueries({ queryKey: ['/api/admin/chat-reviews'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/chats'] });
+      
+      // Update the selected chat details locally if it's the current one
+      if (selectedChatId === chatId && selectedChatDetails) {
+        setSelectedChatDetails({
+          ...selectedChatDetails,
+          reviewStatus: 'approved'
+        });
+      }
+      
       toast({
-        title: "Chat Approved",
-        description: "Chat response has been approved",
+        title: "Response Approved",
+        description: "AI response has been approved and marked for training",
       });
     },
+    onError: (error) => {
+      toast({
+        title: "Approval Failed",
+        description: "Failed to approve chat response. Please try again.",
+        variant: "destructive",
+      });
+    }
   });
 
   // Handler functions for chat actions
@@ -754,15 +776,55 @@ export default function AdminControlCenter() {
                         </ScrollArea>
                       </div>
 
+                      {/* Status Display */}
+                      {selectedChatDetails?.reviewStatus && (
+                        <div className={`p-3 rounded-lg border-l-4 ${
+                          selectedChatDetails.reviewStatus === 'approved' 
+                            ? 'bg-green-50 border-green-500' 
+                            : selectedChatDetails.reviewStatus === 'archived'
+                            ? 'bg-gray-50 border-gray-500'
+                            : 'bg-orange-50 border-orange-500'
+                        }`}>
+                          <div className="flex items-center gap-2">
+                            {selectedChatDetails.reviewStatus === 'approved' && (
+                              <CheckCircle className="h-4 w-4 text-green-600" />
+                            )}
+                            {selectedChatDetails.reviewStatus === 'archived' && (
+                              <Archive className="h-4 w-4 text-gray-600" />
+                            )}
+                            {selectedChatDetails.reviewStatus === 'pending' && (
+                              <Clock className="h-4 w-4 text-orange-600" />
+                            )}
+                            <span className="font-medium text-sm">
+                              Status: {selectedChatDetails.reviewStatus === 'approved' ? 'Approved for Training' : 
+                                     selectedChatDetails.reviewStatus === 'archived' ? 'Archived' : 'Pending Review'}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+
                       {/* Action Buttons */}
                       <div className="flex gap-2 pt-3 border-t">
                         <Button 
                           onClick={handleApproveChat}
-                          className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
-                          disabled={approveChatMutation.isPending}
+                          className={`flex items-center gap-2 ${
+                            selectedChatDetails?.reviewStatus === 'approved' 
+                              ? 'bg-green-500 hover:bg-green-600 cursor-not-allowed' 
+                              : 'bg-green-600 hover:bg-green-700'
+                          }`}
+                          disabled={approveChatMutation.isPending || selectedChatDetails?.reviewStatus === 'approved'}
                         >
-                          <ThumbsUp className="h-4 w-4" />
-                          {approveChatMutation.isPending ? 'Approving...' : 'Approve Response'}
+                          {selectedChatDetails?.reviewStatus === 'approved' ? (
+                            <>
+                              <CheckCircle className="h-4 w-4" />
+                              Already Approved
+                            </>
+                          ) : (
+                            <>
+                              <ThumbsUp className="h-4 w-4" />
+                              {approveChatMutation.isPending ? 'Approving...' : 'Approve Response'}
+                            </>
+                          )}
                         </Button>
                         <Button 
                           onClick={handleArchiveChat}
