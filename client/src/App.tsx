@@ -150,7 +150,8 @@ function AppContent() {
           {/* <OnboardingWalkthrough /> DISABLED - No automatic popups */}
           <PWAInstallPrompt />
           <Router />
-          <BottomNav />
+          {/* Only show bottom navigation when user is authenticated */}
+          {user && <BottomNav />}
         </div>
       </DragDropProvider>
     </GamificationProvider>
