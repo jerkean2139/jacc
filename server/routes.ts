@@ -3842,6 +3842,57 @@ User Context: {userRole}`,
     }
   });
 
+  // FAQ management endpoints for Admin Control Center
+  app.get('/api/admin/faq', async (req: Request, res: Response) => {
+    try {
+      const allFAQs = await db.select({
+        id: faqKnowledgeBase.id,
+        question: faqKnowledgeBase.question,
+        answer: faqKnowledgeBase.answer,
+        category: faqKnowledgeBase.category,
+        tags: faqKnowledgeBase.tags,
+        priority: faqKnowledgeBase.priority,
+        isActive: faqKnowledgeBase.isActive,
+        lastUpdated: faqKnowledgeBase.lastUpdated,
+        createdAt: faqKnowledgeBase.createdAt,
+        categoryId: faqKnowledgeBase.categoryId,
+        createdBy: faqKnowledgeBase.createdBy
+      }).from(faqKnowledgeBase).orderBy(faqKnowledgeBase.priority);
+      console.log(`Returning ${allFAQs.length} FAQ entries for admin panel`);
+      res.json(allFAQs);
+    } catch (error) {
+      console.error("Error fetching FAQ data:", error);
+      res.status(500).json({ error: 'Failed to fetch FAQ data' });
+    }
+  });
+
+  // Chat reviews endpoint for Admin Control Center
+  app.get('/api/admin/chat-reviews', async (req: Request, res: Response) => {
+    try {
+      const { chats, messages } = await import('@shared/schema');
+      const { sql } = await import('drizzle-orm');
+      
+      const chatReviews = await db.select({
+        chatId: chats.id,
+        title: chats.title,
+        userId: chats.userId,
+        createdAt: chats.createdAt,
+        messageCount: sql<number>`count(${messages.id})`.as('messageCount'),
+        reviewStatus: sql<string>`CASE WHEN ${chats.isArchived} = true THEN 'approved' ELSE 'pending' END`.as('reviewStatus')
+      })
+      .from(chats)
+      .leftJoin(messages, eq(chats.id, messages.chatId))
+      .groupBy(chats.id, chats.title, chats.userId, chats.createdAt, chats.isArchived)
+      .orderBy(desc(chats.createdAt));
+      
+      console.log(`Returning ${chatReviews.length} chat reviews for admin panel`);
+      res.json(chatReviews);
+    } catch (error) {
+      console.error("Error fetching chat reviews:", error);
+      res.status(500).json({ error: 'Failed to fetch chat reviews' });
+    }
+  });
+
   // Admin Chat Monitoring Routes
   app.get('/api/admin/chat-monitoring', async (req: any, res) => {
     try {
