@@ -1,5 +1,6 @@
 import { Switch, Route } from "wouter";
 import { lazy } from "react";
+import React from "react";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -15,6 +16,7 @@ import InteractiveTutorial from "@/components/interactive-tutorial";
 import PWAInstallPrompt from "@/components/pwa-install-prompt";
 import BottomNav from "@/components/bottom-nav";
 import "@/utils/clear-popup-flags"; // Auto-clear popup flags on app load
+import { suppressDevelopmentWarnings, handlePWAInstallPrompt } from "@/lib/deployment-utils";
 
 import Landing from "@/pages/landing";
 import LoginPage from "@/pages/login";
@@ -156,6 +158,12 @@ function AppContent() {
 }
 
 function App() {
+  // Initialize deployment utilities on app start
+  React.useEffect(() => {
+    suppressDevelopmentWarnings();
+    handlePWAInstallPrompt();
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
