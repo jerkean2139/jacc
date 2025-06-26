@@ -147,6 +147,18 @@ export default function AdminControlCenter() {
     enabled: !!selectedChatId,
   });
 
+  // Debug logging for message query status
+  useEffect(() => {
+    console.log('Messages Query Status:', {
+      chatId: selectedChatId,
+      queryKey: ['/api/chats', selectedChatId, 'messages'],
+      enabled: !!selectedChatId,
+      isLoading: messagesLoading,
+      hasError: false,
+      messageCount: chatMessages?.length || 0
+    });
+  }, [selectedChatId, messagesLoading, chatMessages]);
+
   // Update chat details whenever chatMessages changes
   useEffect(() => {
     if (selectedChatId && chatMessages) {
@@ -562,7 +574,10 @@ export default function AdminControlCenter() {
                       userChats.map((chat: any) => (
                         <div 
                           key={chat.chatId}
-                          onClick={() => setSelectedChatId(chat.chatId)}
+                          onClick={() => {
+                            console.log('Chat clicked:', { chatId: chat.chatId, title: chat.title });
+                            setSelectedChatId(chat.chatId);
+                          }}
                           className={`
                             p-4 border rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md
                             ${selectedChatId === chat.chatId 
