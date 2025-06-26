@@ -827,44 +827,60 @@ export default function AdminControlCenter() {
               <CardContent>
                 <ScrollArea className="h-[300px]">
                   <div className="space-y-3">
-                    {faqCategories.map((category) => {
-                      const count = Array.isArray(faqData) ? faqData.filter((f: FAQ) => f.category === category).length : 0;
-                      const categoryFAQs = Array.isArray(faqData) ? faqData.filter((f: FAQ) => f.category === category) : [];
-                      const isOpen = openKnowledgeCategories.includes(category);
-                      
-                      return (
-                        <Collapsible key={category} open={isOpen} onOpenChange={() => toggleKnowledgeCategory(category)}>
-                          <CollapsibleTrigger asChild>
-                            <div className="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
-                              <div className="flex items-center gap-3">
-                                {isOpen ? <ChevronDown className="w-4 h-4 text-blue-500" /> : <ChevronRight className="w-4 h-4 text-blue-500" />}
-                                <BookOpen className="w-4 h-4 text-blue-500" />
-                                <span className="font-medium capitalize">{category}</span>
-                              </div>
-                              <Badge variant="secondary">{count}</Badge>
-                            </div>
-                          </CollapsibleTrigger>
-                          <CollapsibleContent className="mt-2 ml-6 space-y-2">
-                            {categoryFAQs.map((faq: FAQ) => (
-                              <div key={faq.id} className="p-2 bg-gray-50 rounded text-sm">
-                                <div className="font-medium text-gray-800">{faq.question}</div>
-                                <div className="text-gray-600 mt-1">{faq.answer.length > 100 ? faq.answer.substring(0, 100) + '...' : faq.answer}</div>
-                                <div className="flex items-center gap-2 mt-2">
-                                  <Button size="sm" variant="ghost" onClick={() => handleEditFAQ(faq)}>
-                                    <Edit className="w-3 h-3 mr-1" />
-                                    Edit
-                                  </Button>
-                                  <Button size="sm" variant="ghost" onClick={() => handleDeleteFAQ(faq.id)}>
-                                    <Trash2 className="w-3 h-3 mr-1 text-red-500" />
-                                    Delete
-                                  </Button>
+                    {faqLoading ? (
+                      <div className="flex items-center justify-center py-8">
+                        <RefreshCw className="h-6 w-6 animate-spin" />
+                        <span className="ml-2">Loading categories...</span>
+                      </div>
+                    ) : faqCategories.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500">
+                        <BookOpen className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                        <p className="font-medium">No FAQ categories found</p>
+                        <p className="text-sm">Add your first FAQ entry to create categories</p>
+                        {faqError && (
+                          <p className="text-red-500 text-sm mt-2">Error loading FAQ data</p>
+                        )}
+                      </div>
+                    ) : (
+                      faqCategories.map((category) => {
+                        const count = Array.isArray(faqData) ? faqData.filter((f: FAQ) => f.category === category).length : 0;
+                        const categoryFAQs = Array.isArray(faqData) ? faqData.filter((f: FAQ) => f.category === category) : [];
+                        const isOpen = openKnowledgeCategories.includes(category);
+                        
+                        return (
+                          <Collapsible key={category} open={isOpen} onOpenChange={() => toggleKnowledgeCategory(category)}>
+                            <CollapsibleTrigger asChild>
+                              <div className="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                                <div className="flex items-center gap-3">
+                                  {isOpen ? <ChevronDown className="w-4 h-4 text-blue-500" /> : <ChevronRight className="w-4 h-4 text-blue-500" />}
+                                  <BookOpen className="w-4 h-4 text-blue-500" />
+                                  <span className="font-medium capitalize">{category}</span>
                                 </div>
+                                <Badge variant="secondary">{count}</Badge>
                               </div>
-                            ))}
-                          </CollapsibleContent>
-                        </Collapsible>
-                      );
-                    })}
+                            </CollapsibleTrigger>
+                            <CollapsibleContent className="mt-2 ml-6 space-y-2">
+                              {categoryFAQs.map((faq: FAQ) => (
+                                <div key={faq.id} className="p-2 bg-gray-50 rounded text-sm">
+                                  <div className="font-medium text-gray-800">{faq.question}</div>
+                                  <div className="text-gray-600 mt-1">{faq.answer.length > 100 ? faq.answer.substring(0, 100) + '...' : faq.answer}</div>
+                                  <div className="flex items-center gap-2 mt-2">
+                                    <Button size="sm" variant="ghost" onClick={() => handleEditFAQ(faq)}>
+                                      <Edit className="w-3 h-3 mr-1" />
+                                      Edit
+                                    </Button>
+                                    <Button size="sm" variant="ghost" onClick={() => handleDeleteFAQ(faq.id)}>
+                                      <Trash2 className="w-3 h-3 mr-1 text-red-500" />
+                                      Delete
+                                    </Button>
+                                  </div>
+                                </div>
+                              ))}
+                            </CollapsibleContent>
+                          </Collapsible>
+                        );
+                      })
+                    )}
                   </div>
                 </ScrollArea>
               </CardContent>
