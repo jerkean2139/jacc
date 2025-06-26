@@ -329,13 +329,29 @@ export default function AdminControlCenter() {
     mutationFn: async (chatId: string) => {
       const response = await fetch(`/api/admin/chat-reviews/${chatId}/delete`, {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 
+          'Content-Type': 'application/json',
+          'credentials': 'include'
+        },
+        credentials: 'include'
       });
-      if (!response.ok) throw new Error('Failed to delete chat');
-      return response.json();
+      
+      if (!response.ok) {
+        const errorData = await response.text();
+        throw new Error(`Failed to delete chat: ${response.status} ${errorData}`);
+      }
+      
+      // Try to parse JSON, but handle empty responses
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        return response.json();
+      } else {
+        return { success: true };
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/chat-reviews'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/chats'] });
       toast({
         title: "Chat Deleted",
         description: "Chat has been permanently removed from the system",
@@ -343,10 +359,11 @@ export default function AdminControlCenter() {
       setSelectedChatId(null);
       setSelectedChatDetails(null);
     },
-    onError: (error) => {
+    onError: (error: Error) => {
+      console.error('Delete chat error:', error);
       toast({
         title: "Delete Failed",
-        description: "Failed to delete chat. Please try again.",
+        description: error.message || "Failed to delete chat. Please try again.",
         variant: "destructive",
       });
     }
