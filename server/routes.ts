@@ -2349,7 +2349,13 @@ User Context: {userRole}`,
       
       // Get messages from database
       const chatMessages = await db.select().from(messages).where(eq(messages.chatId, chatId)).orderBy(messages.createdAt);
-      console.log(`API: Sending ${chatMessages.length} messages to frontend for chat ${chatId} (user: ${userId}, role: ${userRole})`);
+      console.log(`API: Found ${chatMessages.length} messages for chat ${chatId}`);
+      console.log(`Sample message:`, chatMessages[0] ? {
+        id: chatMessages[0].id,
+        role: chatMessages[0].role,
+        content: chatMessages[0].content?.substring(0, 100) + '...',
+        chatId: chatMessages[0].chatId
+      } : 'No messages found');
       res.json(chatMessages);
     } catch (error) {
       console.error("Error fetching messages:", error);
