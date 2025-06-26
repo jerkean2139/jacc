@@ -2305,6 +2305,7 @@ User Context: {userRole}`,
       // Check simple auth session (primary method)
       const sessionId = req.cookies?.sessionId;
       console.log(`Session check - sessionId: ${sessionId}`);
+      console.log(`All cookies:`, req.cookies);
       if (sessionId) {
         const { sessions } = await import('./simple-routes');
         if (sessions && sessions.has(sessionId)) {
