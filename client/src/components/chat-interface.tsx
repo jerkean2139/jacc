@@ -486,22 +486,18 @@ With these details, I'll create a customized proposal highlighting value proposi
             </p>
           </div>
 
-          {/* Conversation Starters - Coming Soon */}
+          {/* Conversation Starters */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-4xl mb-8">
             <div className="w-full">
               <Button
                 variant="outline"
-                className="p-3 h-auto text-left justify-start hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-300 hover:border-blue-200 dark:hover:border-blue-700 transition-colors w-full"
-                onClick={() => {
-                  if (onNewChatWithMessage) {
-                    onNewChatWithMessage("I need help calculating processing rates and fees for a merchant. Please show me the ISO-AMP integration for rate calculations.");
-                  }
-                }}
+                className="p-4 h-auto text-left justify-start hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-300 hover:border-blue-200 dark:hover:border-blue-700 transition-colors w-full"
+                onClick={() => handleQuickAction("Calculate processing rates for a restaurant")}
               >
-                <Calculator className="mr-3 h-4 w-4 text-blue-600 flex-shrink-0" />
-                <div className="flex-1 min-w-0 overflow-hidden">
-                  <div className="font-medium mb-1 text-sm truncate">Calculate Rates</div>
-                  <div className="text-xs text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 line-clamp-2">Calculate processing rates and fees</div>
+                <Calculator className="mr-3 h-5 w-5 text-blue-600 flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold mb-1 text-sm">Calculate Processing Rates</div>
+                  <div className="text-xs text-slate-500 hover:text-blue-600 dark:hover:text-blue-400">Get competitive rates for any business type</div>
                 </div>
               </Button>
             </div>
@@ -509,17 +505,13 @@ With these details, I'll create a customized proposal highlighting value proposi
             <div className="w-full">
               <Button
                 variant="outline"
-                className="p-3 h-auto text-left justify-start hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-700 dark:hover:text-green-300 hover:border-green-200 dark:hover:border-green-700 transition-colors w-full"
-                onClick={() => {
-                  if (onNewChatWithMessage) {
-                    onNewChatWithMessage("Show me real-time market intelligence including current processor pricing and industry trends for merchant services.");
-                  }
-                }}
+                className="p-4 h-auto text-left justify-start hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-700 dark:hover:text-green-300 hover:border-green-200 dark:hover:border-green-700 transition-colors w-full"
+                onClick={() => handleQuickAction("Analyze Stripe vs Square vs Clover for my restaurant client")}
               >
-                <Globe className="mr-3 h-4 w-4 text-green-600 flex-shrink-0" />
-                <div className="flex-1 min-w-0 overflow-hidden">
-                  <div className="font-medium mb-1 text-sm truncate">Real-Time Market Intelligence</div>
-                  <div className="text-xs text-slate-500 hover:text-green-600 dark:hover:text-green-400 line-clamp-2">Get current processor pricing and industry trends</div>
+                <FileSearch className="mr-3 h-5 w-5 text-green-600 flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold mb-1 text-sm">Compare Processors</div>
+                  <div className="text-xs text-slate-500 hover:text-green-600 dark:hover:text-green-400">Side-by-side processor analysis</div>
                 </div>
               </Button>
             </div>
@@ -527,17 +519,13 @@ With these details, I'll create a customized proposal highlighting value proposi
             <div className="w-full">
               <Button
                 variant="outline"
-                className="p-3 h-auto text-left justify-start hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-700 dark:hover:text-purple-300 hover:border-purple-200 dark:hover:border-purple-700 transition-colors w-full"
-                onClick={() => {
-                  if (onNewChatWithMessage) {
-                    onNewChatWithMessage("I need an AI-powered competitor analysis comparing different payment processors. Please analyze and compare the top processors with detailed insights on rates, features, and competitive advantages.");
-                  }
-                }}
+                className="p-4 h-auto text-left justify-start hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-700 dark:hover:text-purple-300 hover:border-purple-200 dark:hover:border-purple-700 transition-colors w-full"
+                onClick={() => handleQuickAction("Get current payment processing industry trends and market analysis")}
               >
-                <Brain className="mr-3 h-4 w-4 text-purple-600 flex-shrink-0" />
-                <div className="flex-1 min-w-0 overflow-hidden">
-                  <div className="font-medium mb-1 text-sm truncate">AI Competitor Analysis</div>
-                  <div className="text-xs text-slate-500 hover:text-purple-600 dark:hover:text-purple-400 line-clamp-2">Compare processors with AI insights</div>
+                <Brain className="mr-3 h-5 w-5 text-purple-600 flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold mb-1 text-sm">Market Intelligence</div>
+                  <div className="text-xs text-slate-500 hover:text-purple-600 dark:hover:text-purple-400">Latest industry trends and insights</div>
                 </div>
               </Button>
             </div>
@@ -545,23 +533,21 @@ With these details, I'll create a customized proposal highlighting value proposi
             <div className="w-full">
               <Button
                 variant="outline"
-                className="p-3 h-auto text-left justify-start hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-700 dark:hover:text-orange-300 hover:border-orange-200 dark:hover:border-orange-700 transition-colors w-full"
-                onClick={() => handleQuickAction("Find the most current market trends and insights from payment processing and merchant services industry articles from the previous 7 days. Please provide comprehensive analysis with recent developments, regulatory changes, technology updates, and competitive landscape shifts.")}
+                className="p-4 h-auto text-left justify-start hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-700 dark:hover:text-orange-300 hover:border-orange-200 dark:hover:border-orange-700 transition-colors w-full"
+                onClick={() => handleQuickAction("Help me prepare a proposal for a new client")}
               >
-                <Zap className="mr-3 h-4 w-4 text-orange-600 flex-shrink-0" />
-                <div className="flex-1 min-w-0 overflow-hidden">
-                  <div className="font-medium mb-1 text-sm truncate">Industry Intelligence</div>
-                  <div className="text-xs text-slate-500 hover:text-orange-600 dark:hover:text-orange-400 line-clamp-2">Real-time market trends and insights</div>
+                <FileText className="mr-3 h-5 w-5 text-orange-600 flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold mb-1 text-sm">Create Proposal</div>
+                  <div className="text-xs text-slate-500 hover:text-orange-600 dark:hover:text-orange-400">Build winning client proposals</div>
                 </div>
               </Button>
             </div>
-            
-            {/* Create Proposal button hidden for Version 2 */}
           </div>
         </div>
 
         {/* Enhanced Input Box for New Chat */}
-        <div className="border-t border-slate-200 dark:border-slate-700 p-4 pb-20 md:pb-4">
+        <div className="sticky bottom-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 p-4 pb-20 md:pb-4 z-30">
           {/* File Upload Area */}
           {showFileUpload && (
             <div className="mb-4 max-w-4xl mx-auto">
@@ -579,8 +565,28 @@ With these details, I'll create a customized proposal highlighting value proposi
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyPress}
+                onFocus={() => {
+                  // Scroll input into view with proper spacing
+                  setTimeout(() => {
+                    textareaRef.current?.scrollIntoView({ 
+                      behavior: 'smooth', 
+                      block: 'center',
+                      inline: 'nearest'
+                    });
+                  }, 100);
+                }}
+                onClick={() => {
+                  // Ensure input takes priority and stays visible
+                  setTimeout(() => {
+                    textareaRef.current?.scrollIntoView({ 
+                      behavior: 'smooth', 
+                      block: 'center',
+                      inline: 'nearest'
+                    });
+                  }, 50);
+                }}
                 placeholder="Ask JACC anything about rates, documents, or client questions..."
-                className="auto-resize border-slate-300 dark:border-slate-600 rounded-xl pr-28 min-h-[50px] max-h-[120px] resize-none focus:ring-blue-500 focus:border-blue-500 shadow-sm"
+                className="auto-resize border-slate-300 dark:border-slate-600 rounded-xl pr-28 min-h-[50px] max-h-[120px] resize-none focus:ring-blue-500 focus:border-blue-500 shadow-sm focus:shadow-lg transition-shadow"
                 disabled={sendMessageMutation.isPending}
               />
               
@@ -771,7 +777,7 @@ With these details, I'll create a customized proposal highlighting value proposi
       )}
 
       {/* Chat Input */}
-      <div className="border-t border-slate-200 dark:border-slate-700 p-4 pb-20 md:pb-4">
+      <div className="sticky bottom-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 p-4 pb-20 md:pb-4 z-30">
         {/* Input Box */}
         <div className="flex items-end space-x-3 max-w-4xl mx-auto">
           <div className="flex-1 relative">
@@ -780,8 +786,28 @@ With these details, I'll create a customized proposal highlighting value proposi
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyPress}
+              onFocus={() => {
+                // Scroll input into view with proper spacing
+                setTimeout(() => {
+                  textareaRef.current?.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center',
+                    inline: 'nearest'
+                  });
+                }, 100);
+              }}
+              onClick={() => {
+                // Ensure input takes priority and stays visible
+                setTimeout(() => {
+                  textareaRef.current?.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center',
+                    inline: 'nearest'
+                  });
+                }, 50);
+              }}
               placeholder="Ask JACC anything about rates, documents, or client questions..."
-              className="auto-resize border-slate-300 dark:border-slate-600 rounded-xl pr-28 min-h-[50px] max-h-[120px] resize-none focus:ring-green-500 focus:border-green-500"
+              className="auto-resize border-slate-300 dark:border-slate-600 rounded-xl pr-28 min-h-[50px] max-h-[120px] resize-none focus:ring-green-500 focus:border-green-500 focus:shadow-lg transition-shadow"
               disabled={sendMessageMutation.isPending}
             />
             
