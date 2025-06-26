@@ -3869,16 +3869,15 @@ User Context: {userRole}`,
   // Chat reviews endpoint for Admin Control Center
   app.get('/api/admin/chat-reviews', async (req: Request, res: Response) => {
     try {
-      const { chats, messages } = await import('@shared/schema');
-      const { sql } = await import('drizzle-orm');
+      const { sql, eq, desc, count } = await import('drizzle-orm');
       
       const chatReviews = await db.select({
         chatId: chats.id,
         title: chats.title,
         userId: chats.userId,
         createdAt: chats.createdAt,
-        messageCount: sql<number>`count(${messages.id})`.as('messageCount'),
-        reviewStatus: sql<string>`CASE WHEN ${chats.isArchived} = true THEN 'approved' ELSE 'pending' END`.as('reviewStatus')
+        messageCount: count(messages.id).as('messageCount'),
+        reviewStatus: sql<string>`CASE WHEN ${chats.isArchived} THEN 'approved' ELSE 'pending' END`.as('reviewStatus')
       })
       .from(chats)
       .leftJoin(messages, eq(chats.id, messages.chatId))
