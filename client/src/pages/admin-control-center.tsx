@@ -158,8 +158,20 @@ export default function AdminControlCenter() {
       });
       
       if (chatMessages.length > 0) {
-        const userMessage = chatMessages.find((m: any) => m.role === 'user')?.content || '';
-        const aiResponse = chatMessages.find((m: any) => m.role === 'assistant')?.content || '';
+        console.log('Sample message structure:', chatMessages[0]);
+        
+        // Try different message field names
+        const userMessage = chatMessages.find((m: any) => 
+          m.role === 'user' || m.sender === 'user' || m.type === 'user'
+        )?.content || chatMessages.find((m: any) => 
+          m.role === 'user' || m.sender === 'user' || m.type === 'user'
+        )?.message || '';
+        
+        const aiResponse = chatMessages.find((m: any) => 
+          m.role === 'assistant' || m.sender === 'assistant' || m.type === 'assistant'
+        )?.content || chatMessages.find((m: any) => 
+          m.role === 'assistant' || m.sender === 'assistant' || m.type === 'assistant'
+        )?.message || '';
         
         setSelectedChatDetails({
           userMessage,
@@ -170,7 +182,8 @@ export default function AdminControlCenter() {
           hasUserMessage: !!userMessage, 
           hasAiResponse: !!aiResponse,
           userMessageLength: userMessage.length,
-          aiResponseLength: aiResponse.length
+          aiResponseLength: aiResponse.length,
+          messageFields: Object.keys(chatMessages[0] || {})
         });
       } else {
         setSelectedChatDetails({
