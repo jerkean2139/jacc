@@ -2298,33 +2298,37 @@ User Context: {userRole}`,
     try {
       const { chatId } = req.params;
       
-      // Get user from session
-      let userId = 'dev-user-123';
-      let userRole = 'sales-agent';
+      // Get user from session - check simple auth first (current system)
+      let userId = null;
+      let userRole = null;
       
-      // Check for admin session using express-session
-      if (req.session && req.session.user) {
+      // Check simple auth session (primary method)
+      const sessionId = req.cookies?.sessionId;
+      console.log(`Session check - sessionId: ${sessionId}`);
+      if (sessionId) {
+        const { sessions } = await import('./simple-routes');
+        if (sessions && sessions.has(sessionId)) {
+          const sessionUser = sessions.get(sessionId);
+          userId = sessionUser.id;
+          userRole = sessionUser.role;
+          console.log(`Simple session found - userId: ${userId}, role: ${userRole}`);
+        } else {
+          console.log(`Session not found in sessions map`);
+        }
+      }
+      
+      // Check express-session as fallback
+      if (!userId && req.session && req.session.user) {
         const sessionUser = req.session.user;
         userId = sessionUser.id;
         userRole = sessionUser.role;
         console.log(`Express session found - userId: ${userId}, role: ${userRole}`);
-      } else {
-        // Check simple auth session as fallback
-        const sessionId = req.cookies?.sessionId;
-        console.log(`Session check - sessionId: ${sessionId}`);
-        if (sessionId) {
-          const { sessions } = await import('./simple-routes');
-          if (sessions && sessions.has(sessionId)) {
-            const sessionUser = sessions.get(sessionId);
-            userId = sessionUser.id;
-            userRole = sessionUser.role;
-            console.log(`Simple session found - userId: ${userId}, role: ${userRole}`);
-          } else {
-            console.log(`Session not found in sessions map`);
-          }
-        } else {
-          console.log(`No session ID in cookies`);
-        }
+      }
+      
+      // If no valid session found, deny access
+      if (!userId || !userRole) {
+        console.log(`No valid session found`);
+        return res.status(401).json({ message: "Authentication required" });
       }
       
       // Verify chat exists using database query

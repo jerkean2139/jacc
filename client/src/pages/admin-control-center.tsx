@@ -131,15 +131,6 @@ export default function AdminControlCenter() {
 
   const { data: userChats, isLoading: chatsLoading } = useQuery({
     queryKey: ['/api/admin/chat-reviews'],
-    onSuccess: (data) => {
-      console.log('Chat Reviews loaded:', data?.length || 0, 'chats');
-      // Auto-select first chat if none selected
-      if (!selectedChatId && Array.isArray(data) && data.length > 0) {
-        const firstChat = data[0];
-        console.log('Auto-selecting first chat:', firstChat.chatId);
-        setSelectedChatId(firstChat.chatId);
-      }
-    }
   });
 
   const { data: chatMessages, isLoading: messagesLoading } = useQuery({
@@ -147,15 +138,14 @@ export default function AdminControlCenter() {
     enabled: !!selectedChatId,
   });
 
-  // Debug logging for message query status
+  // Debug logging for state changes
   useEffect(() => {
-    console.log('Messages Query Status:', {
-      chatId: selectedChatId,
-      queryKey: ['/api/chats', selectedChatId, 'messages'],
-      enabled: !!selectedChatId,
-      isLoading: messagesLoading,
-      hasError: false,
-      messageCount: chatMessages?.length || 0
+    console.log('Chat Selection State Changed:', {
+      selectedChatId,
+      hasSelectedChat: !!selectedChatId,
+      messagesLoading,
+      messageCount: chatMessages?.length || 0,
+      timestamp: new Date().toISOString()
     });
   }, [selectedChatId, messagesLoading, chatMessages]);
 
