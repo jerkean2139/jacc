@@ -996,14 +996,70 @@ export default function AdminControlCenter() {
               <CardTitle className="text-green-600">📁 Document Upload Center</CardTitle>
               <CardDescription>Complete 3-step process: Select Files → Choose Folder → Set Permissions → Upload</CardDescription>
             </CardHeader>
-            <CardContent>
-              <DocumentUpload onUploadComplete={() => {
-                queryClient.invalidateQueries({ queryKey: ['/api/documents'] });
-                toast({
-                  title: "Upload Complete",
-                  description: "Documents have been uploaded successfully",
-                });
-              }} />
+            <CardContent className="space-y-6">
+              {/* Step 1: Pre-Upload Configuration */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
+                <div>
+                  <Label className="text-sm font-medium text-blue-700">Step 1: Select Destination Folder</Label>
+                  <Select value={uploadSelectedFolder} onValueChange={setUploadSelectedFolder}>
+                    <SelectTrigger className="mt-1 border-blue-300">
+                      <SelectValue placeholder="Choose destination folder" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {foldersData?.map((folder: any) => (
+                        <SelectItem key={folder.id} value={folder.id}>
+                          {folder.name}
+                        </SelectItem>
+                      ))}
+                      <SelectItem value="new-folder">+ Create New Folder</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label className="text-sm font-medium text-blue-700">Step 2: Set Access Permissions</Label>
+                  <Select value={selectedPermissions} onValueChange={setSelectedPermissions}>
+                    <SelectTrigger className="mt-1 border-blue-300">
+                      <SelectValue placeholder="Choose access level" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="admin">Admin Only</SelectItem>
+                      <SelectItem value="all-users">All Users</SelectItem>
+                      <SelectItem value="managers">Managers & Admins</SelectItem>
+                      <SelectItem value="agents">Agents & Above</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Configuration Summary */}
+              {(uploadSelectedFolder || selectedPermissions) && (
+                <div className="p-3 bg-green-50 rounded-lg border border-green-200">
+                  <p className="text-sm font-medium text-green-700">Upload Configuration:</p>
+                  <div className="text-xs text-green-600 mt-1 space-y-1">
+                    <p>📁 Folder: {uploadSelectedFolder ? foldersData?.find(f => f.id === uploadSelectedFolder)?.name || 'Selected' : 'Not selected'}</p>
+                    <p>🔒 Access: {selectedPermissions || 'Not selected'}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Step 3: Document Upload Area */}
+              <div className="border-t pt-4">
+                <Label className="text-sm font-medium text-green-700 mb-2 block">Step 3: Upload Documents</Label>
+                <DocumentUpload 
+                  preSelectedFolder={uploadSelectedFolder}
+                  preSelectedPermissions={selectedPermissions}
+                  onUploadComplete={() => {
+                    queryClient.invalidateQueries({ queryKey: ['/api/documents'] });
+                    setUploadSelectedFolder('');
+                    setSelectedPermissions('');
+                    toast({
+                      title: "Upload Complete",
+                      description: "Documents have been uploaded successfully",
+                    });
+                  }} 
+                />
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
