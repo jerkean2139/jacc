@@ -2313,20 +2313,23 @@ User Context: {userRole}`,
         }
       }
       
-      // Verify chat exists
-      const chat = await storage.getChat(chatId);
+      // Verify chat exists using database query
+      const [chat] = await db.select().from(chats).where(eq(chats.id, chatId)).limit(1);
       if (!chat) {
+        console.log(`Chat not found for ID: ${chatId}`);
         return res.status(404).json({ message: "Chat not found" });
       }
+      console.log(`Found chat: ${chat.id} for user: ${chat.userId}`);
       
       // Admin users can access all chats, regular users only their own
       if (userRole !== 'admin' && chat.userId !== userId) {
         return res.status(404).json({ message: "Chat not found" });
       }
       
-      const messages = await storage.getChatMessages(chatId);
-      console.log(`API: Sending ${messages.length} messages to frontend for chat ${chatId} (user: ${userId}, role: ${userRole})`);
-      res.json(messages);
+      // Get messages from database
+      const chatMessages = await db.select().from(messages).where(eq(messages.chatId, chatId)).orderBy(messages.createdAt);
+      console.log(`API: Sending ${chatMessages.length} messages to frontend for chat ${chatId} (user: ${userId}, role: ${userRole})`);
+      res.json(chatMessages);
     } catch (error) {
       console.error("Error fetching messages:", error);
       res.status(500).json({ message: "Failed to fetch messages" });
