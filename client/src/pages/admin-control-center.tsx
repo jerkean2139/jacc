@@ -134,7 +134,7 @@ export default function AdminControlCenter() {
   });
 
   const { data: chatMessages, isLoading: messagesLoading } = useQuery({
-    queryKey: ['/api/chats', selectedChatId, 'messages'],
+    queryKey: [`/api/chats/${selectedChatId}/messages`],
     enabled: !!selectedChatId,
   });
 
