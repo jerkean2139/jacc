@@ -88,7 +88,6 @@ app.use((req, res, next) => {
   }
 
   // Use environment port or fallback to 5000
-  // this serves both the API and the client.
   const port = process.env.PORT ? parseInt(process.env.PORT) : 5000;
   const host = process.env.NODE_ENV === "production" ? "0.0.0.0" : "localhost";
   
@@ -97,5 +96,13 @@ app.use((req, res, next) => {
     if (process.env.NODE_ENV === "production") {
       console.log("✅ Production server ready for deployment");
     }
+  });
+
+  // Graceful shutdown handling
+  process.on('SIGTERM', () => {
+    console.log('SIGTERM received, shutting down gracefully');
+    server.close(() => {
+      console.log('Process terminated');
+    });
   });
 })();
