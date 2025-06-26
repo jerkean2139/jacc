@@ -275,4 +275,82 @@ export function registerChatReviewRoutes(app: any) {
     }
   });
 
+  // Archive chat endpoint
+  app.post('/api/admin/chat-reviews/:chatId/archive', async (req: Request, res: Response) => {
+    try {
+      const { chatId } = req.params;
+      const userId = (req.session as any)?.user?.id || 'admin';
+
+      // Check if review exists
+      const existingReview = await db
+        .select()
+        .from(chatReviews)
+        .where(eq(chatReviews.chatId, chatId))
+        .limit(1);
+
+      if (existingReview.length > 0) {
+        await db
+          .update(chatReviews)
+          .set({
+            reviewStatus: 'archived',
+            reviewedBy: userId,
+            lastReviewedAt: new Date(),
+            updatedAt: new Date(),
+          })
+          .where(eq(chatReviews.chatId, chatId));
+      } else {
+        await db.insert(chatReviews).values({
+          chatId,
+          reviewStatus: 'archived',
+          reviewedBy: userId,
+          lastReviewedAt: new Date(),
+        });
+      }
+
+      res.json({ success: true, message: 'Chat archived successfully' });
+    } catch (error) {
+      console.error('Error archiving chat:', error);
+      res.status(500).json({ error: 'Failed to archive chat' });
+    }
+  });
+
+  // Approve chat endpoint
+  app.post('/api/admin/chat-reviews/:chatId/approve', async (req: Request, res: Response) => {
+    try {
+      const { chatId } = req.params;
+      const userId = (req.session as any)?.user?.id || 'admin';
+
+      // Check if review exists
+      const existingReview = await db
+        .select()
+        .from(chatReviews)
+        .where(eq(chatReviews.chatId, chatId))
+        .limit(1);
+
+      if (existingReview.length > 0) {
+        await db
+          .update(chatReviews)
+          .set({
+            reviewStatus: 'approved',
+            reviewedBy: userId,
+            lastReviewedAt: new Date(),
+            updatedAt: new Date(),
+          })
+          .where(eq(chatReviews.chatId, chatId));
+      } else {
+        await db.insert(chatReviews).values({
+          chatId,
+          reviewStatus: 'approved',
+          reviewedBy: userId,
+          lastReviewedAt: new Date(),
+        });
+      }
+
+      res.json({ success: true, message: 'Chat approved successfully' });
+    } catch (error) {
+      console.error('Error approving chat:', error);
+      res.status(500).json({ error: 'Failed to approve chat' });
+    }
+  });
+
 }

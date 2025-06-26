@@ -349,6 +349,12 @@ export default function AdminControlCenter() {
     }
   };
 
+  const handleApproveChat = () => {
+    if (selectedChatId) {
+      approveChatMutation.mutate(selectedChatId);
+    }
+  };
+
   // Helper functions for FAQ management
   const toggleKnowledgeCategory = (category: string) => {
     setOpenKnowledgeCategories(prev => 
