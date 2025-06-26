@@ -3058,7 +3058,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         // Use demo user for testing when no session exists
         user = {
-          id: 'demo-user',
+          id: 'demo-user-id',
           username: 'demo',
           email: 'demo@example.com',
           role: 'sales-agent'
@@ -3095,7 +3095,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId = sessions.get(sessionId).id;
       } else {
         // Use demo user for testing when no session exists
-        userId = 'demo-user';
+        userId = 'demo-user-id';
       }
 
       const { chatId } = req.params;
