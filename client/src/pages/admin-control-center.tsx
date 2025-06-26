@@ -18,8 +18,7 @@ import {
   Edit, Trash2, Save, Plus, Folder, FolderOpen, Upload, Users, Activity,
   BarChart3, Timer, ChevronDown, ChevronRight, Target, BookOpen, ThumbsUp,
   ThumbsDown, Star, Copy, AlertCircle, ArrowRight, User, Bot, RefreshCw, Calendar,
-  Archive,
-  Scan
+  Archive, Scan
 } from 'lucide-react';
 import DocumentDragDrop from '@/components/ui/document-drag-drop';
 import DocumentPreviewModal from '@/components/ui/document-preview-modal';
@@ -251,26 +250,7 @@ export default function AdminControlCenter() {
     }
   });
 
-  const approveChatMutation = useMutation({
-    mutationFn: async (chatId: string) => {
-      const response = await fetch(`/api/admin/chat-reviews/${chatId}/approve`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          feedback: 'Chat approved by admin',
-          reviewStatus: 'approved'
-        })
-      });
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/chat-reviews'] });
-      toast({
-        title: "Chat Approved",
-        description: "AI response approved and added to training data",
-      });
-    }
-  });
+
 
   const handleSubmitCorrection = async () => {
     if (!correctionText.trim() || !selectedChatDetails) return;
@@ -321,6 +301,53 @@ export default function AdminControlCenter() {
       toast({ title: 'FAQ deleted successfully' });
     },
   });
+
+  // Archive chat mutation
+  const archiveChatMutation = useMutation({
+    mutationFn: async (chatId: string) => {
+      const response = await fetch(`/api/admin/chat-reviews/${chatId}/archive`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      if (!response.ok) throw new Error('Failed to archive chat');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/chat-reviews'] });
+      toast({
+        title: "Chat Archived",
+        description: "Chat has been moved to archived folder",
+      });
+      setSelectedChatId(null);
+      setSelectedChatDetails(null);
+    },
+  });
+
+  // Approve chat mutation
+  const approveChatMutation = useMutation({
+    mutationFn: async (chatId: string) => {
+      const response = await fetch(`/api/admin/chat-reviews/${chatId}/approve`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      if (!response.ok) throw new Error('Failed to approve chat');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/chat-reviews'] });
+      toast({
+        title: "Chat Approved",
+        description: "Chat response has been approved",
+      });
+    },
+  });
+
+  // Handler functions for chat actions
+  const handleArchiveChat = () => {
+    if (selectedChatId) {
+      archiveChatMutation.mutate(selectedChatId);
+    }
+  };
 
   // Helper functions for FAQ management
   const toggleKnowledgeCategory = (category: string) => {
@@ -487,11 +514,6 @@ export default function AdminControlCenter() {
     } finally {
       setIsScrapingForKnowledge(false);
     }
-  };
-
-  const handleApproveChat = () => {
-    if (!selectedChatId) return;
-    approveChatMutation.mutate(selectedChatId);
   };
 
   // Chat Review Center Component
@@ -712,6 +734,15 @@ export default function AdminControlCenter() {
                         >
                           <ThumbsUp className="h-4 w-4" />
                           {approveChatMutation.isPending ? 'Approving...' : 'Approve Response'}
+                        </Button>
+                        <Button 
+                          onClick={handleArchiveChat}
+                          variant="outline"
+                          className="flex items-center gap-2"
+                          disabled={archiveChatMutation.isPending}
+                        >
+                          <Archive className="h-4 w-4" />
+                          {archiveChatMutation.isPending ? 'Archiving...' : 'Archive Chat'}
                         </Button>
                       </div>
 
