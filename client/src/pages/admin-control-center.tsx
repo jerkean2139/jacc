@@ -97,7 +97,7 @@ export default function AdminControlCenter() {
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const [selectedChatDetails, setSelectedChatDetails] = useState<any>(null);
   const [chatReviewTab, setChatReviewTab] = useState<string>("active");
-  const [chatDisplayLimit, setChatDisplayLimit] = useState(15); // Show 15 chats initially
+  const [chatDisplayLimit, setChatDisplayLimit] = useState(5); // Show 5 chats initially
   
   // URL Scraping for Knowledge Base
   const [scrapeUrl, setScrapeUrl] = useState('');
@@ -688,7 +688,7 @@ export default function AdminControlCenter() {
                         return filteredChats.length > chatDisplayLimit && (
                           <div className="text-center pt-4 border-t">
                             <Button
-                              onClick={() => setChatDisplayLimit(prev => prev + 15)}
+                              onClick={() => setChatDisplayLimit(prev => prev + 5)}
                               variant="outline"
                               className="w-full"
                             >
