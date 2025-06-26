@@ -2,6 +2,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { ensureProductionFiles, configureProductionServer, validateDeploymentEnvironment } from "./deployment-config";
+import { createTestDataPlaceholders, setupProductionDirectories, validateProductionEnvironment, setupErrorHandling } from "./production-setup";
 
 const app = express();
 app.use(express.json());
@@ -41,12 +42,19 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Setup error handling first
+  setupErrorHandling();
+  
   // Configure deployment environment before starting server
+  console.log("🚀 Initializing JACC deployment configuration...");
+  createTestDataPlaceholders();
+  setupProductionDirectories();
   ensureProductionFiles();
   configureProductionServer();
   
+  const validationResults = validateProductionEnvironment();
   if (!validateDeploymentEnvironment()) {
-    console.warn("⚠️ Deployment environment validation failed, continuing with available configuration");
+    console.warn("⚠️ Some deployment checks failed, continuing with available configuration");
   }
   
   let server;
