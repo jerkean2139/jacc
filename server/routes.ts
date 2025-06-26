@@ -2302,14 +2302,28 @@ User Context: {userRole}`,
       let userId = 'dev-user-123';
       let userRole = 'sales-agent';
       
-      // Check simple auth session first
-      const sessionId = req.cookies?.sessionId;
-      if (sessionId) {
-        const { sessions } = await import('./simple-routes');
-        if (sessions && sessions.has(sessionId)) {
-          const sessionUser = sessions.get(sessionId);
-          userId = sessionUser.id;
-          userRole = sessionUser.role;
+      // Check for admin session using express-session
+      if (req.session && req.session.user) {
+        const sessionUser = req.session.user;
+        userId = sessionUser.id;
+        userRole = sessionUser.role;
+        console.log(`Express session found - userId: ${userId}, role: ${userRole}`);
+      } else {
+        // Check simple auth session as fallback
+        const sessionId = req.cookies?.sessionId;
+        console.log(`Session check - sessionId: ${sessionId}`);
+        if (sessionId) {
+          const { sessions } = await import('./simple-routes');
+          if (sessions && sessions.has(sessionId)) {
+            const sessionUser = sessions.get(sessionId);
+            userId = sessionUser.id;
+            userRole = sessionUser.role;
+            console.log(`Simple session found - userId: ${userId}, role: ${userRole}`);
+          } else {
+            console.log(`Session not found in sessions map`);
+          }
+        } else {
+          console.log(`No session ID in cookies`);
         }
       }
       
@@ -2320,9 +2334,11 @@ User Context: {userRole}`,
         return res.status(404).json({ message: "Chat not found" });
       }
       console.log(`Found chat: ${chat.id} for user: ${chat.userId}`);
+      console.log(`Auth check - userId: ${userId}, userRole: ${userRole}, chat.userId: ${chat.userId}`);
       
       // Admin users can access all chats, regular users only their own
       if (userRole !== 'admin' && chat.userId !== userId) {
+        console.log(`Access denied - role: ${userRole}, userId: ${userId}, chat.userId: ${chat.userId}`);
         return res.status(404).json({ message: "Chat not found" });
       }
       
