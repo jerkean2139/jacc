@@ -84,6 +84,11 @@ export default function AdminControlCenter() {
   const [selectedPermissions, setSelectedPermissions] = useState('admin');
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
   
+  // Folder creation states
+  const [isCreateFolderDialogOpen, setIsCreateFolderDialogOpen] = useState(false);
+  const [newFolderName, setNewFolderName] = useState('');
+  const [newFolderColor, setNewFolderColor] = useState('blue');
+  
   // Document management states
   const [documentSearchTerm, setDocumentSearchTerm] = useState('');
   const [documentFilter, setDocumentFilter] = useState('all');
@@ -170,6 +175,39 @@ export default function AdminControlCenter() {
         description: "New FAQ entry has been added successfully.",
       });
     },
+  });
+
+  // Create folder mutation
+  const createFolderMutation = useMutation({
+    mutationFn: async (folderData: { name: string; color: string }) => {
+      return apiRequest('/api/folders', {
+        method: 'POST',
+        body: JSON.stringify({
+          name: folderData.name,
+          color: folderData.color,
+          folderType: 'custom',
+          vectorNamespace: `folder_${folderData.name.toLowerCase().replace(/\s+/g, '_')}`
+        })
+      });
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/folders'] });
+      setUploadSelectedFolder(data.id);
+      setIsCreateFolderDialogOpen(false);
+      setNewFolderName('');
+      setNewFolderColor('blue');
+      toast({
+        title: "Folder Created",
+        description: `Folder "${data.name}" has been created successfully.`,
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Creation Failed",
+        description: "Failed to create folder. Please try again.",
+        variant: "destructive",
+      });
+    }
   });
 
   const approveChatMutation = useMutation({
@@ -1001,7 +1039,13 @@ export default function AdminControlCenter() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
                 <div>
                   <Label className="text-sm font-medium text-blue-700">Step 1: Select Destination Folder</Label>
-                  <Select value={uploadSelectedFolder} onValueChange={setUploadSelectedFolder}>
+                  <Select value={uploadSelectedFolder} onValueChange={(value) => {
+                    if (value === "new-folder") {
+                      setIsCreateFolderDialogOpen(true);
+                    } else {
+                      setUploadSelectedFolder(value);
+                    }
+                  }}>
                     <SelectTrigger className="mt-1 border-blue-300">
                       <SelectValue placeholder="Choose destination folder" />
                     </SelectTrigger>
@@ -1752,6 +1796,81 @@ export default function AdminControlCenter() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Create Folder Dialog */}
+      <Dialog open={isCreateFolderDialogOpen} onOpenChange={setIsCreateFolderDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New Folder</DialogTitle>
+            <DialogDescription>
+              Create a new folder to organize your documents
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="folder-name">Folder Name</Label>
+              <Input
+                id="folder-name"
+                value={newFolderName}
+                onChange={(e) => setNewFolderName(e.target.value)}
+                placeholder="Enter folder name"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="folder-color">Folder Color</Label>
+              <Select value={newFolderColor} onValueChange={setNewFolderColor}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Choose folder color" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="blue">🔵 Blue</SelectItem>
+                  <SelectItem value="green">🟢 Green</SelectItem>
+                  <SelectItem value="yellow">🟡 Yellow</SelectItem>
+                  <SelectItem value="red">🔴 Red</SelectItem>
+                  <SelectItem value="purple">🟣 Purple</SelectItem>
+                  <SelectItem value="orange">🟠 Orange</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsCreateFolderDialogOpen(false);
+                setNewFolderName('');
+                setNewFolderColor('blue');
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                if (newFolderName.trim()) {
+                  createFolderMutation.mutate({
+                    name: newFolderName.trim(),
+                    color: newFolderColor
+                  });
+                }
+              }}
+              disabled={!newFolderName.trim() || createFolderMutation.isPending}
+            >
+              {createFolderMutation.isPending ? (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Folder
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
