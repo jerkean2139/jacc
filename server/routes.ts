@@ -2497,6 +2497,8 @@ User Context: {userRole}`,
     }
   });
 
+
+
   // Start learning module
   app.post('/api/learning/modules/:moduleId/start', isAuthenticated, async (req: any, res) => {
     try {
