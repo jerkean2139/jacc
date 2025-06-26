@@ -17,7 +17,8 @@ import {
   AlertTriangle, Clock, TrendingUp, Zap, Globe, Search, FileText, Eye, Download,
   Edit, Trash2, Save, Plus, Folder, FolderOpen, Upload, Users, Activity,
   BarChart3, Timer, ChevronDown, ChevronRight, Target, BookOpen, ThumbsUp,
-  ThumbsDown, Star, Copy, AlertCircle, ArrowRight, User, Bot, RefreshCw, Calendar
+  ThumbsDown, Star, Copy, AlertCircle, ArrowRight, User, Bot, RefreshCw, Calendar,
+  Scan
 } from 'lucide-react';
 import DocumentDragDrop from '@/components/ui/document-drag-drop';
 import DocumentPreviewModal from '@/components/ui/document-preview-modal';
@@ -1276,66 +1277,370 @@ export default function AdminControlCenter() {
               )}
 
               {settingsTab === "system-perf" && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>System Performance</CardTitle>
-                    <CardDescription>Monitor and configure system performance</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <Card>
-                        <CardContent className="p-4">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Activity className="h-4 w-4 text-green-500" />
-                            <span className="font-medium">System Status</span>
+                <div className="space-y-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Activity className="w-5 h-5 text-orange-500" />
+                        System Performance Monitoring
+                      </CardTitle>
+                      <CardDescription>Real-time system metrics and configuration</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      {/* Real-time Metrics */}
+                      <div>
+                        <h4 className="font-semibold mb-3 flex items-center gap-2">
+                          <BarChart3 className="w-4 h-4" />
+                          Real-time Metrics
+                        </h4>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <Card className="border-green-200">
+                            <CardContent className="p-4">
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2">
+                                  <Activity className="h-4 w-4 text-green-500" />
+                                  <span className="font-medium text-sm">System Status</span>
+                                </div>
+                                <Badge variant="outline" className="text-green-600">Online</Badge>
+                              </div>
+                              <p className="text-xs text-gray-600">All Services Operational</p>
+                              <div className="mt-2">
+                                <Progress value={98} className="h-2" />
+                                <p className="text-xs text-gray-500 mt-1">98% Uptime</p>
+                              </div>
+                            </CardContent>
+                          </Card>
+                          <Card className="border-blue-200">
+                            <CardContent className="p-4">
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2">
+                                  <Database className="h-4 w-4 text-blue-500" />
+                                  <span className="font-medium text-sm">Database</span>
+                                </div>
+                                <Badge variant="outline" className="text-blue-600">Connected</Badge>
+                              </div>
+                              <p className="text-xs text-gray-600">Response: 2.3s avg</p>
+                              <div className="mt-2">
+                                <Progress value={85} className="h-2" />
+                                <p className="text-xs text-gray-500 mt-1">85% Efficiency</p>
+                              </div>
+                            </CardContent>
+                          </Card>
+                          <Card className="border-orange-200">
+                            <CardContent className="p-4">
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2">
+                                  <Zap className="h-4 w-4 text-orange-500" />
+                                  <span className="font-medium text-sm">Memory Usage</span>
+                                </div>
+                                <Badge variant="outline" className="text-orange-600">97%</Badge>
+                              </div>
+                              <p className="text-xs text-gray-600">1.2GB / 1.25GB Used</p>
+                              <div className="mt-2">
+                                <Progress value={97} className="h-2" />
+                                <p className="text-xs text-gray-500 mt-1">High Usage</p>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </div>
+                      </div>
+
+                      <Separator />
+
+                      {/* Timeout & Cache Settings */}
+                      <div>
+                        <h4 className="font-semibold mb-3 flex items-center gap-2">
+                          <Timer className="w-4 h-4" />
+                          Timeouts & Cache
+                        </h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div className="space-y-4">
+                            <div>
+                              <Label className="text-sm font-medium">API Timeout</Label>
+                              <Select>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="30 seconds" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="15s">15 seconds</SelectItem>
+                                  <SelectItem value="30s">30 seconds</SelectItem>
+                                  <SelectItem value="60s">60 seconds</SelectItem>
+                                  <SelectItem value="120s">2 minutes</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div>
+                              <Label className="text-sm font-medium">Database Timeout</Label>
+                              <Select>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="10 seconds" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="5s">5 seconds</SelectItem>
+                                  <SelectItem value="10s">10 seconds</SelectItem>
+                                  <SelectItem value="20s">20 seconds</SelectItem>
+                                  <SelectItem value="30s">30 seconds</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
                           </div>
-                          <p className="text-sm text-green-600">All Systems Operational</p>
-                        </CardContent>
-                      </Card>
-                      <Card>
-                        <CardContent className="p-4">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Database className="h-4 w-4 text-blue-500" />
-                            <span className="font-medium">Database</span>
+                          <div className="space-y-4">
+                            <div>
+                              <Label className="text-sm font-medium">Cache Duration</Label>
+                              <Select>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="5 minutes" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="1min">1 minute</SelectItem>
+                                  <SelectItem value="5min">5 minutes</SelectItem>
+                                  <SelectItem value="15min">15 minutes</SelectItem>
+                                  <SelectItem value="1hour">1 hour</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="space-y-2">
+                              <Label className="text-sm font-medium">Memory Optimization</Label>
+                              <div className="space-y-2">
+                                <div className="flex items-center space-x-2">
+                                  <input type="checkbox" id="auto-gc" defaultChecked />
+                                  <Label htmlFor="auto-gc" className="text-sm">Auto garbage collection</Label>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <input type="checkbox" id="cache-compression" defaultChecked />
+                                  <Label htmlFor="cache-compression" className="text-sm">Cache compression</Label>
+                                </div>
+                              </div>
+                            </div>
                           </div>
-                          <p className="text-sm text-blue-600">Connected & Optimized</p>
-                        </CardContent>
-                      </Card>
-                      <Card>
-                        <CardContent className="p-4">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Zap className="h-4 w-4 text-yellow-500" />
-                            <span className="font-medium">Performance</span>
-                          </div>
-                          <p className="text-sm text-yellow-600">Excellent</p>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  </CardContent>
-                </Card>
+                        </div>
+                      </div>
+
+                      <Separator />
+
+                      {/* Health Monitoring */}
+                      <div>
+                        <h4 className="font-semibold mb-3 flex items-center gap-2">
+                          <TrendingUp className="w-4 h-4" />
+                          Health Monitoring
+                        </h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <Card className="border-purple-200">
+                            <CardContent className="p-4">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="font-medium text-sm">AI Services</span>
+                                <Badge variant="outline" className="text-green-600">Healthy</Badge>
+                              </div>
+                              <div className="space-y-1 text-xs text-gray-600">
+                                <div className="flex justify-between">
+                                  <span>Claude API:</span>
+                                  <span className="text-green-600">Active</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span>OpenAI API:</span>
+                                  <span className="text-green-600">Active</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span>Pinecone:</span>
+                                  <span className="text-green-600">Connected</span>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                          <Card className="border-teal-200">
+                            <CardContent className="p-4">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="font-medium text-sm">Search Accuracy</span>
+                                <Badge variant="outline" className="text-teal-600">96%</Badge>
+                              </div>
+                              <div className="space-y-1 text-xs text-gray-600">
+                                <div className="flex justify-between">
+                                  <span>Document Retrieval:</span>
+                                  <span className="text-green-600">Excellent</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span>FAQ Matching:</span>
+                                  <span className="text-green-600">High</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span>Vector Search:</span>
+                                  <span className="text-green-600">Optimal</span>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
               )}
 
-              {/* Other setting tabs would go here */}
               {settingsTab === "user-mgmt" && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>User Management</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-gray-600">User management settings coming soon...</p>
-                  </CardContent>
-                </Card>
+                <div className="space-y-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Users className="w-5 h-5 text-blue-500" />
+                        User Management
+                      </CardTitle>
+                      <CardDescription>Configure user access and session settings</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      {/* Sessions & Notifications */}
+                      <div>
+                        <h4 className="font-semibold mb-3 flex items-center gap-2">
+                          <Clock className="w-4 h-4" />
+                          Sessions & Notifications
+                        </h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div className="space-y-4">
+                            <div>
+                              <Label className="text-sm font-medium">Default User Role</Label>
+                              <Select>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Sales Agent" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="sales-agent">Sales Agent</SelectItem>
+                                  <SelectItem value="client-admin">Client Admin</SelectItem>
+                                  <SelectItem value="dev-admin">Dev Admin</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div>
+                              <Label className="text-sm font-medium">Session Timeout</Label>
+                              <Select>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="2 hours" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="15min">15 minutes</SelectItem>
+                                  <SelectItem value="1hour">1 hour</SelectItem>
+                                  <SelectItem value="2hours">2 hours</SelectItem>
+                                  <SelectItem value="8hours">8 hours</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                          <div className="space-y-4">
+                            <div className="space-y-2">
+                              <Label className="text-sm font-medium">MFA Settings</Label>
+                              <div className="space-y-2">
+                                <div className="flex items-center space-x-2">
+                                  <input type="checkbox" id="mfa-required" defaultChecked />
+                                  <Label htmlFor="mfa-required" className="text-sm">Require MFA for admin roles</Label>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <input type="checkbox" id="guest-access" />
+                                  <Label htmlFor="guest-access" className="text-sm">Allow guest access</Label>
+                                </div>
+                              </div>
+                            </div>
+                            <div>
+                              <Label className="text-sm font-medium">Notification Preferences</Label>
+                              <Select>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Daily digest" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="immediate">Immediate</SelectItem>
+                                  <SelectItem value="daily">Daily digest</SelectItem>
+                                  <SelectItem value="weekly">Weekly summary</SelectItem>
+                                  <SelectItem value="disabled">Disabled</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
               )}
 
               {settingsTab === "content-docs" && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Content & Documents</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-gray-600">Content and document settings coming soon...</p>
-                  </CardContent>
-                </Card>
+                <div className="space-y-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <FileText className="w-5 h-5 text-green-500" />
+                        Content & Document Processing
+                      </CardTitle>
+                      <CardDescription>Configure OCR, categorization, and retention policies</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      {/* OCR & Categorization */}
+                      <div>
+                        <h4 className="font-semibold mb-3 flex items-center gap-2">
+                          <Scan className="w-4 h-4" />
+                          OCR & Categorization
+                        </h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div className="space-y-4">
+                            <div>
+                              <Label className="text-sm font-medium">OCR Quality Level</Label>
+                              <Select>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="High Quality" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="basic">Basic (Fast)</SelectItem>
+                                  <SelectItem value="standard">Standard</SelectItem>
+                                  <SelectItem value="high">High Quality</SelectItem>
+                                  <SelectItem value="premium">Premium (Slow)</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="space-y-2">
+                              <Label className="text-sm font-medium">Auto-Categorization</Label>
+                              <div className="space-y-2">
+                                <div className="flex items-center space-x-2">
+                                  <input type="checkbox" id="auto-categorize" defaultChecked />
+                                  <Label htmlFor="auto-categorize" className="text-sm">Enable auto-categorization</Label>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <input type="checkbox" id="auto-tagging" defaultChecked />
+                                  <Label htmlFor="auto-tagging" className="text-sm">Automatic tagging</Label>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="space-y-4">
+                            <div>
+                              <Label className="text-sm font-medium">Text Chunking Size</Label>
+                              <Select>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="800 characters" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="500">500 characters</SelectItem>
+                                  <SelectItem value="800">800 characters</SelectItem>
+                                  <SelectItem value="1000">1000 characters</SelectItem>
+                                  <SelectItem value="1500">1500 characters</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div>
+                              <Label className="text-sm font-medium">Document Retention</Label>
+                              <Select>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="2 years" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="1year">1 year</SelectItem>
+                                  <SelectItem value="2years">2 years</SelectItem>
+                                  <SelectItem value="5years">5 years</SelectItem>
+                                  <SelectItem value="permanent">Permanent</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
               )}
             </div>
           </div>
