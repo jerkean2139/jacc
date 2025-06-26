@@ -42,15 +42,7 @@ app.use((req, res, next) => {
 (async () => {
   let server;
   try {
-    console.log("🔄 Setting up simple routes...");
-    await registerSimpleRoutes(app);
-    console.log("✅ Simple routes registered successfully");
-    
-    console.log("🔄 Setting up database routes...");
-    await registerDatabaseRoutes(app);
-    console.log("✅ Database routes registered successfully");
-    
-    server = (await import('http')).createServer(app);
+    server = await registerRoutes(app);
     console.log("✅ Routes registered successfully");
   } catch (error) {
     console.error("❌ Failed to register routes:", error);
