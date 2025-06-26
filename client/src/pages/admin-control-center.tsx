@@ -97,6 +97,7 @@ export default function AdminControlCenter() {
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const [selectedChatDetails, setSelectedChatDetails] = useState<any>(null);
   const [chatReviewTab, setChatReviewTab] = useState<string>("active");
+  const [chatDisplayLimit, setChatDisplayLimit] = useState(15); // Show 15 chats initially
   
   // URL Scraping for Knowledge Base
   const [scrapeUrl, setScrapeUrl] = useState('');
@@ -629,6 +630,7 @@ export default function AdminControlCenter() {
                             if (chatReviewTab === 'archived') return chat.reviewStatus === 'archived';
                             return true;
                           })
+                          .slice(0, chatDisplayLimit)
                           .map((chat: any) => (
                             <div 
                               key={chat.chatId}
@@ -674,6 +676,27 @@ export default function AdminControlCenter() {
                           <p className="text-gray-500">User conversations will appear here for review and training</p>
                         </div>
                       )}
+
+                      {/* Load More Button */}
+                      {Array.isArray(userChats) && userChats.length > 0 && (() => {
+                        const filteredChats = userChats.filter((chat: any) => {
+                          if (chatReviewTab === 'active') return chat.reviewStatus !== 'archived';
+                          if (chatReviewTab === 'pending') return chat.reviewStatus === 'pending';
+                          if (chatReviewTab === 'archived') return chat.reviewStatus === 'archived';
+                          return true;
+                        });
+                        return filteredChats.length > chatDisplayLimit && (
+                          <div className="text-center pt-4 border-t">
+                            <Button
+                              onClick={() => setChatDisplayLimit(prev => prev + 15)}
+                              variant="outline"
+                              className="w-full"
+                            >
+                              Load More ({filteredChats.length - chatDisplayLimit} remaining)
+                            </Button>
+                          </div>
+                        );
+                      })()}
                     </div>
                   </ScrollArea>
                 </div>
