@@ -275,6 +275,34 @@ export function registerChatReviewRoutes(app: any) {
     }
   });
 
+  // Delete chat endpoint
+  app.delete('/api/admin/chat-reviews/:chatId/delete', async (req: Request, res: Response) => {
+    try {
+      const { chatId } = req.params;
+      const userId = (req.session as any)?.user?.id || 'admin';
+
+      console.log(`Deleting chat ${chatId} by user ${userId}`);
+
+      // Delete in proper order to avoid foreign key constraints
+      // 1. Delete message corrections
+      await db.delete(messageCorrections).where(eq(messageCorrections.chatId, chatId));
+      
+      // 2. Delete chat reviews
+      await db.delete(chatReviews).where(eq(chatReviews.chatId, chatId));
+      
+      // 3. Delete messages
+      await db.delete(messages).where(eq(messages.chatId, chatId));
+      
+      // 4. Delete the chat itself
+      await db.delete(chats).where(eq(chats.id, chatId));
+
+      res.json({ success: true, message: 'Chat deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting chat:', error);
+      res.status(500).json({ error: 'Failed to delete chat' });
+    }
+  });
+
   // Archive chat endpoint
   app.post('/api/admin/chat-reviews/:chatId/archive', async (req: Request, res: Response) => {
     try {

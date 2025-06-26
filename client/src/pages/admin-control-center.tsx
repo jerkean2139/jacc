@@ -324,6 +324,34 @@ export default function AdminControlCenter() {
     },
   });
 
+  // Delete chat mutation
+  const deleteChatMutation = useMutation({
+    mutationFn: async (chatId: string) => {
+      const response = await fetch(`/api/admin/chat-reviews/${chatId}/delete`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      if (!response.ok) throw new Error('Failed to delete chat');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/chat-reviews'] });
+      toast({
+        title: "Chat Deleted",
+        description: "Chat has been permanently removed from the system",
+      });
+      setSelectedChatId(null);
+      setSelectedChatDetails(null);
+    },
+    onError: (error) => {
+      toast({
+        title: "Delete Failed",
+        description: "Failed to delete chat. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
   // Approve chat mutation
   const approveChatMutation = useMutation({
     mutationFn: async (chatId: string) => {
@@ -375,6 +403,12 @@ export default function AdminControlCenter() {
   const handleApproveChat = () => {
     if (selectedChatId) {
       approveChatMutation.mutate(selectedChatId);
+    }
+  };
+
+  const handleDeleteChat = () => {
+    if (selectedChatId && confirm('Are you sure you want to permanently delete this chat? This action cannot be undone.')) {
+      deleteChatMutation.mutate(selectedChatId);
     }
   };
 
@@ -834,6 +868,15 @@ export default function AdminControlCenter() {
                         >
                           <Archive className="h-4 w-4" />
                           {archiveChatMutation.isPending ? 'Archiving...' : 'Archive Chat'}
+                        </Button>
+                        <Button 
+                          onClick={handleDeleteChat}
+                          variant="destructive"
+                          className="flex items-center gap-2"
+                          disabled={deleteChatMutation.isPending}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          {deleteChatMutation.isPending ? 'Deleting...' : 'Delete'}
                         </Button>
                       </div>
 
