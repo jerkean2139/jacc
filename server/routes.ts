@@ -3871,19 +3871,66 @@ User Context: {userRole}`,
     try {
       const { sql, eq, desc, count } = await import('drizzle-orm');
       
-      const allChats = await db.select().from(chats).orderBy(desc(chats.createdAt));
+      // Join chats with users to get user information
+      const allChats = await db.select({
+        id: chats.id,
+        title: chats.title,
+        userId: chats.userId,
+        createdAt: chats.createdAt,
+        updatedAt: chats.updatedAt,
+        isActive: chats.isActive,
+        userName: users.username,
+        userEmail: users.email,
+        userFirstName: users.firstName,
+        userLastName: users.lastName
+      })
+      .from(chats)
+      .leftJoin(users, eq(chats.userId, users.id))
+      .orderBy(desc(chats.createdAt));
       
       const chatReviews = [];
       for (const chat of allChats) {
+        // Get message count for this chat
         const messageCount = await db.select({ count: count() }).from(messages).where(eq(messages.chatId, chat.id));
+        
+        // Get first user message to use as title if title is empty or "Untitled Chat"
+        const firstUserMessage = await db.select()
+          .from(messages)
+          .where(eq(messages.chatId, chat.id))
+          .orderBy(messages.createdAt)
+          .limit(1);
+        
+        // Create meaningful title from first message if needed
+        let displayTitle = chat.title;
+        if (!displayTitle || displayTitle === 'Untitled Chat' || displayTitle.trim() === '') {
+          if (firstUserMessage.length > 0) {
+            const content = firstUserMessage[0].content;
+            displayTitle = content.length > 50 ? content.substring(0, 50) + '...' : content;
+          } else {
+            displayTitle = 'Empty Conversation';
+          }
+        }
+        
+        // Create display name for user
+        let displayUserName = 'Unknown User';
+        if (chat.userName) {
+          displayUserName = chat.userName;
+        } else if (chat.userFirstName || chat.userLastName) {
+          displayUserName = `${chat.userFirstName || ''} ${chat.userLastName || ''}`.trim();
+        } else if (chat.userEmail) {
+          displayUserName = chat.userEmail;
+        }
         
         chatReviews.push({
           chatId: chat.id,
-          title: chat.title,
+          title: displayTitle,
           userId: chat.userId,
+          userName: displayUserName,
+          userEmail: chat.userEmail,
           createdAt: chat.createdAt,
+          updatedAt: chat.updatedAt,
           messageCount: messageCount[0]?.count || 0,
-          reviewStatus: chat.isArchived ? 'approved' : 'pending'
+          reviewStatus: chat.isActive === false ? 'archived' : 'pending'
         });
       }
       

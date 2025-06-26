@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -145,16 +145,24 @@ export default function AdminControlCenter() {
   const { data: chatMessages, isLoading: messagesLoading } = useQuery({
     queryKey: ['/api/chats', selectedChatId, 'messages'],
     enabled: !!selectedChatId,
-    onSuccess: (data) => {
-      if (data && data.length > 0) {
-        setSelectedChatDetails({
-          userMessage: data.find((m: any) => m.role === 'user')?.content || '',
-          aiResponse: data.find((m: any) => m.role === 'assistant')?.content || '',
-          messages: data
-        });
-      }
-    }
   });
+
+  // Update chat details whenever chatMessages changes
+  useEffect(() => {
+    if (chatMessages && chatMessages.length > 0) {
+      const userMessage = chatMessages.find((m: any) => m.role === 'user')?.content || '';
+      const aiResponse = chatMessages.find((m: any) => m.role === 'assistant')?.content || '';
+      
+      setSelectedChatDetails({
+        userMessage,
+        aiResponse,
+        messages: chatMessages
+      });
+    } else if (selectedChatId && !messagesLoading) {
+      // If no messages found for selected chat, clear details
+      setSelectedChatDetails(null);
+    }
+  }, [chatMessages, selectedChatId, messagesLoading]);
 
   // Mutations
   const createFAQMutation = useMutation({
@@ -547,7 +555,7 @@ export default function AdminControlCenter() {
                           `}
                         >
                           <div className="flex items-center justify-between mb-2">
-                            <h4 className="font-medium truncate">{chat.chatTitle || 'Untitled Chat'}</h4>
+                            <h4 className="font-medium truncate">{chat.title || 'Untitled Chat'}</h4>
                             <Badge variant={chat.reviewStatus === 'approved' ? 'default' : 'secondary'}>
                               {chat.reviewStatus === 'approved' ? (
                                 <ThumbsUp className="h-3 w-3 mr-1" />
@@ -561,7 +569,7 @@ export default function AdminControlCenter() {
                           <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
                             <div>
                               <p><span className="font-medium">{chat.messageCount || 0}</span> messages</p>
-                              <p>{chat.username || 'Unknown User'}</p>
+                              <p>{chat.userName || 'Unknown User'}</p>
                             </div>
                             <div className="text-right">
                               <p>{new Date(chat.createdAt).toLocaleDateString()}</p>
