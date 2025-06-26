@@ -1,5 +1,5 @@
 import express, { type Request, Response, NextFunction } from "express";
-import { registerRoutes } from "./simple-routes";
+import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
@@ -42,12 +42,20 @@ app.use((req, res, next) => {
 (async () => {
   let server;
   try {
-    server = await registerRoutes(app);
+    console.log("🔄 Setting up simple routes...");
+    await registerSimpleRoutes(app);
+    console.log("✅ Simple routes registered successfully");
+    
+    console.log("🔄 Setting up database routes...");
+    await registerDatabaseRoutes(app);
+    console.log("✅ Database routes registered successfully");
+    
+    server = (await import('http')).createServer(app);
     console.log("✅ Routes registered successfully");
   } catch (error) {
     console.error("❌ Failed to register routes:", error);
     // Create a basic server if routes fail
-    server = require('http').createServer(app);
+    server = (await import('http')).createServer(app);
     console.log("⚠️ Using fallback server configuration");
   }
   

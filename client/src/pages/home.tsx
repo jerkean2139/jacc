@@ -28,12 +28,12 @@ export default function Home() {
   // Set active chat to most recent if none selected
   useEffect(() => {
     if (!activeChatId && chats.length > 0) {
-      // Force set the active chat ID to the existing chat
-      const chatId = "05c2287d-a415-4de4-b9b4-1bc4628a337a";
-      console.log("Setting active chat ID to:", chatId);
-      setActiveChatId(chatId);
+      // Set to the most recent chat (first in array, assuming sorted by creation date)
+      const mostRecentChat = chats[0];
+      console.log("Setting active chat ID to most recent:", mostRecentChat.id);
+      setActiveChatId(mostRecentChat.id);
     }
-  }, [chats]); // Remove activeChatId from dependencies to prevent infinite loop
+  }, [chats, activeChatId]);
 
   const handleNewChat = async () => {
     try {
@@ -49,11 +49,54 @@ export default function Home() {
 
       if (response.ok) {
         const newChat = await response.json();
+        console.log("Created new chat:", newChat);
         setActiveChatId(newChat.id);
-        refetchChats();
+        await refetchChats();
+      } else {
+        console.error("Failed to create chat:", await response.text());
       }
     } catch (error) {
       console.error("Failed to create new chat:", error);
+    }
+  };
+
+  const handleNewChatWithMessage = async (message: string) => {
+    try {
+      const response = await fetch("/api/chats", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          title: "New Chat",
+          isActive: true
+        }),
+      });
+
+      if (response.ok) {
+        const newChat = await response.json();
+        console.log("Created new chat with message:", newChat);
+        setActiveChatId(newChat.id);
+        await refetchChats();
+        
+        // Send the initial message
+        setTimeout(async () => {
+          try {
+            await fetch(`/api/chats/${newChat.id}/messages`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              credentials: "include",
+              body: JSON.stringify({
+                content: message,
+                role: "user"
+              }),
+            });
+          } catch (error) {
+            console.error("Failed to send initial message:", error);
+          }
+        }, 100);
+      }
+    } catch (error) {
+      console.error("Failed to create new chat with message:", error);
     }
   };
 
@@ -188,6 +231,7 @@ export default function Home() {
             <ChatInterface
               chatId={activeChatId}
               onChatUpdate={refetchChats}
+              onNewChatWithMessage={handleNewChatWithMessage}
             />
           </ResizablePanel>
         </ResizablePanelGroup>
