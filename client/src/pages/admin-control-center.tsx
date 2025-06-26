@@ -550,6 +550,19 @@ export default function AdminControlCenter() {
               <CardDescription>
                 Select a chat to review user question and AI response
               </CardDescription>
+              {/* Debug: Test Selection Button */}
+              {Array.isArray(userChats) && userChats.length > 0 && (
+                <button 
+                  onClick={() => {
+                    const firstChat = userChats[0];
+                    console.log('Test button clicked - selecting first chat:', firstChat.chatId);
+                    setSelectedChatId(firstChat.chatId);
+                  }}
+                  className="text-xs bg-blue-500 text-white px-2 py-1 rounded"
+                >
+                  Test: Select First Chat
+                </button>
+              )}
             </CardHeader>
             <CardContent className="flex-1 overflow-hidden">
               {chatsLoading ? (
@@ -564,10 +577,13 @@ export default function AdminControlCenter() {
                       userChats.map((chat: any) => (
                         <div 
                           key={chat.chatId}
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
                             console.log('Chat clicked:', { chatId: chat.chatId, title: chat.title });
                             setSelectedChatId(chat.chatId);
                           }}
+                          style={{ zIndex: 10, position: 'relative' }}
                           className={`
                             p-4 border rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md
                             ${selectedChatId === chat.chatId 
