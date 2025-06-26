@@ -78,10 +78,10 @@ export default function Home() {
         setActiveChatId(newChat.id);
         await refetchChats();
         
-        // Send the initial message
+        // Send the initial message and trigger AI response
         setTimeout(async () => {
           try {
-            await fetch(`/api/chats/${newChat.id}/messages`, {
+            const messageResponse = await fetch(`/api/chats/${newChat.id}/messages`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               credentials: "include",
@@ -90,10 +90,20 @@ export default function Home() {
                 role: "user"
               }),
             });
+            
+            if (messageResponse.ok) {
+              console.log("Initial message sent successfully, AI response should follow");
+              // Refetch chats to update the UI with the new conversation
+              await refetchChats();
+            } else {
+              console.error("Failed to send initial message:", await messageResponse.text());
+            }
           } catch (error) {
             console.error("Failed to send initial message:", error);
           }
-        }, 100);
+        }, 200);
+      } else {
+        console.error("Failed to create chat:", await response.text());
       }
     } catch (error) {
       console.error("Failed to create new chat with message:", error);
