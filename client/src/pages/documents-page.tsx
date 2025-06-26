@@ -9,7 +9,7 @@ import DocumentUpload from "@/components/document-upload";
 import { DraggableDocument } from "@/components/draggable-document";
 import { DroppableFolder } from "@/components/droppable-folder";
 import { apiRequest } from "@/lib/queryClient";
-import { Search, FileText, Upload, Folder, Trash2 } from "lucide-react";
+import { Search, FileText, Upload, Folder, Trash2, ArrowLeft, Home } from "lucide-react";
 import type { Document, Folder as FolderType, User } from "@shared/schema";
 
 export default function DocumentsPage() {
@@ -119,6 +119,31 @@ export default function DocumentsPage() {
   return (
     <div className="flex-1 space-y-6 p-6">
       <div>
+        {/* Breadcrumb Navigation */}
+        <div className="flex items-center gap-2 mb-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => window.history.back()}
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </Button>
+          <span className="text-muted-foreground">/</span>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => window.location.href = '/'}
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
+          >
+            <Home className="h-4 w-4" />
+            Home
+          </Button>
+          <span className="text-muted-foreground">/</span>
+          <span className="text-sm font-medium">Documents</span>
+        </div>
+
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Document Management</h1>
