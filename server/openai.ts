@@ -187,9 +187,12 @@ export async function generateTitle(content: string): Promise<string> {
 // Alex Hormozi Visual Formatting System
 function applyHormoziFormatting(content: string, userMessage: string): string {
   console.log('🔧 Starting Alex Hormozi formatting transformation');
+  console.log('🔍 Original content length:', content.length);
+  console.log('🔍 User message:', userMessage);
   
   // Remove any existing HTML code blocks that shouldn't be there
   content = content.replace(/```html[\s\S]*?```/g, '').trim();
+  console.log('🔧 After HTML removal:', content.length);
   
   // Enhanced patterns for different content types
   const isStyleQuery = /style|format|design|visual|template|hormozi/i.test(userMessage);
@@ -197,18 +200,24 @@ function applyHormoziFormatting(content: string, userMessage: string): string {
   const isStepByStep = /step|process|how to|guide|tutorial/i.test(content);
   const hasMultipleSections = (content.match(/\n\n/g) || []).length > 2;
   
+  console.log('🎯 Pattern analysis:', { isStyleQuery, isListContent, isStepByStep, hasMultipleSections });
+  
   if (isStyleQuery) {
+    console.log('✨ Applying Hormozi Style Template');
     return createHormoziStyleTemplate(content);
   }
   
   if (isStepByStep || hasMultipleSections) {
+    console.log('✨ Applying Process Template');
     return createProcessTemplate(content);
   }
   
   if (isListContent) {
+    console.log('✨ Applying List Template');
     return createListTemplate(content);
   }
   
+  console.log('✨ Applying Default Template');
   return createDefaultTemplate(content);
 }
 
