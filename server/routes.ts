@@ -286,18 +286,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
-  // Get current user session
-  app.get('/api/user', async (req, res) => {
-    try {
-      const sessionUser = (req as any).session?.user;
-      if (!sessionUser) {
-        return res.status(401).json({ message: "Not authenticated" });
-      }
-      res.json(sessionUser);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to get user session" });
-    }
-  });
+  // Note: /api/user endpoint moved to simple-routes.ts with auto-login functionality
 
   // Get current user
   app.get('/api/auth/me', isAuthenticated, async (req, res) => {
@@ -7937,6 +7926,15 @@ Document content: {content}`,
       res.status(500).json({ error: "Failed to get quick reference" });
     }
   });
+
+  // Import and register simple routes for authentication and core functionality
+  try {
+    const { registerRoutes: registerSimpleRoutes } = await import('./simple-routes');
+    await registerSimpleRoutes(app);
+    console.log("✅ Simple routes with auto-login registered successfully");
+  } catch (error) {
+    console.error("⚠️ Failed to register simple routes:", error);
+  }
 
   const httpServer = createServer(app);
   return httpServer;
