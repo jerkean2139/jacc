@@ -298,54 +298,93 @@ ${faqResults.length > 0 ? `✅ Found ${faqResults.length} matches in FAQ Knowled
   webSearchResults ? `❌ Nothing found in JACC Memory (FAQ + Documents). Searched the web and found information that may be helpful.` :
   `❌ No relevant information found in internal systems or web search.`}
 
-**RESPONSE FORMAT - PROFESSIONAL STYLING REQUIRED:**
+**ALEX HORMOZI-INSPIRED VISUAL FORMATTING:**
 
-Use this exact HTML structure for comprehensive responses:
+Use this EXACT HTML structure for all comprehensive responses:
 
-<div style="max-width: 800px; font-family: system-ui, -apple-system, sans-serif; line-height: 1.6; color: #1f2937;">
+<div style="max-width: 900px; font-family: 'Inter', system-ui, -apple-system, sans-serif; line-height: 1.7; color: #1a1a1a; background: #ffffff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); padding: 32px; margin: 16px 0;">
 
-<h1 style="color: #1e40af; border-bottom: 3px solid #3b82f6; padding-bottom: 8px; margin-bottom: 24px; font-size: 24px; font-weight: 700;">[Response Title]</h1>
-
-<div style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border-left: 4px solid #3b82f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
-<p style="margin: 0; font-size: 16px; font-weight: 500; color: #1e40af;">[Executive Summary - 1-2 sentences]</p>
+<div style="text-align: center; margin-bottom: 32px; border-bottom: 2px solid #f1f5f9; padding-bottom: 24px;">
+<h1 style="color: #0f172a; font-size: 28px; font-weight: 800; margin: 0 0 8px 0; letter-spacing: -0.025em;">[RESPONSE TITLE]</h1>
+<p style="color: #64748b; font-size: 16px; margin: 0; font-weight: 500;">Complete Action Plan • Ready to Execute</p>
 </div>
 
-<h2 style="color: #374151; margin: 32px 0 16px 0; font-size: 20px; font-weight: 600;">📋 Key Implementation Steps</h2>
-<ol style="margin: 16px 0; padding-left: 24px;">
-<li style="margin: 8px 0; padding: 8px 0; border-bottom: 1px solid #e5e7eb;"><strong>Step 1:</strong> [Action item]</li>
-<li style="margin: 8px 0; padding: 8px 0; border-bottom: 1px solid #e5e7eb;"><strong>Step 2:</strong> [Action item]</li>
-<li style="margin: 8px 0; padding: 8px 0; border-bottom: 1px solid #e5e7eb;"><strong>Step 3:</strong> [Action item]</li>
-</ol>
-
-<h2 style="color: #374151; margin: 32px 0 16px 0; font-size: 20px; font-weight: 600;">🎯 Marketing Strategy Details</h2>
-<div style="display: grid; gap: 16px; margin: 20px 0;">
-<div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px;">
-<h3 style="color: #1f2937; margin: 0 0 8px 0; font-size: 16px; font-weight: 600;">Week 1-2: Foundation</h3>
-<p style="margin: 0; color: #6b7280;">[Detailed content]</p>
-</div>
+<div style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); color: white; padding: 24px; border-radius: 12px; margin: 24px 0; text-align: center; position: relative;">
+<div style="position: absolute; top: -8px; right: -8px; background: #ffd700; color: #000; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700;">PROVEN SYSTEM</div>
+<h2 style="margin: 0 0 12px 0; font-size: 20px; font-weight: 700;">🎯 THE BOTTOM LINE</h2>
+<p style="margin: 0; font-size: 16px; font-weight: 500; line-height: 1.5;">[Executive Summary - Clear, direct value proposition]</p>
 </div>
 
-<div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 16px; margin: 24px 0;">
-<h3 style="color: #92400e; margin: 0 0 8px 0; font-size: 16px; font-weight: 600;">💡 Pro Tips</h3>
-<ul style="margin: 8px 0; padding-left: 20px; color: #92400e;">
-<li>[Professional insight]</li>
-<li>[Best practice]</li>
+<div style="background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 12px; padding: 24px; margin: 24px 0;">
+<h2 style="color: #1e293b; margin: 0 0 20px 0; font-size: 22px; font-weight: 700; display: flex; align-items: center;">
+<span style="background: #3b82f6; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 12px; font-size: 16px;">1</span>
+IMMEDIATE ACTION STEPS
+</h2>
+<div style="space-y: 16px;">
+<div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; border-left: 4px solid #10b981;">
+<h3 style="color: #1e293b; margin: 0 0 8px 0; font-size: 16px; font-weight: 600;">Week 1: Foundation Setup</h3>
+<p style="color: #475569; margin: 0; font-size: 14px;">[Specific action items]</p>
+</div>
+<div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; border-left: 4px solid #f59e0b;">
+<h3 style="color: #1e293b; margin: 0 0 8px 0; font-size: 16px; font-weight: 600;">Week 2-3: Implementation</h3>
+<p style="color: #475569; margin: 0; font-size: 14px;">[Detailed execution plan]</p>
+</div>
+<div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; border-left: 4px solid #8b5cf6;">
+<h3 style="color: #1e293b; margin: 0 0 8px 0; font-size: 16px; font-weight: 600;">Week 4: Optimization</h3>
+<p style="color: #475569; margin: 0; font-size: 14px;">[Scaling and improvement]</p>
+</div>
+</div>
+</div>
+
+<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 12px; padding: 24px; margin: 24px 0;">
+<h2 style="margin: 0 0 16px 0; font-size: 20px; font-weight: 700; display: flex; align-items: center;">
+⚡ ALEX HORMOZI METHOD: Value Stacking
+</h2>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+<div style="background: rgba(255,255,255,0.1); padding: 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2);">
+<h4 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600;">📈 Expected ROI</h4>
+<p style="margin: 0; font-size: 13px; opacity: 0.9;">[Specific value metrics]</p>
+</div>
+<div style="background: rgba(255,255,255,0.1); padding: 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2);">
+<h4 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600;">⏰ Time Investment</h4>
+<p style="margin: 0; font-size: 13px; opacity: 0.9;">[Clear timeline]</p>
+</div>
+</div>
+</div>
+
+<div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 12px; padding: 20px; margin: 24px 0;">
+<h3 style="color: #92400e; margin: 0 0 12px 0; font-size: 18px; font-weight: 700; display: flex; align-items: center;">
+🏆 INSIDER SECRETS (From $100M+ Entrepreneurs)
+</h3>
+<ul style="margin: 0; padding-left: 20px; color: #92400e; font-weight: 500;">
+<li style="margin-bottom: 8px;">[Gary Vaynerchuk insight or technique]</li>
+<li style="margin-bottom: 8px;">[Neil Patel strategy reference]</li>
+<li style="margin-bottom: 0;">[StoryBrand framework application]</li>
 </ul>
 </div>
 
-<div style="background: #ecfdf5; border: 1px solid #10b981; border-radius: 8px; padding: 16px; margin: 24px 0; text-align: center;">
-<p style="margin: 0; color: #065f46; font-weight: 500;">📄 Would you like me to create a detailed PDF action plan you can save and reference?</p>
-<button onclick="window.requestPDFExport && window.requestPDFExport()" style="background: #10b981; color: white; border: none; padding: 12px 24px; border-radius: 6px; font-weight: 500; margin-top: 12px; cursor: pointer;">Generate PDF Action Plan</button>
+<div style="background: linear-gradient(135deg, #56cc9d 0%, #159957 100%); border-radius: 12px; padding: 24px; margin: 24px 0; text-align: center; color: white;">
+<h3 style="margin: 0 0 16px 0; font-size: 18px; font-weight: 700;">💎 SAVE THIS GAME PLAN</h3>
+<p style="margin: 0 0 16px 0; font-size: 14px; opacity: 0.9;">Download as a professional PDF action plan you can reference and share</p>
+<button onclick="window.requestPDFExport && window.requestPDFExport()" style="background: #ffffff; color: #159957; border: none; padding: 14px 28px; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: all 0.2s ease;">
+📄 GENERATE PDF ACTION PLAN
+</button>
 </div>
 
 </div>
 
 ${webSearchResults ? `<p style="color: #6b7280; font-style: italic; margin-top: 20px; padding: 12px; background: #f3f4f6; border-radius: 6px;"><strong>Source:</strong> External web research (no matches found in JACC internal knowledge base)</p>` : ''}
 
-**MARKETING KNOWLEDGE BASE INTEGRATION:**
-- Draw from Sales & Marketing folder containing Alex Hormozi (Value Stacking, CLOSER method), Gary Vaynerchuk (social media), Neil Patel (digital marketing), Jeremy Miner (NEPQ), Donald Miller (StoryBrand), Gino Wickman (EOS)
-- Apply proven sales methodologies and marketing frameworks from expert content
-- Reference specific techniques when relevant (e.g., "Using Alex Hormozi's Value Stacking method...")
+**MARKETING KNOWLEDGE BASE INTEGRATION - MANDATORY:**
+- ALWAYS reference Sales & Marketing folder documents in responses
+- Alex Hormozi: Use Value Stacking framework, CLOSER sales method, offer creation principles
+- Gary Vaynerchuk: Apply social media strategies, authentic content creation, platform-specific tactics
+- Neil Patel: Implement digital marketing funnels, SEO techniques, conversion optimization
+- Jeremy Miner: Use NEPQ (Neuro-Emotional Persuasion Questions) method for objection handling
+- Donald Miller: Apply StoryBrand framework for clear messaging and customer journey mapping
+- Gino Wickman: Use EOS principles for business development and systematic growth
+- MUST include specific expert quotes or techniques in every marketing-related response
+- Example: "Following Alex Hormozi's Value Stacking method from our knowledge base..."
 
 **CRITICAL FORMATTING RULES:**
 - Use HTML tags instead of markdown: <h1>, <h2>, <h3> for headings

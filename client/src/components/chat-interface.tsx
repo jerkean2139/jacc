@@ -572,18 +572,23 @@ With these details, I'll create a customized proposal highlighting value proposi
               </Button>
             </div>
             
-            <div className="w-full">
+            <div className="w-full relative group">
               <Button
+                disabled
                 variant="outline"
-                className="p-4 h-auto text-left justify-start hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-700 dark:hover:text-purple-300 hover:border-purple-200 dark:hover:border-purple-700 transition-colors w-full"
-                onClick={() => handleQuickAction("Let's talk marketing - I want to learn about effective sales strategies and marketing techniques")}
+                className="p-4 h-auto text-left justify-start cursor-not-allowed opacity-60 bg-gray-50 dark:bg-gray-900/20 border-gray-200 dark:border-gray-800 text-gray-500 dark:text-gray-400 w-full"
+                onClick={(e) => e.preventDefault()}
               >
-                <Brain className="mr-3 h-5 w-5 text-purple-600 flex-shrink-0" />
+                <Brain className="mr-3 h-5 w-5 text-gray-400 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <div className="font-semibold mb-1 text-sm">Let's Talk Marketing</div>
-                  <div className="text-xs text-slate-500 hover:text-purple-600 dark:hover:text-purple-400">Sales strategies and marketing insights</div>
+                  <div className="font-semibold mb-1 text-sm text-gray-500">Let's Talk Marketing</div>
+                  <div className="text-xs text-gray-400">Sales strategies and marketing insights</div>
+                  <span className="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-full mt-1 inline-block">Coming Soon</span>
                 </div>
               </Button>
+              <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+                Coming Soon
+              </span>
             </div>
             
             <div className="w-full">
