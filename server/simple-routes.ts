@@ -2204,11 +2204,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
   });
 
-  // Session storage for logged in users
-  const sessions = new Map<string, any>();
-  
-  // Export sessions for use in other route files
-  export { sessions };
+  // Use global sessions storage
 
   // Login endpoint
   app.post('/api/login', async (req: Request, res: Response) => {
@@ -4099,3 +4095,6 @@ Would you like me to create a detailed proposal for this merchant?`,
   const server = createServer(app);
   return server;
 }
+
+// Global sessions storage for cross-file access
+export const sessions = new Map<string, any>();
