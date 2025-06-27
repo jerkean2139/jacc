@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Brain, LogIn } from 'lucide-react';
 import { useLocation } from 'wouter';
+import { queryClient } from '@/lib/queryClient';
 
 export default function LoginPage() {
   const [, setLocation] = useLocation();
@@ -26,9 +27,10 @@ export default function LoginPage() {
       });
 
       if (response.ok) {
+        // Invalidate auth queries to refresh state
+        await queryClient.invalidateQueries({ queryKey: ["/api/user"] });
         // Redirect to main app after successful login
         setLocation('/');
-        window.location.reload(); // Refresh to update auth state
       } else {
         const error = await response.json();
         alert(error.message || 'Login failed');
