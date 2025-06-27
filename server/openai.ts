@@ -72,7 +72,11 @@ Available documents: ${context?.documents?.map(d => d.name).join(', ') || 'Exten
       max_tokens: 300,
     });
 
-    const content = response.choices[0].message.content || "";
+    let content = response.choices[0].message.content || "";
+    
+    // Apply Alex Hormozi visual formatting system
+    console.log('🎨 Applying Alex Hormozi visual formatting to AI response');
+    content = applyHormoziFormatting(content, messages[messages.length - 1]?.content || '');
     
     // Parse response for potential actions
     const actions = [];
@@ -178,4 +182,149 @@ export async function generateTitle(content: string): Promise<string> {
     console.error("Title generation error:", error);
     return "New Chat";
   }
+}
+
+// Alex Hormozi Visual Formatting System
+function applyHormoziFormatting(content: string, userMessage: string): string {
+  console.log('🔧 Starting Alex Hormozi formatting transformation');
+  
+  // Remove any existing HTML code blocks that shouldn't be there
+  content = content.replace(/```html[\s\S]*?```/g, '').trim();
+  
+  // Enhanced patterns for different content types
+  const isStyleQuery = /style|format|design|visual|template|hormozi/i.test(userMessage);
+  const isListContent = /^[\d\-\*•]/.test(content) || content.includes('\n-') || content.includes('\n*');
+  const isStepByStep = /step|process|how to|guide|tutorial/i.test(content);
+  const hasMultipleSections = (content.match(/\n\n/g) || []).length > 2;
+  
+  if (isStyleQuery) {
+    return createHormoziStyleTemplate(content);
+  }
+  
+  if (isStepByStep || hasMultipleSections) {
+    return createProcessTemplate(content);
+  }
+  
+  if (isListContent) {
+    return createListTemplate(content);
+  }
+  
+  return createDefaultTemplate(content);
+}
+
+function createHormoziStyleTemplate(content: string): string {
+  return `
+<div class="hormozi-container">
+  <div class="hormozi-header">
+    <h1 class="hormozi-title">🎯 ALEX HORMOZI STYLE RESPONSE</h1>
+    <div class="hormozi-accent-bar"></div>
+  </div>
+  
+  <div class="hormozi-content">
+    <div class="hormozi-highlight-box">
+      <h2 class="hormozi-section-title">💰 KEY INSIGHT</h2>
+      <p class="hormozi-emphasis">${content.split('\n')[0] || content.substring(0, 150)}...</p>
+    </div>
+    
+    <div class="hormozi-action-section">
+      <h3 class="hormozi-action-title">🚀 ACTION ITEMS</h3>
+      <ul class="hormozi-action-list">
+        <li class="hormozi-action-item">Review the complete template structure</li>
+        <li class="hormozi-action-item">Implement visual hierarchy elements</li>
+        <li class="hormozi-action-item">Test responsive design components</li>
+      </ul>
+    </div>
+    
+    <div class="hormozi-results-box">
+      <h3 class="hormozi-results-title">📊 EXPECTED RESULTS</h3>
+      <p class="hormozi-results-text">Professional, engaging visual presentation that captures attention and drives action</p>
+    </div>
+  </div>
+</div>`;
+}
+
+function createProcessTemplate(content: string): string {
+  const sections = content.split('\n\n').filter(s => s.trim());
+  const firstSection = sections[0] || content.substring(0, 200);
+  
+  return `
+<div class="hormozi-container">
+  <div class="hormozi-header">
+    <h1 class="hormozi-title">🎯 STEP-BY-STEP PROCESS</h1>
+    <div class="hormozi-accent-bar"></div>
+  </div>
+  
+  <div class="hormozi-overview">
+    <p class="hormozi-intro">${firstSection}</p>
+  </div>
+  
+  <div class="hormozi-steps">
+    ${sections.slice(1).map((section, index) => `
+      <div class="hormozi-step">
+        <div class="hormozi-step-number">${index + 1}</div>
+        <div class="hormozi-step-content">
+          <p>${section}</p>
+        </div>
+      </div>
+    `).join('')}
+  </div>
+  
+  <div class="hormozi-cta-box">
+    <h3 class="hormozi-cta-title">🚀 TAKE ACTION NOW</h3>
+    <p class="hormozi-cta-text">Implementation is everything. Start with step 1 today.</p>
+  </div>
+</div>`;
+}
+
+function createListTemplate(content: string): string {
+  const lines = content.split('\n').filter(line => line.trim());
+  const title = lines[0] || "Key Points";
+  const items = lines.slice(1);
+  
+  return `
+<div class="hormozi-container">
+  <div class="hormozi-header">
+    <h1 class="hormozi-title">💎 ${title.toUpperCase()}</h1>
+    <div class="hormozi-accent-bar"></div>
+  </div>
+  
+  <div class="hormozi-list-grid">
+    ${items.map((item, index) => `
+      <div class="hormozi-list-item">
+        <div class="hormozi-item-icon">${index + 1}</div>
+        <div class="hormozi-item-content">
+          <p class="hormozi-item-text">${item.replace(/^[-*•]\s*/, '')}</p>
+        </div>
+      </div>
+    `).join('')}
+  </div>
+  
+  <div class="hormozi-bottom-banner">
+    <p class="hormozi-banner-text">🎯 Focus on execution, not perfection</p>
+  </div>
+</div>`;
+}
+
+function createDefaultTemplate(content: string): string {
+  const paragraphs = content.split('\n\n').filter(p => p.trim());
+  
+  return `
+<div class="hormozi-container">
+  <div class="hormozi-header">
+    <h1 class="hormozi-title">💰 MERCHANT SERVICES INSIGHT</h1>
+    <div class="hormozi-accent-bar"></div>
+  </div>
+  
+  <div class="hormozi-content">
+    ${paragraphs.map(paragraph => `
+      <div class="hormozi-paragraph">
+        <p class="hormozi-text">${paragraph}</p>
+      </div>
+    `).join('')}
+  </div>
+  
+  <div class="hormozi-action-bar">
+    <p class="hormozi-action-prompt">🚀 Ready to implement? Let's make it happen.</p>
+  </div>
+</div>`;
 }
