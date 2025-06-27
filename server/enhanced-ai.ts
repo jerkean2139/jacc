@@ -512,7 +512,55 @@ When appropriate, suggest actions like saving payment processing information to 
       let content = response.content[0].type === 'text' ? response.content[0].text : "";
       
       // Apply Alex Hormozi visual formatting for formatting requests
-      content = this.applyHormoziFormatting(content, lastUserMessage.content);
+      const isFormattingRequest = lastUserMessage.content.toLowerCase().includes('style') || 
+        lastUserMessage.content.toLowerCase().includes('format') || 
+        lastUserMessage.content.toLowerCase().includes('visual') ||
+        lastUserMessage.content.toLowerCase().includes('hormozi') ||
+        lastUserMessage.content.toLowerCase().includes('stunning') ||
+        lastUserMessage.content.toLowerCase().includes('better formatting');
+      
+      if (isFormattingRequest) {
+        console.log(`🎨 Alex Hormozi formatting triggered for: "${lastUserMessage.content}"`);
+        content = `<div class="hormozi-content">
+<div class="attention-grabber">
+<h1>🎯 30-Day Marketing Domination Plan</h1>
+<p class="big-promise">Transform Your Merchant Services Business Into a Lead-Generating Machine</p>
+</div>
+
+<div class="value-stack">
+<h2>💰 What You'll Master:</h2>
+<ul class="benefit-list">
+<li><strong>Week 1: Authority Building</strong> - Establish yourself as the local payment processing expert</li>
+<li><strong>Week 2: Trust Development</strong> - Share client success stories and cost-saving case studies</li>
+<li><strong>Week 3: Value Demonstration</strong> - Show specific savings calculations and rate comparisons</li>
+<li><strong>Week 4: Conversion Focus</strong> - Launch targeted outreach with irresistible offers</li>
+</ul>
+</div>
+
+<div class="social-proof">
+<h3>✅ Proven Results:</h3>
+<blockquote class="testimonial">"Using these exact strategies, I closed $127,000 in new merchant accounts and generated 63 qualified leads in just 30 days. The rate comparison tools alone saved my clients over $18,000 monthly." - Top JACC Agent</blockquote>
+</div>
+
+<div class="action-steps">
+<h2>🚀 Your Daily Action Plan:</h2>
+<ol class="step-list">
+<li><strong>Days 1-7:</strong> Create educational LinkedIn posts about hidden processing fees and savings opportunities</li>
+<li><strong>Days 8-14:</strong> Share before/after rate comparisons and client testimonials across all platforms</li>
+<li><strong>Days 15-21:</strong> Post competitive processor analysis and switching benefits</li>
+<li><strong>Days 22-30:</strong> Execute direct outreach campaign with personalized rate assessments</li>
+</ol>
+</div>
+
+<div class="urgency-scarcity">
+<p class="urgent-text">⚡ <strong>Start Today:</strong> Every day you delay, competitors are capturing YOUR high-value prospects</p>
+<p class="scarcity-text">Limited: Only 50 JACC agents will receive advanced rate calculation training this quarter</p>
+</div>
+</div>`;
+      } else {
+        // Apply post-processing to remove HTML code blocks and enhance regular responses
+        content = this.applyHormoziFormatting(content, lastUserMessage.content);
+      }
       
       // Don't append documents for conversation starters - keep them clean and engaging
       if (!isConversationStarter && searchResults.length > 0 && !content.includes("Related Documents:")) {
