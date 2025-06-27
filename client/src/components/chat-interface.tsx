@@ -723,9 +723,6 @@ With these details, I'll create a customized proposal highlighting value proposi
 
   return (
     <div className="h-full flex flex-col bg-white dark:bg-slate-900">
-      
-
-
       {/* Chat Messages */}
       <ScrollArea className="flex-1 p-4">
         <div className="space-y-4 max-w-4xl mx-auto">
@@ -741,9 +738,7 @@ With these details, I'll create a customized proposal highlighting value proposi
               <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
                 Start the conversation
               </h3>
-              <p className="text-slate-600 dark:text-slate-400 mb-6">
-                Ask me anything about insurance rates, documents, or client questions.
-              </p>
+              <p className="text-slate-600 dark:text-slate-400 mb-6">Ask me anything about Tracer Merchant Services; documents, marketing, sales, or client questions.</p>
             </div>
           ) : (
             safeMessages.map((message) => (
@@ -773,14 +768,12 @@ With these details, I'll create a customized proposal highlighting value proposi
           <div ref={messagesEndRef} />
         </div>
       </ScrollArea>
-
       {/* File Upload Area */}
       {showFileUpload && (
         <div className="border-t border-slate-200 dark:border-slate-700 p-4">
           <FileUpload onFileUpload={handleFileUpload} />
         </div>
       )}
-
       {/* Chat Input */}
       <div className="sticky bottom-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 p-4 pb-20 md:pb-4 z-30">
         {/* Input Box */}
@@ -938,7 +931,6 @@ With these details, I'll create a customized proposal highlighting value proposi
         {/* Quick Actions - Version 2 features hidden */}
         {/* Document analysis, proposal creation, and ISO Hub integration moved to Version 2 */}
       </div>
-
       {/* Sales Coaching Overlay - Temporarily disabled */}
       {/* {coaching.isCoachingEnabled && <CoachingOverlay />} */}
     </div>
