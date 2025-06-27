@@ -253,7 +253,7 @@ export default function DocumentsPage() {
                   {folders.map((folder) => {
                     // Get document count from the integrated API response
                     const folderFromAPI = documentsData?.folders?.find((f: any) => f.id === folder.id);
-                    const documentCount = folderFromAPI?.document_count || 0;
+                    const documentCount = folderFromAPI?.document_count || folderFromAPI?.documents?.length || 0;
                     
                     return (
                       <DroppableFolder
