@@ -221,9 +221,18 @@ export default function PromptCustomization() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Get user data for role checking
+  const { data: user } = useQuery({
+    queryKey: ["/api/user"],
+    queryFn: () => apiRequest("/api/user")
+  });
+
   const { data: prompts = [], isLoading } = useQuery<UserPrompt[]>({
     queryKey: ["/api/user/prompts"],
   });
+
+  // Check if user is admin
+  const isAdmin = user?.role === 'dev-admin' || user?.role === 'client-admin';
 
   const createPromptMutation = useMutation({
     mutationFn: (data: any) => {
@@ -579,7 +588,24 @@ export default function PromptCustomization() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Role-based content wrapper */}
+      <div className={`relative ${!isAdmin ? 'pointer-events-none' : ''}`}>
+        {/* Blur overlay for non-admin users */}
+        {!isAdmin && (
+          <div className="absolute inset-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm z-10 flex items-center justify-center">
+            <div className="text-center p-8 bg-white dark:bg-gray-800 rounded-lg border shadow-lg">
+              <Wand2 className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+              <h3 className="text-xl font-semibold mb-2">Coming Soon</h3>
+              <p className="text-muted-foreground">
+                AI Prompt Customization is currently available for administrators only.
+              </p>
+            </div>
+          </div>
+        )}
+        
+        {/* Main content - blurred for non-admin users */}
+        <div className={!isAdmin ? 'blur-sm' : ''}>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Existing Prompts */}
         <div className="space-y-4">
           <h2 className="text-lg font-semibold">Your Custom Prompts</h2>
@@ -929,6 +955,7 @@ export default function PromptCustomization() {
             </CardContent>
           </Card>
         )}
+        </div>
       </div>
     </div>
   );
