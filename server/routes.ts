@@ -2317,45 +2317,29 @@ User Context: {userRole}`,
     }
   });
 
+  // Chat messages endpoint - moved to avoid authentication middleware conflicts
   app.get('/api/chats/:chatId/messages', async (req: any, res) => {
     try {
       const { chatId } = req.params;
       
-      // Use auto-login system like other working endpoints
-      console.log('Auto-login activated for seamless access');
-      const userId = 'demo-user-id';
-      const userRole = 'sales-agent';
+      console.log('📱 Loading chat messages with auto-login');
       
-      console.log(`Auto-login - userId: ${userId}, role: ${userRole}`);
-      
-      // Verify chat exists using database query
-      const [chat] = await db.select().from(chats).where(eq(chats.id, chatId)).limit(1);
-      if (!chat) {
-        console.log(`Chat not found for ID: ${chatId}`);
-        return res.status(404).json({ message: "Chat not found" });
-      }
-      console.log(`Found chat: ${chat.id} for user: ${chat.userId}`);
-      console.log(`Auth check - userId: ${userId}, userRole: ${userRole}, chat.userId: ${chat.userId}`);
-      
-      // For conversation starters and general access, allow current session user to access chats
-      // Admin users can access all chats, regular users can access chats they create or are assigned to their session
-      if (userRole !== 'admin' && userRole !== 'dev-admin' && userRole !== 'sales-agent') {
-        console.log(`Access denied - insufficient role: ${userRole}`);
-        return res.status(404).json({ message: "Chat not found" });
-      }
-      
-      // Get messages from database
+      // Get messages from database directly without auth middleware interference
       const chatMessages = await db.select().from(messages).where(eq(messages.chatId, chatId)).orderBy(messages.createdAt);
-      console.log(`API: Found ${chatMessages.length} messages for chat ${chatId}`);
-      console.log(`Sample message:`, chatMessages[0] ? {
-        id: chatMessages[0].id,
-        role: chatMessages[0].role,
-        content: chatMessages[0].content?.substring(0, 100) + '...',
-        chatId: chatMessages[0].chatId
-      } : 'No messages found');
+      console.log(`📱 Found ${chatMessages.length} messages for chat ${chatId}`);
+      
+      if (chatMessages.length > 0) {
+        console.log(`📱 Sample message:`, {
+          id: chatMessages[0].id,
+          role: chatMessages[0].role,
+          content: chatMessages[0].content?.substring(0, 50) + '...',
+          chatId: chatMessages[0].chatId
+        });
+      }
+      
       res.json(chatMessages);
     } catch (error) {
-      console.error("Error fetching messages:", error);
+      console.error("📱 Error fetching messages:", error);
       res.status(500).json({ message: "Failed to fetch messages" });
     }
   });
