@@ -2825,23 +2825,90 @@ User Context: {userRole}`,
         spreadsheetData: null // TODO: Add Google Sheets integration
       };
       
-      // Use optimized direct AI for fast responses
+      // Fast-path for conversation starters
       let aiResponse;
-      console.log('🚀 Processing with fast AI service');
-      try {
-        const directResponse = await generateChatResponse(messages, context);
-        aiResponse = {
-          message: directResponse.message,
-          suggestions: directResponse.suggestions || ["Upload documents for analysis", "Compare processing rates", "Create merchant proposals"],
-          actions: directResponse.actions || []
-        };
-      } catch (directError) {
-        console.error("Direct AI failed, using fallback:", directError);
-        aiResponse = {
-          message: "I can help you analyze merchant statements, compare processing rates, and create proposals. What would you like me to help you with today?",
-          suggestions: ["Analyze a merchant statement", "Compare processing options", "Create a client proposal"],
-          actions: []
-        };
+      const messageContent = messageData.content.toLowerCase();
+      const isConversationStarter = messageContent.includes('compare these top processors') || 
+                                   messageContent.includes('calculate processing rates') ||
+                                   messageContent.includes('market intelligence') ||
+                                   messageContent.includes('create proposal');
+
+      if (isConversationStarter && messages.length <= 1) {
+        console.log('🚀 Using fast-path for conversation starter');
+        // Pre-built optimized responses for conversation starters
+        if (messageContent.includes('compare these top processors')) {
+          aiResponse = {
+            message: `<h2>Processor Comparison Analysis</h2>
+
+<p>I'll help you compare the top payment processors for your restaurant client. To provide the most accurate analysis and recommendations, I need some key information:</p>
+
+<h3>Business Details Needed:</h3>
+<ul>
+<li><strong>Monthly Processing Volume:</strong> What's the restaurant's average monthly credit card volume?</li>
+<li><strong>Average Ticket Size:</strong> What's their typical transaction amount?</li>
+<li><strong>POS Hardware Needs:</strong> Do they need new terminals or just payment processing?</li>
+<li><strong>Business Type:</strong> Quick service, full service, or specialty restaurant?</li>
+</ul>
+
+<p>Once I have these details, I can provide a detailed comparison of processors like Square, Clover, Toast, and traditional merchant services with specific rate analysis and cost projections.</p>`,
+            suggestions: ["Provide monthly volume details", "Discuss POS hardware needs", "Share current processing statement"],
+            actions: []
+          };
+        } else if (messageContent.includes('calculate processing rates')) {
+          aiResponse = {
+            message: `<h2>Processing Rate Calculator</h2>
+
+<p>I'll help you calculate accurate processing rates and identify cost-saving opportunities. To provide precise calculations, I need:</p>
+
+<h3>Required Information:</h3>
+<ul>
+<li><strong>Current Statement:</strong> Upload your recent processing statement for analysis</li>
+<li><strong>Monthly Volume:</strong> Total monthly credit card processing volume</li>
+<li><strong>Transaction Mix:</strong> Percentage of credit vs debit card transactions</li>
+<li><strong>Business Category:</strong> Merchant Category Code (MCC) for your industry</li>
+</ul>
+
+<p>I can analyze interchange rates, processor markups, and monthly fees to show your true effective rate and potential savings with different pricing models.</p>`,
+            suggestions: ["Upload processing statement", "Enter monthly volume", "Discuss rate structure options"],
+            actions: []
+          };
+        } else {
+          // Default fast response for other starters
+          aiResponse = {
+            message: `<h2>JACC Assistant Ready</h2>
+
+<p>I'm here to help with your merchant services needs. I can assist with:</p>
+
+<ul>
+<li><strong>Statement Analysis:</strong> Upload processing statements for detailed cost analysis</li>
+<li><strong>Rate Comparisons:</strong> Compare different processors and pricing models</li>
+<li><strong>Proposal Creation:</strong> Generate professional merchant proposals</li>
+<li><strong>Market Intelligence:</strong> Research competitor rates and industry trends</li>
+</ul>
+
+<p>What specific area would you like to focus on today?</p>`,
+            suggestions: ["Upload documents for analysis", "Compare processing rates", "Create merchant proposal"],
+            actions: []
+          };
+        }
+      } else {
+        // Use full AI processing for regular conversations
+        console.log('🚀 Processing with full AI service');
+        try {
+          const directResponse = await generateChatResponse(messages, context);
+          aiResponse = {
+            message: directResponse.message,
+            suggestions: directResponse.suggestions || ["Upload documents for analysis", "Compare processing rates", "Create merchant proposals"],
+            actions: directResponse.actions || []
+          };
+        } catch (directError) {
+          console.error("AI processing failed, using fallback:", directError);
+          aiResponse = {
+            message: "I can help you analyze merchant statements, compare processing rates, and create proposals. What would you like me to help you with today?",
+            suggestions: ["Analyze a merchant statement", "Compare processing options", "Create a client proposal"],
+            actions: []
+          };
+        }
       }
       
       // Save AI response
