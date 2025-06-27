@@ -606,83 +606,84 @@ export default function PromptCustomization() {
         {/* Main content - blurred for non-admin users */}
         <div className={!isAdmin ? 'blur-sm' : ''}>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Existing Prompts */}
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold">Your Custom Prompts</h2>
-          
-          {prompts.length === 0 ? (
-            <Card>
-              <CardContent className="p-6 text-center">
-                <p className="text-muted-foreground mb-4">No custom prompts yet</p>
-                <p className="text-sm text-muted-foreground">
-                  Start with a template below or create your own
-                </p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="space-y-3">
-              {prompts.map((prompt) => {
-                const IconComponent = getCategoryIcon(prompt.category);
-                return (
-                  <Card key={prompt.id}>
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <IconComponent className="w-5 h-5 text-primary" />
-                          <div>
-                            <h3 className="font-medium">{prompt.name}</h3>
-                            <p className="text-sm text-muted-foreground capitalize">
-                              {prompt.category}
-                              {prompt.isDefault && " • Default"}
-                            </p>
+            {/* Existing Prompts */}
+            <div className="space-y-4">
+              <h2 className="text-lg font-semibold">Your Custom Prompts</h2>
+              
+              {prompts.length === 0 ? (
+                <Card>
+                  <CardContent className="p-6 text-center">
+                    <p className="text-muted-foreground mb-4">No custom prompts yet</p>
+                    <p className="text-sm text-muted-foreground">
+                      Start with a template below or create your own
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="space-y-3">
+                  {prompts.map((prompt) => {
+                    const IconComponent = getCategoryIcon(prompt.category);
+                    return (
+                      <Card key={prompt.id}>
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <IconComponent className="w-5 h-5 text-primary" />
+                              <div>
+                                <h3 className="font-medium">{prompt.name}</h3>
+                                <p className="text-sm text-muted-foreground capitalize">
+                                  {prompt.category}
+                                  {prompt.isDefault && " • Default"}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEdit(prompt)}
+                              >
+                                <Edit3 className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => deletePromptMutation.mutate(prompt.id)}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
                           </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEdit(prompt)}
-                          >
-                            <Edit3 className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => deletePromptMutation.mutate(prompt.id)}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                      {prompt.writingStyle && (
-                        <p className="text-sm text-muted-foreground mt-2">
-                          Style: {prompt.writingStyle}
-                        </p>
-                      )}
-                      {prompt.tags && prompt.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-2">
-                          {prompt.tags.map((tag, index) => (
-                            <span key={index} className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-primary/10 text-primary">
-                              <Tag className="w-3 h-3 mr-1" />
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                      {prompt.lastSynced && (
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Last synced: {new Date(prompt.lastSynced).toLocaleDateString()}
-                        </p>
-                      )}
-                    </CardContent>
-                  </Card>
-                );
-              })}
+                          {prompt.writingStyle && (
+                            <p className="text-sm text-muted-foreground mt-2">
+                              Style: {prompt.writingStyle}
+                            </p>
+                          )}
+                          {prompt.tags && prompt.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-2">
+                              {prompt.tags.map((tag, index) => (
+                                <span key={index} className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-primary/10 text-primary">
+                                  <Tag className="w-3 h-3 mr-1" />
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                          {prompt.lastSynced && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Last synced: {new Date(prompt.lastSynced).toLocaleDateString()}
+                            </p>
+                          )}
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              )}
             </div>
-          )}
 
-          {/* Internal Strategy Templates */}
-          <div className="space-y-4">
+            {/* Internal Strategy Templates */}
+            <div className="space-y-4">
             <div className="flex items-center gap-2">
               <h3 className="text-md font-medium">Internal Strategy Templates</h3>
               <PromptTooltip content="These prompts help you analyze data, research markets, and make strategic business decisions. Use these for your internal planning and analysis work.">
