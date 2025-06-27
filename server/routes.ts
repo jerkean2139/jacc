@@ -2838,56 +2838,53 @@ User Context: {userRole}`,
         // Pre-built optimized responses for conversation starters
         if (messageContent.includes('compare these top processors')) {
           aiResponse = {
-            message: `<h2>Processor Comparison Analysis</h2>
+            message: `<h2>Processor Comparison</h2>
 
-<p>I'll help you compare the top payment processors for your restaurant client. To provide the most accurate analysis and recommendations, I need some key information:</p>
+<p>I'd be happy to help you compare payment processors! Tell me about your client - what type of business are they in and what are their main needs?</p>
 
-<h3>Business Details Needed:</h3>
-<ul>
-<li><strong>Monthly Processing Volume:</strong> What's the restaurant's average monthly credit card volume?</li>
-<li><strong>Average Ticket Size:</strong> What's their typical transaction amount?</li>
-<li><strong>POS Hardware Needs:</strong> Do they need new terminals or just payment processing?</li>
-<li><strong>Business Type:</strong> Quick service, full service, or specialty restaurant?</li>
-</ul>
-
-<p>Once I have these details, I can provide a detailed comparison of processors like Square, Clover, Toast, and traditional merchant services with specific rate analysis and cost projections.</p>`,
-            suggestions: ["Provide monthly volume details", "Discuss POS hardware needs", "Share current processing statement"],
+<p>For example: Are they a restaurant, retail store, online business, or something else? This will help me recommend the best processors and pricing structures for their specific situation.</p>`,
+            suggestions: ["Restaurant/food service", "Retail store", "Online business", "Service-based business"],
             actions: []
           };
         } else if (messageContent.includes('calculate processing rates')) {
           aiResponse = {
-            message: `<h2>Processing Rate Calculator</h2>
+            message: `<h2>Rate Analysis</h2>
 
-<p>I'll help you calculate accurate processing rates and identify cost-saving opportunities. To provide precise calculations, I need:</p>
+<p>I can help you calculate processing rates and find savings opportunities! What would you like me to analyze?</p>
 
-<h3>Required Information:</h3>
-<ul>
-<li><strong>Current Statement:</strong> Upload your recent processing statement for analysis</li>
-<li><strong>Monthly Volume:</strong> Total monthly credit card processing volume</li>
-<li><strong>Transaction Mix:</strong> Percentage of credit vs debit card transactions</li>
-<li><strong>Business Category:</strong> Merchant Category Code (MCC) for your industry</li>
-</ul>
+<p>Do you have a current processing statement to review, or would you like me to help estimate rates for a new merchant based on their business type and volume?</p>`,
+            suggestions: ["Analyze current statement", "Estimate rates for new merchant", "Compare rate structures", "Calculate potential savings"],
+            actions: []
+          };
+        } else if (messageContent.includes('market intelligence')) {
+          aiResponse = {
+            message: `<h2>Market Intelligence</h2>
 
-<p>I can analyze interchange rates, processor markups, and monthly fees to show your true effective rate and potential savings with different pricing models.</p>`,
-            suggestions: ["Upload processing statement", "Enter monthly volume", "Discuss rate structure options"],
+<p>I can help you research market trends and competitive information! What specific intelligence are you looking for?</p>
+
+<p>Are you researching rates for a particular industry, looking at competitor offerings, or need insights about a specific market or region?</p>`,
+            suggestions: ["Industry rate research", "Competitor analysis", "Regional market trends", "Processor feature comparison"],
+            actions: []
+          };
+        } else if (messageContent.includes('create proposal')) {
+          aiResponse = {
+            message: `<h2>Proposal Creation</h2>
+
+<p>I'd be happy to help you create a compelling merchant proposal! Tell me about your prospect - what type of business are they and what's their current situation?</p>
+
+<p>Are they unhappy with their current processor, looking to upgrade their POS system, or starting a new business that needs payment processing?</p>`,
+            suggestions: ["Unhappy with current processor", "New business setup", "POS system upgrade", "Rate reduction opportunity"],
             actions: []
           };
         } else {
           // Default fast response for other starters
           aiResponse = {
-            message: `<h2>JACC Assistant Ready</h2>
+            message: `<h2>How Can I Help?</h2>
 
-<p>I'm here to help with your merchant services needs. I can assist with:</p>
+<p>I'm ready to assist you with merchant services! What would you like to work on today?</p>
 
-<ul>
-<li><strong>Statement Analysis:</strong> Upload processing statements for detailed cost analysis</li>
-<li><strong>Rate Comparisons:</strong> Compare different processors and pricing models</li>
-<li><strong>Proposal Creation:</strong> Generate professional merchant proposals</li>
-<li><strong>Market Intelligence:</strong> Research competitor rates and industry trends</li>
-</ul>
-
-<p>What specific area would you like to focus on today?</p>`,
-            suggestions: ["Upload documents for analysis", "Compare processing rates", "Create merchant proposal"],
+<p>I can help with processor comparisons, rate analysis, proposal creation, or market research. Just let me know what you need!</p>`,
+            suggestions: ["Compare processors", "Analyze rates", "Create proposal", "Research market intelligence"],
             actions: []
           };
         }
