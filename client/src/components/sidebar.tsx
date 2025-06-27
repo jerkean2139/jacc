@@ -652,7 +652,20 @@ export default function Sidebar({
         </div>
 
         {/* Saved Documents Section */}
-        <SavedDocumentsSection />
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+              Saved Documents
+            </h4>
+            <Badge variant="secondary" className="text-xs">
+              0
+            </Badge>
+          </div>
+          
+          <div className="text-xs text-slate-400 italic p-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+            No saved documents yet. Export AI responses to save them here.
+          </div>
+        </div>
 
         {/* Business Intelligence Section */}
         <div className="mb-6">
