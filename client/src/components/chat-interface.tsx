@@ -149,11 +149,14 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
   });
 
   // Fetch user data for role-based access control
-  const { data: user } = useQuery({
+  const { data: user, isLoading: userLoading } = useQuery({
     queryKey: ["/api/user"],
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
     retry: false, // Don't retry on auth errors
   });
+
+  // Debug user role for marketing button
+  console.log("User data for marketing button:", { user, role: user?.role, isLoading: userLoading });
 
   // Log any errors with message loading
   if (error) {
@@ -595,6 +598,7 @@ With these details, I'll create a customized proposal highlighting value proposi
                 </Button>
               </div>
             ) : (
+              // Default: Coming Soon for all non-admin users
               <div className="w-full relative group">
                 <Button
                   disabled
@@ -606,7 +610,7 @@ With these details, I'll create a customized proposal highlighting value proposi
                   <div className="flex-1 min-w-0">
                     <div className="font-semibold mb-1 text-sm text-gray-500">Let's Talk Marketing</div>
                     <div className="text-xs text-gray-400">Sales strategies and marketing insights</div>
-                    <span className="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-full mt-1 inline-block">Coming Soon</span>
+                    <span className="text-xs bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-300 px-2 py-1 rounded-full mt-1 inline-block">Coming Soon</span>
                   </div>
                 </Button>
                 <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
