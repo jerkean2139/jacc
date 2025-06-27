@@ -74,6 +74,62 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
 
+  // PDF Export functionality
+  const exportToPDF = async (messageContent: string, messageTitle?: string) => {
+    try {
+      const response = await fetch('/api/export-pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          content: messageContent,
+          title: messageTitle || 'JACC Action Plan',
+          chatId: chatId
+        })
+      });
+
+      if (!response.ok) throw new Error('Export failed');
+      
+      const result = await response.json();
+      
+      // Show success notification
+      alert(`Document saved to your personal library!\nFile: ${result.document.name}`);
+      
+      // Trigger download
+      const downloadLink = document.createElement('a');
+      downloadLink.href = result.downloadUrl;
+      downloadLink.download = result.document.name;
+      downloadLink.click();
+      
+      // Refresh user's documents
+      await queryClient.invalidateQueries({ queryKey: ['/api/documents'] });
+      
+    } catch (error) {
+      console.error('PDF export error:', error);
+      alert('Failed to export PDF. Please try again.');
+    }
+  };
+
+  // Make PDF export available globally for button clicks in AI responses
+  useEffect(() => {
+    (window as any).requestPDFExport = (element?: HTMLElement) => {
+      // Find the message content containing the PDF export button
+      const messageElement = element?.closest('.message-content') || 
+                            document.querySelector('.message-content:last-child');
+      
+      if (messageElement) {
+        const content = messageElement.innerHTML;
+        const titleElement = messageElement.querySelector('h1');
+        const title = titleElement?.textContent || 'JACC Action Plan';
+        exportToPDF(content, title);
+      }
+    };
+
+    return () => {
+      delete (window as any).requestPDFExport;
+    };
+  }, [chatId]);
+
   // Initialize coaching hook
   const coaching = useCoaching();
 

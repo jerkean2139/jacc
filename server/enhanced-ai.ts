@@ -298,24 +298,54 @@ ${faqResults.length > 0 ? `✅ Found ${faqResults.length} matches in FAQ Knowled
   webSearchResults ? `❌ Nothing found in JACC Memory (FAQ + Documents). Searched the web and found information that may be helpful.` :
   `❌ No relevant information found in internal systems or web search.`}
 
-**RESPONSE FORMAT - ALWAYS USE HTML STYLING WITH PROPER SPACING:**
+**RESPONSE FORMAT - PROFESSIONAL STYLING REQUIRED:**
 
-<p>[One sentence direct answer]</p>
+Use this exact HTML structure for comprehensive responses:
 
-<br>
+<div style="max-width: 800px; font-family: system-ui, -apple-system, sans-serif; line-height: 1.6; color: #1f2937;">
 
-<h2>Key Points:</h2>
-<ul>
-<li>[Main point 1]</li>
-<li>[Main point 2]</li>
-<li>[Main point 3]</li>
+<h1 style="color: #1e40af; border-bottom: 3px solid #3b82f6; padding-bottom: 8px; margin-bottom: 24px; font-size: 24px; font-weight: 700;">[Response Title]</h1>
+
+<div style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border-left: 4px solid #3b82f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+<p style="margin: 0; font-size: 16px; font-weight: 500; color: #1e40af;">[Executive Summary - 1-2 sentences]</p>
+</div>
+
+<h2 style="color: #374151; margin: 32px 0 16px 0; font-size: 20px; font-weight: 600;">📋 Key Implementation Steps</h2>
+<ol style="margin: 16px 0; padding-left: 24px;">
+<li style="margin: 8px 0; padding: 8px 0; border-bottom: 1px solid #e5e7eb;"><strong>Step 1:</strong> [Action item]</li>
+<li style="margin: 8px 0; padding: 8px 0; border-bottom: 1px solid #e5e7eb;"><strong>Step 2:</strong> [Action item]</li>
+<li style="margin: 8px 0; padding: 8px 0; border-bottom: 1px solid #e5e7eb;"><strong>Step 3:</strong> [Action item]</li>
+</ol>
+
+<h2 style="color: #374151; margin: 32px 0 16px 0; font-size: 20px; font-weight: 600;">🎯 Marketing Strategy Details</h2>
+<div style="display: grid; gap: 16px; margin: 20px 0;">
+<div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px;">
+<h3 style="color: #1f2937; margin: 0 0 8px 0; font-size: 16px; font-weight: 600;">Week 1-2: Foundation</h3>
+<p style="margin: 0; color: #6b7280;">[Detailed content]</p>
+</div>
+</div>
+
+<div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 16px; margin: 24px 0;">
+<h3 style="color: #92400e; margin: 0 0 8px 0; font-size: 16px; font-weight: 600;">💡 Pro Tips</h3>
+<ul style="margin: 8px 0; padding-left: 20px; color: #92400e;">
+<li>[Professional insight]</li>
+<li>[Best practice]</li>
 </ul>
+</div>
 
-<br>
+<div style="background: #ecfdf5; border: 1px solid #10b981; border-radius: 8px; padding: 16px; margin: 24px 0; text-align: center;">
+<p style="margin: 0; color: #065f46; font-weight: 500;">📄 Would you like me to create a detailed PDF action plan you can save and reference?</p>
+<button onclick="window.requestPDFExport && window.requestPDFExport()" style="background: #10b981; color: white; border: none; padding: 12px 24px; border-radius: 6px; font-weight: 500; margin-top: 12px; cursor: pointer;">Generate PDF Action Plan</button>
+</div>
 
-<p>[One brief paragraph of explanation if needed]</p>
+</div>
 
-${webSearchResults ? `<p><strong>Note:</strong> This information comes from external web sources since nothing was found in our internal JACC Memory (FAQ knowledge base and document center).</p>` : ''}
+${webSearchResults ? `<p style="color: #6b7280; font-style: italic; margin-top: 20px; padding: 12px; background: #f3f4f6; border-radius: 6px;"><strong>Source:</strong> External web research (no matches found in JACC internal knowledge base)</p>` : ''}
+
+**MARKETING KNOWLEDGE BASE INTEGRATION:**
+- Draw from Sales & Marketing folder containing Alex Hormozi (Value Stacking, CLOSER method), Gary Vaynerchuk (social media), Neil Patel (digital marketing), Jeremy Miner (NEPQ), Donald Miller (StoryBrand), Gino Wickman (EOS)
+- Apply proven sales methodologies and marketing frameworks from expert content
+- Reference specific techniques when relevant (e.g., "Using Alex Hormozi's Value Stacking method...")
 
 **CRITICAL FORMATTING RULES:**
 - Use HTML tags instead of markdown: <h1>, <h2>, <h3> for headings

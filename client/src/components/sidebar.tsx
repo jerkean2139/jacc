@@ -29,11 +29,118 @@ import {
   FileSearch,
   Brain,
   RotateCcw,
-  FileText
+  FileText,
+  BookmarkCheck,
+  ExternalLink
 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 
 import type { User, Chat, Folder as FolderType } from "@shared/schema";
 import { cn } from "@/lib/utils";
+
+// Saved Documents Section Component
+function SavedDocumentsSection() {
+  const { data: savedDocuments = [], isLoading } = useQuery({
+    queryKey: ['/api/documents', { category: 'personal_exports' }],
+    select: (data: any) => {
+      // Filter personal exports from the documents
+      return data?.documents?.filter((doc: any) => doc.category === 'personal_exports') || [];
+    }
+  });
+
+  const [showAllSaved, setShowAllSaved] = useState(false);
+  const displayedDocs = showAllSaved ? savedDocuments : savedDocuments.slice(0, 5);
+
+  if (isLoading) {
+    return (
+      <div className="mb-6">
+        <h4 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3">
+          Saved Documents
+        </h4>
+        <div className="space-y-1">
+          <div className="animate-pulse">
+            <div className="h-8 bg-slate-200 dark:bg-slate-700 rounded"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mb-6">
+      <div className="flex items-center justify-between mb-3">
+        <h4 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+          Saved Documents
+        </h4>
+        <Badge variant="secondary" className="text-xs">
+          {savedDocuments.length}
+        </Badge>
+      </div>
+      
+      {savedDocuments.length === 0 ? (
+        <div className="text-xs text-slate-400 italic p-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+          No saved documents yet. Export AI responses to save them here.
+        </div>
+      ) : (
+        <div className="space-y-1">
+          {displayedDocs.map((doc: any) => (
+            <div
+              key={doc.id}
+              className="group flex items-center justify-between p-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg cursor-pointer transition-colors"
+            >
+              <div className="flex items-center space-x-2 flex-1 min-w-0">
+                <BookmarkCheck className="w-3 h-3 text-green-500 flex-shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <div className="text-xs font-medium text-slate-700 dark:text-slate-300 truncate">
+                    {doc.name.replace(/\.(html|pdf)$/, '').replace(/-\d{4}-\d{2}-\d{2}$/, '')}
+                  </div>
+                  <div className="text-xs text-slate-400">
+                    {new Date(doc.createdAt).toLocaleDateString()}
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="w-5 h-5"
+                  onClick={() => window.open(`/api/documents/${doc.id}/view`, '_blank')}
+                  title="View document"
+                >
+                  <ExternalLink className="w-3 h-3" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="w-5 h-5"
+                  onClick={() => window.open(`/api/documents/${doc.id}/download`, '_blank')}
+                  title="Download document"
+                >
+                  <Download className="w-3 h-3" />
+                </Button>
+              </div>
+            </div>
+          ))}
+          
+          {savedDocuments.length > 5 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowAllSaved(!showAllSaved)}
+              className="w-full mt-2 text-xs text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+            >
+              {showAllSaved ? "Show Less" : `Show ${savedDocuments.length - 5} More`}
+              <ChevronDown className={cn(
+                "w-3 h-3 ml-1 transition-transform",
+                showAllSaved && "rotate-180"
+              )} />
+            </Button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 interface SidebarProps {
   user?: User;
@@ -543,6 +650,9 @@ export default function Sidebar({
             </a>
           </div>
         </div>
+
+        {/* Saved Documents Section */}
+        <SavedDocumentsSection />
 
         {/* Business Intelligence Section */}
         <div className="mb-6">
