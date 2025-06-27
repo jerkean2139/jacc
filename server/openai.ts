@@ -184,6 +184,21 @@ export async function generateTitle(content: string): Promise<string> {
   }
 }
 
+// Helper function to clean markdown content
+function cleanMarkdownContent(content: string): string {
+  return content
+    // Convert markdown headers to plain text
+    .replace(/^###\s+/gm, '')
+    .replace(/^##\s+/gm, '')
+    .replace(/^#\s+/gm, '')
+    // Remove markdown bold/italic syntax
+    .replace(/\*\*([^*]+)\*\*/g, '$1')
+    .replace(/\*([^*]+)\*/g, '$1')
+    // Clean up extra whitespace
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
 // Alex Hormozi Visual Formatting System
 function applyHormoziFormatting(content: string, userMessage: string): string {
   console.log('🔧 Starting Alex Hormozi formatting transformation');
@@ -253,8 +268,22 @@ function createHormoziStyleTemplate(content: string): string {
 }
 
 function createProcessTemplate(content: string): string {
-  const sections = content.split('\n\n').filter(s => s.trim());
-  const firstSection = sections[0] || content.substring(0, 200);
+  // Clean and parse content
+  let cleanContent = cleanMarkdownContent(content);
+  const sections = cleanContent.split('\n\n').filter(s => s.trim());
+  const firstSection = sections[0] || cleanContent.substring(0, 200);
+  
+  // Extract step content and remove duplicate numbering
+  const stepSections = sections.slice(1).map(section => {
+    // Remove existing step numbers and markdown headers
+    let cleanSection = section
+      .replace(/^###?\s*Step\s*\d+[:\-\.]?\s*/i, '')
+      .replace(/^\d+\.\s*\*?\*?/, '')
+      .replace(/^[\d\-\*•]\s*/, '')
+      .trim();
+    
+    return cleanSection;
+  }).filter(section => section.length > 0);
   
   return `
 <div class="hormozi-container">
@@ -268,7 +297,7 @@ function createProcessTemplate(content: string): string {
   </div>
   
   <div class="hormozi-steps">
-    ${sections.slice(1).map((section, index) => `
+    ${stepSections.map((section, index) => `
       <div class="hormozi-step">
         <div class="hormozi-step-number">${index + 1}</div>
         <div class="hormozi-step-content">
@@ -286,9 +315,17 @@ function createProcessTemplate(content: string): string {
 }
 
 function createListTemplate(content: string): string {
-  const lines = content.split('\n').filter(line => line.trim());
+  const cleanContent = cleanMarkdownContent(content);
+  const lines = cleanContent.split('\n').filter(line => line.trim());
   const title = lines[0] || "Key Points";
-  const items = lines.slice(1);
+  const items = lines.slice(1).map(item => {
+    // Remove numbering, bullets, and markdown formatting
+    return item
+      .replace(/^\d+\.\s*/, '')
+      .replace(/^[-*•]\s*/, '')
+      .replace(/^\*\*([^*]+)\*\*:?\s*/, '$1: ')
+      .trim();
+  }).filter(item => item.length > 0);
   
   return `
 <div class="hormozi-container">
@@ -302,7 +339,7 @@ function createListTemplate(content: string): string {
       <div class="hormozi-list-item">
         <div class="hormozi-item-icon">${index + 1}</div>
         <div class="hormozi-item-content">
-          <p class="hormozi-item-text">${item.replace(/^[-*•]\s*/, '')}</p>
+          <p class="hormozi-item-text">${item}</p>
         </div>
       </div>
     `).join('')}
@@ -315,7 +352,8 @@ function createListTemplate(content: string): string {
 }
 
 function createDefaultTemplate(content: string): string {
-  const paragraphs = content.split('\n\n').filter(p => p.trim());
+  const cleanContent = cleanMarkdownContent(content);
+  const paragraphs = cleanContent.split('\n\n').filter(p => p.trim());
   
   return `
 <div class="hormozi-container">
