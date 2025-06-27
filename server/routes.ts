@@ -126,6 +126,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid credentials" });
       }
       
+      // Ensure user exists in database
+      try {
+        await storage.upsertUser({
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          passwordHash: 'demo-hash', // Demo password hash
+          firstName: user.username,
+          lastName: 'User',
+          role: user.role as any,
+          profileImageUrl: null
+        });
+      } catch (dbError) {
+        console.error("Error creating demo user:", dbError);
+      }
+      
       // Create session
       (req as any).session.userId = user.id;
       (req as any).session.user = {
