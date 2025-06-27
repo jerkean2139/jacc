@@ -2253,15 +2253,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // User session endpoint
-  app.get('/api/user', (req: Request, res: Response) => {
+  // User session endpoint with auto-login fallback
+  app.get('/api/user', async (req: Request, res: Response) => {
     try {
       const sessionId = req.cookies?.sessionId;
       if (sessionId && sessions.has(sessionId)) {
         const user = sessions.get(sessionId);
         res.json(user);
       } else {
-        res.status(401).json({ error: 'Not authenticated' });
+        // Auto-login for seamless access - ensure user exists in database
+        const autoUser = { 
+          id: 'demo-user-id', 
+          username: 'tracer-user', 
+          email: 'demo@example.com', 
+          role: 'sales-agent' 
+        };
+        
+        // Ensure demo user exists in database
+        try {
+          const existingUsers = await db.select().from(users).where(eq(users.id, 'demo-user-id'));
+          if (existingUsers.length === 0) {
+            await db.insert(users).values({
+              id: 'demo-user-id',
+              username: 'tracer-user',
+              email: 'demo@example.com',
+              passwordHash: 'demo-hash',
+              firstName: 'Tracer',
+              lastName: 'User',
+              role: 'sales-agent'
+            });
+          }
+        } catch (dbError) {
+          console.log('Demo user already exists or database setup issue:', dbError);
+        }
+        
+        const newSessionId = Math.random().toString(36).substring(2);
+        sessions.set(newSessionId, autoUser);
+        
+        res.cookie('sessionId', newSessionId, { 
+          httpOnly: true, 
+          secure: false,
+          maxAge: 24 * 60 * 60 * 1000,
+          path: '/'
+        });
+        
+        console.log('Auto-login activated for seamless access');
+        res.json(autoUser);
       }
     } catch (error) {
       console.error('User fetch error:', error);

@@ -124,9 +124,14 @@ export default function DocumentsPage() {
 
   const filteredDocuments = normalizedDocuments.filter(doc =>
     doc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    doc.original_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    doc.originalName?.toLowerCase().includes(searchQuery.toLowerCase())
+    doc.originalName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    doc.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    doc.category?.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  console.log('Search query:', searchQuery);
+  console.log('Normalized documents:', normalizedDocuments.length);
+  console.log('Filtered documents:', filteredDocuments.length);
 
   return (
     <div className="flex-1 space-y-6 p-6">
