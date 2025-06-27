@@ -2829,14 +2829,19 @@ User Context: {userRole}`,
       let aiResponse;
       const messageContent = messageData.content.toLowerCase();
       const isConversationStarter = messageContent.includes('compare these top processors') || 
+                                   messageContent.includes('compare payment processors') ||
                                    messageContent.includes('calculate processing rates') ||
+                                   messageContent.includes('calculating processing rates') ||
+                                   messageContent.includes('help calculating processing rates') ||
                                    messageContent.includes('market intelligence') ||
-                                   messageContent.includes('create proposal');
+                                   messageContent.includes('payment processing industry') ||
+                                   messageContent.includes('create proposal') ||
+                                   messageContent.includes('prepare a proposal');
 
       if (isConversationStarter && messages.length <= 1) {
         console.log('🚀 Using fast-path for conversation starter');
         // Pre-built optimized responses for conversation starters
-        if (messageContent.includes('compare these top processors')) {
+        if (messageContent.includes('compare payment processors') || messageContent.includes('compare these top processors')) {
           aiResponse = {
             message: `<h2>Processor Comparison</h2>
 
@@ -2846,7 +2851,7 @@ User Context: {userRole}`,
             suggestions: ["Restaurant/food service", "Retail store", "Online business", "Service-based business"],
             actions: []
           };
-        } else if (messageContent.includes('calculate processing rates')) {
+        } else if (messageContent.includes('calculate processing rates') || messageContent.includes('calculating processing rates')) {
           aiResponse = {
             message: `<h2>Rate Analysis</h2>
 

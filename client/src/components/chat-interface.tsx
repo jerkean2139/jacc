@@ -492,7 +492,7 @@ With these details, I'll create a customized proposal highlighting value proposi
               <Button
                 variant="outline"
                 className="p-4 h-auto text-left justify-start hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-700 dark:hover:text-blue-300 hover:border-blue-200 dark:hover:border-blue-700 transition-colors w-full"
-                onClick={() => handleQuickAction("Calculate processing rates for a restaurant")}
+                onClick={() => handleQuickAction("I need help calculating processing rates and finding competitive pricing")}
               >
                 <Calculator className="mr-3 h-5 w-5 text-blue-600 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
@@ -506,7 +506,7 @@ With these details, I'll create a customized proposal highlighting value proposi
               <Button
                 variant="outline"
                 className="p-4 h-auto text-left justify-start hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-700 dark:hover:text-green-300 hover:border-green-200 dark:hover:border-green-700 transition-colors w-full"
-                onClick={() => handleQuickAction("Analyze Stripe vs Square vs Clover for my restaurant client")}
+                onClick={() => handleQuickAction("I need to compare payment processors - can you help me analyze different options?")}
               >
                 <FileSearch className="mr-3 h-5 w-5 text-green-600 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
