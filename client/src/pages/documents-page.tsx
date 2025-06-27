@@ -22,12 +22,12 @@ export default function DocumentsPage() {
     queryKey: ["/api/user"],
   });
 
-  // Fetch documents and folders
-  const { data: documentsData } = useQuery({
+  // Fetch documents and folders with loading states
+  const { data: documentsData, isLoading: documentsLoading, error: documentsError } = useQuery({
     queryKey: ["/api/documents"],
   });
 
-  const { data: folders = [] } = useQuery<FolderType[]>({
+  const { data: folders = [], isLoading: foldersLoading, error: foldersError } = useQuery<FolderType[]>({
     queryKey: ["/api/folders"],
   });
 
@@ -164,22 +164,22 @@ export default function DocumentsPage() {
         </div>
       </div>
 
-      <Tabs defaultValue={isAdmin ? "upload" : "manage"} className="space-y-4">
+      <Tabs defaultValue="folders" className="space-y-4">
         <TabsList>
+          <TabsTrigger value="folders">
+            <Folder className="h-4 w-4 mr-2" />
+            Folders ({folders.length})
+          </TabsTrigger>
+          <TabsTrigger value="manage">
+            <FileText className="h-4 w-4 mr-2" />
+            {isAdmin ? 'All Documents' : 'Documents'} ({normalizedDocuments.length})
+          </TabsTrigger>
           {isAdmin && (
             <TabsTrigger value="upload">
               <Upload className="h-4 w-4 mr-2" />
               Upload Documents
             </TabsTrigger>
           )}
-          <TabsTrigger value="manage">
-            <FileText className="h-4 w-4 mr-2" />
-            {isAdmin ? 'All Documents' : 'Documents'} ({normalizedDocuments.length})
-          </TabsTrigger>
-          <TabsTrigger value="folders">
-            <Folder className="h-4 w-4 mr-2" />
-            Folders ({folders.length})
-          </TabsTrigger>
         </TabsList>
 
         {isAdmin && (
@@ -202,8 +202,21 @@ export default function DocumentsPage() {
                 />
               </div>
             </CardHeader>
-            {filteredDocuments.length > 0 && (
-              <CardContent>
+            <CardContent>
+              {documentsLoading ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                  <p className="mt-2 text-sm text-muted-foreground">Loading documents...</p>
+                </div>
+              ) : documentsError ? (
+                <div className="text-center py-8">
+                  <FileText className="mx-auto h-12 w-12 text-red-400" />
+                  <h3 className="mt-2 text-sm font-semibold text-red-600">Error loading documents</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Please try refreshing the page or contact support if the issue persists.
+                  </p>
+                </div>
+              ) : filteredDocuments.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {filteredDocuments.map((doc) => (
                     <DraggableDocument
@@ -213,19 +226,21 @@ export default function DocumentsPage() {
                     />
                   ))}
                 </div>
-              </CardContent>
-            )}
-            {filteredDocuments.length === 0 && (
-              <CardContent>
+              ) : (
                 <div className="text-center py-8">
                   <FileText className="mx-auto h-12 w-12 text-muted-foreground" />
                   <h3 className="mt-2 text-sm font-semibold text-gray-900">No documents found</h3>
                   <p className="mt-1 text-sm text-muted-foreground">
                     {searchQuery ? 'Try adjusting your search terms.' : 'Upload some documents to get started.'}
                   </p>
+                  {normalizedDocuments.length === 0 && !searchQuery && (
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      Documents available: {normalizedDocuments.length}
+                    </p>
+                  )}
                 </div>
-              </CardContent>
-            )}
+              )}
+            </CardContent>
           </Card>
         </TabsContent>
 
@@ -238,17 +253,32 @@ export default function DocumentsPage() {
               </p>
             </CardHeader>
             <CardContent>
-              <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-950 rounded-lg border-2 border-dashed border-blue-200 dark:border-blue-800">
-                <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">Drag & Drop Instructions</h4>
-                <p className="text-sm text-blue-700 dark:text-blue-200">
-                  • Drag documents from the "Manage Documents" tab to any folder below to organize them
-                </p>
-                <p className="text-sm text-blue-700 dark:text-blue-200">
-                  • Folders will highlight when you can drop documents into them
-                </p>
-              </div>
+              {!foldersLoading && (
+                <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-950 rounded-lg border-2 border-dashed border-blue-200 dark:border-blue-800">
+                  <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">Drag & Drop Instructions</h4>
+                  <p className="text-sm text-blue-700 dark:text-blue-200">
+                    • Drag documents from the "Documents" tab to any folder below to organize them
+                  </p>
+                  <p className="text-sm text-blue-700 dark:text-blue-200">
+                    • Folders will highlight when you can drop documents into them
+                  </p>
+                </div>
+              )}
               
-              {folders.length > 0 ? (
+              {foldersLoading ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                  <p className="mt-2 text-sm text-muted-foreground">Loading folders...</p>
+                </div>
+              ) : foldersError ? (
+                <div className="text-center py-8">
+                  <Folder className="mx-auto h-12 w-12 text-red-400" />
+                  <h3 className="mt-2 text-sm font-semibold text-red-600">Error loading folders</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Please try refreshing the page or contact support if the issue persists.
+                  </p>
+                </div>
+              ) : folders.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {folders.map((folder) => {
                     // Get document count from the integrated API response
