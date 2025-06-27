@@ -184,6 +184,7 @@ Changelog:
 - June 26, 2025. **DOCUMENTS PAGE ACCESS FIX**: Fixed 404 error on Documents tab by moving document routes outside admin-only restrictions. Documents page now accessible to all authenticated users with role-based content filtering maintaining security while providing universal access to permitted documents.
 - June 27, 2025. **FOLDER DOCUMENT COUNTS DISPLAY FIX**: Fixed folder document count display issue where folders showed 0 documents despite having proper backend counts. Updated documents page to correctly extract document_count field from integrated API response and added fallback to documents.length. Folders now display accurate document counts (Admin: 40, Clearent: 18, MiCamp: 13, etc.) with proper organization across all 136 documents and 29 folders.
 - June 27, 2025. **CONVERSATION STARTER CRASH FIX**: Fixed critical undefined prompt error causing conversation starter buttons to crash with "prompt.promptTemplate.slice" error. Added null safety checks using optional chaining operator in ChatInterface component. Brain icon and other conversation starters now work without runtime errors.
+- June 27, 2025. **FOREIGN KEY CONSTRAINT ERROR RESOLVED**: Fixed database foreign key constraint error preventing conversation starter chat creation. Updated simple login route to ensure demo users (demo-user-id, admin-user-id, manager-user-id) exist in users table before chat creation. Conversation starters now successfully create chats and generate AI responses without database errors.
 
 ## User Preferences
 
