@@ -180,7 +180,7 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
   }, [messages]);
 
   const handleSendMessage = async () => {
-    if (!input.trim() || sendMessageMutation.isPending) return;
+    if (!input?.trim() || sendMessageMutation.isPending) return;
 
     // If no active chat, create one first and then send message
     if (!chatId && onNewChatWithMessage) {
