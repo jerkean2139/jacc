@@ -708,7 +708,7 @@ With these details, I'll create a customized proposal highlighting value proposi
             <Button
               onClick={handleSendMessage}
               disabled={!input.trim() || sendMessageMutation.isPending}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-xl hover:opacity-90 disabled:opacity-50"
+              className="bg-blue-700 hover:bg-blue-800 text-white px-4 py-3 rounded-xl transition-colors disabled:opacity-50 disabled:bg-gray-400"
             >
               <Send className="w-4 h-4" />
             </Button>
