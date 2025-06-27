@@ -375,4 +375,198 @@
     outline-offset: 2px;
     box-shadow: 0 0 0 4px hsla(var(--ring), 0.1);
   }
+
+  /* Alex Hormozi-inspired styling */
+  .hormozi-content {
+    font-family: Inter, system-ui, sans-serif;
+    line-height: 1.6;
+    color: #1a1a1a;
+    max-width: 100%;
+  }
+
+  .hormozi-content .attention-grabber {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+
+  .hormozi-content .attention-grabber h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    margin: 0 0 1rem 0;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
+
+  .hormozi-content .big-promise {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+    opacity: 0.95;
+  }
+
+  .hormozi-content .value-stack {
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .hormozi-content .value-stack h2 {
+    color: #065f46;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 0 1.5rem 0;
+  }
+
+  .hormozi-content .benefit-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .hormozi-content .benefit-list li {
+    background: white;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+
+  .hormozi-content .benefit-list li strong {
+    color: #1f2937;
+    font-weight: 700;
+  }
+
+  .hormozi-content .social-proof {
+    background: #fef3c7;
+    border-left: 6px solid #f59e0b;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border-radius: 0 8px 8px 0;
+  }
+
+  .hormozi-content .social-proof h3 {
+    color: #92400e;
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0 0 1rem 0;
+  }
+
+  .hormozi-content .testimonial {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 0;
+    font-style: italic;
+    border-left: 4px solid #f59e0b;
+  }
+
+  .hormozi-content .action-steps {
+    background: #ecfdf5;
+    border: 2px solid #10b981;
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .hormozi-content .action-steps h2 {
+    color: #065f46;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 0 1.5rem 0;
+  }
+
+  .hormozi-content .step-list {
+    counter-reset: step-counter;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .hormozi-content .step-list li {
+    counter-increment: step-counter;
+    background: white;
+    border: 1px solid #10b981;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    position: relative;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .hormozi-content .step-list li::before {
+    content: counter(step-counter);
+    position: absolute;
+    left: -12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #10b981;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.875rem;
+  }
+
+  .hormozi-content .urgency-scarcity {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .hormozi-content .urgent-text {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin: 0;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  }
+
+  /* Dark mode adjustments */
+  .dark .hormozi-content {
+    color: #f1f5f9;
+  }
+
+  .dark .hormozi-content .value-stack {
+    background: #1e293b;
+    border-color: #334155;
+  }
+
+  .dark .hormozi-content .benefit-list li {
+    background: #334155;
+    border-color: #475569;
+    color: #f1f5f9;
+  }
+
+  .dark .hormozi-content .social-proof {
+    background: #451a03;
+    border-left-color: #f59e0b;
+  }
+
+  .dark .hormozi-content .testimonial {
+    background: #292524;
+    color: #f5f5f4;
+  }
+
+  .dark .hormozi-content .action-steps {
+    background: #064e3b;
+    border-color: #10b981;
+  }
+
+  .dark .hormozi-content .step-list li {
+    background: #1f2937;
+    border-color: #10b981;
+    color: #f1f5f9;
+  }
 }

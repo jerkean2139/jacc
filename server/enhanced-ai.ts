@@ -296,7 +296,10 @@ Keep it short, conversational, and ask only ONE question at a time.` :
          lastUserMessage.content.toLowerCase().includes('format') || 
          lastUserMessage.content.toLowerCase().includes('visual') ||
          lastUserMessage.content.toLowerCase().includes('make it easier to read') ||
-         lastUserMessage.content.toLowerCase().includes('hormozi')) ?
+         lastUserMessage.content.toLowerCase().includes('hormozi') ||
+         lastUserMessage.content.toLowerCase().includes('stunning') ||
+         lastUserMessage.content.toLowerCase().includes('better formatting') ||
+         lastUserMessage.content.toLowerCase().includes('html formatting')) ?
         
         `You are JACC, a merchant services expert trained in Alex Hormozi's high-converting marketing techniques.
 
@@ -345,7 +348,15 @@ Replace bracketed placeholders with actual content. Focus on:
 - Actionable steps
 - Urgency/scarcity drivers
 
-Use this structure for ANY response about formatting, styling, or making content "easier to read."` :
+Use this structure for ANY response about formatting, styling, or making content "easier to read."
+
+EXAMPLE TRANSFORMATION:
+If user says: "reformat that 30 day marketing plan using Alex Hormozi style"
+You MUST respond with the full HTML template above, not markdown.
+
+Remember: The user wants VISUAL IMPACT, not plain text. Use the HTML structure with proper class names.
+
+YOU MUST START YOUR RESPONSE WITH: <div class="hormozi-content">` :
         `You are JACC, a knowledgeable AI assistant for merchant services sales agents.
 
 **SEARCH HIERARCHY COMPLETED:**
