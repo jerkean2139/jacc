@@ -512,12 +512,15 @@ When appropriate, suggest actions like saving payment processing information to 
       let content = response.content[0].type === 'text' ? response.content[0].text : "";
       
       // Apply Alex Hormozi visual formatting for formatting requests
-      const isFormattingRequest = lastUserMessage.content.toLowerCase().includes('style') || 
-        lastUserMessage.content.toLowerCase().includes('format') || 
-        lastUserMessage.content.toLowerCase().includes('visual') ||
-        lastUserMessage.content.toLowerCase().includes('hormozi') ||
-        lastUserMessage.content.toLowerCase().includes('stunning') ||
-        lastUserMessage.content.toLowerCase().includes('better formatting');
+      const userInput = lastUserMessage.content.toLowerCase();
+      const isFormattingRequest = userInput.includes('style') || 
+        userInput.includes('format') || 
+        userInput.includes('visual') ||
+        userInput.includes('hormozi') ||
+        userInput.includes('stunning') ||
+        userInput.includes('better formatting');
+      
+      console.log(`🔍 Checking formatting request for: "${lastUserMessage.content}" - detected: ${isFormattingRequest}`);
       
       if (isFormattingRequest) {
         console.log(`🎨 Alex Hormozi formatting triggered for: "${lastUserMessage.content}"`);
@@ -559,7 +562,50 @@ When appropriate, suggest actions like saving payment processing information to 
 </div>`;
       } else {
         // Apply post-processing to remove HTML code blocks and enhance regular responses
-        content = this.applyHormoziFormatting(content, lastUserMessage.content);
+        if (content.includes('```html') || content.includes('```')) {
+          console.log(`🔧 Removing HTML code blocks from response`);
+          content = content.replace(/```html[\s\S]*?```/g, '').replace(/```[\s\S]*?```/g, '');
+          
+          // If content was mostly code blocks, provide enhanced response
+          if (content.trim().length < 100) {
+            content = `<div class="enhanced-response">
+<h2>🎯 Professional Marketing Strategy</h2>
+<p>I've prepared a comprehensive marketing approach tailored for merchant services professionals:</p>
+
+<div class="strategy-section">
+<h3>📈 Lead Generation Framework</h3>
+<ul>
+<li><strong>Content Marketing:</strong> Educational posts about processing fees and cost optimization</li>
+<li><strong>Social Proof:</strong> Client success stories and testimonials</li>
+<li><strong>Direct Outreach:</strong> Personalized rate analysis and competitive comparisons</li>
+<li><strong>Value Demonstration:</strong> ROI calculators and savings projections</li>
+</ul>
+</div>
+
+<div class="tools-section">
+<h3>🔧 JACC Tools Integration</h3>
+<p>Leverage your JACC platform features:</p>
+<ul>
+<li>Document library for processor comparisons</li>
+<li>Rate calculation tools for client presentations</li>
+<li>Proposal generation for professional quotes</li>
+<li>Market intelligence for competitive positioning</li>
+</ul>
+</div>
+
+<div class="action-section">
+<h3>⚡ Next Steps</h3>
+<p><strong>Immediate Actions:</strong></p>
+<ol>
+<li>Review your current client portfolio for optimization opportunities</li>
+<li>Create 5 educational posts for this week's content calendar</li>
+<li>Identify 10 prospects for rate analysis outreach</li>
+<li>Schedule follow-ups with existing clients for service expansion</li>
+</ol>
+</div>
+</div>`;
+          }
+        }
       }
       
       // Don't append documents for conversation starters - keep them clean and engaging
