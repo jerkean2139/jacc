@@ -680,7 +680,7 @@ With these details, I'll create a customized proposal highlighting value proposi
                         >
                           <div className="font-medium text-sm text-slate-900 dark:text-white">{prompt.name}</div>
                           <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
-                            {prompt.promptTemplate.slice(0, 100)}...
+                            {prompt.promptTemplate?.slice(0, 100) || 'No template available'}...
                           </div>
                           <div className="flex items-center gap-1 mt-2">
                             <Badge variant="secondary" className="text-xs">
@@ -901,7 +901,7 @@ With these details, I'll create a customized proposal highlighting value proposi
                       >
                         <div className="font-medium text-sm text-slate-900 dark:text-white">{prompt.name}</div>
                         <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
-                          {prompt.promptTemplate.slice(0, 100)}...
+                          {prompt.promptTemplate?.slice(0, 100) || 'No template available'}...
                         </div>
                         <div className="flex items-center gap-1 mt-2">
                           <Badge variant="secondary" className="text-xs">
