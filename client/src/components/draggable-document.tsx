@@ -82,7 +82,7 @@ export function DraggableDocument({ document, onMove }: DraggableDocumentProps) 
               </div>
               
               <p className="text-xs text-muted-foreground">
-                {new Date(document.createdAt).toLocaleDateString()}
+                {document.createdAt ? new Date(document.createdAt).toLocaleDateString() : 'No date'}
               </p>
             </div>
           </div>

@@ -34,22 +34,34 @@ export default function DocumentsPage() {
   // Check if user is admin
   const isAdmin = user?.role === 'dev-admin' || user?.role === 'client-admin';
 
-  // Extract documents from the integrated structure with role-based filtering
-  const documents = documentsData ? [
-    ...(documentsData.folders?.flatMap((folder: any) => {
-      if (!folder.documents) return [];
-      // Filter documents based on user role and permissions
-      return folder.documents.filter((doc: any) => {
+  // Extract documents from API response - handle both array and object formats
+  let documents: any[] = [];
+  
+  if (documentsData) {
+    // Handle case where API returns array directly (current format)
+    if (Array.isArray(documentsData)) {
+      documents = documentsData.filter((doc: any) => {
         if (isAdmin) return true; // Admins see all documents
-        // Regular users only see documents that are not admin-only
-        return !doc.admin_only;
+        return !doc.adminOnly; // Regular users only see non-admin documents
       });
-    }) || []),
-    ...(documentsData.unassignedDocuments?.filter((doc: any) => {
-      if (isAdmin) return true; // Admins see all documents
-      return !doc.admin_only; // Regular users only see non-admin documents
-    }) || [])
-  ] : [];
+    } 
+    // Handle case where API returns object with folders structure (legacy format)
+    else {
+      documents = [
+        ...(documentsData.folders?.flatMap((folder: any) => {
+          if (!folder.documents || !Array.isArray(folder.documents)) return [];
+          return folder.documents.filter((doc: any) => {
+            if (isAdmin) return true; // Admins see all documents
+            return !doc.admin_only && !doc.adminOnly;
+          });
+        }) || []),
+        ...(documentsData.unassignedDocuments?.filter((doc: any) => {
+          if (isAdmin) return true; // Admins see all documents
+          return !doc.admin_only && !doc.adminOnly;
+        }) || [])
+      ];
+    }
+  }
 
   // Map the document structure to ensure consistent field names
   const normalizedDocuments = documents.map((doc: any) => ({
@@ -281,9 +293,8 @@ export default function DocumentsPage() {
               ) : folders.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {folders.map((folder) => {
-                    // Get document count from the integrated API response
-                    const folderFromAPI = documentsData?.folders?.find((f: any) => f.id === folder.id);
-                    const documentCount = folderFromAPI?.document_count || folderFromAPI?.documents?.length || 0;
+                    // Calculate document count from the actual documents array
+                    const documentCount = documents.filter(doc => doc.folderId === folder.id).length;
                     
                     return (
                       <DroppableFolder
