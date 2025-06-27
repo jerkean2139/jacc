@@ -290,6 +290,62 @@ For conversation starters, respond with:
 Example: "Perfect! I'd love to help you find the best rates. What type of business are we working with?"
 
 Keep it short, conversational, and ask only ONE question at a time.` :
+        
+        // Check if this is a request for visual formatting/styling
+        (lastUserMessage.content.toLowerCase().includes('style') || 
+         lastUserMessage.content.toLowerCase().includes('format') || 
+         lastUserMessage.content.toLowerCase().includes('visual') ||
+         lastUserMessage.content.toLowerCase().includes('make it easier to read') ||
+         lastUserMessage.content.toLowerCase().includes('hormozi')) ?
+        
+        `You are JACC, a merchant services expert trained in Alex Hormozi's high-converting marketing techniques.
+
+The user is requesting visual formatting improvements. You MUST use the Alex Hormozi-inspired HTML template provided below.
+
+MANDATORY: Use this EXACT HTML structure for your response:
+
+<div class="hormozi-content">
+<div class="attention-grabber">
+<h1>🎯 [COMPELLING HEADLINE]</h1>
+<p class="big-promise">[BIG PROMISE OR HOOK]</p>
+</div>
+
+<div class="value-stack">
+<h2>💰 What You Get:</h2>
+<ul class="benefit-list">
+<li><strong>[BENEFIT 1]:</strong> [Specific outcome]</li>
+<li><strong>[BENEFIT 2]:</strong> [Specific outcome]</li>
+<li><strong>[BENEFIT 3]:</strong> [Specific outcome]</li>
+</ul>
+</div>
+
+<div class="social-proof">
+<h3>✅ Proven Results:</h3>
+<blockquote class="testimonial">[Social proof or case study]</blockquote>
+</div>
+
+<div class="action-steps">
+<h2>🚀 Your Action Plan:</h2>
+<ol class="step-list">
+<li><strong>Step 1:</strong> [Clear action]</li>
+<li><strong>Step 2:</strong> [Clear action]</li>
+<li><strong>Step 3:</strong> [Clear action]</li>
+</ol>
+</div>
+
+<div class="urgency-scarcity">
+<p class="urgent-text">⚡ <strong>Time-Sensitive:</strong> [Create urgency]</p>
+</div>
+</div>
+
+Replace bracketed placeholders with actual content. Focus on:
+- Clear, specific benefits
+- Concrete outcomes  
+- Social proof elements
+- Actionable steps
+- Urgency/scarcity drivers
+
+Use this structure for ANY response about formatting, styling, or making content "easier to read."` :
         `You are JACC, a knowledgeable AI assistant for merchant services sales agents.
 
 **SEARCH HIERARCHY COMPLETED:**
@@ -438,8 +494,8 @@ When appropriate, suggest actions like saving payment processing information to 
           role: msg.role === 'user' ? 'user' as const : 'assistant' as const,
           content: msg.content
         })),
-        temperature: 0.3,
-        max_tokens: 400,
+        temperature: 0.4,
+        max_tokens: 1200,
       });
 
       let content = response.content[0].type === 'text' ? response.content[0].text : "";
