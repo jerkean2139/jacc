@@ -1,9 +1,13 @@
 import axios from 'axios';
 import { promises as fs } from 'fs';
 import path from 'path';
-import { Pool } from '@neondatabase/serverless';
+import { Pool, neonConfig } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-serverless';
 import { v4 as uuidv4 } from 'uuid';
+import ws from 'ws';
+
+// Configure WebSocket for Neon
+neonConfig.webSocketConstructor = ws;
 
 // Database setup
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
@@ -24,6 +28,7 @@ async function createSalesMarketingFolder() {
       description: 'Sales strategies, marketing techniques, and business growth content from industry experts',
       userId: 'admin-user-id',
       adminOnly: false,
+      vectorNamespace: 'sales-marketing',
       createdAt: new Date(),
       updatedAt: new Date()
     });
