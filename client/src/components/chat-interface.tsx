@@ -516,18 +516,21 @@ With these details, I'll create a customized proposal highlighting value proposi
               </Button>
             </div>
             
-            <div className="w-full">
+            <div className="w-full relative group">
               <Button
                 variant="outline"
-                className="p-4 h-auto text-left justify-start hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-700 dark:hover:text-purple-300 hover:border-purple-200 dark:hover:border-purple-700 transition-colors w-full"
-                onClick={() => handleQuickAction("Get current payment processing industry trends and market analysis")}
+                className="p-4 h-auto text-left justify-start cursor-not-allowed opacity-60 bg-gray-100 hover:bg-gray-100 border-gray-300 w-full"
+                disabled
               >
-                <Brain className="mr-3 h-5 w-5 text-purple-600 flex-shrink-0" />
+                <Brain className="mr-3 h-5 w-5 text-gray-400 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <div className="font-semibold mb-1 text-sm">Market Intelligence</div>
-                  <div className="text-xs text-slate-500 hover:text-purple-600 dark:hover:text-purple-400">Latest industry trends and insights</div>
+                  <div className="font-semibold mb-1 text-sm text-gray-500">Market Intelligence</div>
+                  <div className="text-xs text-gray-400">Latest industry trends and insights</div>
                 </div>
               </Button>
+              <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+                Coming Soon
+              </span>
             </div>
             
             <div className="w-full">
@@ -602,16 +605,21 @@ With these details, I'll create a customized proposal highlighting value proposi
                   <Paperclip className="w-4 h-4" />
                 </Button>
                 
-                {/* AI PROMPTS BUTTON */}
-                <Button
-                  variant="default"
-                  size="icon"
-                  onClick={() => setShowPromptDropdown(!showPromptDropdown)}
-                  className="w-8 h-8 bg-purple-600 hover:bg-purple-700 text-white shadow-md"
-                  title="AI Prompts"
-                >
-                  <Brain className="w-4 h-4" />
-                </Button>
+                {/* AI PROMPTS BUTTON - Coming Soon */}
+                <div className="relative group">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="w-8 h-8 cursor-not-allowed opacity-60 bg-gray-100 hover:bg-gray-100 border-gray-300"
+                    title="Coming Soon"
+                    disabled
+                  >
+                    <Brain className="w-4 h-4 text-gray-400" />
+                  </Button>
+                  <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+                    Coming Soon
+                  </span>
+                </div>
                 
                 <Button
                   variant="ghost"
@@ -627,8 +635,8 @@ With these details, I'll create a customized proposal highlighting value proposi
                 </Button>
               </div>
               
-              {/* AI Prompt Dropdown */}
-              {showPromptDropdown && (
+              {/* AI Prompt Dropdown - Disabled */}
+              {false && (
                 <div className="absolute right-2 bottom-14 w-96 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg z-50">
                   {/* Header with search */}
                   <div className="p-3 border-b border-slate-200 dark:border-slate-700">
