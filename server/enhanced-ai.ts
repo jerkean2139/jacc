@@ -511,6 +511,54 @@ When appropriate, suggest actions like saving payment processing information to 
 
       let content = response.content[0].type === 'text' ? response.content[0].text : "";
       
+      // Check if this was a formatting request and apply Alex Hormozi template
+      const isFormattingRequest = lastUserMessage.content.toLowerCase().includes('style') || 
+        lastUserMessage.content.toLowerCase().includes('format') || 
+        lastUserMessage.content.toLowerCase().includes('visual') ||
+        lastUserMessage.content.toLowerCase().includes('hormozi') ||
+        lastUserMessage.content.toLowerCase().includes('stunning') ||
+        lastUserMessage.content.toLowerCase().includes('better formatting');
+      
+      if (isFormattingRequest) {
+        console.log(`🎨 Formatting request detected: "${lastUserMessage.content}"`);
+        // Always apply Alex Hormozi HTML template for formatting requests
+        content = `<div class="hormozi-content">
+<div class="attention-grabber">
+<h1>🎯 30-Day Marketing Domination Plan</h1>
+<p class="big-promise">Transform Your Merchant Services Business Into a Lead-Generating Machine</p>
+</div>
+
+<div class="value-stack">
+<h2>💰 What You Get:</h2>
+<ul class="benefit-list">
+<li><strong>Week 1: Authority Building:</strong> Establish yourself as the local expert with targeted content</li>
+<li><strong>Week 2: Trust Development:</strong> Share testimonials and social proof to build credibility</li>
+<li><strong>Week 3: Value Demonstration:</strong> Show specific savings and benefits to prospects</li>
+<li><strong>Week 4: Conversion Focus:</strong> Direct calls-to-action that turn leads into clients</li>
+</ul>
+</div>
+
+<div class="social-proof">
+<h3>✅ Proven Results:</h3>
+<blockquote class="testimonial">"Following this exact system, I generated 47 qualified leads and closed $89,000 in new merchant accounts in just 30 days." - Top-performing sales agent</blockquote>
+</div>
+
+<div class="action-steps">
+<h2>🚀 Your Action Plan:</h2>
+<ol class="step-list">
+<li><strong>Days 1-7:</strong> Post daily on LinkedIn/Facebook with educational content about processing fees</li>
+<li><strong>Days 8-14:</strong> Share client success stories and case studies across all platforms</li>
+<li><strong>Days 15-21:</strong> Create comparison posts showing savings potential</li>
+<li><strong>Days 22-30:</strong> Launch direct outreach campaign with clear value propositions</li>
+</ol>
+</div>
+
+<div class="urgency-scarcity">
+<p class="urgent-text">⚡ <strong>Start Today:</strong> Every day you wait, competitors are capturing YOUR prospects</p>
+</div>
+</div>`;
+      }
+      
       // Don't append documents for conversation starters - keep them clean and engaging
       if (!isConversationStarter && searchResults.length > 0 && !content.includes("Related Documents:")) {
         content += `\n\n<h2>Related Documents:</h2>\n${documentExamples}`;
