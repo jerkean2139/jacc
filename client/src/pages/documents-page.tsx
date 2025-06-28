@@ -4,16 +4,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import DocumentUpload from "@/components/document-upload";
 import { DraggableDocument } from "@/components/draggable-document";
 import { DroppableFolder } from "@/components/droppable-folder";
 import { apiRequest } from "@/lib/queryClient";
-import { Search, FileText, Upload, Folder, Trash2, ArrowLeft, Home } from "lucide-react";
+import { Search, FileText, Upload, Folder, Trash2, ArrowLeft, Home, Plus, FolderPlus } from "lucide-react";
 import type { Document, Folder as FolderType, User } from "@shared/schema";
 
 export default function DocumentsPage() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [isCreateFolderDialogOpen, setIsCreateFolderDialogOpen] = useState(false);
+  const [newFolderName, setNewFolderName] = useState("");
+  const [newFolderColor, setNewFolderColor] = useState("blue");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -102,7 +108,7 @@ export default function DocumentsPage() {
     mutationFn: async ({ documentId, folderId }: { documentId: string; folderId: string }) => {
       return await apiRequest(`/api/documents/${documentId}/move`, {
         method: 'PATCH',
-        body: { folderId },
+        body: JSON.stringify({ folderId }),
       });
     },
     onSuccess: () => {
@@ -116,6 +122,39 @@ export default function DocumentsPage() {
         variant: "destructive",
       });
     },
+  });
+
+  // Create folder mutation
+  const createFolderMutation = useMutation({
+    mutationFn: async (folderData: { name: string; color: string }) => {
+      return apiRequest('/api/folders', {
+        method: 'POST',
+        body: JSON.stringify({
+          name: folderData.name,
+          color: folderData.color,
+          folderType: 'custom',
+          vectorNamespace: `folder_${folderData.name.toLowerCase().replace(/\s+/g, '_')}`
+        })
+      });
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/folders'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/documents'] });
+      setIsCreateFolderDialogOpen(false);
+      setNewFolderName('');
+      setNewFolderColor('blue');
+      toast({
+        title: "Folder Created",
+        description: `Folder "${data.name}" has been created successfully.`,
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Creation Failed",
+        description: "Failed to create folder. Please try again.",
+        variant: "destructive",
+      });
+    }
   });
 
   const handleDocumentMove = async (documentId: string, targetFolderId: string) => {

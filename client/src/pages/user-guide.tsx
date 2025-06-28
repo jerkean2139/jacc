@@ -340,18 +340,22 @@ function SalesAgentOnboarding() {
               </div>
               <div>
                 <h3 className="font-semibold">Master AI Prompts for Better Responses</h3>
-                <p className="text-muted-foreground text-sm">Use AI Prompts to customize how JACC responds to your specific needs.</p>
+                <p className="text-muted-foreground text-sm">Learn basic prompting techniques to get better results from JACC.</p>
                 <div className="mt-3 space-y-2">
                   <div className="p-3 bg-purple-50 dark:bg-purple-950 rounded-lg">
-                    <h4 className="font-medium text-sm mb-2">Step-by-Step: Using AI Prompts</h4>
-                    <ol className="text-xs space-y-1 text-muted-foreground">
-                      <li>1. Click "AI Prompts" in the sidebar</li>
-                      <li>2. Choose a template: Pricing Analysis, Objection Handling, or Compliance Guidance</li>
-                      <li>3. Click "Use Template" to load it into the editor</li>
-                      <li>4. Customize the prompt for your business style</li>
-                      <li>5. Save your changes - JACC will now use your custom prompt in chat</li>
-                      <li>6. Test it by asking JACC a question that matches your prompt category</li>
-                    </ol>
+                    <h4 className="font-medium text-sm mb-2">Coming Soon - Learn Basic Prompting</h4>
+                    <p className="text-xs text-muted-foreground mb-2">
+                      Watch this video to learn how to write better prompts for AI assistants:
+                    </p>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="text-xs"
+                      onClick={() => window.open('https://youtu.be/HqY4bd0wlXw?si=c431nFAmSFA3PDX8', '_blank')}
+                    >
+                      <Play className="w-3 h-3 mr-1" />
+                      Watch: Basic AI Prompting Guide
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -396,6 +400,28 @@ function SalesAgentOnboarding() {
                       <li>• "What compliance requirements do I need to mention?"</li>
                       <li>• "How do I handle rate objections from merchants?"</li>
                       <li>• "What's included in the Shift4 equipment package?"</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-8 h-8 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+                <span className="text-sm font-semibold text-green-600 dark:text-green-400">6</span>
+              </div>
+              <div>
+                <h3 className="font-semibold">Access Marketing & Sales Helpers</h3>
+                <p className="text-muted-foreground text-sm">Get expert-level marketing strategies and sales techniques from JACC.</p>
+                <div className="mt-3 space-y-2">
+                  <div className="p-3 bg-purple-50 dark:bg-purple-950 rounded-lg">
+                    <h4 className="font-medium text-sm mb-2">Ask JACC for Marketing Help:</h4>
+                    <ul className="text-xs space-y-1 text-muted-foreground">
+                      <li>• "Help me create a marketing strategy for restaurants"</li>
+                      <li>• "Write a cold outbound email for retail merchants"</li>
+                      <li>• "Create a flyer idea for POS system benefits"</li>
+                      <li>• "Help me handle pricing objections professionally"</li>
+                      <li>• "What's the best way to approach new prospects?"</li>
                     </ul>
                   </div>
                 </div>
