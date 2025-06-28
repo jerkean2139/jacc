@@ -239,6 +239,38 @@ export const documents = pgTable("documents", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Personal documents - user-specific documents with separate folder structure
+export const personalDocuments = pgTable("personal_documents", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: varchar("name", { length: 255 }).notNull(),
+  originalName: varchar("original_name", { length: 255 }).notNull(),
+  mimeType: varchar("mime_type", { length: 100 }).notNull(),
+  size: integer("size").notNull(),
+  path: text("path").notNull(),
+  content: text("content"), // Extracted text content for search
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  personalFolderId: uuid("personal_folder_id").references(() => personalFolders.id, { onDelete: "set null" }),
+  isFavorite: boolean("is_favorite").default(false),
+  tags: text("tags").array().default([]),
+  notes: text("notes"), // User's personal notes about the document
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Personal folders - user-specific folder structure
+export const personalFolders = pgTable("personal_folders", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  color: varchar("color", { length: 7 }).default("#3B82F6"), // Hex color code
+  icon: varchar("icon", { length: 50 }).default("Folder"), // Lucide icon name
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  parentId: uuid("parent_id").references(() => personalFolders.id, { onDelete: "cascade" }),
+  sortOrder: integer("sort_order").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Scheduled URLs for automatic scraping
 export const scheduledUrls = pgTable("scheduled_urls", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -893,12 +925,29 @@ export const trainingInteractions = pgTable("training_interactions", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Personal documents types
+export const insertPersonalDocumentSchema = createInsertSchema(personalDocuments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertPersonalFolderSchema = createInsertSchema(personalFolders).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type TrainingInteraction = typeof trainingInteractions.$inferSelect;
 export type InsertTrainingInteraction = typeof trainingInteractions.$inferInsert;
+export type PersonalDocument = typeof personalDocuments.$inferSelect;
+export type InsertPersonalDocument = z.infer<typeof insertPersonalDocumentSchema>;
+export type PersonalFolder = typeof personalFolders.$inferSelect;
+export type InsertPersonalFolder = z.infer<typeof insertPersonalFolderSchema>;
 
 // Processor pricing management
 export const processorPricing = pgTable("processor_pricing", {
