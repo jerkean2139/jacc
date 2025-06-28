@@ -123,11 +123,9 @@ export default function UserGuide() {
       </Card>
       {/* Role-Specific Content */}
       <Tabs defaultValue="getting-started" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="getting-started">Getting Started</TabsTrigger>
           <TabsTrigger value="onboarding">Onboarding</TabsTrigger>
-          <TabsTrigger value="features">Features</TabsTrigger>
-          <TabsTrigger value="workflows">Workflows</TabsTrigger>
           <TabsTrigger value="tips">Tips & Tricks</TabsTrigger>
         </TabsList>
 
@@ -208,19 +206,7 @@ export default function UserGuide() {
           {activeRole === 'dev-admin' && <DevAdminOnboarding />}
         </TabsContent>
 
-        {/* Features */}
-        <TabsContent value="features">
-          {activeRole === 'sales-agent' && <SalesAgentFeatures />}
-          {activeRole === 'client-admin' && <ClientAdminFeatures />}
-          {activeRole === 'dev-admin' && <DevAdminFeatures />}
-        </TabsContent>
 
-        {/* Workflows */}
-        <TabsContent value="workflows">
-          {activeRole === 'sales-agent' && <SalesAgentWorkflows />}
-          {activeRole === 'client-admin' && <ClientAdminWorkflows />}
-          {activeRole === 'dev-admin' && <DevAdminWorkflows />}
-        </TabsContent>
 
         {/* Tips & Tricks */}
         <TabsContent value="tips">
@@ -500,81 +486,3 @@ function DevAdminOnboarding() {
 }
 
 // Feature Components (simplified for brevity)
-function SalesAgentFeatures() {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Sales Agent Features</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p>Sales Agent features documentation coming soon...</p>
-      </CardContent>
-    </Card>
-  );
-}
-
-function ClientAdminFeatures() {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Client Admin Features</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p>Client Admin features documentation coming soon...</p>
-      </CardContent>
-    </Card>
-  );
-}
-
-function DevAdminFeatures() {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>System Admin Features</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p>System Admin features documentation coming soon...</p>
-      </CardContent>
-    </Card>
-  );
-}
-
-// Workflow Components (simplified for brevity)
-function SalesAgentWorkflows() {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Sales Agent Workflows</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p>Sales Agent workflow documentation coming soon...</p>
-      </CardContent>
-    </Card>
-  );
-}
-
-function ClientAdminWorkflows() {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Client Admin Workflows</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p>Client Admin workflow documentation coming soon...</p>
-      </CardContent>
-    </Card>
-  );
-}
-
-function DevAdminWorkflows() {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>System Admin Workflows</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p>System Admin workflow documentation coming soon...</p>
-      </CardContent>
-    </Card>
-  );
-}
