@@ -18,6 +18,8 @@ interface DraggableDocumentProps {
     folderId?: string;
   };
   onMove?: (documentId: string, targetFolderId: string) => Promise<void>;
+  onPreview?: (document: any) => void;
+  onDownload?: (document: any) => void;
 }
 
 export function DraggableDocument({ document, onMove }: DraggableDocumentProps) {

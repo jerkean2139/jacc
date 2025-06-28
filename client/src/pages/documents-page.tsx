@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import DocumentUpload from "@/components/document-upload";
 import { DraggableDocument } from "@/components/draggable-document";
 import { DroppableFolder } from "@/components/droppable-folder";
+import DocumentPreviewModal from "@/components/ui/document-preview-modal";
 import { apiRequest } from "@/lib/queryClient";
 import { Search, FileText, Upload, Folder, Trash2, ArrowLeft, Home, Plus, FolderPlus, User as UserIcon } from "lucide-react";
 import type { Document, Folder as FolderType, User as UserType } from "@shared/schema";
@@ -21,6 +22,8 @@ export default function DocumentsPage() {
   const [isCreateFolderDialogOpen, setIsCreateFolderDialogOpen] = useState(false);
   const [newFolderName, setNewFolderName] = useState("");
   const [newFolderColor, setNewFolderColor] = useState("blue");
+  const [previewDocument, setPreviewDocument] = useState<Document | null>(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -140,6 +143,26 @@ export default function DocumentsPage() {
 
   const handleDocumentMove = async (documentId: string, targetFolderId: string) => {
     await moveMutation.mutateAsync({ documentId, folderId: targetFolderId });
+  };
+
+  const handlePreviewDocument = (document: Document) => {
+    setPreviewDocument(document);
+    setIsPreviewOpen(true);
+  };
+
+  const handleDownloadDocument = (doc: Document) => {
+    const downloadUrl = `/api/documents/${doc.id}/download`;
+    const link = window.document.createElement('a');
+    link.href = downloadUrl;
+    link.download = doc.originalName || doc.name;
+    window.document.body.appendChild(link);
+    link.click();
+    window.document.body.removeChild(link);
+    
+    toast({
+      title: "Download started",
+      description: `Downloading ${doc.originalName || doc.name}`,
+    });
   };
 
   const filteredDocuments = normalizedDocuments.filter(doc =>
