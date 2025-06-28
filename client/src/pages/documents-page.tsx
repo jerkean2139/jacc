@@ -33,39 +33,44 @@ export default function DocumentsPage() {
     queryKey: ["/api/documents"],
   });
 
-  const { data: folders = [], isLoading: foldersLoading, error: foldersError } = useQuery<FolderType[]>({
+  const { data: foldersData = [], isLoading: foldersLoading, error: foldersError } = useQuery<FolderType[]>({
     queryKey: ["/api/folders"],
   });
+
+  // Extract folders from the documents API response or fallback to folders API
+  const folders = documentsData?.folders || foldersData;
 
   // Check if user is admin
   const isAdmin = user?.role === 'dev-admin' || user?.role === 'client-admin';
 
-  // Extract documents from API response - handle both array and object formats
+  // Extract documents from API response - handle the integrated format
   let documents: any[] = [];
   
-  if (documentsData) {
-    // Handle case where API returns array directly (current format)
-    if (Array.isArray(documentsData)) {
-      documents = documentsData.filter((doc: any) => {
-        if (isAdmin) return true; // Admins see all documents
-        return !doc.adminOnly; // Regular users only see non-admin documents
-      });
-    } 
-    // Handle case where API returns object with folders structure (legacy format)
-    else {
+  if (documentsData && typeof documentsData === 'object') {
+    // Handle the current integrated format with folders and unassignedDocuments
+    if ((documentsData as any).folders && Array.isArray((documentsData as any).folders)) {
       documents = [
-        ...(documentsData.folders?.flatMap((folder: any) => {
+        // Extract documents from folders
+        ...(documentsData as any).folders.flatMap((folder: any) => {
           if (!folder.documents || !Array.isArray(folder.documents)) return [];
           return folder.documents.filter((doc: any) => {
             if (isAdmin) return true; // Admins see all documents
             return !doc.admin_only && !doc.adminOnly;
           });
-        }) || []),
-        ...(documentsData.unassignedDocuments?.filter((doc: any) => {
+        }),
+        // Add unassigned documents
+        ...((documentsData as any).unassignedDocuments?.filter((doc: any) => {
           if (isAdmin) return true; // Admins see all documents
           return !doc.admin_only && !doc.adminOnly;
         }) || [])
       ];
+    }
+    // Fallback for array format (if it ever changes back)
+    else if (Array.isArray(documentsData)) {
+      documents = documentsData.filter((doc: any) => {
+        if (isAdmin) return true; // Admins see all documents
+        return !doc.adminOnly; // Regular users only see non-admin documents
+      });
     }
   }
 
@@ -355,7 +360,7 @@ export default function DocumentsPage() {
                           id: folder.id,
                           name: folder.name,
                           documentCount: documentCount,
-                          createdAt: folder.createdAt?.toISOString() || undefined
+                          createdAt: folder.createdAt || undefined
                         }}
                         onDocumentMove={handleDocumentMove}
                       />

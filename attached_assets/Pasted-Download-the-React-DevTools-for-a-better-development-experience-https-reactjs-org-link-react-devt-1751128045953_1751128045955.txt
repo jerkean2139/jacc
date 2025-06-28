@@ -1,0 +1,80 @@
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+clear-popup-flags.ts:26 Cleared 0 popup flags from localStorage
+documents-page.tsx:166 Search query: 
+documents-page.tsx:167 Normalized documents: 0
+documents-page.tsx:168 Filtered documents: 0
+documents-page.tsx:166 Search query: 
+documents-page.tsx:167 Normalized documents: 0
+documents-page.tsx:168 Filtered documents: 0
+api/user/stats:1 
+            
+            
+           Failed to load resource: the server responded with a status of 401 (Unauthorized)Understand this error
+api/user/achievements:1 
+            
+            
+           Failed to load resource: the server responded with a status of 401 (Unauthorized)Understand this error
+documents-page.tsx:166 Search query: 
+documents-page.tsx:167 Normalized documents: 0
+documents-page.tsx:168 Filtered documents: 0
+documents-page.tsx:166 Search query: 
+documents-page.tsx:167 Normalized documents: 0
+documents-page.tsx:168 Filtered documents: 0
+documents-page.tsx:358 Uncaught TypeError: folder.createdAt?.toISOString is not a function
+    at documents-page.tsx:358:56
+    at Array.map (<anonymous>)
+    at DocumentsPage (documents-page.tsx:347:28)
+    at renderWithHooks (chunk-WERSD76P.js?v=0d8a4c76:11548:26)
+    at updateFunctionComponent (chunk-WERSD76P.js?v=0d8a4c76:14582:28)
+    at beginWork (chunk-WERSD76P.js?v=0d8a4c76:15924:22)
+    at HTMLUnknownElement.callCallback2 (chunk-WERSD76P.js?v=0d8a4c76:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-WERSD76P.js?v=0d8a4c76:3699:24)
+    at invokeGuardedCallback (chunk-WERSD76P.js?v=0d8a4c76:3733:39)
+    at beginWork$1 (chunk-WERSD76P.js?v=0d8a4c76:19765:15)Understand this error
+documents-page.tsx:166 Search query: 
+documents-page.tsx:167 Normalized documents: 0
+documents-page.tsx:168 Filtered documents: 0
+documents-page.tsx:166 Search query: 
+documents-page.tsx:167 Normalized documents: 0
+documents-page.tsx:168 Filtered documents: 0
+documents-page.tsx:358 Uncaught TypeError: folder.createdAt?.toISOString is not a function
+    at documents-page.tsx:358:56
+    at Array.map (<anonymous>)
+    at DocumentsPage (documents-page.tsx:347:28)
+    at renderWithHooks (chunk-WERSD76P.js?v=0d8a4c76:11548:26)
+    at updateFunctionComponent (chunk-WERSD76P.js?v=0d8a4c76:14582:28)
+    at beginWork (chunk-WERSD76P.js?v=0d8a4c76:15924:22)
+    at HTMLUnknownElement.callCallback2 (chunk-WERSD76P.js?v=0d8a4c76:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-WERSD76P.js?v=0d8a4c76:3699:24)
+    at invokeGuardedCallback (chunk-WERSD76P.js?v=0d8a4c76:3733:39)
+    at beginWork$1 (chunk-WERSD76P.js?v=0d8a4c76:19765:15)Understand this error
+chunk-WERSD76P.js?v=0d8a4c76:14032 The above error occurred in the <DocumentsPage> component:
+
+    at DocumentsPage (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/pages/documents-page.tsx:35:41)
+    at Route (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=0d8a4c76:323:16)
+    at Switch (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=0d8a4c76:379:17)
+    at Router (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/App.tsx?v=F2RKmgbFz2Mpok1fobA5A:63:31)
+    at div
+    at DragDropProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/components/drag-drop-provider.tsx:20:36)
+    at GamificationProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/hooks/useGamification.tsx:22:40)
+    at AppContent (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/App.tsx?v=F2RKmgbFz2Mpok1fobA5A:307:20)
+    at Provider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-PLT6GTVM.js?v=0d8a4c76:38:15)
+    at TooltipProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=0d8a4c76:64:5)
+    at QueryClientProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=0d8a4c76:2805:3)
+    at App (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/App.tsx?v=F2RKmgbFz2Mpok1fobA5A:368:9)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+logCapturedError @ chunk-WERSD76P.js?v=0d8a4c76:14032Understand this error
+chunk-WERSD76P.js?v=0d8a4c76:9129 Uncaught TypeError: folder.createdAt?.toISOString is not a function
+    at documents-page.tsx:358:56
+    at Array.map (<anonymous>)
+    at DocumentsPage (documents-page.tsx:347:28)
+    at renderWithHooks (chunk-WERSD76P.js?v=0d8a4c76:11548:26)
+    at updateFunctionComponent (chunk-WERSD76P.js?v=0d8a4c76:14582:28)
+    at beginWork (chunk-WERSD76P.js?v=0d8a4c76:15924:22)
+    at beginWork$1 (chunk-WERSD76P.js?v=0d8a4c76:19753:22)
+    at performUnitOfWork (chunk-WERSD76P.js?v=0d8a4c76:19198:20)
+    at workLoopSync (chunk-WERSD76P.js?v=0d8a4c76:19137:13)
+    at renderRootSync (chunk-WERSD76P.js?v=0d8a4c76:19116:15)Understand this error
+documents:1 Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner.
