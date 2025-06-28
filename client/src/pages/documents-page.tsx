@@ -46,32 +46,12 @@ export default function DocumentsPage() {
   // Extract documents from API response - handle the integrated format
   let documents: any[] = [];
   
-  if (documentsData && typeof documentsData === 'object') {
-    // Handle the current integrated format with folders and unassignedDocuments
-    if ((documentsData as any).folders && Array.isArray((documentsData as any).folders)) {
-      documents = [
-        // Extract documents from folders
-        ...(documentsData as any).folders.flatMap((folder: any) => {
-          if (!folder.documents || !Array.isArray(folder.documents)) return [];
-          return folder.documents.filter((doc: any) => {
-            if (isAdmin) return true; // Admins see all documents
-            return !doc.admin_only && !doc.adminOnly;
-          });
-        }),
-        // Add unassigned documents
-        ...((documentsData as any).unassignedDocuments?.filter((doc: any) => {
-          if (isAdmin) return true; // Admins see all documents
-          return !doc.admin_only && !doc.adminOnly;
-        }) || [])
-      ];
-    }
-    // Fallback for array format (if it ever changes back)
-    else if (Array.isArray(documentsData)) {
-      documents = documentsData.filter((doc: any) => {
-        if (isAdmin) return true; // Admins see all documents
-        return !doc.adminOnly; // Regular users only see non-admin documents
-      });
-    }
+  if (documentsData && Array.isArray(documentsData)) {
+    // API returns array format directly
+    documents = documentsData.filter((doc: any) => {
+      if (isAdmin) return true; // Admins see all documents
+      return !doc.adminOnly && !doc.admin_only; // Regular users only see non-admin documents
+    });
   }
 
   // Map the document structure to ensure consistent field names
@@ -350,8 +330,10 @@ export default function DocumentsPage() {
               ) : folders.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {folders.map((folder: any) => {
-                    // Calculate document count from the actual documents array
-                    const documentCount = documents.filter(doc => doc.folderId === folder.id).length;
+                    // Get documents for this folder from the documents array
+                    const folderDocuments = documents.filter(doc => 
+                      doc.folderId === folder.id || doc.folder_id === folder.id
+                    );
                     
                     return (
                       <DroppableFolder
@@ -359,8 +341,9 @@ export default function DocumentsPage() {
                         folder={{
                           id: folder.id,
                           name: folder.name,
-                          documentCount: documentCount,
-                          createdAt: folder.createdAt ? new Date(folder.createdAt).toISOString() : undefined
+                          documentCount: folder.document_count || folder.documentCount || folderDocuments.length,
+                          createdAt: folder.createdAt ? new Date(folder.createdAt).toISOString() : undefined,
+                          documents: folderDocuments
                         }}
                         onDocumentMove={handleDocumentMove}
                       />
