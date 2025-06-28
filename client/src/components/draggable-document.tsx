@@ -22,7 +22,7 @@ interface DraggableDocumentProps {
   onDownload?: (document: any) => void;
 }
 
-export function DraggableDocument({ document, onMove }: DraggableDocumentProps) {
+export function DraggableDocument({ document, onMove, onPreview, onDownload }: DraggableDocumentProps) {
   const { setDraggedItem, draggedItem, isDragging } = useDragDrop();
 
   const handleDragStart = (e: React.DragEvent) => {
@@ -96,7 +96,11 @@ export function DraggableDocument({ document, onMove }: DraggableDocumentProps) 
               className="h-8 w-8 p-0"
               onClick={(e) => {
                 e.stopPropagation();
-                window.open(`/documents/${document.id}`, '_blank');
+                if (onPreview) {
+                  onPreview(document);
+                } else {
+                  window.open(`/documents/${document.id}`, '_blank');
+                }
               }}
             >
               <Eye className="h-4 w-4" />
@@ -107,7 +111,11 @@ export function DraggableDocument({ document, onMove }: DraggableDocumentProps) 
               className="h-8 w-8 p-0"
               onClick={(e) => {
                 e.stopPropagation();
-                window.open(`/api/documents/${document.id}/download`, '_blank');
+                if (onDownload) {
+                  onDownload(document);
+                } else {
+                  window.open(`/api/documents/${document.id}/download`, '_blank');
+                }
               }}
             >
               <Download className="h-4 w-4" />

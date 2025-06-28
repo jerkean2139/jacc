@@ -291,6 +291,8 @@ export default function DocumentsPage() {
                       key={doc.id}
                       document={doc}
                       onMove={handleDocumentMove}
+                      onPreview={handlePreviewDocument}
+                      onDownload={handleDownloadDocument}
                     />
                   ))}
                 </div>
@@ -470,6 +472,18 @@ export default function DocumentsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Document Preview Modal */}
+      {previewDocument && (
+        <DocumentPreviewModal
+          document={previewDocument}
+          isOpen={isPreviewOpen}
+          onClose={() => {
+            setIsPreviewOpen(false);
+            setPreviewDocument(null);
+          }}
+        />
+      )}
     </div>
   );
 }
