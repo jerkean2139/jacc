@@ -4,6 +4,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -20,23 +21,11 @@ import {
 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
-interface Document {
-  id: string;
-  name: string;
-  originalName: string;
-  mimeType: string;
-  size: number;
-  folderId?: string;
-  tags?: string[];
-  category?: string;
-  createdAt: string;
-}
-
 interface DocumentPreviewModalProps {
-  document: Document | null;
+  document: any;
   isOpen: boolean;
   onClose: () => void;
-  onDownload: (doc: Document) => void;
+  onDownload: (doc: any) => void;
 }
 
 export default function DocumentPreviewModal({
@@ -71,8 +60,9 @@ export default function DocumentPreviewModal({
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+  const formatDate = (date: Date | null) => {
+    if (!date) return 'Unknown';
+    return new Date(date).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -149,13 +139,16 @@ export default function DocumentPreviewModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[90vh] p-0">
+      <DialogContent className="max-w-6xl max-h-[90vh] p-0 z-50">
         <DialogHeader className="p-6 pb-0">
           <div className="flex items-start justify-between">
             <div className="flex-1 min-w-0">
               <DialogTitle className="text-lg font-semibold truncate">
                 {document.name}
               </DialogTitle>
+              <DialogDescription className="sr-only">
+                Document preview for {document.name}
+              </DialogDescription>
               <div className="flex items-center gap-2 mt-2">
                 <Badge variant="outline">
                   {document.mimeType?.split('/')[1] || 'unknown'}

@@ -1,0 +1,147 @@
+Normalized documents: 0
+documents-page.tsx:179 Filtered documents: 0
+documents-page.tsx:177 Search query: 
+documents-page.tsx:178 Normalized documents: 0
+documents-page.tsx:179 Filtered documents: 0
+requests.js:1 
+            
+            
+           GET https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/api/user/stats 401 (Unauthorized)
+s.fetch @ requests.js:1
+(anonymous) @ queryClient.ts:32
+fetchFn @ @tanstack_react-query.js?v=c37dbce7:840
+run @ @tanstack_react-query.js?v=c37dbce7:494
+start @ @tanstack_react-query.js?v=c37dbce7:536
+fetch @ @tanstack_react-query.js?v=c37dbce7:926
+executeFetch_fn @ @tanstack_react-query.js?v=c37dbce7:2211
+setOptions @ @tanstack_react-query.js?v=c37dbce7:1955
+(anonymous) @ @tanstack_react-query.js?v=c37dbce7:3032
+commitHookEffectListMount @ chunk-WERSD76P.js?v=c37dbce7:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=c37dbce7:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=c37dbce7:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=c37dbce7:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=c37dbce7:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=c37dbce7:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=c37dbce7:19447
+commitRootImpl @ chunk-WERSD76P.js?v=c37dbce7:19416
+commitRoot @ chunk-WERSD76P.js?v=c37dbce7:19277
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=c37dbce7:18895
+flushSyncCallbacks @ chunk-WERSD76P.js?v=c37dbce7:9119
+(anonymous) @ chunk-WERSD76P.js?v=c37dbce7:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=c37dbce7:555
+flush @ @tanstack_react-query.js?v=c37dbce7:569
+batch @ @tanstack_react-query.js?v=c37dbce7:587
+dispatch_fn @ @tanstack_react-query.js?v=c37dbce7:996
+setData @ @tanstack_react-query.js?v=c37dbce7:696
+onSuccess @ @tanstack_react-query.js?v=c37dbce7:897
+resolve @ @tanstack_react-query.js?v=c37dbce7:456
+Promise.then
+run @ @tanstack_react-query.js?v=c37dbce7:498
+start @ @tanstack_react-query.js?v=c37dbce7:536
+fetch @ @tanstack_react-query.js?v=c37dbce7:926
+executeFetch_fn @ @tanstack_react-query.js?v=c37dbce7:2211
+onSubscribe @ @tanstack_react-query.js?v=c37dbce7:1898
+subscribe @ @tanstack_react-query.js?v=c37dbce7:24
+(anonymous) @ @tanstack_react-query.js?v=c37dbce7:3022
+subscribeToStore @ chunk-WERSD76P.js?v=c37dbce7:11984
+commitHookEffectListMount @ chunk-WERSD76P.js?v=c37dbce7:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=c37dbce7:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=c37dbce7:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=c37dbce7:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=c37dbce7:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=c37dbce7:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=c37dbce7:19447
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=c37dbce7:18868
+flushSyncCallbacks @ chunk-WERSD76P.js?v=c37dbce7:9119
+commitRootImpl @ chunk-WERSD76P.js?v=c37dbce7:19432
+commitRoot @ chunk-WERSD76P.js?v=c37dbce7:19277
+finishConcurrentRender @ chunk-WERSD76P.js?v=c37dbce7:18805
+performConcurrentWorkOnRoot @ chunk-WERSD76P.js?v=c37dbce7:18718
+workLoop @ chunk-WERSD76P.js?v=c37dbce7:197
+flushWork @ chunk-WERSD76P.js?v=c37dbce7:176
+performWorkUntilDeadline @ chunk-WERSD76P.js?v=c37dbce7:384Understand this error
+requests.js:1 
+            
+            
+           GET https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/api/user/achievements 401 (Unauthorized)
+s.fetch @ requests.js:1
+(anonymous) @ queryClient.ts:32
+fetchFn @ @tanstack_react-query.js?v=c37dbce7:840
+run @ @tanstack_react-query.js?v=c37dbce7:494
+start @ @tanstack_react-query.js?v=c37dbce7:536
+fetch @ @tanstack_react-query.js?v=c37dbce7:926
+executeFetch_fn @ @tanstack_react-query.js?v=c37dbce7:2211
+setOptions @ @tanstack_react-query.js?v=c37dbce7:1955
+(anonymous) @ @tanstack_react-query.js?v=c37dbce7:3032
+commitHookEffectListMount @ chunk-WERSD76P.js?v=c37dbce7:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=c37dbce7:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=c37dbce7:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=c37dbce7:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=c37dbce7:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=c37dbce7:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=c37dbce7:19447
+commitRootImpl @ chunk-WERSD76P.js?v=c37dbce7:19416
+commitRoot @ chunk-WERSD76P.js?v=c37dbce7:19277
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=c37dbce7:18895
+flushSyncCallbacks @ chunk-WERSD76P.js?v=c37dbce7:9119
+(anonymous) @ chunk-WERSD76P.js?v=c37dbce7:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=c37dbce7:555
+flush @ @tanstack_react-query.js?v=c37dbce7:569
+batch @ @tanstack_react-query.js?v=c37dbce7:587
+dispatch_fn @ @tanstack_react-query.js?v=c37dbce7:996
+setData @ @tanstack_react-query.js?v=c37dbce7:696
+onSuccess @ @tanstack_react-query.js?v=c37dbce7:897
+resolve @ @tanstack_react-query.js?v=c37dbce7:456
+Promise.then
+run @ @tanstack_react-query.js?v=c37dbce7:498
+start @ @tanstack_react-query.js?v=c37dbce7:536
+fetch @ @tanstack_react-query.js?v=c37dbce7:926
+executeFetch_fn @ @tanstack_react-query.js?v=c37dbce7:2211
+onSubscribe @ @tanstack_react-query.js?v=c37dbce7:1898
+subscribe @ @tanstack_react-query.js?v=c37dbce7:24
+(anonymous) @ @tanstack_react-query.js?v=c37dbce7:3022
+subscribeToStore @ chunk-WERSD76P.js?v=c37dbce7:11984
+commitHookEffectListMount @ chunk-WERSD76P.js?v=c37dbce7:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=c37dbce7:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=c37dbce7:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=c37dbce7:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=c37dbce7:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=c37dbce7:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=c37dbce7:19447
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=c37dbce7:18868
+flushSyncCallbacks @ chunk-WERSD76P.js?v=c37dbce7:9119
+commitRootImpl @ chunk-WERSD76P.js?v=c37dbce7:19432
+commitRoot @ chunk-WERSD76P.js?v=c37dbce7:19277
+finishConcurrentRender @ chunk-WERSD76P.js?v=c37dbce7:18805
+performConcurrentWorkOnRoot @ chunk-WERSD76P.js?v=c37dbce7:18718
+workLoop @ chunk-WERSD76P.js?v=c37dbce7:197
+flushWork @ chunk-WERSD76P.js?v=c37dbce7:176
+performWorkUntilDeadline @ chunk-WERSD76P.js?v=c37dbce7:384Understand this error
+documents-page.tsx:177 Search query: 
+documents-page.tsx:178 Normalized documents: 22
+documents-page.tsx:179 Filtered documents: 22
+documents:1 Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner.
+draggable-document.tsx:99 Eye button clicked, onPreview available: true
+draggable-document.tsx:101 Calling onPreview with document: Authorize.net_Agent_Resource_Slick (3)
+documents-page.tsx:149 Preview handler called with: {id: 'eb84c6d1-622a-4dce-8d45-e81fadebc5e2', name: 'Authorize.net_Agent_Resource_Slick (3)', originalName: 'Authorize.net_Agent_Resource_Slick (3).pdf', mimeType: 'application/pdf', size: 739427, …}
+documents-page.tsx:152 Modal state set: {previewDocument: 'Authorize.net_Agent_Resource_Slick (3)', isPreviewOpen: true}
+documents-page.tsx:177 Search query: 
+documents-page.tsx:178 Normalized documents: 22
+documents-page.tsx:179 Filtered documents: 22
+documents-page.tsx:481 Rendering DocumentPreviewModal with: {document: 'Authorize.net_Agent_Resource_Slick (3)', isOpen: true, hasDocument: true}
+chunk-B3U54XBD.js?v=c37dbce7:339 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-B3U54XBD.js?v=c37dbce7:339
+commitHookEffectListMount @ chunk-WERSD76P.js?v=c37dbce7:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=c37dbce7:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=c37dbce7:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=c37dbce7:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=c37dbce7:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=c37dbce7:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=c37dbce7:19447
+commitRootImpl @ chunk-WERSD76P.js?v=c37dbce7:19416
+commitRoot @ chunk-WERSD76P.js?v=c37dbce7:19277
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=c37dbce7:18895
+flushSyncCallbacks @ chunk-WERSD76P.js?v=c37dbce7:9119
+(anonymous) @ chunk-WERSD76P.js?v=c37dbce7:18627Understand this warning

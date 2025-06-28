@@ -491,6 +491,7 @@ export default function DocumentsPage() {
               setIsPreviewOpen(false);
               setPreviewDocument(null);
             }}
+            onDownload={handleDownloadDocument}
           />
         </>
       )}
