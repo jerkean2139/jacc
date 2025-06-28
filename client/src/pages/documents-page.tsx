@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import DocumentUpload from "@/components/document-upload";
 import { DraggableDocument } from "@/components/draggable-document";
 import { DroppableFolder } from "@/components/droppable-folder";
-import DocumentPreviewModal from "@/components/ui/document-preview-modal";
+
 import { apiRequest } from "@/lib/queryClient";
 import { Search, FileText, Upload, Folder, Trash2, ArrowLeft, Home, Plus, FolderPlus, User as UserIcon } from "lucide-react";
 import type { Document, Folder as FolderType, User as UserType } from "@shared/schema";
@@ -22,8 +22,7 @@ export default function DocumentsPage() {
   const [isCreateFolderDialogOpen, setIsCreateFolderDialogOpen] = useState(false);
   const [newFolderName, setNewFolderName] = useState("");
   const [newFolderColor, setNewFolderColor] = useState("blue");
-  const [previewDocument, setPreviewDocument] = useState<Document | null>(null);
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -146,10 +145,8 @@ export default function DocumentsPage() {
   };
 
   const handlePreviewDocument = (document: Document) => {
-    console.log('Preview handler called with:', document);
-    setPreviewDocument(document);
-    setIsPreviewOpen(true);
-    console.log('Modal state set:', { previewDocument: document.name, isPreviewOpen: true });
+    // Open document in new tab for viewing
+    window.open(`/api/documents/${document.id}/view`, '_blank');
   };
 
   const handleDownloadDocument = (doc: Document) => {
@@ -475,18 +472,7 @@ export default function DocumentsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Document Preview Modal */}
-      {previewDocument && (
-        <DocumentPreviewModal
-          document={previewDocument}
-          isOpen={isPreviewOpen}
-          onClose={() => {
-            setIsPreviewOpen(false);
-            setPreviewDocument(null);
-          }}
-          onDownload={handleDownloadDocument}
-        />
-      )}
+
     </div>
   );
 }
