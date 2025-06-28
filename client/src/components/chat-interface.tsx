@@ -11,6 +11,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   Send,
   Paperclip,
   Mic,
@@ -65,6 +71,7 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
   const [input, setInput] = useState("");
   const [showFileUpload, setShowFileUpload] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [showRecordingDialog, setShowRecordingDialog] = useState(false);
   const [showExternalSearchDialog, setShowExternalSearchDialog] = useState(false);
   const [pendingExternalQuery, setPendingExternalQuery] = useState("");
   const [showPromptDropdown, setShowPromptDropdown] = useState(false);
@@ -286,20 +293,24 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
 
       recognition.onstart = () => {
         setIsListening(true);
+        setShowRecordingDialog(true);
       };
 
       recognition.onresult = (event: any) => {
         const transcript = event.results[0][0].transcript;
         setInput(prev => prev + transcript);
         setIsListening(false);
+        setShowRecordingDialog(false);
       };
 
       recognition.onerror = () => {
         setIsListening(false);
+        setShowRecordingDialog(false);
       };
 
       recognition.onend = () => {
         setIsListening(false);
+        setShowRecordingDialog(false);
       };
 
       recognition.start();
@@ -1022,6 +1033,42 @@ With these details, I'll create a customized proposal highlighting value proposi
       </div>
       {/* Sales Coaching Overlay - Temporarily disabled */}
       {/* {coaching.isCoachingEnabled && <CoachingOverlay />} */}
+
+      {/* Voice Recording Dialog */}
+      <Dialog open={showRecordingDialog} onOpenChange={setShowRecordingDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+              Recording Voice Input
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col items-center py-6">
+            <div className="relative mb-4">
+              <div className="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center animate-pulse">
+                <Mic className="w-8 h-8 text-white" />
+              </div>
+              <div className="absolute inset-0 w-20 h-20 border-4 border-red-300 rounded-full animate-ping"></div>
+            </div>
+            <p className="text-center text-slate-600 dark:text-slate-400 mb-2">
+              Listening for your voice...
+            </p>
+            <p className="text-sm text-slate-500 dark:text-slate-500 text-center">
+              Speak clearly and I'll convert your speech to text
+            </p>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowRecordingDialog(false);
+                setIsListening(false);
+              }}
+              className="mt-4"
+            >
+              Cancel Recording
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
