@@ -106,10 +106,7 @@ export default function DocumentsPage() {
   // Document move mutation for drag-and-drop
   const moveMutation = useMutation({
     mutationFn: async ({ documentId, folderId }: { documentId: string; folderId: string }) => {
-      return await apiRequest(`/api/documents/${documentId}/move`, {
-        method: 'PATCH',
-        body: JSON.stringify({ folderId }),
-      });
+      return await apiRequest('PATCH', `/api/documents/${documentId}/move`, { folderId });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/documents"] });
@@ -127,15 +124,13 @@ export default function DocumentsPage() {
   // Create folder mutation
   const createFolderMutation = useMutation({
     mutationFn: async (folderData: { name: string; color: string }) => {
-      return apiRequest('/api/folders', {
-        method: 'POST',
-        body: JSON.stringify({
-          name: folderData.name,
-          color: folderData.color,
-          folderType: 'custom',
-          vectorNamespace: `folder_${folderData.name.toLowerCase().replace(/\s+/g, '_')}`
-        })
+      const response = await apiRequest('POST', '/api/folders', {
+        name: folderData.name,
+        color: folderData.color,
+        folderType: 'custom',
+        vectorNamespace: `folder_${folderData.name.toLowerCase().replace(/\s+/g, '_')}`
       });
+      return await response.json();
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['/api/folders'] });
@@ -303,10 +298,23 @@ export default function DocumentsPage() {
         <TabsContent value="folders" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Folder Organization</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Organize your documents into folders for better management
-              </p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Folder Organization</CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    Organize your documents into folders for better management
+                  </p>
+                </div>
+                {isAdmin && (
+                  <Button
+                    onClick={() => setIsCreateFolderDialogOpen(true)}
+                    className="flex items-center gap-2"
+                  >
+                    <FolderPlus className="h-4 w-4" />
+                    Create Folder
+                  </Button>
+                )}
+              </div>
             </CardHeader>
             <CardContent>
               {!foldersLoading && (
@@ -344,8 +352,10 @@ export default function DocumentsPage() {
                       <DroppableFolder
                         key={folder.id}
                         folder={{
-                          ...folder,
-                          documentCount: documentCount
+                          id: folder.id,
+                          name: folder.name,
+                          documentCount: documentCount,
+                          createdAt: folder.createdAt?.toISOString() || undefined
                         }}
                         onDocumentMove={handleDocumentMove}
                       />
@@ -365,6 +375,81 @@ export default function DocumentsPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Create Folder Dialog */}
+      <Dialog open={isCreateFolderDialogOpen} onOpenChange={setIsCreateFolderDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New Folder</DialogTitle>
+            <DialogDescription>
+              Create a new folder to organize your documents
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="folder-name">Folder Name</Label>
+              <Input
+                id="folder-name"
+                value={newFolderName}
+                onChange={(e) => setNewFolderName(e.target.value)}
+                placeholder="Enter folder name"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="folder-color">Folder Color</Label>
+              <Select value={newFolderColor} onValueChange={setNewFolderColor}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Choose folder color" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="blue">🔵 Blue</SelectItem>
+                  <SelectItem value="green">🟢 Green</SelectItem>
+                  <SelectItem value="yellow">🟡 Yellow</SelectItem>
+                  <SelectItem value="red">🔴 Red</SelectItem>
+                  <SelectItem value="purple">🟣 Purple</SelectItem>
+                  <SelectItem value="orange">🟠 Orange</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsCreateFolderDialogOpen(false);
+                setNewFolderName('');
+                setNewFolderColor('blue');
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                if (newFolderName.trim()) {
+                  createFolderMutation.mutate({
+                    name: newFolderName.trim(),
+                    color: newFolderColor
+                  });
+                }
+              }}
+              disabled={!newFolderName.trim() || createFolderMutation.isPending}
+            >
+              {createFolderMutation.isPending ? (
+                <>
+                  <Plus className="w-4 h-4 mr-2 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Folder
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
