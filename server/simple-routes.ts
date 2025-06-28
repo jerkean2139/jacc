@@ -2415,9 +2415,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (sessionId && sessions.has(sessionId)) {
         const user = sessions.get(sessionId);
+        console.log(`Session found for ID: ${sessionId}, user: ${user?.username}, role: ${user?.role}`);
         res.json(user);
-      } else if (!loggedOut) {
-        // Auto-login for seamless access - only if not recently logged out
+      } else if (!loggedOut && !sessionId) {
+        // Auto-login for seamless access - only if no session exists and not recently logged out
         const autoUser = { 
           id: 'demo-user-id', 
           username: 'tracer-user', 
@@ -2591,6 +2592,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           path: '/',
           sameSite: 'lax'
         });
+        
+        console.log(`Login successful for ${validUser.user.username} with role: ${validUser.user.role}`);
+        console.log(`Session stored with ID: ${sessionId}`);
         
         res.json({
           message: 'Login successful',
