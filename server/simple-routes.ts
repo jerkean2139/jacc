@@ -644,18 +644,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const [document] = await db.select().from(documents).where(eq(documents.id, id));
       if (!document) {
+        console.log(`Document not found in database: ${id}`);
         return res.status(404).json({ message: "Document not found" });
       }
       
+      console.log(`Document found: ${document.name}, path: ${document.path}`);
+      
       const fs = await import('fs');
       const path = await import('path');
-      // Handle both absolute and relative paths
-      let filePath = document.path;
-      if (!path.isAbsolute(filePath)) {
-        filePath = path.join(process.cwd(), filePath);
+      
+      // Try multiple path possibilities to locate the file
+      const possiblePaths = [
+        document.path, // Original path as stored
+        path.join(process.cwd(), document.path), // Relative to project root
+        path.join(process.cwd(), 'uploads', path.basename(document.path)), // In uploads with basename
+        path.join(process.cwd(), 'uploads', document.name), // By document name
+        path.join(process.cwd(), 'uploads', document.originalName || document.name) // By original name
+      ];
+      
+      let foundPath = null;
+      for (const testPath of possiblePaths) {
+        if (fs.existsSync(testPath)) {
+          foundPath = testPath;
+          console.log(`Found file at: ${foundPath}`);
+          break;
+        }
       }
       
-      if (!fs.existsSync(filePath)) {
+      if (!foundPath) {
+        console.log(`File not found at any path for document ${id}`);
         return res.status(404).json({ message: "File not found on disk" });
       }
       
@@ -667,7 +684,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.setHeader('Access-Control-Allow-Methods', 'GET');
       res.setHeader('X-Content-Type-Options', 'nosniff');
       
-      const fileStream = fs.createReadStream(filePath);
+      const fileStream = fs.createReadStream(foundPath);
       fileStream.pipe(res);
     } catch (error) {
       console.error("Error viewing document:", error);
@@ -689,20 +706,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const fs = await import('fs');
       const path = await import('path');
-      // Handle both absolute and relative paths
-      let filePath = document.path;
-      if (!path.isAbsolute(filePath)) {
-        filePath = path.join(process.cwd(), filePath);
+      
+      // Try multiple path possibilities to locate the file
+      const possiblePaths = [
+        document.path, // Original path as stored
+        path.join(process.cwd(), document.path), // Relative to project root
+        path.join(process.cwd(), 'uploads', path.basename(document.path)), // In uploads with basename
+        path.join(process.cwd(), 'uploads', document.name), // By document name
+        path.join(process.cwd(), 'uploads', document.originalName || document.name) // By original name
+      ];
+      
+      let foundPath = null;
+      for (const testPath of possiblePaths) {
+        if (fs.existsSync(testPath)) {
+          foundPath = testPath;
+          break;
+        }
       }
       
-      if (!fs.existsSync(filePath)) {
+      if (!foundPath) {
         return res.status(404).json({ message: "File not found on disk" });
       }
       
       res.setHeader('Content-Type', document.mimeType || 'application/octet-stream');
       res.setHeader('Content-Disposition', `attachment; filename="${document.originalName}"`);
       
-      const fileStream = fs.createReadStream(filePath);
+      const fileStream = fs.createReadStream(foundPath);
       fileStream.pipe(res);
     } catch (error) {
       console.error("Error downloading document:", error);
