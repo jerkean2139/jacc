@@ -40,12 +40,12 @@ export default function MyDocumentsPage() {
   const queryClient = useQueryClient();
 
   // Fetch personal documents
-  const { data: documents = [], isLoading: documentsLoading } = useQuery({
+  const { data: documents = [], isLoading: documentsLoading } = useQuery<PersonalDocument[]>({
     queryKey: ['/api/personal-documents'],
   });
 
   // Fetch personal folders
-  const { data: folders = [], isLoading: foldersLoading } = useQuery({
+  const { data: folders = [], isLoading: foldersLoading } = useQuery<PersonalFolder[]>({
     queryKey: ['/api/personal-folders'],
   });
 
@@ -142,7 +142,7 @@ export default function MyDocumentsPage() {
   });
 
   // Filter documents based on search and selected folder
-  const filteredDocuments = documents.filter((doc: PersonalDocument) => {
+  const filteredDocuments = documents.filter((doc) => {
     const matchesSearch = doc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          doc.content?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          doc.tags?.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -154,11 +154,11 @@ export default function MyDocumentsPage() {
 
   // Get documents in selected folder
   const folderDocuments = selectedFolder 
-    ? documents.filter((doc: PersonalDocument) => doc.personalFolderId === selectedFolder)
+    ? documents.filter((doc) => doc.personalFolderId === selectedFolder)
     : [];
 
   // Get unorganized documents
-  const unorganizedDocuments = documents.filter((doc: PersonalDocument) => !doc.personalFolderId);
+  const unorganizedDocuments = documents.filter((doc) => !doc.personalFolderId);
 
   const handleCreateFolder = () => {
     if (!newFolderName.trim()) return;

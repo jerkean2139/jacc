@@ -13,8 +13,8 @@ import DocumentUpload from "@/components/document-upload";
 import { DraggableDocument } from "@/components/draggable-document";
 import { DroppableFolder } from "@/components/droppable-folder";
 import { apiRequest } from "@/lib/queryClient";
-import { Search, FileText, Upload, Folder, Trash2, ArrowLeft, Home, Plus, FolderPlus } from "lucide-react";
-import type { Document, Folder as FolderType, User } from "@shared/schema";
+import { Search, FileText, Upload, Folder, Trash2, ArrowLeft, Home, Plus, FolderPlus, User as UserIcon } from "lucide-react";
+import type { Document, Folder as FolderType, User as UserType } from "@shared/schema";
 
 export default function DocumentsPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -210,6 +210,10 @@ export default function DocumentsPage() {
           <TabsTrigger value="manage">
             <FileText className="h-4 w-4 mr-2" />
             {isAdmin ? 'All Documents' : 'Documents'} ({normalizedDocuments.length})
+          </TabsTrigger>
+          <TabsTrigger value="my-documents">
+            <User className="h-4 w-4 mr-2" />
+            My Documents
           </TabsTrigger>
           {isAdmin && (
             <TabsTrigger value="upload">
