@@ -654,15 +654,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const document = documentResult[0];
       const fs = await import('fs');
-      const path = await import('path');
       
       if (!document.path) {
         return res.status(404).json({ message: "No file path stored" });
       }
       
-      // Extract hash filename and construct file path
-      const hashFilename = path.basename(document.path);
-      const filePath = path.join(process.cwd(), 'uploads', hashFilename);
+      // Use the stored path directly since it's already absolute
+      const filePath = document.path;
       
       // Check if file exists
       if (!fs.existsSync(filePath)) {
