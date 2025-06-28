@@ -22,20 +22,37 @@ import {
   Target,
   TrendingUp,
   ArrowLeft,
-  Home
+  Home,
+  Clock,
+  Database,
+  Globe,
+  Lock,
+  Upload,
+  Search,
+  Brain,
+  BarChart3,
+  UserCheck,
+  Monitor
 } from 'lucide-react';
 import { useLocation } from 'wouter';
+import { useQuery } from '@tanstack/react-query';
 
 export default function UserGuide() {
   const [activeRole, setActiveRole] = useState('sales-agent');
   const [location, navigate] = useLocation();
+
+  // Get current user data to determine role-based visibility
+  const { data: user } = useQuery({
+    queryKey: ['/api/user'],
+    enabled: true
+  });
 
   const handleGoBack = () => {
     // Navigate back to home or previous page
     navigate('/');
   };
 
-  const roles = {
+  const allRoles = {
     'sales-agent': {
       name: 'Sales Agent',
       icon: Target,
@@ -55,6 +72,28 @@ export default function UserGuide() {
       description: 'Technical administrators with full system access'
     }
   };
+
+  // Filter roles based on user permissions
+  const getUserVisibleRoles = () => {
+    if (!user) return { 'sales-agent': allRoles['sales-agent'] };
+    
+    const userRole = user.role;
+    
+    // Regular sales agents only see their own guide
+    if (userRole === 'sales-agent') {
+      return { 'sales-agent': allRoles['sales-agent'] };
+    }
+    
+    // Admins can see all roles
+    if (userRole === 'client-admin' || userRole === 'dev-admin') {
+      return allRoles;
+    }
+    
+    // Default to sales agent view
+    return { 'sales-agent': allRoles['sales-agent'] };
+  };
+
+  const roles = getUserVisibleRoles();
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto p-6">
@@ -454,34 +493,281 @@ function SalesAgentOnboarding() {
 // Client Admin Onboarding Component
 function ClientAdminOnboarding() {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Settings className="w-5 h-5 text-blue-600" />
-          Client Admin Onboarding
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Settings className="w-5 h-5 text-blue-600" />
+            Client Admin Onboarding
         </CardTitle>
+        <CardDescription>
+          Complete setup and management guide for client administrators
+        </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <p>Client Admin onboarding steps coming soon...</p>
+      <CardContent className="space-y-6">
+        <div className="space-y-4">
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0 w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+              <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">1</span>
+            </div>
+            <div>
+              <h3 className="font-semibold">Access Admin Control Center</h3>
+              <p className="text-muted-foreground text-sm">Navigate to Settings → Admin Control Center for full management capabilities.</p>
+              <div className="mt-3 space-y-2">
+                <div className="p-3 bg-blue-50 dark:bg-blue-950 rounded-lg">
+                  <h4 className="font-medium text-sm mb-2">Admin Dashboard Overview:</h4>
+                  <ul className="text-xs space-y-1 text-muted-foreground">
+                    <li>• Q&A Knowledge Base - Manage FAQ entries and responses</li>
+                    <li>• Document Center - Upload, organize, and manage documents</li>
+                    <li>• Chat Review & Training - Monitor conversations and train AI</li>
+                    <li>• Settings - Configure AI behavior, user management, and system performance</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0 w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+              <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">2</span>
+            </div>
+            <div>
+              <h3 className="font-semibold">Set Up Document Management</h3>
+              <p className="text-muted-foreground text-sm">Organize and upload documents for your sales team to access through JACC.</p>
+              <div className="mt-3 space-y-2">
+                <div className="p-3 bg-green-50 dark:bg-green-950 rounded-lg">
+                  <h4 className="font-medium text-sm mb-2">Document Setup Process:</h4>
+                  <ol className="text-xs space-y-1 text-muted-foreground">
+                    <li>1. Create folders by processor (Clover, Square, Shift4, etc.)</li>
+                    <li>2. Upload rate sheets, contracts, and training materials</li>
+                    <li>3. Set permissions (admin-only or all-users access)</li>
+                    <li>4. Use website URL scraper for external documentation</li>
+                    <li>5. Test document search functionality with sample queries</li>
+                  </ol>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0 w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+              <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">3</span>
+            </div>
+            <div>
+              <h3 className="font-semibold">Configure User Management</h3>
+              <p className="text-muted-foreground text-sm">Set up user roles, permissions, and notification preferences.</p>
+              <div className="mt-3 space-y-2">
+                <div className="p-3 bg-purple-50 dark:bg-purple-950 rounded-lg">
+                  <h4 className="font-medium text-sm mb-2">User Management Tasks:</h4>
+                  <ul className="text-xs space-y-1 text-muted-foreground">
+                    <li>• Configure default user roles (sales-agent, client-admin)</li>
+                    <li>• Set session timeout preferences</li>
+                    <li>• Enable/disable MFA requirements</li>
+                    <li>• Configure email notification settings</li>
+                    <li>• Monitor active user sessions</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0 w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+              <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">4</span>
+            </div>
+            <div>
+              <h3 className="font-semibold">Monitor AI Performance</h3>
+              <p className="text-muted-foreground text-sm">Use Chat Review Center to track AI responses and make corrections.</p>
+              <div className="mt-3 space-y-2">
+                <div className="p-3 bg-orange-50 dark:bg-orange-950 rounded-lg">
+                  <h4 className="font-medium text-sm mb-2">AI Monitoring Workflow:</h4>
+                  <ol className="text-xs space-y-1 text-muted-foreground">
+                    <li>1. Review recent chat conversations for accuracy</li>
+                    <li>2. Test AI responses with sample queries</li>
+                    <li>3. Submit corrections when responses need improvement</li>
+                    <li>4. Monitor training analytics for response quality trends</li>
+                    <li>5. Update FAQ entries based on common questions</li>
+                  </ol>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </CardContent>
     </Card>
+
+    <Card>
+      <CardHeader>
+        <CardTitle>Admin Quick Start Checklist</CardTitle>
+        <CardDescription>Essential setup tasks for new client administrators</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3">
+          <div className="flex items-center gap-3">
+            <CheckCircle className="w-5 h-5 text-blue-600" />
+            <span>Access admin control center successfully</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <CheckCircle className="w-5 h-5 text-blue-600" />
+            <span>Upload initial document set (rate sheets, contracts)</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <CheckCircle className="w-5 h-5 text-blue-600" />
+            <span>Create FAQ entries for common questions</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <CheckCircle className="w-5 h-5 text-blue-600" />
+            <span>Test AI responses and submit first correction</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <CheckCircle className="w-5 h-5 text-blue-600" />
+            <span>Configure user notification preferences</span>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  </div>
   );
 }
 
 // Dev Admin Onboarding Component
 function DevAdminOnboarding() {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Shield className="w-5 h-5 text-purple-600" />
-          System Admin Onboarding
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <p>System Admin onboarding steps coming soon...</p>
-      </CardContent>
-    </Card>
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Shield className="w-5 h-5 text-purple-600" />
+            System Admin Onboarding
+          </CardTitle>
+          <CardDescription>
+            Complete technical setup and system management guide for development administrators
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="space-y-4">
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-8 h-8 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center">
+                <span className="text-sm font-semibold text-purple-600 dark:text-purple-400">1</span>
+              </div>
+              <div>
+                <h3 className="font-semibold">System Access & Configuration</h3>
+                <p className="text-muted-foreground text-sm">Set up full system access and configure core system settings.</p>
+                <div className="mt-3 space-y-2">
+                  <div className="p-3 bg-purple-50 dark:bg-purple-950 rounded-lg">
+                    <h4 className="font-medium text-sm mb-2">System Setup Tasks:</h4>
+                    <ul className="text-xs space-y-1 text-muted-foreground">
+                      <li>• Configure database connections and schema</li>
+                      <li>• Set up AI service integrations (Claude, OpenAI, Pinecone)</li>
+                      <li>• Configure authentication and session management</li>
+                      <li>• Test all API endpoints and service connections</li>
+                      <li>• Monitor system performance and memory usage</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-8 h-8 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center">
+                <span className="text-sm font-semibold text-purple-600 dark:text-purple-400">2</span>
+              </div>
+              <div>
+                <h3 className="font-semibold">AI System Management</h3>
+                <p className="text-muted-foreground text-sm">Configure AI behavior, prompts, and response quality settings.</p>
+                <div className="mt-3 space-y-2">
+                  <div className="p-3 bg-blue-50 dark:bg-blue-950 rounded-lg">
+                    <h4 className="font-medium text-sm mb-2">AI Configuration Areas:</h4>
+                    <ol className="text-xs space-y-1 text-muted-foreground">
+                      <li>1. System prompts for document search and response formatting</li>
+                      <li>2. AI personality and behavior settings</li>
+                      <li>3. Custom prompt templates for specific use cases</li>
+                      <li>4. User-specific prompt overrides and customizations</li>
+                      <li>5. Response quality monitoring and training corrections</li>
+                    </ol>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-8 h-8 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center">
+                <span className="text-sm font-semibold text-purple-600 dark:text-purple-400">3</span>
+              </div>
+              <div>
+                <h3 className="font-semibold">Performance Monitoring</h3>
+                <p className="text-muted-foreground text-sm">Set up comprehensive system monitoring and performance optimization.</p>
+                <div className="mt-3 space-y-2">
+                  <div className="p-3 bg-green-50 dark:bg-green-950 rounded-lg">
+                    <h4 className="font-medium text-sm mb-2">Monitoring Setup:</h4>
+                    <ul className="text-xs space-y-1 text-muted-foreground">
+                      <li>• Database response time monitoring</li>
+                      <li>• AI service status and response quality tracking</li>
+                      <li>• Memory usage and garbage collection optimization</li>
+                      <li>• User session management and timeout configuration</li>
+                      <li>• Real-time system health dashboards</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-8 h-8 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center">
+                <span className="text-sm font-semibold text-purple-600 dark:text-purple-400">4</span>
+              </div>
+              <div>
+                <h3 className="font-semibold">Security & Compliance</h3>
+                <p className="text-muted-foreground text-sm">Implement security measures and maintain compliance standards.</p>
+                <div className="mt-3 space-y-2">
+                  <div className="p-3 bg-red-50 dark:bg-red-950 rounded-lg">
+                    <h4 className="font-medium text-sm mb-2">Security Checklist:</h4>
+                    <ol className="text-xs space-y-1 text-muted-foreground">
+                      <li>1. Configure MFA requirements and user authentication</li>
+                      <li>2. Set up role-based access control (RBAC)</li>
+                      <li>3. Monitor and audit user activity logs</li>
+                      <li>4. Implement data backup and recovery procedures</li>
+                      <li>5. Regular security updates and vulnerability assessments</li>
+                    </ol>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>System Admin Quick Start Checklist</CardTitle>
+          <CardDescription>Critical setup tasks for system administrators</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <CheckCircle className="w-5 h-5 text-purple-600" />
+              <span>Verify all database connections and API integrations</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <CheckCircle className="w-5 h-5 text-purple-600" />
+              <span>Configure AI system prompts and behavior settings</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <CheckCircle className="w-5 h-5 text-purple-600" />
+              <span>Set up performance monitoring dashboards</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <CheckCircle className="w-5 h-5 text-purple-600" />
+              <span>Implement security measures and user access controls</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <CheckCircle className="w-5 h-5 text-purple-600" />
+              <span>Test system backup and recovery procedures</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
 
