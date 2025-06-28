@@ -638,6 +638,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/documents/:id/view', async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
+      console.log(`📄 Document view request for ID: ${id}`);
+      
       const { neon } = await import('@neondatabase/serverless');
       const sql = neon(process.env.DATABASE_URL!);
       
@@ -649,40 +651,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
       `;
       
       if (!documentResult || documentResult.length === 0) {
-        console.log(`Document not found in database: ${id}`);
+        console.log(`❌ Document not found in database: ${id}`);
         return res.status(404).json({ message: "Document not found" });
       }
       
       const document = documentResult[0];
-      console.log(`Document found: ${document.name}, stored path: ${document.path}`);
+      console.log(`✅ Document found: ${document.name}`);
+      console.log(`📁 Stored path: ${document.path}`);
       
       const fs = await import('fs');
       const path = await import('path');
       
-      // Extract hash from stored path and construct correct file path
-      let filePath = null;
+      if (!document.path) {
+        console.log(`❌ No path stored for document ${id}`);
+        return res.status(404).json({ message: "No file path stored" });
+      }
       
-      if (document.path) {
-        // Extract the hash filename from the stored path
-        const hashFilename = path.basename(document.path);
-        // Construct the correct path in uploads directory
-        filePath = path.join(process.cwd(), 'uploads', hashFilename);
+      // Extract the hash filename from the stored path
+      const hashFilename = path.basename(document.path);
+      // Construct the correct path in uploads directory
+      const filePath = path.join(process.cwd(), 'uploads', hashFilename);
+      
+      console.log(`🔍 Hash filename: ${hashFilename}`);
+      console.log(`🎯 Constructed path: ${filePath}`);
+      console.log(`📂 Current working directory: ${process.cwd()}`);
+      
+      // Verify the file exists with detailed logging
+      try {
+        const fileExists = fs.existsSync(filePath);
+        console.log(`📄 File exists check: ${fileExists}`);
         
-        console.log(`Document ${id}: ${document.name}`);
-        console.log(`Stored path: ${document.path}`);
-        console.log(`Hash filename: ${hashFilename}`);
-        console.log(`Checking file at: ${filePath}`);
-        
-        // Verify the file exists
-        if (!fs.existsSync(filePath)) {
-          console.log(`File not found at: ${filePath}`);
+        if (!fileExists) {
+          console.log(`❌ File not found at: ${filePath}`);
+          
+          // Try to list the uploads directory for debugging
+          try {
+            const uploadsDir = path.join(process.cwd(), 'uploads');
+            const files = fs.readdirSync(uploadsDir);
+            console.log(`📁 Files in uploads directory: ${files.length} files`);
+            const hashExists = files.includes(hashFilename);
+            console.log(`🔍 Hash file ${hashFilename} exists in directory: ${hashExists}`);
+          } catch (dirError) {
+            console.log(`❌ Error reading uploads directory:`, dirError);
+          }
+          
           return res.status(404).json({ message: "File not found on disk" });
         }
         
-        console.log(`✅ File found at: ${filePath}`);
-      } else {
-        console.log(`No path stored for document ${id}`);
-        return res.status(404).json({ message: "No file path stored" });
+        console.log(`✅ File verified at: ${filePath}`);
+      } catch (fsError) {
+        console.log(`❌ Error checking file existence:`, fsError);
+        return res.status(500).json({ message: "File system error" });
       }
       
       // Set headers for inline viewing with CORS support
@@ -693,10 +712,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.setHeader('Access-Control-Allow-Methods', 'GET');
       res.setHeader('X-Content-Type-Options', 'nosniff');
       
+      console.log(`🚀 Streaming file: ${filePath}`);
       const fileStream = fs.createReadStream(filePath);
+      
+      fileStream.on('error', (streamError) => {
+        console.log(`❌ Stream error:`, streamError);
+        if (!res.headersSent) {
+          res.status(500).json({ message: "File stream error" });
+        }
+      });
+      
       fileStream.pipe(res);
     } catch (error) {
-      console.error("Error viewing document:", error);
+      console.error("❌ Error viewing document:", error);
       res.status(500).json({ message: "Failed to view document" });
     }
   });
