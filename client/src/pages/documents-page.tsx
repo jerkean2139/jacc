@@ -146,8 +146,10 @@ export default function DocumentsPage() {
   };
 
   const handlePreviewDocument = (document: Document) => {
+    console.log('Preview handler called with:', document);
     setPreviewDocument(document);
     setIsPreviewOpen(true);
+    console.log('Modal state set:', { previewDocument: document.name, isPreviewOpen: true });
   };
 
   const handleDownloadDocument = (doc: Document) => {
@@ -475,14 +477,22 @@ export default function DocumentsPage() {
 
       {/* Document Preview Modal */}
       {previewDocument && (
-        <DocumentPreviewModal
-          document={previewDocument}
-          isOpen={isPreviewOpen}
-          onClose={() => {
-            setIsPreviewOpen(false);
-            setPreviewDocument(null);
-          }}
-        />
+        <>
+          {console.log('Rendering DocumentPreviewModal with:', { 
+            document: previewDocument.name, 
+            isOpen: isPreviewOpen,
+            hasDocument: !!previewDocument 
+          })}
+          <DocumentPreviewModal
+            document={previewDocument}
+            isOpen={isPreviewOpen}
+            onClose={() => {
+              console.log('Modal closing...');
+              setIsPreviewOpen(false);
+              setPreviewDocument(null);
+            }}
+          />
+        </>
       )}
     </div>
   );

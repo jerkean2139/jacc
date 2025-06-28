@@ -96,9 +96,12 @@ export function DraggableDocument({ document, onMove, onPreview, onDownload }: D
               className="h-8 w-8 p-0"
               onClick={(e) => {
                 e.stopPropagation();
+                console.log('Eye button clicked, onPreview available:', !!onPreview);
                 if (onPreview) {
+                  console.log('Calling onPreview with document:', document.name);
                   onPreview(document);
                 } else {
+                  console.log('No onPreview handler, opening in new tab');
                   window.open(`/documents/${document.id}`, '_blank');
                 }
               }}
