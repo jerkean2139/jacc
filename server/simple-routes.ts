@@ -659,54 +659,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const fs = await import('fs');
       const path = await import('path');
       
-      // Extract the hash filename from the stored path
-      let hashFilename = null;
+      // Extract hash from stored path and construct correct file path
+      let filePath = null;
+      
       if (document.path) {
-        // Extract just the filename/hash from the full path
-        hashFilename = path.basename(document.path);
-      }
-      
-      // Try multiple path possibilities to locate the file
-      const possiblePaths = [];
-      
-      if (hashFilename) {
-        possiblePaths.push(path.join(process.cwd(), 'uploads', hashFilename));
-      }
-      
-      // Additional fallback paths
-      if (document.path) {
-        possiblePaths.push(document.path); // Original path as stored
-        possiblePaths.push(path.join(process.cwd(), 'uploads', path.basename(document.path)));
-      }
-      
-      // Try by document names as last resort
-      possiblePaths.push(
-        path.join(process.cwd(), 'uploads', document.name),
-        path.join(process.cwd(), 'uploads', document.original_name || document.name)
-      );
-      
-      console.log(`Looking for document ${id} with hash: ${hashFilename}`);
-      console.log(`Possible paths to try:`, possiblePaths);
-      
-      let foundPath = null;
-      for (const testPath of possiblePaths) {
-        try {
-          if (testPath && fs.existsSync(testPath)) {
-            foundPath = testPath;
-            console.log(`✅ Found file at: ${foundPath}`);
-            break;
-          } else {
-            console.log(`❌ File not found at: ${testPath}`);
-          }
-        } catch (err) {
-          console.log(`❌ Error checking path ${testPath}:`, err);
+        // Extract the hash filename from the stored path
+        const hashFilename = path.basename(document.path);
+        // Construct the correct path in uploads directory
+        filePath = path.join(process.cwd(), 'uploads', hashFilename);
+        
+        console.log(`Document ${id}: ${document.name}`);
+        console.log(`Stored path: ${document.path}`);
+        console.log(`Hash filename: ${hashFilename}`);
+        console.log(`Checking file at: ${filePath}`);
+        
+        // Verify the file exists
+        if (!fs.existsSync(filePath)) {
+          console.log(`File not found at: ${filePath}`);
+          return res.status(404).json({ message: "File not found on disk" });
         }
-      }
-      
-      if (!foundPath) {
-        console.log(`❌ File not found at any path for document ${id}. Hash: ${hashFilename}`);
-        console.log(`❌ Tried paths:`, possiblePaths);
-        return res.status(404).json({ message: "File not found on disk" });
+        
+        console.log(`✅ File found at: ${filePath}`);
+      } else {
+        console.log(`No path stored for document ${id}`);
+        return res.status(404).json({ message: "No file path stored" });
       }
       
       // Set headers for inline viewing with CORS support
@@ -717,7 +693,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.setHeader('Access-Control-Allow-Methods', 'GET');
       res.setHeader('X-Content-Type-Options', 'nosniff');
       
-      const fileStream = fs.createReadStream(foundPath);
+      const fileStream = fs.createReadStream(filePath);
       fileStream.pipe(res);
     } catch (error) {
       console.error("Error viewing document:", error);
@@ -764,7 +740,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.setHeader('Content-Type', document.mimeType || 'application/octet-stream');
       res.setHeader('Content-Disposition', `attachment; filename="${document.originalName}"`);
       
-      const fileStream = fs.createReadStream(foundPath);
+      const fileStream = fs.createReadStream(filePath);
       fileStream.pipe(res);
     } catch (error) {
       console.error("Error downloading document:", error);
