@@ -38,7 +38,7 @@ export default function DocumentsPage() {
   });
 
   // Extract folders from the documents API response or fallback to folders API
-  const folders = documentsData?.folders || foldersData;
+  const folders = (documentsData as any)?.folders || foldersData;
 
   // Check if user is admin
   const isAdmin = user?.role === 'dev-admin' || user?.role === 'client-admin';
@@ -349,7 +349,7 @@ export default function DocumentsPage() {
                 </div>
               ) : folders.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {folders.map((folder) => {
+                  {folders.map((folder: any) => {
                     // Calculate document count from the actual documents array
                     const documentCount = documents.filter(doc => doc.folderId === folder.id).length;
                     
@@ -360,7 +360,7 @@ export default function DocumentsPage() {
                           id: folder.id,
                           name: folder.name,
                           documentCount: documentCount,
-                          createdAt: folder.createdAt || undefined
+                          createdAt: folder.createdAt ? new Date(folder.createdAt).toISOString() : undefined
                         }}
                         onDocumentMove={handleDocumentMove}
                       />
