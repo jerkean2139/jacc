@@ -191,14 +191,14 @@ export default function Sidebar({
       // Clear any local storage/session data
       localStorage.clear();
       sessionStorage.clear();
-      // Redirect to login page after logout
-      window.location.href = "/login";
+      // Redirect to root which will show login screen
+      window.location.href = "/";
     } catch (error) {
       console.error("Logout error:", error);
       // Still clear data and redirect even if logout request fails
       localStorage.clear();
       sessionStorage.clear();
-      window.location.href = "/login";
+      window.location.href = "/";
     }
   };
 

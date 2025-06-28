@@ -2411,11 +2411,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/user', async (req: Request, res: Response) => {
     try {
       const sessionId = req.cookies?.sessionId;
+      const loggedOut = req.cookies?.loggedOut;
+      
       if (sessionId && sessions.has(sessionId)) {
         const user = sessions.get(sessionId);
         res.json(user);
-      } else {
-        // Auto-login for seamless access - ensure user exists in database
+      } else if (!loggedOut) {
+        // Auto-login for seamless access - only if not recently logged out
         const autoUser = { 
           id: 'demo-user-id', 
           username: 'tracer-user', 
@@ -2453,6 +2455,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         console.log('Auto-login activated for seamless access');
         res.json(autoUser);
+      } else {
+        // User recently logged out, don't auto-login
+        res.status(401).json({ error: 'Not authenticated' });
       }
     } catch (error) {
       console.error('User fetch error:', error);
@@ -2473,6 +2478,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           sameSite: 'lax'
         });
       }
+      
+      // Set a logout flag cookie to prevent immediate re-authentication
+      res.cookie('loggedOut', 'true', {
+        path: '/',
+        httpOnly: true,
+        secure: false,
+        sameSite: 'lax',
+        maxAge: 5000 // 5 seconds to prevent immediate auto-login
+      });
+      
       res.json({ success: true });
     } catch (error) {
       console.error('Logout error:', error);
@@ -2493,6 +2508,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           sameSite: 'lax'
         });
       }
+      
+      // Set a logout flag cookie to prevent immediate re-authentication
+      res.cookie('loggedOut', 'true', {
+        path: '/',
+        httpOnly: true,
+        secure: false,
+        sameSite: 'lax',
+        maxAge: 5000 // 5 seconds to prevent immediate auto-login
+      });
+      
       res.json({ success: true });
     } catch (error) {
       console.error('Logout error:', error);
