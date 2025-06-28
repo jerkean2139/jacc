@@ -4296,6 +4296,184 @@ Would you like me to create a detailed proposal for this merchant?`,
     }
   });
 
+  // Personal Documents API endpoints
+  app.get('/api/personal-documents', async (req: Request, res: Response) => {
+    try {
+      const userId = (req as any).session?.user?.id || 'demo-user-id';
+      const { db } = await import('./db.ts');
+      const { personalDocuments } = await import('../shared/schema.ts');
+      const { eq, desc } = await import('drizzle-orm');
+
+      const docs = await db
+        .select()
+        .from(personalDocuments)
+        .where(eq(personalDocuments.userId, userId))
+        .orderBy(desc(personalDocuments.createdAt));
+
+      res.json(docs);
+    } catch (error) {
+      console.error('Error fetching personal documents:', error);
+      res.status(500).json({ error: 'Failed to fetch personal documents' });
+    }
+  });
+
+  app.get('/api/personal-folders', async (req: Request, res: Response) => {
+    try {
+      const userId = (req as any).session?.user?.id || 'demo-user-id';
+      const { db } = await import('./db.ts');
+      const { personalFolders } = await import('../shared/schema.ts');
+      const { eq, asc } = await import('drizzle-orm');
+
+      const folders = await db
+        .select()
+        .from(personalFolders)
+        .where(eq(personalFolders.userId, userId))
+        .orderBy(asc(personalFolders.sortOrder), asc(personalFolders.name));
+
+      res.json(folders);
+    } catch (error) {
+      console.error('Error fetching personal folders:', error);
+      res.status(500).json({ error: 'Failed to fetch personal folders' });
+    }
+  });
+
+  app.post('/api/personal-folders', async (req: Request, res: Response) => {
+    try {
+      const userId = (req as any).session?.user?.id || 'demo-user-id';
+      const { db } = await import('./db.ts');
+      const { personalFolders } = await import('../shared/schema.ts');
+
+      const [newFolder] = await db
+        .insert(personalFolders)
+        .values({
+          ...req.body,
+          userId,
+        })
+        .returning();
+
+      res.json(newFolder);
+    } catch (error) {
+      console.error('Error creating personal folder:', error);
+      res.status(500).json({ error: 'Failed to create personal folder' });
+    }
+  });
+
+  app.put('/api/personal-folders/:id', async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const userId = (req as any).session?.user?.id || 'demo-user-id';
+      const { db } = await import('./db.ts');
+      const { personalFolders } = await import('../shared/schema.ts');
+      const { eq, and } = await import('drizzle-orm');
+
+      const [updatedFolder] = await db
+        .update(personalFolders)
+        .set(req.body)
+        .where(and(eq(personalFolders.id, id), eq(personalFolders.userId, userId)))
+        .returning();
+
+      if (!updatedFolder) {
+        return res.status(404).json({ error: 'Folder not found' });
+      }
+
+      res.json(updatedFolder);
+    } catch (error) {
+      console.error('Error updating personal folder:', error);
+      res.status(500).json({ error: 'Failed to update personal folder' });
+    }
+  });
+
+  app.delete('/api/personal-folders/:id', async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const userId = (req as any).session?.user?.id || 'demo-user-id';
+      const { db } = await import('./db.ts');
+      const { personalFolders, personalDocuments } = await import('../shared/schema.ts');
+      const { eq, and } = await import('drizzle-orm');
+
+      // Move documents out of folder before deleting
+      await db
+        .update(personalDocuments)
+        .set({ personalFolderId: null })
+        .where(eq(personalDocuments.personalFolderId, id));
+
+      const [deletedFolder] = await db
+        .delete(personalFolders)
+        .where(and(eq(personalFolders.id, id), eq(personalFolders.userId, userId)))
+        .returning();
+
+      if (!deletedFolder) {
+        return res.status(404).json({ error: 'Folder not found' });
+      }
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting personal folder:', error);
+      res.status(500).json({ error: 'Failed to delete personal folder' });
+    }
+  });
+
+  app.put('/api/personal-documents/:id', async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const userId = (req as any).session?.user?.id || 'demo-user-id';
+      const { db } = await import('./db.ts');
+      const { personalDocuments } = await import('../shared/schema.ts');
+      const { eq, and } = await import('drizzle-orm');
+
+      const [updatedDocument] = await db
+        .update(personalDocuments)
+        .set(req.body)
+        .where(and(eq(personalDocuments.id, id), eq(personalDocuments.userId, userId)))
+        .returning();
+
+      if (!updatedDocument) {
+        return res.status(404).json({ error: 'Document not found' });
+      }
+
+      res.json(updatedDocument);
+    } catch (error) {
+      console.error('Error updating personal document:', error);
+      res.status(500).json({ error: 'Failed to update personal document' });
+    }
+  });
+
+  app.delete('/api/personal-documents/:id', async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const userId = (req as any).session?.user?.id || 'demo-user-id';
+      const { db } = await import('./db.ts');
+      const { personalDocuments } = await import('../shared/schema.ts');
+      const { eq, and } = await import('drizzle-orm');
+      const fs = await import('fs');
+
+      // Get document to delete file
+      const [document] = await db
+        .select()
+        .from(personalDocuments)
+        .where(and(eq(personalDocuments.id, id), eq(personalDocuments.userId, userId)));
+
+      if (!document) {
+        return res.status(404).json({ error: 'Document not found' });
+      }
+
+      // Delete file if it exists
+      if (fs.existsSync(document.path)) {
+        fs.unlinkSync(document.path);
+      }
+
+      // Delete from database
+      await db
+        .delete(personalDocuments)
+        .where(and(eq(personalDocuments.id, id), eq(personalDocuments.userId, userId)));
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting personal document:', error);
+      res.status(500).json({ error: 'Failed to delete personal document' });
+    }
+  });
+
   console.log("✅ Simple routes registered successfully");
   
   const server = createServer(app);
