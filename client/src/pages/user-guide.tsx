@@ -275,6 +275,16 @@ export default function UserGuide() {
                       <li>• Reference documents by name for instant information</li>
                     </ul>
                   </div>
+                  <div className="p-4 bg-orange-50 dark:bg-orange-950 rounded-lg">
+                    <h4 className="font-semibold text-orange-700 dark:text-orange-300 mb-2">My Documents Management</h4>
+                    <ul className="space-y-1 text-sm">
+                      <li>• Use "My Documents" tab for personal document organization</li>
+                      <li>• Create custom folders for client-specific materials</li>
+                      <li>• Upload personal rate sheets, proposals, and notes</li>
+                      <li>• Keep client presentations separate from company documents</li>
+                      <li>• Use search to quickly find your uploaded documents</li>
+                    </ul>
+                  </div>
                 </div>
               )}
 
@@ -286,6 +296,16 @@ export default function UserGuide() {
                       <li>• Monitor agent activity through the dashboard</li>
                       <li>• Set up automated training reminders</li>
                       <li>• Customize system prompts for your business needs</li>
+                    </ul>
+                  </div>
+                  <div className="p-4 bg-indigo-50 dark:bg-indigo-950 rounded-lg">
+                    <h4 className="font-semibold text-indigo-700 dark:text-indigo-300 mb-2">Document Management</h4>
+                    <ul className="space-y-1 text-sm">
+                      <li>• Enable "My Documents" for user personal file storage</li>
+                      <li>• Create folder templates for consistent organization</li>
+                      <li>• Set permission defaults for new document uploads</li>
+                      <li>• Monitor document usage and access patterns</li>
+                      <li>• Use URL scraper for rapid content integration</li>
                     </ul>
                   </div>
                 </div>
@@ -399,10 +419,11 @@ function SalesAgentOnboarding() {
                     <ol className="text-xs space-y-1 text-muted-foreground">
                       <li>1. Click "Document Center" in the sidebar or bottom navigation</li>
                       <li>2. Browse by folders: Admin (40), Clearent (18), MiCamp (13), etc.</li>
-                      <li>3. Use the search bar to find specific documents quickly</li>
-                      <li>4. Click any document to view or download it</li>
-                      <li>5. Documents are organized by processor and content type</li>
-                      <li>6. Ask JACC about any document: "What does the Clover contract say about rates?"</li>
+                      <li>3. Switch to "My Documents" tab for personal document management</li>
+                      <li>4. Use the search bar to find specific documents quickly</li>
+                      <li>5. Click any document to view or download it</li>
+                      <li>6. Documents are organized by processor and content type</li>
+                      <li>7. Ask JACC about any document: "What does the Clover contract say about rates?"</li>
                     </ol>
                   </div>
                 </div>
@@ -541,8 +562,9 @@ function ClientAdminOnboarding() {
                     <li>1. Create folders by processor (Clover, Square, Shift4, etc.)</li>
                     <li>2. Upload rate sheets, contracts, and training materials</li>
                     <li>3. Set permissions (admin-only or all-users access)</li>
-                    <li>4. Use website URL scraper for external documentation</li>
-                    <li>5. Test document search functionality with sample queries</li>
+                    <li>4. Configure "My Documents" tab for user personal document storage</li>
+                    <li>5. Use website URL scraper for external documentation</li>
+                    <li>6. Test document search functionality with sample queries</li>
                   </ol>
                 </div>
               </div>
