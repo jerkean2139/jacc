@@ -477,23 +477,15 @@ export default function DocumentsPage() {
 
       {/* Document Preview Modal */}
       {previewDocument && (
-        <>
-          {console.log('Rendering DocumentPreviewModal with:', { 
-            document: previewDocument.name, 
-            isOpen: isPreviewOpen,
-            hasDocument: !!previewDocument 
-          })}
-          <DocumentPreviewModal
-            document={previewDocument}
-            isOpen={isPreviewOpen}
-            onClose={() => {
-              console.log('Modal closing...');
-              setIsPreviewOpen(false);
-              setPreviewDocument(null);
-            }}
-            onDownload={handleDownloadDocument}
-          />
-        </>
+        <DocumentPreviewModal
+          document={previewDocument}
+          isOpen={isPreviewOpen}
+          onClose={() => {
+            setIsPreviewOpen(false);
+            setPreviewDocument(null);
+          }}
+          onDownload={handleDownloadDocument}
+        />
       )}
     </div>
   );
