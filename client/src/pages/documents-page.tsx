@@ -25,7 +25,7 @@ export default function DocumentsPage() {
   const queryClient = useQueryClient();
 
   // Fetch user data to determine role
-  const { data: user } = useQuery<User>({
+  const { data: user } = useQuery<UserType>({
     queryKey: ["/api/user"],
   });
 
@@ -212,7 +212,7 @@ export default function DocumentsPage() {
             {isAdmin ? 'All Documents' : 'Documents'} ({normalizedDocuments.length})
           </TabsTrigger>
           <TabsTrigger value="my-documents">
-            <User className="h-4 w-4 mr-2" />
+            <UserIcon className="h-4 w-4 mr-2" />
             My Documents
           </TabsTrigger>
           {isAdmin && (
@@ -228,6 +228,10 @@ export default function DocumentsPage() {
             <DocumentUpload />
           </TabsContent>
         )}
+
+        <TabsContent value="my-documents" className="space-y-4">
+          <MyDocumentsPage />
+        </TabsContent>
 
         <TabsContent value="manage" className="space-y-4">
           <Card>
