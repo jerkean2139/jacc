@@ -3084,28 +3084,53 @@ User Context: {userRole}`,
   // Document viewer route for PDF display in browser
   app.get('/api/documents/:id/view', async (req: any, res) => {
     try {
-      const userId = 'simple-user-001'; // Temporary for testing
       const { id } = req.params;
       
-      const document = await storage.getDocument(id);
-      if (!document || document.userId !== userId) {
+      const { neon } = await import('@neondatabase/serverless');
+      const sql = neon(process.env.DATABASE_URL!);
+      
+      // Get document from database
+      const documentResult = await sql`
+        SELECT id, name, original_name, mime_type, path, size
+        FROM documents 
+        WHERE id = ${id}
+      `;
+      
+      if (!documentResult || documentResult.length === 0) {
         return res.status(404).json({ message: "Document not found" });
       }
       
+      const document = documentResult[0];
       const fs = await import('fs');
-      const path = await import('path');
-      const filePath = path.join(process.cwd(), 'uploads', document.path);
       
+      if (!document.path) {
+        return res.status(404).json({ message: "No file path stored" });
+      }
+      
+      // Use the stored path directly since it's already absolute
+      const filePath = document.path;
+      
+      // Check if file exists
       if (!fs.existsSync(filePath)) {
         return res.status(404).json({ message: "File not found on disk" });
       }
       
       // Set headers for inline viewing
-      res.setHeader('Content-Type', document.mimeType || 'application/pdf');
-      res.setHeader('Content-Disposition', `inline; filename="${document.originalName}"`);
+      res.setHeader('Content-Type', document.mime_type || 'application/pdf');
+      res.setHeader('Content-Disposition', `inline; filename="${document.original_name || document.name}"`);
       res.setHeader('Cache-Control', 'public, max-age=31536000');
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Access-Control-Allow-Methods', 'GET');
+      res.setHeader('X-Content-Type-Options', 'nosniff');
       
+      // Stream the file
       const fileStream = fs.createReadStream(filePath);
+      fileStream.on('error', (streamError) => {
+        if (!res.headersSent) {
+          res.status(500).json({ message: "File stream error" });
+        }
+      });
+      
       fileStream.pipe(res);
     } catch (error) {
       console.error("Error viewing document:", error);

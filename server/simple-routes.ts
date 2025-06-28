@@ -638,6 +638,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/documents/:id/view', async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
+      console.log(`📄 Document view request for ID: ${id}`);
+      
       const { neon } = await import('@neondatabase/serverless');
       const sql = neon(process.env.DATABASE_URL!);
       
@@ -648,24 +650,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
         WHERE id = ${id}
       `;
       
+      console.log(`📊 Database query result:`, documentResult);
+      
       if (!documentResult || documentResult.length === 0) {
+        console.log(`❌ Document not found in database: ${id}`);
         return res.status(404).json({ message: "Document not found" });
       }
       
       const document = documentResult[0];
+      console.log(`✅ Document found:`, {
+        id: document.id,
+        name: document.name,
+        path: document.path,
+        mimeType: document.mime_type
+      });
+      
       const fs = await import('fs');
       
       if (!document.path) {
+        console.log(`❌ No path stored for document ${id}`);
         return res.status(404).json({ message: "No file path stored" });
       }
       
       // Use the stored path directly since it's already absolute
       const filePath = document.path;
+      console.log(`🎯 Using file path: ${filePath}`);
       
-      // Check if file exists
-      if (!fs.existsSync(filePath)) {
+      // Check if file exists with detailed logging
+      const fileExists = fs.existsSync(filePath);
+      console.log(`📁 File exists check: ${fileExists}`);
+      
+      if (!fileExists) {
+        console.log(`❌ File not found at: ${filePath}`);
+        // Try to check the uploads directory for debugging
+        try {
+          const path = await import('path');
+          const uploadsDir = path.join(process.cwd(), 'uploads');
+          const files = fs.readdirSync(uploadsDir).slice(0, 5);
+          console.log(`📁 Sample files in uploads directory:`, files);
+          const filename = path.basename(filePath);
+          console.log(`🔍 Looking for filename: ${filename}`);
+        } catch (dirError) {
+          console.log(`❌ Error reading uploads directory:`, dirError);
+        }
         return res.status(404).json({ message: "File not found on disk" });
       }
+      
+      console.log(`✅ File verified, streaming: ${filePath}`);
       
       // Set headers for inline viewing
       res.setHeader('Content-Type', document.mime_type || 'application/pdf');
@@ -678,6 +709,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Stream the file
       const fileStream = fs.createReadStream(filePath);
       fileStream.on('error', (streamError) => {
+        console.log(`❌ Stream error:`, streamError);
         if (!res.headersSent) {
           res.status(500).json({ message: "File stream error" });
         }
@@ -685,6 +717,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       fileStream.pipe(res);
     } catch (error) {
+      console.error("❌ Error viewing document:", error);
       res.status(500).json({ message: "Failed to view document" });
     }
   });
