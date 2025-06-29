@@ -2584,11 +2584,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log('User already exists or database setup issue:', dbError);
         }
         
-        // Store session
+        // Clear any existing session first
+        const oldSessionId = req.cookies?.sessionId;
+        if (oldSessionId && sessions.has(oldSessionId)) {
+          sessions.delete(oldSessionId);
+        }
+        
+        // Store new session
         const sessionId = Math.random().toString(36).substring(2);
         sessions.set(sessionId, validUser.user);
         
-        // Set cookie with proper attributes for Replit environment
+        // Clear old cookie and set new one
+        res.clearCookie('sessionId');
         res.cookie('sessionId', sessionId, { 
           httpOnly: false, // Allow JavaScript access for debugging
           secure: false,
