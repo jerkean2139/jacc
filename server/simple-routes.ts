@@ -2594,8 +2594,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const sessionId = Math.random().toString(36).substring(2);
         sessions.set(sessionId, validUser.user);
         
-        // Clear old cookie and set new one
+        // Force clear old cookie with all possible path/domain combinations
+        res.clearCookie('sessionId', { path: '/' });
+        res.clearCookie('sessionId', { path: '/', domain: req.hostname });
         res.clearCookie('sessionId');
+        
+        // Set new cookie
         res.cookie('sessionId', sessionId, { 
           httpOnly: false, // Allow JavaScript access for debugging
           secure: false,

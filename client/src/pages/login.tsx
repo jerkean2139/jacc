@@ -27,10 +27,14 @@ export default function LoginPage() {
       });
 
       if (response.ok) {
+        // Clear any existing session cookies manually
+        document.cookie = 'sessionId=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        
         // Invalidate auth queries to refresh state
         await queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-        // Redirect to main app after successful login
-        setLocation('/');
+        
+        // Force page refresh to ensure cookie sync
+        window.location.href = '/';
       } else {
         const error = await response.json();
         alert(error.message || 'Login failed');
