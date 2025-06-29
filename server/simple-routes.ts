@@ -2553,6 +2553,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { username, password, email } = req.body;
       const loginField = username || email;
       
+      console.log('🔐 LOGIN ATTEMPT: username/email:', loginField, 'password:', password ? '***' : 'empty');
+      
       const validCredentials = [
         { field: 'demo@example.com', pass: 'demo-password', user: { id: 'demo-user-id', username: 'tracer-user', email: 'demo@example.com', role: 'sales-agent' }},
         { field: 'tracer-user', pass: 'demo-password', user: { id: 'demo-user-id', username: 'tracer-user', email: 'demo@example.com', role: 'sales-agent' }},
