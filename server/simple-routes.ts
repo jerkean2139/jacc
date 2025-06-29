@@ -2567,6 +2567,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         cred.field === loginField && cred.pass === password
       );
       
+      console.log('🔍 LOGIN VALIDATION: Found matching user:', validUser ? validUser.user.username : 'NONE');
+      
       if (validUser) {
         // Ensure demo user exists in database
         try {

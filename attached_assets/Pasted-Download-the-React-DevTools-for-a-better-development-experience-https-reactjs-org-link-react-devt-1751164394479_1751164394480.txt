@@ -1,0 +1,58 @@
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+clear-popup-flags.ts:26 Cleared 0 popup flags from localStorage
+requests.js:1 
+            
+            
+           GET https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/api/user 401 (Unauthorized)
+s.fetch @ requests.js:1
+queryFn @ useAuth.ts:11
+fetchFn @ @tanstack_react-query.js?v=c37dbce7:840
+run @ @tanstack_react-query.js?v=c37dbce7:494
+start @ @tanstack_react-query.js?v=c37dbce7:536
+fetch @ @tanstack_react-query.js?v=c37dbce7:926
+executeFetch_fn @ @tanstack_react-query.js?v=c37dbce7:2211
+onSubscribe @ @tanstack_react-query.js?v=c37dbce7:1898
+subscribe @ @tanstack_react-query.js?v=c37dbce7:24
+(anonymous) @ @tanstack_react-query.js?v=c37dbce7:3022
+subscribeToStore @ chunk-WERSD76P.js?v=c37dbce7:11984
+commitHookEffectListMount @ chunk-WERSD76P.js?v=c37dbce7:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=c37dbce7:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=c37dbce7:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=c37dbce7:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=c37dbce7:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=c37dbce7:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=c37dbce7:19447
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=c37dbce7:18868
+flushSyncCallbacks @ chunk-WERSD76P.js?v=c37dbce7:9119
+commitRootImpl @ chunk-WERSD76P.js?v=c37dbce7:19432
+commitRoot @ chunk-WERSD76P.js?v=c37dbce7:19277
+finishConcurrentRender @ chunk-WERSD76P.js?v=c37dbce7:18805
+performConcurrentWorkOnRoot @ chunk-WERSD76P.js?v=c37dbce7:18718
+workLoop @ chunk-WERSD76P.js?v=c37dbce7:197
+flushWork @ chunk-WERSD76P.js?v=c37dbce7:176
+performWorkUntilDeadline @ chunk-WERSD76P.js?v=c37dbce7:384Understand this error
+02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/:1 Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner.
+requests.js:1 
+            
+            
+           GET https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/api/user 401 (Unauthorized)
+s.fetch @ requests.js:1
+queryFn @ useAuth.ts:11
+fetchFn @ @tanstack_react-query.js?v=c37dbce7:840
+run @ @tanstack_react-query.js?v=c37dbce7:494
+start @ @tanstack_react-query.js?v=c37dbce7:536
+fetch @ @tanstack_react-query.js?v=c37dbce7:926
+executeFetch_fn @ @tanstack_react-query.js?v=c37dbce7:2211
+fetch @ @tanstack_react-query.js?v=c37dbce7:2011
+refetch @ @tanstack_react-query.js?v=c37dbce7:2001
+onFocus @ @tanstack_react-query.js?v=c37dbce7:749
+(anonymous) @ @tanstack_react-query.js?v=c37dbce7:1112
+(anonymous) @ @tanstack_react-query.js?v=c37dbce7:1111
+batch @ @tanstack_react-query.js?v=c37dbce7:583
+onFocus @ @tanstack_react-query.js?v=c37dbce7:1110
+(anonymous) @ @tanstack_react-query.js?v=c37dbce7:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=c37dbce7:313
+onFocus @ @tanstack_react-query.js?v=c37dbce7:312
+(anonymous) @ @tanstack_react-query.js?v=c37dbce7:299
+listener @ @tanstack_react-query.js?v=c37dbce7:270Understand this error
