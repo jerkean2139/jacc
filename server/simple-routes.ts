@@ -2413,6 +2413,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const sessionId = req.cookies?.sessionId;
       const loggedOut = req.cookies?.loggedOut;
       
+      console.log(`/api/user called - sessionId: ${sessionId}, loggedOut: ${loggedOut}`);
+      console.log(`Available sessions: ${Array.from(sessions.keys()).join(', ')}`);
+      console.log(`All cookies:`, req.cookies);
+      
       if (sessionId && sessions.has(sessionId)) {
         const user = sessions.get(sessionId);
         console.log(`Session found for ID: ${sessionId}, user: ${user?.username}, role: ${user?.role}`);
@@ -2584,9 +2588,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const sessionId = Math.random().toString(36).substring(2);
         sessions.set(sessionId, validUser.user);
         
-        // Set cookie with proper attributes
+        // Set cookie with proper attributes for Replit environment
         res.cookie('sessionId', sessionId, { 
-          httpOnly: true, 
+          httpOnly: false, // Allow JavaScript access for debugging
           secure: false,
           maxAge: 24 * 60 * 60 * 1000,
           path: '/',
