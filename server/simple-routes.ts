@@ -2421,45 +2421,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const user = sessions.get(sessionId);
         console.log(`Session found for ID: ${sessionId}, user: ${user?.username}, role: ${user?.role}`);
         res.json(user);
-      } else if (!loggedOut && !sessionId) {
-        // Auto-login for seamless access - only if no session exists and not recently logged out
-        const autoUser = { 
-          id: 'demo-user-id', 
-          username: 'tracer-user', 
-          email: 'demo@example.com', 
-          role: 'sales-agent' 
-        };
-        
-        // Ensure demo user exists in database
-        try {
-          const existingUsers = await db.select().from(users).where(eq(users.id, 'demo-user-id'));
-          if (existingUsers.length === 0) {
-            await db.insert(users).values({
-              id: 'demo-user-id',
-              username: 'tracer-user',
-              email: 'demo@example.com',
-              passwordHash: 'demo-hash',
-              firstName: 'Tracer',
-              lastName: 'User',
-              role: 'sales-agent'
-            });
-          }
-        } catch (dbError) {
-          console.log('Demo user already exists or database setup issue:', dbError);
-        }
-        
-        const newSessionId = Math.random().toString(36).substring(2);
-        sessions.set(newSessionId, autoUser);
-        
-        res.cookie('sessionId', newSessionId, { 
-          httpOnly: true, 
-          secure: false,
-          maxAge: 24 * 60 * 60 * 1000,
-          path: '/'
-        });
-        
-        console.log('Auto-login activated for seamless access');
-        res.json(autoUser);
+      } else if (false) {
+        // Auto-login disabled to fix credential validation issues
       } else {
         // User recently logged out, don't auto-login
         res.status(401).json({ error: 'Not authenticated' });
