@@ -1,4 +1,5 @@
 import { useDragDrop } from './drag-drop-provider';
+import { DocumentNameEditor } from './document-name-editor';
 import { FileText, Download, Eye } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -60,9 +61,12 @@ export function DraggableDocument({ document, onMove, onPreview, onDownload }: D
             </div>
             
             <div className="flex-1 min-w-0">
-              <h3 className="font-medium text-sm line-clamp-2 mb-1">
-                {document.originalName || document.name}
-              </h3>
+              <div className="mb-1">
+                <DocumentNameEditor 
+                  documentId={document.id}
+                  currentName={document.name}
+                />
+              </div>
               
               {document.description && (
                 <p className="text-xs text-muted-foreground line-clamp-2 mb-2">

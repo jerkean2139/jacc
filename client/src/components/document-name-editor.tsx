@@ -20,13 +20,7 @@ export function DocumentNameEditor({ documentId, currentName, onNameUpdate }: Do
 
   const updateNameMutation = useMutation({
     mutationFn: async (newName: string) => {
-      return apiRequest(`/api/documents/${documentId}`, {
-        method: "PUT",
-        body: JSON.stringify({ name: newName }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      return apiRequest(`/api/documents/${documentId}`, "PUT", { name: newName });
     },
     onSuccess: (updatedDocument) => {
       toast({
