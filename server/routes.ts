@@ -90,76 +90,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // === Authentication Routes ===
   
-  // Simple login for demo environment
-  app.post('/api/auth/simple-login', async (req, res) => {
-    try {
-      const { username, password } = req.body;
-      
-      // Define demo users with roles
-      const demoUsers = {
-        'tracer-user': {
-          id: 'demo-user-id',
-          username: 'tracer-user',
-          email: 'demo@example.com',
-          role: 'sales-agent',
-          password: 'demo-password'
-        },
-        'admin': {
-          id: 'admin-user-id',
-          username: 'admin',
-          email: 'admin@jacc.com',
-          role: 'admin',
-          password: 'admin123'
-        },
-        'manager': {
-          id: 'manager-user-id',
-          username: 'manager',
-          email: 'manager@jacc.com',
-          role: 'manager',
-          password: 'manager123'
-        }
-      };
-      
-      const user = demoUsers[username as keyof typeof demoUsers];
-      
-      if (!user || user.password !== password) {
-        return res.status(401).json({ message: "Invalid credentials" });
-      }
-      
-      // Ensure user exists in database
-      try {
-        await storage.upsertUser({
-          id: user.id,
-          username: user.username,
-          email: user.email,
-          passwordHash: 'demo-hash', // Demo password hash
-          firstName: user.username,
-          lastName: 'User',
-          role: user.role as any,
-          profileImageUrl: null
-        });
-      } catch (dbError) {
-        console.error("Error creating demo user:", dbError);
-      }
-      
-      // Create session
-      (req as any).session.userId = user.id;
-      (req as any).session.user = {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        role: user.role
-      };
-      
-      const { password: _, ...userResponse } = user;
-      res.json({ 
-        message: "Login successful",
-        user: userResponse
-      });
-    } catch (error) {
-      res.status(500).json({ message: "Login failed" });
-    }
-  });
+  // Load simple routes after main routes to avoid conflicts
+  const { registerRoutes: registerSimpleRoutes } = await import('./simple-routes');
+  await registerSimpleRoutes(app);
   
   // User Registration
   app.post('/api/auth/register', async (req, res) => {
