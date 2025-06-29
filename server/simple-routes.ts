@@ -666,37 +666,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       const fs = await import('fs');
+      const path = await import('path');
       
       if (!document.path) {
         console.log(`❌ No path stored for document ${id}`);
         return res.status(404).json({ message: "No file path stored" });
       }
       
-      // Use the stored path directly since it's already absolute
-      const filePath = document.path;
-      console.log(`🎯 Using file path: ${filePath}`);
+      // Try multiple path possibilities to locate the file
+      const possiblePaths = [
+        document.path, // Original path as stored
+        path.join(process.cwd(), document.path), // Relative to project root
+        path.join(process.cwd(), 'uploads', path.basename(document.path)), // In uploads with basename
+        path.join(process.cwd(), 'uploads', document.name), // By document name
+        path.join(process.cwd(), 'uploads', document.original_name || document.name) // By original name
+      ];
       
-      // Check if file exists with detailed logging
-      const fileExists = fs.existsSync(filePath);
-      console.log(`📁 File exists check: ${fileExists}`);
-      
-      if (!fileExists) {
-        console.log(`❌ File not found at: ${filePath}`);
-        // Try to check the uploads directory for debugging
-        try {
-          const path = await import('path');
-          const uploadsDir = path.join(process.cwd(), 'uploads');
-          const files = fs.readdirSync(uploadsDir).slice(0, 5);
-          console.log(`📁 Sample files in uploads directory:`, files);
-          const filename = path.basename(filePath);
-          console.log(`🔍 Looking for filename: ${filename}`);
-        } catch (dirError) {
-          console.log(`❌ Error reading uploads directory:`, dirError);
+      let foundPath = null;
+      for (const testPath of possiblePaths) {
+        if (fs.existsSync(testPath)) {
+          foundPath = testPath;
+          console.log(`✅ File found at: ${foundPath}`);
+          break;
         }
-        return res.status(404).json({ message: "File not found on disk" });
       }
       
-      console.log(`✅ File verified, streaming: ${filePath}`);
+      if (!foundPath) {
+        console.log(`❌ File not found at any of the attempted paths:`, possiblePaths);
+        return res.status(404).json({ message: "File not found on disk" });
+      }
       
       // Set headers for inline viewing
       res.setHeader('Content-Type', document.mime_type || 'application/pdf');
@@ -707,7 +705,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.setHeader('X-Content-Type-Options', 'nosniff');
       
       // Stream the file
-      const fileStream = fs.createReadStream(filePath);
+      const fileStream = fs.createReadStream(foundPath);
       fileStream.on('error', (streamError) => {
         console.log(`❌ Stream error:`, streamError);
         if (!res.headersSent) {
@@ -761,7 +759,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.setHeader('Content-Type', document.mimeType || 'application/octet-stream');
       res.setHeader('Content-Disposition', `attachment; filename="${document.originalName}"`);
       
-      const fileStream = fs.createReadStream(filePath);
+      const fileStream = fs.createReadStream(foundPath);
       fileStream.pipe(res);
     } catch (error) {
       console.error("Error downloading document:", error);
@@ -788,22 +786,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Document edit endpoint with tagging support
+  // Document edit endpoint with comprehensive editing support
   app.put('/api/documents/:id', async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
       const { name, folderId, isPublic, adminOnly, managerOnly, tags, category, subcategory, processorType } = req.body;
+      
+      console.log(`📝 Updating document ${id} with:`, { name, folderId, isPublic, adminOnly, managerOnly });
+      
       const { db } = await import('./db.ts');
       const { documents } = await import('../shared/schema.ts');
       const { eq } = await import('drizzle-orm');
       
       const [document] = await db.select().from(documents).where(eq(documents.id, id));
       if (!document) {
+        console.log(`❌ Document not found: ${id}`);
         return res.status(404).json({ message: "Document not found" });
       }
       
       const updateData: any = { updatedAt: new Date() };
-      if (name !== undefined) updateData.name = name;
+      if (name !== undefined) {
+        updateData.name = name;
+        console.log(`📝 Updating document name to: ${name}`);
+      }
       if (folderId !== undefined) updateData.folderId = folderId;
       if (isPublic !== undefined) updateData.isPublic = isPublic;
       if (adminOnly !== undefined) updateData.adminOnly = adminOnly;
@@ -819,6 +824,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .where(eq(documents.id, id))
         .returning();
       
+      console.log(`✅ Document updated successfully: ${updatedDocument.name}`);
       res.json(updatedDocument);
     } catch (error) {
       console.error("Error updating document:", error);
