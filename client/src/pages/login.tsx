@@ -16,22 +16,31 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
+      // Clear any existing session cookies before login
+      document.cookie = 'sessionId=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      document.cookie = 'connect.sid=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      
       const formData = new FormData(e.target as HTMLFormElement);
       const username = formData.get('username') as string;
       const password = formData.get('password') as string;
+
+      console.log('Attempting login for:', username);
 
       const response = await fetch('/api/auth/simple-login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
+        credentials: 'include'
       });
 
+      console.log('Login response status:', response.status);
+
       if (response.ok) {
-        // Clear any existing session cookies manually
-        document.cookie = 'sessionId=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        const loginData = await response.json();
+        console.log('Login successful, user data:', loginData);
         
-        // Invalidate auth queries to refresh state
-        await queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+        // Add delay to ensure cookie is set
+        await new Promise(resolve => setTimeout(resolve, 200));
         
         // Force page refresh to ensure cookie sync
         window.location.href = '/';

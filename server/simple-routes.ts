@@ -2586,18 +2586,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // Clear any existing session first
         const oldSessionId = req.cookies?.sessionId;
+        console.log('🔍 LOGIN: Old session ID:', oldSessionId);
         if (oldSessionId && sessions.has(oldSessionId)) {
           sessions.delete(oldSessionId);
+          console.log('🗑️ LOGIN: Deleted old session:', oldSessionId);
         }
         
         // Store new session
         const sessionId = Math.random().toString(36).substring(2);
         sessions.set(sessionId, validUser.user);
+        console.log('✅ LOGIN: Created new session:', sessionId, 'for user:', validUser.user.username);
         
         // Force clear old cookie with all possible path/domain combinations
         res.clearCookie('sessionId', { path: '/' });
         res.clearCookie('sessionId', { path: '/', domain: req.hostname });
         res.clearCookie('sessionId');
+        console.log('🧹 LOGIN: Cleared old cookies');
         
         // Set new cookie
         res.cookie('sessionId', sessionId, { 
@@ -2607,6 +2611,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           path: '/',
           sameSite: 'lax'
         });
+        console.log('🍪 LOGIN: Set new cookie:', sessionId);
+        
+        // Log available sessions after login
+        console.log('📋 LOGIN: Available sessions after login:', Array.from(sessions.keys()));
         
         console.log(`Login successful for ${validUser.user.username} with role: ${validUser.user.role}`);
         console.log(`Session stored with ID: ${sessionId}`);
