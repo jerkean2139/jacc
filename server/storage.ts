@@ -69,6 +69,7 @@ export interface IStorage {
   createChat(chat: InsertChat): Promise<Chat>;
   getChat(id: string): Promise<Chat | undefined>;
   updateChat(id: string, updates: Partial<Chat>): Promise<Chat>;
+  updateChatTitle(chatId: string, title: string): Promise<void>;
   deleteChat(id: string): Promise<void>;
   
   // Message operations
@@ -239,6 +240,13 @@ export class DatabaseStorage implements IStorage {
       .where(eq(chats.id, id))
       .returning();
     return chat;
+  }
+
+  async updateChatTitle(chatId: string, title: string): Promise<void> {
+    await db
+      .update(chats)
+      .set({ title, updatedAt: new Date() })
+      .where(eq(chats.id, chatId));
   }
 
   async deleteChat(id: string): Promise<void> {
