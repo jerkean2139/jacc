@@ -2675,6 +2675,21 @@ User Context: {userRole}`,
       
       if (isFirstMessage) {
         try {
+          // Generate meaningful chat title for first user message
+          try {
+            const { generateTitle } = await import('./openai');
+            const generatedTitle = await generateTitle(messageData.content);
+            await storage.updateChatTitle(chatId, generatedTitle);
+            console.log('✅ Updated chat title:', generatedTitle);
+          } catch (titleError) {
+            console.error('❌ Title generation failed:', titleError);
+            // Fallback to meaningful title based on content
+            const fallbackTitle = messageData.content.length > 50 ? 
+              messageData.content.substring(0, 47).trim() + '...' : 
+              messageData.content.trim();
+            await storage.updateChatTitle(chatId, fallbackTitle);
+          }
+
           const user = await storage.getUser(userId);
           await storage.logUserChatRequest({
             userId,

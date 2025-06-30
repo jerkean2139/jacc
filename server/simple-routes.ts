@@ -3417,6 +3417,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // If it's a user message, generate AI response using Enhanced AI Service
       if (role === 'user') {
         try {
+          // Generate meaningful chat title for first user message
+          const isFirstUserMessage = chatMessages.filter(msg => msg.role === 'user').length === 1;
+          if (isFirstUserMessage && chats.has(chatId)) {
+            try {
+              const { generateTitle } = await import('./openai');
+              const generatedTitle = await generateTitle(content);
+              const currentChat = chats.get(chatId);
+              if (currentChat) {
+                currentChat.title = generatedTitle;
+                chats.set(chatId, currentChat);
+                console.log('✅ Updated chat title:', generatedTitle);
+              }
+            } catch (titleError) {
+              console.error('❌ Title generation failed:', titleError);
+              // Fallback to meaningful title based on content
+              const fallbackTitle = content.length > 50 ? 
+                content.substring(0, 47).trim() + '...' : 
+                content.trim();
+              const currentChat = chats.get(chatId);
+              if (currentChat) {
+                currentChat.title = fallbackTitle;
+                chats.set(chatId, currentChat);
+              }
+            }
+          }
+
           const { enhancedAIService } = await import('./enhanced-ai');
           const aiResponseData = await enhancedAIService.generateStandardResponse(
             content, 
