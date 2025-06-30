@@ -3351,8 +3351,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get messages for a chat
-  app.get('/api/chats/:chatId/messages', (req: Request, res: Response) => {
+  // Get messages for a chat - FIXED: Now uses database instead of in-memory Map
+  app.get('/api/chats/:chatId/messages', async (req: Request, res: Response) => {
+    console.log(`🚨 SIMPLE ROUTES ENDPOINT HIT: Loading messages for chat ${req.params.chatId}`);
     try {
       const sessionId = req.cookies?.sessionId;
       let userId;
@@ -3366,7 +3367,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const { chatId } = req.params;
-      const chatMessages = messages.get(chatId) || [];
+      
+      console.log(`🔍 SIMPLE ROUTES: Loading messages for chat ${chatId}`);
+      
+      // CRITICAL FIX: Use database instead of in-memory Map
+      const { db } = await import('./db');
+      const { messages: messagesTable } = await import('@shared/schema');
+      const { eq } = await import('drizzle-orm');
+      
+      const chatMessages = await db.select().from(messagesTable).where(eq(messagesTable.chatId, chatId)).orderBy(messagesTable.createdAt);
+      
+      console.log(`🔍 SIMPLE ROUTES: Found ${chatMessages.length} messages in database for chat ${chatId}`);
+      
+      if (chatMessages.length > 0) {
+        console.log(`🔍 SIMPLE ROUTES: Sample message:`, {
+          id: chatMessages[0].id,
+          role: chatMessages[0].role,
+          content: chatMessages[0].content?.substring(0, 50) + '...',
+          chatId: chatMessages[0].chatId
+        });
+      }
+      
       res.json(chatMessages);
     } catch (error) {
       console.error('Get messages error:', error);
