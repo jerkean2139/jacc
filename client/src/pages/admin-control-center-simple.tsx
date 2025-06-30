@@ -35,9 +35,10 @@ export default function AdminControlCenter() {
     queryKey: ['/api/admin/chat-reviews'],
   });
 
-  // Fetch messages for selected chat
+  // Fetch messages for selected chat - CRITICAL: DO NOT CHANGE THIS QUERY FORMAT
+  // This exact format was locked after fixing Chat Review Center regression
   const { data: chatMessages, isLoading: messagesLoading } = useQuery({
-    queryKey: ['/api/chats', selectedChatId, 'messages'],
+    queryKey: [`/api/chats/${selectedChatId}/messages`],
     enabled: !!selectedChatId,
     onSuccess: (data) => {
       if (data && data.length > 0) {
