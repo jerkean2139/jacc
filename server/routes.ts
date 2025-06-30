@@ -4011,6 +4011,20 @@ User Context: {userRole}`,
           displayUserName = chat.userEmail;
         }
         
+        // Determine proper review status based on message count and activity
+        let reviewStatus = 'pending';
+        const msgCount = messageCount[0]?.count || 0;
+        
+        if (msgCount === 0) {
+          reviewStatus = 'empty';
+        } else if (chat.isActive === false) {
+          reviewStatus = 'archived';
+        } else {
+          // For active chats with messages, check if they have recent activity
+          const daysSinceUpdate = Math.floor((Date.now() - new Date(chat.updatedAt).getTime()) / (1000 * 60 * 60 * 24));
+          reviewStatus = daysSinceUpdate < 7 ? 'active' : 'pending';
+        }
+
         chatReviews.push({
           chatId: chat.id,
           title: displayTitle,
@@ -4019,8 +4033,8 @@ User Context: {userRole}`,
           userEmail: chat.userEmail,
           createdAt: chat.createdAt,
           updatedAt: chat.updatedAt,
-          messageCount: messageCount[0]?.count || 0,
-          reviewStatus: chat.isActive === false ? 'archived' : 'pending'
+          messageCount: msgCount,
+          reviewStatus
         });
       }
       
