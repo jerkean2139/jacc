@@ -2255,11 +2255,22 @@ User Context: {userRole}`,
     try {
       const { chatId } = req.params;
       
-      console.log('📱 Loading chat messages with auto-login');
+      console.log('📱 Loading chat messages with auto-login for chatId:', chatId);
+      
+      // Debug: First check if the chat exists
+      const chatExists = await db.select().from(chats).where(eq(chats.id, chatId)).limit(1);
+      console.log(`📱 Chat exists check:`, chatExists.length > 0 ? 'FOUND' : 'NOT FOUND');
       
       // Get messages from database directly without auth middleware interference
       const chatMessages = await db.select().from(messages).where(eq(messages.chatId, chatId)).orderBy(messages.createdAt);
       console.log(`📱 Found ${chatMessages.length} messages for chat ${chatId}`);
+      
+      // Debug: Check if there are ANY messages in the database
+      const totalMessages = await db.select().from(messages).limit(5);
+      console.log(`📱 Total messages in database (sample):`, totalMessages.length);
+      if (totalMessages.length > 0) {
+        console.log(`📱 Sample database message chatId:`, totalMessages[0].chatId);
+      }
       
       if (chatMessages.length > 0) {
         console.log(`📱 Sample message:`, {
