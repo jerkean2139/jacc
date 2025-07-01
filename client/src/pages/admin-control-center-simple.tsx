@@ -44,10 +44,43 @@ function DocumentCenterTab() {
   };
   
   const folders = Array.isArray(foldersData) ? foldersData : [];
-  const documents = (documentsData as any)?.documents || documentsData || [];
+  
+  // Extract documents from the integrated API response structure
+  const getAllDocuments = () => {
+    if (!documentsData) return [];
+    
+    const data = documentsData as any;
+    
+    // Handle integrated API response structure
+    if (data.folders && Array.isArray(data.folders)) {
+      const allDocs: any[] = [];
+      data.folders.forEach((folder: any) => {
+        if (folder.documents && Array.isArray(folder.documents)) {
+          folder.documents.forEach((doc: any) => {
+            allDocs.push({
+              ...doc,
+              folderId: folder.id,
+              folderName: folder.name
+            });
+          });
+        }
+      });
+      return allDocs;
+    }
+    
+    // Fallback for direct documents array
+    return Array.isArray(documentsData) ? documentsData : [];
+  };
+  
+  const documents = getAllDocuments();
   
   const getDocumentsInFolder = (folderId: string) => {
-    return documents.filter((doc: any) => doc.folderId === folderId);
+    const data = documentsData as any;
+    if (!data?.folders) return [];
+    
+    // Find the specific folder and return its documents
+    const folder = data.folders.find((f: any) => f.id === folderId);
+    return folder?.documents || [];
   };
   
   const filteredFolders = folders.filter(folder => 
@@ -105,7 +138,7 @@ function DocumentCenterTab() {
                             <FolderOpen className="h-4 w-4 text-blue-600" />
                             <span className="font-medium">{folder.name}</span>
                             <Badge variant="outline" className="ml-2">
-                              {folderDocs.length} docs
+                              {folder.documentCount || folderDocs.length} docs
                             </Badge>
                           </div>
                         </div>
