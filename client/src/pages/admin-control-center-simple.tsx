@@ -44,11 +44,10 @@ function DocumentCenterTab() {
   };
   
   const folders = Array.isArray(foldersData) ? foldersData : [];
-  const documents = Array.isArray(documentsData?.documents) ? documentsData.documents : 
-                   Array.isArray(documentsData) ? documentsData : [];
+  const documents = (documentsData as any)?.documents || documentsData || [];
   
   const getDocumentsInFolder = (folderId: string) => {
-    return documents.filter(doc => doc.folderId === folderId);
+    return documents.filter((doc: any) => doc.folderId === folderId);
   };
   
   const filteredFolders = folders.filter(folder => 
@@ -114,7 +113,7 @@ function DocumentCenterTab() {
                       <CollapsibleContent className="mt-4">
                         {folderDocs.length > 0 ? (
                           <div className="space-y-2 ml-6">
-                            {folderDocs.map((doc) => (
+                            {folderDocs.map((doc: any) => (
                               <div key={doc.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
                                 <div className="flex items-center gap-2">
                                   <FileText className="h-4 w-4 text-gray-500" />
@@ -149,7 +148,7 @@ function DocumentCenterTab() {
         <TabsContent value="documents" className="space-y-4">
           <div className="grid gap-4">
             {documents.length > 0 ? (
-              documents.map((doc) => (
+              documents.map((doc: any) => (
                 <Card key={doc.id} className="border">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
@@ -214,10 +213,7 @@ function KnowledgeBaseTab() {
   // Add new FAQ mutation
   const addFAQMutation = useMutation({
     mutationFn: async (data: any) => {
-      return apiRequest('/api/admin/faq', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      });
+      return apiRequest('/api/admin/faq', 'POST', data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/faq'] });
@@ -392,16 +388,18 @@ export default function AdminControlCenter() {
   const { data: chatMessages, isLoading: messagesLoading } = useQuery({
     queryKey: [`/api/chats/${selectedChatId}/messages`],
     enabled: !!selectedChatId,
-    onSuccess: (data) => {
-      if (data && data.length > 0) {
-        setSelectedChatDetails({
-          userMessage: data.find((m: any) => m.role === 'user')?.content || '',
-          aiResponse: data.find((m: any) => m.role === 'assistant')?.content || '',
-          messages: data
-        });
-      }
-    }
   });
+
+  // Handle message data when it loads
+  React.useEffect(() => {
+    if (chatMessages && Array.isArray(chatMessages) && chatMessages.length > 0) {
+      setSelectedChatDetails({
+        userMessage: chatMessages.find((m: any) => m.role === 'user')?.content || '',
+        aiResponse: chatMessages.find((m: any) => m.role === 'assistant')?.content || '',
+        messages: chatMessages
+      });
+    }
+  }, [chatMessages]);
 
   // Helper mutation functions for ChatReviewCenter
   const approveChatMutation = useMutation({
