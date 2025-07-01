@@ -40,6 +40,11 @@ export default function DocumentsPage() {
     queryKey: ["/api/folders"],
   });
 
+  // Debug the query response
+  console.log('documentsData query result:', documentsData);
+  console.log('documentsLoading:', documentsLoading);
+  console.log('documentsError:', documentsError);
+
   // Extract folders from the documents API response or fallback to folders API
   const folders = (documentsData as any)?.folders || foldersData;
 
@@ -49,9 +54,25 @@ export default function DocumentsPage() {
   // Extract documents from API response - handle the integrated format
   let documents: any[] = [];
   
-  if (documentsData && Array.isArray(documentsData)) {
-    // API returns array format directly
-    documents = documentsData.filter((doc: any) => {
+  if (documentsData) {
+    console.log('Raw documentsData structure:', documentsData);
+    console.log('documentsData keys:', Object.keys(documentsData as any));
+    
+    if (Array.isArray(documentsData)) {
+      // API returns array format directly
+      documents = documentsData;
+    } else if ((documentsData as any).documents && Array.isArray((documentsData as any).documents)) {
+      // API returns object with documents property
+      documents = (documentsData as any).documents;
+    }
+    
+    console.log('Extracted documents count:', documents.length);
+    if (documents.length > 0) {
+      console.log('Sample document structure:', documents[0]);
+    }
+    
+    // Filter documents based on user role
+    documents = documents.filter((doc: any) => {
       if (isAdmin) return true; // Admins see all documents
       return !doc.adminOnly && !doc.admin_only; // Regular users only see non-admin documents
     });
