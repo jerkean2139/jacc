@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
@@ -105,130 +105,89 @@ function DocumentCenterTab() {
         </div>
       </div>
       
-      <Tabs defaultValue="folders" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="folders">
-            <Folder className="h-4 w-4 mr-2" />
-            Folders ({folders.length})
-          </TabsTrigger>
-          <TabsTrigger value="documents">
-            <FileText className="h-4 w-4 mr-2" />
-            All Documents ({documents.length})
-          </TabsTrigger>
-        </TabsList>
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <Folder className="h-4 w-4 text-blue-600" />
+          <h3 className="text-lg font-medium">Document Folders</h3>
+          <Badge variant="secondary">
+            {folders.length} folders, {documents.length} documents
+          </Badge>
+        </div>
         
-        <TabsContent value="folders" className="space-y-4">
-          <div className="space-y-2">
-            {filteredFolders.map((folder) => {
-              const folderDocs = getDocumentsInFolder(folder.id);
-              const isExpanded = expandedFolders.has(folder.id);
-              
-              // Debug logging
-              console.log(`Folder ${folder.name}: ${folderDocs.length} documents, documentCount: ${folder.documentCount}`);
-              
-              return (
-                <Card key={folder.id} className="border">
-                  <CardContent className="p-4">
-                    <Collapsible open={isExpanded} onOpenChange={() => toggleFolder(folder.id)}>
-                      <CollapsibleTrigger className="w-full">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            {isExpanded ? (
-                              <ChevronDown className="h-4 w-4" />
-                            ) : (
-                              <ChevronRight className="h-4 w-4" />
-                            )}
-                            <FolderOpen className="h-4 w-4 text-blue-600" />
-                            <span className="font-medium">{folder.name}</span>
-                            <Badge variant="outline" className="ml-2">
-                              {folder.documentCount || folderDocs.length} docs
-                            </Badge>
-                          </div>
+        <div className="space-y-2">
+          {filteredFolders.map((folder) => {
+            const folderDocs = getDocumentsInFolder(folder.id);
+            const isExpanded = expandedFolders.has(folder.id);
+            
+            // Debug logging
+            console.log(`Folder ${folder.name}: ${folderDocs.length} documents, documentCount: ${folder.documentCount}`);
+            
+            return (
+              <Card key={folder.id} className="border">
+                <CardContent className="p-4">
+                  <Collapsible open={isExpanded} onOpenChange={() => toggleFolder(folder.id)}>
+                    <CollapsibleTrigger className="w-full">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          {isExpanded ? (
+                            <ChevronDown className="h-4 w-4" />
+                          ) : (
+                            <ChevronRight className="h-4 w-4" />
+                          )}
+                          <FolderOpen className="h-4 w-4 text-blue-600" />
+                          <span className="font-medium">{folder.name}</span>
+                          <Badge variant="outline" className="ml-2">
+                            {folder.documentCount || folderDocs.length} docs
+                          </Badge>
                         </div>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent className="mt-4">
-                        {folderDocs.length > 0 ? (
-                          <div className="space-y-2 ml-6">
-                            {folderDocs.map((doc: any) => (
-                              <div key={doc.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
-                                <div className="flex items-center gap-2">
-                                  <FileText className="h-4 w-4 text-gray-500" />
-                                  <span className="text-sm">{doc.name || doc.originalName}</span>
-                                  <Badge variant="outline" className="text-xs">
-                                    {doc.mimeType?.split('/')[1] || 'file'}
-                                  </Badge>
-                                </div>
-                                <div className="flex gap-1">
-                                  <Button size="sm" variant="ghost">
-                                    <Eye className="h-3 w-3" />
-                                  </Button>
-                                  <Button size="sm" variant="ghost">
-                                    <Download className="h-3 w-3" />
-                                  </Button>
+                      </div>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="mt-4">
+                      {folderDocs.length > 0 ? (
+                        <div className="space-y-2 ml-6">
+                          {folderDocs.map((doc: any) => (
+                            <div key={doc.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border">
+                              <div className="flex items-center gap-3">
+                                <FileText className="h-4 w-4 text-gray-500" />
+                                <div>
+                                  <div className="text-sm font-medium">{doc.name || doc.originalName || doc.title}</div>
+                                  <div className="flex items-center gap-2 mt-1">
+                                    <Badge variant="outline" className="text-xs">
+                                      {doc.mimeType?.split('/')[1] || doc.type || 'file'}
+                                    </Badge>
+                                    {doc.size && (
+                                      <span className="text-xs text-gray-500">
+                                        {Math.round(doc.size / 1024)}KB
+                                      </span>
+                                    )}
+                                  </div>
                                 </div>
                               </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <p className="text-sm text-gray-500 ml-6">No documents in this folder</p>
-                        )}
-                      </CollapsibleContent>
-                    </Collapsible>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="documents" className="space-y-4">
-          <div className="grid gap-4">
-            {documents.length > 0 ? (
-              documents.map((doc: any) => (
-                <Card key={doc.id} className="border">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <FileText className="h-4 w-4 text-blue-600" />
-                        <div>
-                          <div className="font-medium">{doc.name || doc.originalName}</div>
-                          <div className="text-sm text-gray-500">
-                            {doc.folderId ? (
-                              folders.find(f => f.id === doc.folderId)?.name || 'Unknown folder'
-                            ) : (
-                              'No folder assigned'
-                            )}
-                          </div>
+                              <div className="flex gap-1">
+                                <Button size="sm" variant="ghost" title="View Document">
+                                  <Eye className="h-3 w-3" />
+                                </Button>
+                                <Button size="sm" variant="ghost" title="Download Document">
+                                  <Download className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
                         </div>
-                        <Badge variant="outline">
-                          {doc.mimeType?.split('/')[1] || 'file'}
-                        </Badge>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button size="sm" variant="outline">
-                          <Eye className="h-4 w-4 mr-1" />
-                          View
-                        </Button>
-                        <Button size="sm" variant="outline">
-                          <Download className="h-4 w-4 mr-1" />
-                          Download
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            ) : (
-              <Card>
-                <CardContent className="p-8 text-center">
-                  <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-500">No documents found</p>
+                      ) : (
+                        <div className="ml-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                          <FileText className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                          <p className="text-sm text-gray-500">No documents in this folder</p>
+                        </div>
+                      )}
+                    </CollapsibleContent>
+                  </Collapsible>
                 </CardContent>
               </Card>
-            )}
-          </div>
-        </TabsContent>
-      </Tabs>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }
