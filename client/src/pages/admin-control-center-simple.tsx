@@ -8,14 +8,366 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { 
   Settings, Database, MessageSquare, Brain, CheckCircle, 
   AlertTriangle, Clock, Search, FileText, Eye, Download,
   Edit, Trash2, Save, Plus, Folder, Upload, Users,
-  BarChart3, ThumbsUp, User, Bot, RefreshCw, AlertCircle
+  BarChart3, ThumbsUp, User, Bot, RefreshCw, AlertCircle,
+  ChevronRight, ChevronDown, BookOpen, FolderOpen
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
+
+// Document Center Tab Component
+function DocumentCenterTab() {
+  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
+  const [searchTerm, setSearchTerm] = useState("");
+  
+  // Fetch folders and documents
+  const { data: foldersData } = useQuery({
+    queryKey: ['/api/admin/folders'],
+  });
+  
+  const { data: documentsData } = useQuery({
+    queryKey: ['/api/documents'],
+  });
+  
+  const toggleFolder = (folderId: string) => {
+    const newExpanded = new Set(expandedFolders);
+    if (newExpanded.has(folderId)) {
+      newExpanded.delete(folderId);
+    } else {
+      newExpanded.add(folderId);
+    }
+    setExpandedFolders(newExpanded);
+  };
+  
+  const folders = Array.isArray(foldersData) ? foldersData : [];
+  const documents = Array.isArray(documentsData?.documents) ? documentsData.documents : 
+                   Array.isArray(documentsData) ? documentsData : [];
+  
+  const getDocumentsInFolder = (folderId: string) => {
+    return documents.filter(doc => doc.folderId === folderId);
+  };
+  
+  const filteredFolders = folders.filter(folder => 
+    searchTerm === "" || 
+    folder.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+  
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold">Document Center</h2>
+        <div className="flex gap-2">
+          <Input
+            placeholder="Search folders and documents..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-64"
+          />
+          <Badge variant="secondary">
+            {folders.length} folders, {documents.length} documents
+          </Badge>
+        </div>
+      </div>
+      
+      <Tabs defaultValue="folders" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="folders">
+            <Folder className="h-4 w-4 mr-2" />
+            Folders ({folders.length})
+          </TabsTrigger>
+          <TabsTrigger value="documents">
+            <FileText className="h-4 w-4 mr-2" />
+            All Documents ({documents.length})
+          </TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="folders" className="space-y-4">
+          <div className="space-y-2">
+            {filteredFolders.map((folder) => {
+              const folderDocs = getDocumentsInFolder(folder.id);
+              const isExpanded = expandedFolders.has(folder.id);
+              
+              return (
+                <Card key={folder.id} className="border">
+                  <CardContent className="p-4">
+                    <Collapsible open={isExpanded} onOpenChange={() => toggleFolder(folder.id)}>
+                      <CollapsibleTrigger className="w-full">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            {isExpanded ? (
+                              <ChevronDown className="h-4 w-4" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4" />
+                            )}
+                            <FolderOpen className="h-4 w-4 text-blue-600" />
+                            <span className="font-medium">{folder.name}</span>
+                            <Badge variant="outline" className="ml-2">
+                              {folderDocs.length} docs
+                            </Badge>
+                          </div>
+                        </div>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent className="mt-4">
+                        {folderDocs.length > 0 ? (
+                          <div className="space-y-2 ml-6">
+                            {folderDocs.map((doc) => (
+                              <div key={doc.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                                <div className="flex items-center gap-2">
+                                  <FileText className="h-4 w-4 text-gray-500" />
+                                  <span className="text-sm">{doc.name || doc.originalName}</span>
+                                  <Badge variant="outline" className="text-xs">
+                                    {doc.mimeType?.split('/')[1] || 'file'}
+                                  </Badge>
+                                </div>
+                                <div className="flex gap-1">
+                                  <Button size="sm" variant="ghost">
+                                    <Eye className="h-3 w-3" />
+                                  </Button>
+                                  <Button size="sm" variant="ghost">
+                                    <Download className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-sm text-gray-500 ml-6">No documents in this folder</p>
+                        )}
+                      </CollapsibleContent>
+                    </Collapsible>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="documents" className="space-y-4">
+          <div className="grid gap-4">
+            {documents.length > 0 ? (
+              documents.map((doc) => (
+                <Card key={doc.id} className="border">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-blue-600" />
+                        <div>
+                          <div className="font-medium">{doc.name || doc.originalName}</div>
+                          <div className="text-sm text-gray-500">
+                            {doc.folderId ? (
+                              folders.find(f => f.id === doc.folderId)?.name || 'Unknown folder'
+                            ) : (
+                              'No folder assigned'
+                            )}
+                          </div>
+                        </div>
+                        <Badge variant="outline">
+                          {doc.mimeType?.split('/')[1] || 'file'}
+                        </Badge>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="outline">
+                          <Eye className="h-4 w-4 mr-1" />
+                          View
+                        </Button>
+                        <Button size="sm" variant="outline">
+                          <Download className="h-4 w-4 mr-1" />
+                          Download
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <Card>
+                <CardContent className="p-8 text-center">
+                  <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-500">No documents found</p>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
+
+// Knowledge Base Tab Component  
+function KnowledgeBaseTab() {
+  const [newQuestion, setNewQuestion] = useState("");
+  const [newAnswer, setNewAnswer] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("general");
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  
+  // Fetch FAQ data
+  const { data: faqData } = useQuery({
+    queryKey: ['/api/admin/faq'],
+  });
+  
+  // Add new FAQ mutation
+  const addFAQMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return apiRequest('/api/admin/faq', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/faq'] });
+      setNewQuestion("");
+      setNewAnswer("");
+      toast({
+        title: "Success",
+        description: "FAQ entry added successfully",
+      });
+    },
+  });
+  
+  const handleAddFAQ = () => {
+    if (!newQuestion.trim() || !newAnswer.trim()) {
+      toast({
+        title: "Error",
+        description: "Please fill in both question and answer",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    addFAQMutation.mutate({
+      question: newQuestion,
+      answer: newAnswer,
+      category: selectedCategory,
+    });
+  };
+  
+  const faqs = Array.isArray(faqData) ? faqData : [];
+  
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold">Q&A Knowledge Base</h2>
+        <Badge variant="secondary">
+          {faqs.length} entries
+        </Badge>
+      </div>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Add New FAQ */}
+        <Card className="border-2 border-blue-500">
+          <CardHeader>
+            <CardTitle className="text-blue-600">📝 Add New FAQ Entry</CardTitle>
+            <CardDescription>Create comprehensive Q&A entries for the knowledge base</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label>Question</Label>
+              <Input 
+                placeholder="What is the processing fee for restaurants?"
+                value={newQuestion}
+                onChange={(e) => setNewQuestion(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label>Answer</Label>
+              <Textarea 
+                placeholder="Processing fees for restaurants typically range from 2.3% to 3.5% depending on the card type and processing method..."
+                value={newAnswer}
+                onChange={(e) => setNewAnswer(e.target.value)}
+                rows={4}
+              />
+            </div>
+            <div>
+              <Label>Category</Label>
+              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="general">General</SelectItem>
+                  <SelectItem value="pricing">Pricing</SelectItem>
+                  <SelectItem value="compliance">Compliance</SelectItem>
+                  <SelectItem value="hardware">Hardware</SelectItem>
+                  <SelectItem value="integration">Integration</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Button 
+              onClick={handleAddFAQ} 
+              className="w-full"
+              disabled={addFAQMutation.isPending}
+            >
+              {addFAQMutation.isPending ? (
+                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Plus className="h-4 w-4 mr-2" />
+              )}
+              Add FAQ Entry
+            </Button>
+          </CardContent>
+        </Card>
+        
+        {/* Existing FAQs */}
+        <Card>
+          <CardHeader>
+            <CardTitle>📚 Existing FAQ Entries</CardTitle>
+            <CardDescription>Manage and edit current knowledge base entries</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3 max-h-96 overflow-y-auto">
+              {faqs.length > 0 ? (
+                faqs.map((faq: any) => (
+                  <Collapsible key={faq.id}>
+                    <CollapsibleTrigger className="w-full text-left">
+                      <div className="border rounded-lg p-3 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <MessageSquare className="w-4 h-4 text-blue-600" />
+                            <p className="font-medium text-sm">{faq.question}</p>
+                          </div>
+                          <ChevronRight className="w-4 h-4 text-gray-500" />
+                        </div>
+                      </div>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <div className="ml-6 mt-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border-l-4 border-blue-500">
+                        <p className="text-sm">{faq.answer}</p>
+                        <div className="flex items-center justify-between mt-2">
+                          <Badge variant="outline" className="text-xs">
+                            {faq.category}
+                          </Badge>
+                          <div className="flex gap-1">
+                            <Button size="sm" variant="ghost">
+                              <Edit className="w-3 h-3" />
+                            </Button>
+                            <Button size="sm" variant="ghost">
+                              <Trash2 className="w-3 h-3 text-red-500" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
+                ))
+              ) : (
+                <div className="text-center py-8">
+                  <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-500">No FAQ entries yet</p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
 
 export default function AdminControlCenter() {
   const { toast } = useToast();
@@ -469,27 +821,11 @@ export default function AdminControlCenter() {
         </TabsContent>
 
         <TabsContent value="documents" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Document Management</CardTitle>
-              <CardDescription>Upload and manage documents for AI training</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-500">Document management interface would be here</p>
-            </CardContent>
-          </Card>
+          <DocumentCenterTab />
         </TabsContent>
 
         <TabsContent value="knowledge" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Q&A Knowledge Base</CardTitle>
-              <CardDescription>Manage FAQ entries and knowledge base content</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-500">Knowledge base management interface would be here</p>
-            </CardContent>
-          </Card>
+          <KnowledgeBaseTab />
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-6">
