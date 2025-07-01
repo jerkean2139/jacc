@@ -364,9 +364,16 @@ export default function DocumentsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {folders.map((folder: any) => {
                     // Get documents for this folder from the documents array
-                    const folderDocuments = documents.filter(doc => 
+                    const folderDocuments = normalizedDocuments.filter(doc => 
                       doc.folderId === folder.id || doc.folder_id === folder.id
                     );
+                    
+                    // Debug logging
+                    console.log(`Folder ${folder.name}:`, {
+                      folderId: folder.id,
+                      documentsCount: folderDocuments.length,
+                      documents: folderDocuments.map(d => ({ id: d.id, name: d.name || d.originalName }))
+                    });
                     
                     return (
                       <DroppableFolder
