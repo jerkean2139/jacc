@@ -255,10 +255,6 @@ export default function DocumentsPage() {
             <Folder className="h-4 w-4 mr-2" />
             Folders ({folders.length})
           </TabsTrigger>
-          <TabsTrigger value="manage">
-            <FileText className="h-4 w-4 mr-2" />
-            {isAdmin ? 'All Documents' : 'Documents'} ({normalizedDocuments.length})
-          </TabsTrigger>
           <TabsTrigger value="my-documents">
             <UserIcon className="h-4 w-4 mr-2" />
             My Documents
@@ -281,63 +277,7 @@ export default function DocumentsPage() {
           <MyDocumentsPage />
         </TabsContent>
 
-        <TabsContent value="manage" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Search Documents</CardTitle>
-              <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search documents by name, description, or category..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </CardHeader>
-            <CardContent>
-              {documentsLoading ? (
-                <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                  <p className="mt-2 text-sm text-muted-foreground">Loading documents...</p>
-                </div>
-              ) : documentsError ? (
-                <div className="text-center py-8">
-                  <FileText className="mx-auto h-12 w-12 text-red-400" />
-                  <h3 className="mt-2 text-sm font-semibold text-red-600">Error loading documents</h3>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Please try refreshing the page or contact support if the issue persists.
-                  </p>
-                </div>
-              ) : filteredDocuments.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {filteredDocuments.map((doc) => (
-                    <DraggableDocument
-                      key={doc.id}
-                      document={doc}
-                      onMove={handleDocumentMove}
-                      onPreview={handlePreviewDocument}
-                      onDownload={handleDownloadDocument}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <FileText className="mx-auto h-12 w-12 text-muted-foreground" />
-                  <h3 className="mt-2 text-sm font-semibold text-gray-900">No documents found</h3>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {searchQuery ? 'Try adjusting your search terms.' : 'Upload some documents to get started.'}
-                  </p>
-                  {normalizedDocuments.length === 0 && !searchQuery && (
-                    <p className="mt-2 text-xs text-muted-foreground">
-                      Documents available: {normalizedDocuments.length}
-                    </p>
-                  )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+
 
         <TabsContent value="folders" className="space-y-4">
           <Card>

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useDragDrop } from './drag-drop-provider';
-import { Folder, FolderOpen, Plus } from 'lucide-react';
+import { Folder, FolderOpen, Plus, FileText } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -146,9 +146,23 @@ export function DroppableFolder({ folder, onDocumentMove, onClick, isSelected }:
         {isExpanded && folder.documents && folder.documents.length > 0 && (
           <div className="mt-3 space-y-2 border-t pt-3">
             {folder.documents.map((doc: any) => (
-              <div key={doc.id} className="flex items-center gap-2 p-2 bg-gray-50 rounded text-xs">
+              <div 
+                key={doc.id} 
+                className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-800 rounded text-xs hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors"
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent folder toggle
+                  // Open document preview or download
+                  if (doc.webViewLink) {
+                    window.open(doc.webViewLink, '_blank');
+                  } else if (doc.path) {
+                    // For local documents, construct view URL
+                    window.open(`/api/documents/${doc.id}/view`, '_blank');
+                  }
+                }}
+              >
+                <FileText className="w-3 h-3 text-blue-600 flex-shrink-0" />
                 <span className="flex-1 truncate font-medium">{doc.originalName || doc.name}</span>
-                <span className="text-gray-500">{new Date(doc.createdAt).toLocaleDateString()}</span>
+                <span className="text-gray-500 dark:text-gray-400">{new Date(doc.createdAt).toLocaleDateString()}</span>
               </div>
             ))}
           </div>
