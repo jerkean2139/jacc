@@ -9,12 +9,11 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import DocumentUpload from "@/components/document-upload";
 import { DraggableDocument } from "@/components/draggable-document";
 import { DroppableFolder } from "@/components/droppable-folder";
 
 import { apiRequest } from "@/lib/queryClient";
-import { Search, FileText, Upload, Folder, Trash2, ArrowLeft, Home, Plus, FolderPlus, User as UserIcon } from "lucide-react";
+import { Search, FileText, Folder, Trash2, ArrowLeft, Home, Plus, FolderPlus, User as UserIcon } from "lucide-react";
 import type { Document, Folder as FolderType, User as UserType } from "@shared/schema";
 
 export default function DocumentsPage() {
@@ -259,19 +258,7 @@ export default function DocumentsPage() {
             <UserIcon className="h-4 w-4 mr-2" />
             My Documents
           </TabsTrigger>
-          {isAdmin && (
-            <TabsTrigger value="upload">
-              <Upload className="h-4 w-4 mr-2" />
-              Upload Documents
-            </TabsTrigger>
-          )}
         </TabsList>
-
-        {isAdmin && (
-          <TabsContent value="upload" className="space-y-4">
-            <DocumentUpload />
-          </TabsContent>
-        )}
 
         <TabsContent value="my-documents" className="space-y-4">
           <MyDocumentsPage />
