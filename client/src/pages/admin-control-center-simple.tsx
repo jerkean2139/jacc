@@ -45,16 +45,17 @@ function DocumentCenterTab() {
   
   const folders = Array.isArray(foldersData) ? foldersData : [];
   
+  // Cast documentsData to proper type to avoid TypeScript errors
+  const documentsApiData = documentsData as any;
+  
   // Extract documents from the integrated API response structure
   const getAllDocuments = () => {
-    if (!documentsData) return [];
-    
-    const data = documentsData as any;
+    if (!documentsApiData) return [];
     
     // Handle integrated API response structure
-    if (data.folders && Array.isArray(data.folders)) {
+    if (documentsApiData.folders && Array.isArray(documentsApiData.folders)) {
       const allDocs: any[] = [];
-      data.folders.forEach((folder: any) => {
+      documentsApiData.folders.forEach((folder: any) => {
         if (folder.documents && Array.isArray(folder.documents)) {
           folder.documents.forEach((doc: any) => {
             allDocs.push({
@@ -69,17 +70,16 @@ function DocumentCenterTab() {
     }
     
     // Fallback for direct documents array
-    return Array.isArray(documentsData) ? documentsData : [];
+    return Array.isArray(documentsApiData) ? documentsApiData : [];
   };
   
   const documents = getAllDocuments();
   
   const getDocumentsInFolder = (folderId: string) => {
-    const data = documentsData as any;
-    if (!data?.folders) return [];
+    if (!documentsApiData?.folders) return [];
     
     // Find the specific folder and return its documents
-    const folder = data.folders.find((f: any) => f.id === folderId);
+    const folder = documentsApiData.folders.find((f: any) => f.id === folderId);
     return folder?.documents || [];
   };
   
@@ -122,6 +122,9 @@ function DocumentCenterTab() {
             {filteredFolders.map((folder) => {
               const folderDocs = getDocumentsInFolder(folder.id);
               const isExpanded = expandedFolders.has(folder.id);
+              
+              // Debug logging
+              console.log(`Folder ${folder.name}: ${folderDocs.length} documents, documentCount: ${folder.documentCount}`);
               
               return (
                 <Card key={folder.id} className="border">
