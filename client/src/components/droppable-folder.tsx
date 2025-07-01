@@ -24,13 +24,7 @@ export function DroppableFolder({ folder, onDocumentMove, onClick, isSelected }:
   const [isHovered, setIsHovered] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // Debug logging
-  console.log(`DroppableFolder ${folder.name}:`, {
-    documentCount: folder.documentCount,
-    documentsLength: folder.documents?.length,
-    isExpanded,
-    hasDocuments: folder.documents && folder.documents.length > 0
-  });
+
 
   const canAcceptDrop = draggedItem?.type === 'document';
   const isDropTarget = dropTarget === folder.id;

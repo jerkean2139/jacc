@@ -40,35 +40,40 @@ export default function DocumentsPage() {
     queryKey: ["/api/folders"],
   });
 
-  // Debug the query response
-  console.log('documentsData query result:', documentsData);
-  console.log('documentsLoading:', documentsLoading);
-  console.log('documentsError:', documentsError);
+
 
   // Extract folders from the documents API response or fallback to folders API
   const folders = (documentsData as any)?.folders || foldersData;
 
   // Check if user is admin
-  const isAdmin = user?.role === 'dev-admin' || user?.role === 'client-admin';
+  const isAdmin = user?.role === 'admin' || user?.role === 'dev-admin' || user?.role === 'client-admin';
+  
+
 
   // Extract documents from API response - handle the integrated format
   let documents: any[] = [];
   
   if (documentsData) {
-    console.log('Raw documentsData structure:', documentsData);
-    console.log('documentsData keys:', Object.keys(documentsData as any));
-    
     if (Array.isArray(documentsData)) {
       // API returns array format directly
       documents = documentsData;
+    } else if ((documentsData as any).folders && Array.isArray((documentsData as any).folders)) {
+      // API returns integrated format with folders containing documents
+      // Extract all documents from all folders
+      documents = [];
+      (documentsData as any).folders.forEach((folder: any) => {
+        if (folder.documents && Array.isArray(folder.documents)) {
+          documents = documents.concat(folder.documents);
+        }
+      });
+      
+      // Also add unassigned documents if they exist
+      if ((documentsData as any).unassignedDocuments && Array.isArray((documentsData as any).unassignedDocuments)) {
+        documents = documents.concat((documentsData as any).unassignedDocuments);
+      }
     } else if ((documentsData as any).documents && Array.isArray((documentsData as any).documents)) {
       // API returns object with documents property
       documents = (documentsData as any).documents;
-    }
-    
-    console.log('Extracted documents count:', documents.length);
-    if (documents.length > 0) {
-      console.log('Sample document structure:', documents[0]);
     }
     
     // Filter documents based on user role
