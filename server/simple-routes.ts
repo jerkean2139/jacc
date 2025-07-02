@@ -114,53 +114,43 @@ async function searchWebForIndustryArticles(query: string): Promise<string> {
 function getConversationStarterResponse(userMessage: string): string | null {
   const msg = userMessage.toLowerCase().trim();
   
-  // Check for conversation starter patterns
+  // Check for conversation starter patterns - CLEAN RESPONSES WITHOUT FORMATTING
   if (msg.includes('help calculating processing rates') || msg.includes('competitive pricing')) {
-    return `<div class="hormozi-default">
-<h2>📊 Processing Rate Analysis Made Simple</h2>
-<p>I'll help you calculate competitive processing rates and find the best pricing for your merchants. Here's how we can approach this:</p>
+    return `<h2>Processing Rate Analysis</h2>
+<p>I'll help you calculate competitive processing rates and find the best pricing for your merchants.</p>
 
-<div class="hormozi-action-items">
-<h3>What I Need From You:</h3>
+<p><strong>What I need from you:</strong></p>
 <ul>
 <li>What type of business is this for? (restaurant, retail, e-commerce, etc.)</li>
 <li>What's their monthly processing volume?</li>
 <li>What's their average transaction size?</li>
 <li>Do they currently have a processor?</li>
 </ul>
-</div>
 
-<div class="hormozi-expected-results">
-<h3>What I'll Provide:</h3>
+<p><strong>What I'll provide:</strong></p>
 <ul>
 <li>Competitive rate analysis</li>
 <li>Cost comparison across processors</li>
 <li>Specific recommendations based on their business type</li>
 <li>Savings calculation vs current processor</li>
 </ul>
-</div>
 
-<p><strong>Let's start with the business type and monthly volume - what details can you share?</strong></p>
-</div>`;
+<p>Let's start with the business type and monthly volume - what details can you share?</p>`;
   }
   
   if (msg.includes('compare') && (msg.includes('processor') || msg.includes('payment'))) {
-    return `<div class="hormozi-default">
-<h2>🏆 Payment Processor Comparison</h2>
-<p>I'll help you compare payment processors to find the best fit. Let me know what you need:</p>
+    return `<h2>Payment Processor Comparison</h2>
+<p>I'll help you compare payment processors to find the best fit.</p>
 
-<div class="hormozi-action-items">
-<h3>Tell Me About Your Merchant:</h3>
+<p><strong>Tell me about your merchant:</strong></p>
 <ul>
 <li>What industry are they in?</li>
 <li>Card-present or card-not-present transactions?</li>
 <li>Monthly processing volume?</li>
 <li>Special features needed (POS, online payments, mobile)?</li>
 </ul>
-</div>
 
-<p><strong>Once I know these details, I can provide a detailed comparison with specific recommendations.</strong></p>
-</div>`;
+<p>Once I know these details, I can provide a detailed comparison with specific recommendations.</p>`;
   }
   
   return null; // No fast-path match

@@ -288,15 +288,15 @@ Example: "Perfect! I'd love to help you find the best rates. What type of busine
 
 Keep it short, conversational, and ask only ONE question at a time.` :
         
-        // Check if this is a request for visual formatting/styling
-        (lastUserMessage.content.toLowerCase().includes('style') || 
-         lastUserMessage.content.toLowerCase().includes('format') || 
-         lastUserMessage.content.toLowerCase().includes('visual') ||
-         lastUserMessage.content.toLowerCase().includes('make it easier to read') ||
+        // Check if this is a marketing-related request
+        (lastUserMessage.content.toLowerCase().includes('marketing') || 
+         lastUserMessage.content.toLowerCase().includes('sales strategy') || 
+         lastUserMessage.content.toLowerCase().includes('outbound') ||
+         lastUserMessage.content.toLowerCase().includes('social media') ||
+         lastUserMessage.content.toLowerCase().includes('branding') ||
+         lastUserMessage.content.toLowerCase().includes('lead generation') ||
          lastUserMessage.content.toLowerCase().includes('hormozi') ||
-         lastUserMessage.content.toLowerCase().includes('stunning') ||
-         lastUserMessage.content.toLowerCase().includes('better formatting') ||
-         lastUserMessage.content.toLowerCase().includes('html formatting')) ?
+         lastUserMessage.content.toLowerCase().includes('gary v')) ?
         
         `You are JACC, a merchant services expert trained in Alex Hormozi's high-converting marketing techniques.
 
@@ -508,18 +508,18 @@ When appropriate, suggest actions like saving payment processing information to 
 
       let content = response.content[0].type === 'text' ? response.content[0].text : "";
       
-      // Apply Alex Hormozi visual formatting for formatting requests
+      // Apply Alex Hormozi visual formatting ONLY for marketing-related requests
       const userInput = lastUserMessage.content.toLowerCase();
-      const isFormattingRequest = userInput.includes('style') || 
-        userInput.includes('format') || 
-        userInput.includes('visual') ||
-        userInput.includes('hormozi') ||
-        userInput.includes('stunning') ||
-        userInput.includes('better formatting');
+      const isMarketingRequest = userInput.includes('marketing') || 
+        userInput.includes('sales strategy') || 
+        userInput.includes('outbound') ||
+        userInput.includes('social media') ||
+        userInput.includes('branding') ||
+        userInput.includes('lead generation');
       
-      console.log(`🔍 Checking formatting request for: "${lastUserMessage.content}" - detected: ${isFormattingRequest}`);
+      console.log(`🔍 Checking marketing request for: "${lastUserMessage.content}" - detected: ${isMarketingRequest}`);
       
-      if (isFormattingRequest) {
+      if (isMarketingRequest) {
         console.log(`🎨 Alex Hormozi formatting triggered for: "${lastUserMessage.content}"`);
         content = `<div class="hormozi-content">
 <div class="attention-grabber">
@@ -683,15 +683,17 @@ When appropriate, suggest actions like saving payment processing information to 
   }
 
   private applyHormoziFormatting(content: string, userMessage: string): string {
-    // Check if this is a formatting request
-    const isFormattingRequest = userMessage.toLowerCase().includes('style') || 
-      userMessage.toLowerCase().includes('format') || 
-      userMessage.toLowerCase().includes('visual') ||
+    // Check if this is a marketing request
+    const isMarketingRequest = userMessage.toLowerCase().includes('marketing') || 
+      userMessage.toLowerCase().includes('sales strategy') || 
+      userMessage.toLowerCase().includes('outbound') ||
+      userMessage.toLowerCase().includes('social media') ||
+      userMessage.toLowerCase().includes('branding') ||
+      userMessage.toLowerCase().includes('lead generation') ||
       userMessage.toLowerCase().includes('hormozi') ||
-      userMessage.toLowerCase().includes('stunning') ||
-      userMessage.toLowerCase().includes('better formatting');
+      userMessage.toLowerCase().includes('gary v');
     
-    if (isFormattingRequest) {
+    if (isMarketingRequest) {
       console.log(`🎨 Alex Hormozi formatting applied for: "${userMessage}"`);
       return `<div class="hormozi-content">
 <div class="attention-grabber">
