@@ -149,13 +149,52 @@ export default function DocumentViewer() {
           <CardTitle>Document Preview</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <div className="w-full h-[600px] border rounded-b-lg overflow-hidden">
-            <iframe
-              src={`/api/documents/${documentId}/view`}
-              className="w-full h-full border-0"
-              title={`Preview of ${document.name}`}
-              sandbox="allow-same-origin allow-scripts"
-            />
+          <div className="w-full h-[600px] border rounded-b-lg overflow-hidden bg-gray-50 dark:bg-gray-900 relative">
+            {document.mimeType === 'application/pdf' ? (
+              <>
+                <iframe
+                  src={`/api/documents/${documentId}/view#toolbar=1&navpanes=1&scrollbar=1&view=FitH`}
+                  className="w-full h-full border-0"
+                  title={`Preview of ${document.name}`}
+                  allow="fullscreen"
+                  style={{ border: 'none' }}
+                  onLoad={(e) => {
+                    // Hide the loading message when PDF loads
+                    const loadingDiv = document.getElementById('pdf-loading');
+                    if (loadingDiv) loadingDiv.style.display = 'none';
+                  }}
+                />
+                <div id="pdf-loading" className="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+                  <div className="text-center">
+                    <div className="text-4xl mb-4">📄</div>
+                    <p className="text-gray-600 dark:text-gray-400 mb-2">Loading PDF preview...</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-500">
+                      If the preview doesn't load, use the "Open in New Tab" button above
+                    </p>
+                  </div>
+                </div>
+              </>
+            ) : document.mimeType?.startsWith('image/') ? (
+              <div className="flex items-center justify-center h-full">
+                <img
+                  src={`/api/documents/${documentId}/view`}
+                  alt={document.name}
+                  className="max-w-full max-h-full object-contain"
+                />
+              </div>
+            ) : (
+              <div className="flex items-center justify-center h-full">
+                <div className="text-center">
+                  <div className="text-4xl mb-4">📄</div>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    Preview not available for this file type
+                  </p>
+                  <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">
+                    Use the download button to view the file
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
