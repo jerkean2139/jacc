@@ -159,12 +159,15 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
   useEffect(() => {
     if (chatId) {
       console.log('💫 Force refreshing messages for chat:', chatId);
-      setRefreshTrigger(prev => prev + 1); // Force cache bust
-      const messageQueryKey = [`/api/chats/${chatId}/messages`];
-      queryClient.invalidateQueries({ queryKey: messageQueryKey });
+      const nextRefreshTrigger = refreshTrigger + 1;
+      setRefreshTrigger(nextRefreshTrigger);
+      
+      // Use the EXACT same query key format as the main query
+      queryClient.invalidateQueries({ queryKey: [`/api/chats/${chatId}/messages`, refreshTrigger] });
+      queryClient.invalidateQueries({ queryKey: [`/api/chats/${chatId}/messages`, nextRefreshTrigger] });
       refetch();
     }
-  }, [chatId, refetch, queryClient]);
+  }, [chatId, refetch, queryClient, refreshTrigger]);
 
   // Fetch saved prompts for the dropdown (only when authenticated)
   const { data: savedPrompts = [] } = useQuery({
@@ -234,10 +237,14 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
       // Input will be cleared by form reset
       
       // Immediate refresh for user message with proper query key format
-      setRefreshTrigger(prev => prev + 1); // Force cache bust
-      const messageQueryKey = [`/api/chats/${chatId}/messages`];
-      await queryClient.invalidateQueries({ queryKey: messageQueryKey });
-      await queryClient.refetchQueries({ queryKey: messageQueryKey });
+      const currentRefreshTrigger = refreshTrigger;
+      const nextRefreshTrigger = currentRefreshTrigger + 1;
+      setRefreshTrigger(nextRefreshTrigger);
+      
+      // Use the EXACT same query key format as the main query
+      await queryClient.invalidateQueries({ queryKey: [`/api/chats/${chatId}/messages`, currentRefreshTrigger] });
+      await queryClient.invalidateQueries({ queryKey: [`/api/chats/${chatId}/messages`, nextRefreshTrigger] });
+      await queryClient.refetchQueries({ queryKey: [`/api/chats/${chatId}/messages`, nextRefreshTrigger] });
       queryClient.invalidateQueries({ queryKey: ["/api/chats"] });
       onChatUpdate();
       
@@ -283,10 +290,18 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
               
               if (hasAIResponse) {
                 console.log('✅ AI response detected! Refreshing messages...');
-                setRefreshTrigger(prev => prev + 1); // Force cache bust
-                const messageQueryKey = [`/api/chats/${chatId}/messages`];
-                await queryClient.invalidateQueries({ queryKey: messageQueryKey });
-                await queryClient.refetchQueries({ queryKey: messageQueryKey });
+                // Use the EXACT same query key format as the main query
+                const currentRefreshTrigger = refreshTrigger;
+                const nextRefreshTrigger = currentRefreshTrigger + 1;
+                setRefreshTrigger(nextRefreshTrigger);
+                
+                // Invalidate with both current and next refresh trigger
+                await queryClient.invalidateQueries({ queryKey: [`/api/chats/${chatId}/messages`, currentRefreshTrigger] });
+                await queryClient.invalidateQueries({ queryKey: [`/api/chats/${chatId}/messages`, nextRefreshTrigger] });
+                await queryClient.refetchQueries({ queryKey: [`/api/chats/${chatId}/messages`, nextRefreshTrigger] });
+                
+                // Also invalidate without refresh trigger as fallback
+                await queryClient.invalidateQueries({ queryKey: [`/api/chats/${chatId}/messages`] });
                 return true; // Stop polling
               } else {
                 console.log('❌ No recent AI response found yet');
