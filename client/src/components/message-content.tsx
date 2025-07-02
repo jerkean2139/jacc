@@ -7,6 +7,13 @@ interface MessageContentProps {
 }
 
 export function MessageContent({ content, className = '' }: MessageContentProps) {
+  console.log("🔧 MESSAGECONTENT RENDER:", {
+    contentLength: content?.length || 0,
+    hasContent: !!content,
+    contentPreview: content?.substring(0, 100) + "...",
+    hasHtmlTags: /<[^>]*>/g.test(content || '')
+  });
+
   // Check if content contains HTML tags
   const hasHtmlTags = /<[^>]*>/g.test(content);
   
