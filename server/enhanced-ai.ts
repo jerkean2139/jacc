@@ -104,20 +104,46 @@ export class EnhancedAIService {
     conversationHistory: ChatMessage[],
     userId?: string
   ): Promise<EnhancedAIResponse> {
-    // SPEED OPTIMIZATION: Skip custom prompt loading for faster responses
-    // const customPrompt = null; // Remove async database call
+    // PROPER SEARCH HIERARCHY: FAQ → Documents → Web
     
-    // SPEED OPTIMIZATION: Reduce document search results from 5 to 3 for faster processing
-    const searchResults = await this.searchDocuments(message, 3);
+    // STEP 1: Search FAQ Knowledge Base FIRST
+    console.log(`🔍 STEP 1: Searching FAQ Knowledge Base for: "${message}"`);
+    const faqResults = await this.searchFAQKnowledgeBase(message);
     
-    if (searchResults.length > 0) {
-      console.log(`📋 Found ${searchResults.length} documents for: "${message.substring(0, 50)}..."`);
-      // SPEED OPTIMIZATION: Keep only last 2 messages instead of 3
+    if (faqResults.length > 0) {
+      console.log(`✅ Found ${faqResults.length} FAQ matches - using FAQ knowledge base`);
+      // Convert FAQ results to searchResults format
+      const searchResults = faqResults.map(faq => ({
+        id: `faq-${faq.id}`,
+        score: 0.95, // High confidence for FAQ matches
+        documentId: `faq-${faq.id}`,
+        content: `**Q: ${faq.question}**\n\n**A:** ${faq.answer}`,
+        metadata: {
+          documentName: `FAQ: ${faq.question}`,
+          webViewLink: `/admin/faq/${faq.id}`,
+          chunkIndex: 0,
+          mimeType: 'text/faq',
+          semanticTags: Array.isArray(faq.tags) ? faq.tags : (faq.tags ? [faq.tags] : ['faq']),
+          confidence: 0.95
+        }
+      }));
+      
       const messages = [...conversationHistory.slice(-2), { role: 'user' as const, content: message }];
       return await this.generateResponseWithDocuments(messages, { searchResults });
     }
     
-    // SPEED OPTIMIZATION: Minimal conversation history for faster processing
+    // STEP 2: If no FAQ matches, search documents
+    console.log(`📄 STEP 2: No FAQ matches found - searching document center`);
+    const documentResults = await this.searchDocuments(message, 3);
+    
+    if (documentResults.length > 0) {
+      console.log(`📋 Found ${documentResults.length} documents for: "${message.substring(0, 50)}..."`);
+      const messages = [...conversationHistory.slice(-2), { role: 'user' as const, content: message }];
+      return await this.generateResponseWithDocuments(messages, { searchResults: documentResults });
+    }
+    
+    // STEP 3: No internal knowledge found - minimal response
+    console.log(`🌐 STEP 3: No internal matches found - providing general response`);
     const messages = [{ role: 'user' as const, content: message }];
     return await this.generateResponseWithDocuments(messages, {});
   }
@@ -1147,19 +1173,84 @@ When appropriate, suggest actions like saving payment processing information to 
       const { faqKnowledgeBase } = await import('../shared/schema');
       const { or, ilike, eq, and } = await import('drizzle-orm');
       
+      console.log(`🔍 FAQ SEARCH DEBUG: Original query: "${query}"`);
+      
+      // Extract key terms from the query for better matching
+      const queryLower = query.toLowerCase();
+      const keyTerms = queryLower.match(/\b(?:top|best|\d+|three|processor|payment|tracer|recommend|work|partner)\b/g) || [];
+      
+      console.log(`🔍 FAQ SEARCH DEBUG: Key terms extracted:`, keyTerms);
+      
+      // Create search conditions for different variations
+      const searchConditions = [
+        // Exact phrase match
+        ilike(faqKnowledgeBase.question, `%${queryLower}%`),
+        ilike(faqKnowledgeBase.answer, `%${queryLower}%`),
+        // Key term combinations
+        ...keyTerms.map(term => ilike(faqKnowledgeBase.question, `%${term}%`)),
+        ...keyTerms.map(term => ilike(faqKnowledgeBase.answer, `%${term}%`))
+      ];
+      
       // Search active FAQ entries for relevant matches
       const faqMatches = await db
         .select()
         .from(faqKnowledgeBase)
         .where(
-          or(
-            ilike(faqKnowledgeBase.question, `%${query}%`),
-            ilike(faqKnowledgeBase.answer, `%${query}%`),
-            ilike(faqKnowledgeBase.tags, `%${query}%`)
+          and(
+            eq(faqKnowledgeBase.isActive, true),
+            or(...searchConditions)
           )
         );
       
-      console.log(`Found ${faqMatches.length} FAQ matches for: "${query}"`);
+      console.log(`🔍 FAQ SEARCH DEBUG: Found ${faqMatches.length} FAQ matches for: "${query}"`);
+      
+      if (faqMatches.length > 0) {
+        console.log(`🔍 FAQ SEARCH DEBUG: Matching questions:`, faqMatches.map(f => f.question));
+        
+        // Score and sort matches by relevance
+        const scoredMatches = faqMatches.map(faq => {
+          let score = 0;
+          const questionLower = faq.question.toLowerCase();
+          const answerLower = faq.answer.toLowerCase();
+          
+          // Boost exact matches
+          if (questionLower.includes(queryLower)) score += 10;
+          if (answerLower.includes(queryLower)) score += 5;
+          
+          // Boost key term matches
+          keyTerms.forEach(term => {
+            if (questionLower.includes(term)) score += 2;
+            if (answerLower.includes(term)) score += 1;
+          });
+          
+          return { ...faq, relevanceScore: score };
+        });
+        
+        // Sort by relevance score and return top matches
+        const sortedMatches = scoredMatches.sort((a, b) => b.relevanceScore - a.relevanceScore);
+        console.log(`🔍 FAQ SEARCH DEBUG: Top match scores:`, sortedMatches.slice(0, 3).map(m => ({
+          question: m.question,
+          score: m.relevanceScore
+        })));
+        
+        return sortedMatches;
+      } else {
+        // Debug: Let's see what FAQ entries exist with "processor" in them
+        const processorFAQs = await db
+          .select()
+          .from(faqKnowledgeBase)
+          .where(
+            and(
+              eq(faqKnowledgeBase.isActive, true),
+              or(
+                ilike(faqKnowledgeBase.question, `%processor%`),
+                ilike(faqKnowledgeBase.answer, `%processor%`)
+              )
+            )
+          );
+        console.log(`🔍 FAQ SEARCH DEBUG: Available processor FAQs:`, processorFAQs.map(f => f.question));
+      }
+      
       return faqMatches;
     } catch (error) {
       console.error('Error searching FAQ knowledge base:', error);
