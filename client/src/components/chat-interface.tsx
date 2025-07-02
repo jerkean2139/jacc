@@ -142,7 +142,7 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
 
   // Fetch messages for the active chat - with error handling
   const { data: messages = [], isLoading, error } = useQuery<MessageWithActions[]>({
-    queryKey: [`/api/chats/${chatId}/messages`],
+    queryKey: ['/api/chats', chatId, 'messages'],
     enabled: !!chatId,
     refetchOnMount: true,
     staleTime: 0, // Always refetch
@@ -170,7 +170,7 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
   // Debug the actual API call
   console.log("Messages Query Status:", {
     chatId,
-    queryKey: [`/api/chats/${chatId}/messages`],
+    queryKey: ['/api/chats', chatId, 'messages'],
     enabled: !!chatId,
     isLoading,
     hasError: !!error,
@@ -216,8 +216,7 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
       // Input will be cleared by form reset
       
       // Force immediate refresh of messages with correct query key format
-      await queryClient.invalidateQueries({ queryKey: [`/api/chats/${chatId}/messages`] });
-      await queryClient.refetchQueries({ queryKey: [`/api/chats/${chatId}/messages`] });
+      await queryClient.invalidateQueries({ queryKey: ['/api/chats', chatId, 'messages'] });
       queryClient.invalidateQueries({ queryKey: ["/api/chats"] });
       onChatUpdate();
       
