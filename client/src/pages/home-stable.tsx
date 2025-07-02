@@ -87,7 +87,9 @@ export default function HomeStable() {
       console.log("New chat created:", newChat);
       
       // Navigate to the new chat first
+      console.log("Attempting to navigate to:", `/chat/${newChat.id}`);
       navigate(`/chat/${newChat.id}`);
+      console.log("Navigation called, new location should be:", `/chat/${newChat.id}`);
       
       // Refresh chats immediately
       queryClient.invalidateQueries({ queryKey: ["/api/chats"] });
