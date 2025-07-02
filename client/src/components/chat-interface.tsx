@@ -170,7 +170,10 @@ export function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessage }: Ch
     messagesLength: messages?.length,
     safeMessagesLength: safeMessages.length,
     firstMessage: safeMessages[0],
-    allMessages: safeMessages
+    allMessages: safeMessages,
+    queryKey: ['/api/chats', chatId, 'messages'],
+    chatId: chatId,
+    isQueryEnabled: !!chatId
   });
 
   // Send message mutation - SIMPLIFIED VERSION WITHOUT POLLING
