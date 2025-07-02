@@ -161,6 +161,17 @@ export function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessage }: Ch
 
   // Ensure messages is always an array to prevent crashes
   const safeMessages = Array.isArray(messages) ? messages : [];
+  
+  // DETAILED DEBUGGING FOR MESSAGE DISPLAY ISSUE
+  console.log("🔍 DETAILED MESSAGE DEBUG:", {
+    rawMessages: messages,
+    messagesType: typeof messages,
+    isArray: Array.isArray(messages),
+    messagesLength: messages?.length,
+    safeMessagesLength: safeMessages.length,
+    firstMessage: safeMessages[0],
+    allMessages: safeMessages
+  });
 
   // Send message mutation - SIMPLIFIED VERSION WITHOUT POLLING
   const sendMessageMutation = useMutation({
