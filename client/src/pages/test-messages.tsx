@@ -8,8 +8,9 @@ export default function TestMessages() {
   console.log("TEST PAGE - Chat ID:", chatId);
 
   const { data: messages, isLoading, error } = useQuery({
-    queryKey: [`/api/chats/${chatId}/messages`],
+    queryKey: [`/api/public/chats/${chatId}/messages`],
     enabled: !!chatId,
+    retry: false,
   });
 
   console.log("TEST PAGE - Messages:", { messages, isLoading, error });

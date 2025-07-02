@@ -4660,6 +4660,43 @@ Would you like me to create a detailed proposal for this merchant?`,
     }
   });
 
+  // Public test endpoint for debugging (bypasses authentication)
+  app.get('/api/public/chats/:chatId/messages', async (req: Request, res: Response) => {
+    try {
+      const { chatId } = req.params;
+      console.log('🚨 PUBLIC TEST ENDPOINT HIT: Loading messages for chat', chatId);
+      
+      // Get messages directly from database using same logic as authenticated endpoint
+      const messagesResult = await db
+        .select({
+          id: chatMessages.id,
+          chatId: chatMessages.chatId,
+          content: chatMessages.content,
+          role: chatMessages.role,
+          metadata: chatMessages.metadata,
+          createdAt: chatMessages.createdAt
+        })
+        .from(chatMessages)
+        .where(eq(chatMessages.chatId, chatId))
+        .orderBy(chatMessages.createdAt);
+
+      console.log(`🔍 PUBLIC TEST: Found ${messagesResult.length} messages in database for chat ${chatId}`);
+      if (messagesResult.length > 0) {
+        console.log('🔍 PUBLIC TEST: Sample message:', {
+          id: messagesResult[0].id,
+          role: messagesResult[0].role,
+          content: messagesResult[0].content?.substring(0, 100) + '...',
+          chatId: messagesResult[0].chatId
+        });
+      }
+
+      res.json(messagesResult);
+    } catch (error) {
+      console.error('PUBLIC TEST: Error loading messages:', error);
+      res.status(500).json({ error: 'Failed to load messages', details: String(error) });
+    }
+  });
+
   console.log("✅ Simple routes registered successfully");
   
   const server = createServer(app);
