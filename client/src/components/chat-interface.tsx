@@ -162,9 +162,6 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
     retry: false, // Don't retry on auth errors
   });
 
-  // Debug user role for marketing button
-  console.log("User data for marketing button:", { user, role: user?.role, isLoading: userLoading });
-
   // Log any errors with message loading
   if (error) {
     console.error("Error loading messages:", error);
@@ -594,7 +591,7 @@ With these details, I'll create a customized proposal highlighting value proposi
             </div>
             
             {/* Let's Talk Marketing - Admin Only */}
-            {user?.role === 'dev-admin' || user?.role === 'client-admin' ? (
+            {!userLoading && (user?.role === 'dev-admin' || user?.role === 'client-admin') ? (
               <div className="w-full">
                 <Button
                   variant="outline"
@@ -609,7 +606,7 @@ With these details, I'll create a customized proposal highlighting value proposi
                 </Button>
               </div>
             ) : (
-              // Default: Coming Soon for all non-admin users
+              // Default: Coming Soon for all non-admin users or while loading
               <div className="w-full relative group">
                 <Button
                   disabled
