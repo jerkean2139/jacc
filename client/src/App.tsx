@@ -50,6 +50,7 @@ import DemoAdmin from "@/pages/demo-admin";
 import UnifiedAdminPanel from "@/pages/unified-admin-panel";
 import FAQManager from "@/pages/faq-manager";
 import ConsolidatedAdmin from "@/pages/consolidated-admin";
+import DragDropDocsPage from "@/pages/drag-drop-docs";
 import AdminControlCenter from "@/pages/admin-control-center";
 
 function Router() {
@@ -121,6 +122,7 @@ function Router() {
           <Route path="/admin/dashboard" component={AdminDashboard} />
           <Route path="/faq-manager" component={FAQManager} />
           <Route path="/consolidated-admin" component={ConsolidatedAdmin} />
+          <Route path="/drag-drop-docs" component={DragDropDocsPage} />
           <Route path="/admin/chat-monitoring" component={AdminChatMonitoring} />
           <Route path="/admin/settings" component={AdminSettings} />
           <Route path="/admin/training" component={AdminControlCenter} />

@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
 import { 
   Settings, Database, MessageSquare, FileText, Users, Activity,
-  BarChart3, Search, Plus, Edit, Trash2, Eye, Download
+  BarChart3, Search, Plus, Edit, Trash2, Eye, Download, Move
 } from 'lucide-react';
 
 // Import working components
@@ -66,7 +66,7 @@ function QuickStats() {
 // Navigation shortcuts component
 function QuickActions() {
   return (
-    <div className="grid gap-4 md:grid-cols-3">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <Card className="hover:shadow-md transition-shadow cursor-pointer">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -97,6 +97,27 @@ function QuickActions() {
         <CardContent>
           <p className="text-sm text-muted-foreground">
             143 documents organized in 30 folders with full CRUD
+          </p>
+        </CardContent>
+      </Card>
+      
+      <Card 
+        className="hover:shadow-md transition-shadow cursor-pointer border-blue-200 bg-blue-50"
+        onClick={() => window.location.href = '/drag-drop-docs'}
+      >
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Move className="h-5 w-5 text-blue-600" />
+            Drag & Drop
+            <Badge variant="default" className="ml-auto text-xs">New</Badge>
+          </CardTitle>
+          <CardDescription>
+            Organize documents with drag-and-drop interface
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            Visual document organization with real-time feedback
           </p>
         </CardContent>
       </Card>
