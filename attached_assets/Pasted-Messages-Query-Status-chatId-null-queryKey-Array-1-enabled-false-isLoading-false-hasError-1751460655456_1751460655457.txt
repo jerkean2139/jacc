@@ -1,0 +1,42 @@
+Messages Query Status: {chatId: null, queryKey: Array(1), enabled: false, isLoading: false, hasError: false, …}
+chat-interface.tsx:183 Chat Interface Debug: {chatId: null, messagesCount: 0, isLoading: false, hasMessages: false}
+sidebar.tsx:171 Sidebar Debug: {chatsCount: 0, hasOnChatDelete: false, onChatDeleteType: 'undefined'}
+chat-interface.tsx:173 Messages Query Status: {chatId: null, queryKey: Array(1), enabled: false, isLoading: false, hasError: false, …}
+chat-interface.tsx:183 Chat Interface Debug: {chatId: null, messagesCount: 0, isLoading: false, hasMessages: false}
+home-stable.tsx:32 URL Debug: {location: '/', activeChatId: null, hasChat: false}
+chat-interface.tsx:173 Messages Query Status: {chatId: null, queryKey: Array(1), enabled: false, isLoading: false, hasError: false, …}
+chat-interface.tsx:183 Chat Interface Debug: {chatId: null, messagesCount: 0, isLoading: false, hasMessages: false}
+sidebar.tsx:171 Sidebar Debug: {chatsCount: 0, hasOnChatDelete: false, onChatDeleteType: 'undefined'}
+chat-interface.tsx:173 Messages Query Status: {chatId: null, queryKey: Array(1), enabled: false, isLoading: false, hasError: false, …}
+chat-interface.tsx:183 Chat Interface Debug: {chatId: null, messagesCount: 0, isLoading: false, hasMessages: false}
+02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/:1 Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner.
+chat-interface.tsx:322 🚀 CONVERSATION STARTER: handleQuickAction called with: I need help calculating processing rates and finding competitive pricing
+chat-interface.tsx:323 🚀 CONVERSATION STARTER: onNewChatWithMessage available: true
+chat-interface.tsx:364 🚀 CONVERSATION STARTER: Final message: I need help calculating processing rates and finding competitive pricing
+chat-interface.tsx:367 🚀 CONVERSATION STARTER: Calling onNewChatWithMessage
+home-stable.tsx:81 Creating new chat with message: I need help calculating processing rates and finding competitive pricing
+home-stable.tsx:87 New chat created: {id: 'baa6f10f-4656-4dd1-b7e6-ac0741c064e8', title: 'New Chat', userId: 'demo-user-id', createdAt: '2025-07-02T12:50:01.979Z', updatedAt: '2025-07-02T12:50:01.979Z'}
+home-stable.tsx:90 Attempting to navigate to: /chat/baa6f10f-4656-4dd1-b7e6-ac0741c064e8
+home-stable.tsx:92 Navigation called, new location should be: /chat/baa6f10f-4656-4dd1-b7e6-ac0741c064e8
+home-stable.tsx:99 Sending message to new chat: baa6f10f-4656-4dd1-b7e6-ac0741c064e8
+home-stable.tsx:32 URL Debug: {location: '/chat/baa6f10f-4656-4dd1-b7e6-ac0741c064e8', activeChatId: 'baa6f10f-4656-4dd1-b7e6-ac0741c064e8', hasChat: true}
+chat-interface.tsx:173 Messages Query Status: {chatId: 'baa6f10f-4656-4dd1-b7e6-ac0741c064e8', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:183 Chat Interface Debug: {chatId: 'baa6f10f-4656-4dd1-b7e6-ac0741c064e8', messagesCount: 0, isLoading: true, hasMessages: false}
+sidebar.tsx:171 Sidebar Debug: {chatsCount: 0, hasOnChatDelete: false, onChatDeleteType: 'undefined'}
+chat-interface.tsx:173 Messages Query Status: {chatId: 'baa6f10f-4656-4dd1-b7e6-ac0741c064e8', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:183 Chat Interface Debug: {chatId: 'baa6f10f-4656-4dd1-b7e6-ac0741c064e8', messagesCount: 0, isLoading: true, hasMessages: false}
+home-stable.tsx:32 URL Debug: {location: '/chat/baa6f10f-4656-4dd1-b7e6-ac0741c064e8', activeChatId: 'baa6f10f-4656-4dd1-b7e6-ac0741c064e8', hasChat: true}
+chat-interface.tsx:173 Messages Query Status: {chatId: 'baa6f10f-4656-4dd1-b7e6-ac0741c064e8', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:183 Chat Interface Debug: {chatId: 'baa6f10f-4656-4dd1-b7e6-ac0741c064e8', messagesCount: 0, isLoading: true, hasMessages: false}
+sidebar.tsx:171 Sidebar Debug: {chatsCount: 1, hasOnChatDelete: false, onChatDeleteType: 'undefined'}
+chat-interface.tsx:173 Messages Query Status: {chatId: 'baa6f10f-4656-4dd1-b7e6-ac0741c064e8', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:183 Chat Interface Debug: {chatId: 'baa6f10f-4656-4dd1-b7e6-ac0741c064e8', messagesCount: 0, isLoading: true, hasMessages: false}
+chat-interface.tsx:173 Messages Query Status: {chatId: 'baa6f10f-4656-4dd1-b7e6-ac0741c064e8', queryKey: Array(1), enabled: true, isLoading: false, hasError: false, …}
+chat-interface.tsx:183 Chat Interface Debug: {chatId: 'baa6f10f-4656-4dd1-b7e6-ac0741c064e8', messagesCount: 1, isLoading: false, hasMessages: true}
+chat-interface.tsx:851 🔍 RENDERING MESSAGE 0: {id: '6b02f163-fd71-4199-9415-ca6463e8f973', role: 'user', contentLength: 72, hasActions: false, messageObject: {…}}
+message-bubble.tsx:32 🎨 MESSAGEBUBBLE RENDER: {messageId: '6b02f163-fd71-4199-9415-ca6463e8f973', role: 'user', contentLength: 72, hasContent: true, contentPreview: 'I need help calculating processing rates and findi...'}
+chat-interface.tsx:173 Messages Query Status: {chatId: 'baa6f10f-4656-4dd1-b7e6-ac0741c064e8', queryKey: Array(1), enabled: true, isLoading: false, hasError: false, …}
+chat-interface.tsx:183 Chat Interface Debug: {chatId: 'baa6f10f-4656-4dd1-b7e6-ac0741c064e8', messagesCount: 1, isLoading: false, hasMessages: true}
+chat-interface.tsx:851 🔍 RENDERING MESSAGE 0: {id: '6b02f163-fd71-4199-9415-ca6463e8f973', role: 'user', contentLength: 72, hasActions: false, messageObject: {…}}
+message-bubble.tsx:32 🎨 MESSAGEBUBBLE RENDER: {messageId: '6b02f163-fd71-4199-9415-ca6463e8f973', role: 'user', contentLength: 72, hasContent: true, contentPreview: 'I need help calculating processing rates and findi...'}
+home-stable.tsx:104 Message sent successfully

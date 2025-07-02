@@ -3486,6 +3486,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // If it's a user message, generate AI response using Enhanced AI Service
       if (role === 'user') {
+        console.log('🤖 STARTING AI RESPONSE GENERATION for user message:', content.substring(0, 50) + '...');
         try {
           // Generate meaningful chat title for first user message
           const isFirstUserMessage = chatMessages.filter(msg => msg.role === 'user').length === 1;
@@ -3513,12 +3514,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
           }
 
+          console.log('🔄 Loading Enhanced AI Service...');
           const { enhancedAIService } = await import('./enhanced-ai');
+          console.log('🚀 Calling generateStandardResponse...');
           const aiResponseData = await enhancedAIService.generateStandardResponse(
             content, 
             chatMessages.map(msg => ({ role: msg.role, content: msg.content })), 
             { userRole: 'Sales Agent' }
           );
+          console.log('✅ AI Response generated:', aiResponseData.message.substring(0, 100) + '...');
+          
           const aiResponseId = crypto.randomUUID();
           const aiMessage = {
             id: aiResponseId,
@@ -3529,6 +3534,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             createdAt: new Date().toISOString()
           };
           
+          console.log('💾 Saving AI response to database...');
           // Save AI response to database
           await db.insert(messagesTable).values({
             id: aiResponseId,
@@ -3540,6 +3546,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           chatMessages.push(aiMessage);
           messages.set(chatId, chatMessages);
+          console.log('✅ AI response saved and added to chat history');
         } catch (aiError) {
           console.error('AI response error:', aiError);
           // Fallback response if AI fails

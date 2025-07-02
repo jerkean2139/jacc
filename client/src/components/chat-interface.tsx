@@ -217,11 +217,14 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
       
       // Input will be cleared by form reset
       
-      // Force immediate refresh of messages with correct query key format
-      await queryClient.invalidateQueries({ queryKey: [`/api/chats/${chatId}/messages`] });
-      await queryClient.refetchQueries({ queryKey: [`/api/chats/${chatId}/messages`] });
-      queryClient.invalidateQueries({ queryKey: ["/api/chats"] });
-      onChatUpdate();
+      // Add a small delay to ensure AI response is processed before refreshing
+      setTimeout(async () => {
+        console.log('🔄 Refreshing messages after AI response delay...');
+        await queryClient.invalidateQueries({ queryKey: [`/api/chats/${chatId}/messages`] });
+        await queryClient.refetchQueries({ queryKey: [`/api/chats/${chatId}/messages`] });
+        queryClient.invalidateQueries({ queryKey: ["/api/chats"] });
+        onChatUpdate();
+      }, 2000); // 2 second delay to allow AI response to be generated and saved
       
       // Track message sent action for gamification
       try {
