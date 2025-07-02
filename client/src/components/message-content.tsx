@@ -7,13 +7,6 @@ interface MessageContentProps {
 }
 
 export function MessageContent({ content, className = '' }: MessageContentProps) {
-  console.log("🔧 MESSAGECONTENT RENDER:", {
-    contentLength: content?.length || 0,
-    hasContent: !!content,
-    contentPreview: content?.substring(0, 100) + "...",
-    hasHtmlTags: /<[^>]*>/g.test(content || '')
-  });
-
   // Check if content contains HTML tags
   const hasHtmlTags = /<[^>]*>/g.test(content);
   
@@ -171,8 +164,7 @@ export function MessageContent({ content, className = '' }: MessageContentProps)
   const lines = content.split('\n');
   
   return (
-    <div className={`whitespace-pre-wrap ${className}`} style={{ background: 'rgba(255,0,0,0.1)', padding: '4px', border: '1px solid red' }}>
-      <div style={{ color: 'red', fontSize: '12px' }}>DEBUG: MessageContent rendering</div>
+    <div className={`whitespace-pre-wrap ${className}`}>
       {lines.map((line, lineIndex) => (
         <div key={lineIndex} className={lineIndex > 0 ? 'mt-1' : ''}>
           {parseContent(line)}

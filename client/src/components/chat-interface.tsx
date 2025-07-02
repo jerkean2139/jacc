@@ -600,7 +600,7 @@ With these details, I'll create a customized proposal highlighting value proposi
             </div>
             
             {/* Let's Talk Marketing - Admin Only */}
-            {!userLoading && (user?.role === 'dev-admin' || user?.role === 'client-admin') ? (
+            {(!userLoading && user && (user.role === 'dev-admin' || user.role === 'client-admin')) ? (
               <div className="w-full">
                 <Button
                   variant="outline"
@@ -615,7 +615,7 @@ With these details, I'll create a customized proposal highlighting value proposi
                 </Button>
               </div>
             ) : (
-              // Default: Coming Soon for all non-admin users or while loading
+              // Default: Coming Soon for all non-admin users, loading states, or undefined users
               <div className="w-full relative group">
                 <Button
                   disabled
