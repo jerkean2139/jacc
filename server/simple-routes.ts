@@ -3339,7 +3339,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create new chat
-  app.post('/api/chats', (req: Request, res: Response) => {
+  app.post('/api/chats', async (req: Request, res: Response) => {
     try {
       const sessionId = req.cookies?.sessionId;
       let user;
@@ -3365,6 +3365,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
+
+      // Save chat to database first
+      const { db } = await import('./db');
+      const { chats: chatsTable } = await import('@shared/schema');
+      
+      await db.insert(chatsTable).values({
+        id: chatId,
+        title: req.body.title || "New Chat",
+        userId: user.id,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
 
       chats.set(chatId, newChat);
       messages.set(chatId, []);
