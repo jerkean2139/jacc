@@ -3452,6 +3452,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createdAt: new Date().toISOString()
       };
 
+      // Save user message to database
+      const { db } = await import('./db');
+      const { messages: messagesTable } = await import('@shared/schema');
+      
+      await db.insert(messagesTable).values({
+        id: messageId,
+        chatId,
+        content,
+        role: role || 'user',
+        createdAt: new Date()
+      });
+
       if (!messages.has(chatId)) {
         messages.set(chatId, []);
       }
@@ -3504,6 +3516,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
             userId: 'system',
             createdAt: new Date().toISOString()
           };
+          
+          // Save AI response to database
+          await db.insert(messagesTable).values({
+            id: aiResponseId,
+            chatId,
+            content: aiResponseData.message,
+            role: 'assistant',
+            createdAt: new Date()
+          });
+          
           chatMessages.push(aiMessage);
           messages.set(chatId, chatMessages);
         } catch (aiError) {
@@ -3518,6 +3540,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
             userId: 'system',
             createdAt: new Date().toISOString()
           };
+          
+          // Save fallback AI response to database
+          await db.insert(messagesTable).values({
+            id: aiResponseId,
+            chatId,
+            content: `I'm currently experiencing technical difficulties. Please try again in a moment, or contact support if the issue persists.`,
+            role: 'assistant',
+            userId: 'system',
+            createdAt: new Date()
+          });
+          
           chatMessages.push(aiMessage);
           messages.set(chatId, chatMessages);
         }
