@@ -171,7 +171,8 @@ export function MessageContent({ content, className = '' }: MessageContentProps)
   const lines = content.split('\n');
   
   return (
-    <div className={`whitespace-pre-wrap ${className}`}>
+    <div className={`whitespace-pre-wrap ${className}`} style={{ background: 'rgba(255,0,0,0.1)', padding: '4px', border: '1px solid red' }}>
+      <div style={{ color: 'red', fontSize: '12px' }}>DEBUG: MessageContent rendering</div>
       {lines.map((line, lineIndex) => (
         <div key={lineIndex} className={lineIndex > 0 ? 'mt-1' : ''}>
           {parseContent(line)}
