@@ -421,6 +421,20 @@ export function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessage }: Ch
                   }
                 }}
               />
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={toggleVoiceRecording}
+                className={`absolute right-2 top-2 p-1 h-6 w-6 ${
+                  isRecording 
+                    ? 'text-red-500 hover:text-red-600' 
+                    : 'text-gray-400 hover:text-gray-600'
+                }`}
+                disabled={!recognition}
+              >
+                {isRecording ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+              </Button>
             </div>
             
             <Button
@@ -521,6 +535,20 @@ export function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessage }: Ch
                 }
               }}
             />
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={toggleVoiceRecording}
+              className={`absolute right-2 top-2 p-1 h-6 w-6 ${
+                isRecording 
+                  ? 'text-red-500 hover:text-red-600' 
+                  : 'text-gray-400 hover:text-gray-600'
+              }`}
+              disabled={!recognition}
+            >
+              {isRecording ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+            </Button>
           </div>
           
           <Button
