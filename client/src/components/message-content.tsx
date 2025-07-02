@@ -161,7 +161,7 @@ export function MessageContent({ content, className = '' }: MessageContentProps)
   };
 
   // Split content by newlines and process each line
-  const lines = content.split('\n');
+  const lines = (content || '').split('\n');
   
   return (
     <div className={`whitespace-pre-wrap ${className}`}>

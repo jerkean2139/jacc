@@ -1,0 +1,404 @@
+message-content.tsx:164 Uncaught TypeError: Cannot read properties of undefined (reading 'split')
+    at MessageContent (message-content.tsx:164:25)
+    at renderWithHooks (chunk-WERSD76P.js?v=f5467819:11548:26)
+    at mountIndeterminateComponent (chunk-WERSD76P.js?v=f5467819:14926:21)
+    at beginWork (chunk-WERSD76P.js?v=f5467819:15914:22)
+    at HTMLUnknownElement.callCallback2 (chunk-WERSD76P.js?v=f5467819:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-WERSD76P.js?v=f5467819:3699:24)
+    at invokeGuardedCallback (chunk-WERSD76P.js?v=f5467819:3733:39)
+    at beginWork$1 (chunk-WERSD76P.js?v=f5467819:19765:15)
+    at performUnitOfWork (chunk-WERSD76P.js?v=f5467819:19198:20)
+    at workLoopSync (chunk-WERSD76P.js?v=f5467819:19137:13)
+MessageContent @ message-content.tsx:164
+renderWithHooks @ chunk-WERSD76P.js?v=f5467819:11548
+mountIndeterminateComponent @ chunk-WERSD76P.js?v=f5467819:14926
+beginWork @ chunk-WERSD76P.js?v=f5467819:15914
+callCallback2 @ chunk-WERSD76P.js?v=f5467819:3674
+invokeGuardedCallbackDev @ chunk-WERSD76P.js?v=f5467819:3699
+invokeGuardedCallback @ chunk-WERSD76P.js?v=f5467819:3733
+beginWork$1 @ chunk-WERSD76P.js?v=f5467819:19765
+performUnitOfWork @ chunk-WERSD76P.js?v=f5467819:19198
+workLoopSync @ chunk-WERSD76P.js?v=f5467819:19137
+renderRootSync @ chunk-WERSD76P.js?v=f5467819:19116
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=f5467819:18874
+flushSyncCallbacks @ chunk-WERSD76P.js?v=f5467819:9119
+(anonymous) @ chunk-WERSD76P.js?v=f5467819:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=f5467819:555
+flush @ @tanstack_react-query.js?v=f5467819:569
+batch @ @tanstack_react-query.js?v=f5467819:587
+dispatch_fn @ @tanstack_react-query.js?v=f5467819:996
+setData @ @tanstack_react-query.js?v=f5467819:696
+onSuccess @ @tanstack_react-query.js?v=f5467819:897
+resolve @ @tanstack_react-query.js?v=f5467819:456
+Promise.then
+run @ @tanstack_react-query.js?v=f5467819:498
+start @ @tanstack_react-query.js?v=f5467819:536
+fetch @ @tanstack_react-query.js?v=f5467819:926
+executeFetch_fn @ @tanstack_react-query.js?v=f5467819:2211
+setOptions @ @tanstack_react-query.js?v=f5467819:1955
+(anonymous) @ @tanstack_react-query.js?v=f5467819:3032
+commitHookEffectListMount @ chunk-WERSD76P.js?v=f5467819:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=f5467819:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=f5467819:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=f5467819:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=f5467819:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=f5467819:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=f5467819:19447
+commitRootImpl @ chunk-WERSD76P.js?v=f5467819:19416
+commitRoot @ chunk-WERSD76P.js?v=f5467819:19277
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=f5467819:18895
+flushSyncCallbacks @ chunk-WERSD76P.js?v=f5467819:9119
+(anonymous) @ chunk-WERSD76P.js?v=f5467819:18627Understand this error
+chat-interface.tsx:145 Messages Query Status: {chatId: '8711964f-a2ac-4682-bfdc-853f9de5010c', queryKey: Array(1), enabled: true, isLoading: false, hasError: false, …}
+chat-interface.tsx:155 Chat Interface Debug: {chatId: '8711964f-a2ac-4682-bfdc-853f9de5010c', messagesCount: 1, isLoading: false, hasMessages: true}
+chat-interface.tsx:166 🔍 DETAILED MESSAGE DEBUG: {rawMessages: Array(1), messagesType: 'object', isArray: true, messagesLength: 1, safeMessagesLength: 1, …}
+message-content.tsx:164 Uncaught TypeError: Cannot read properties of undefined (reading 'split')
+    at MessageContent (message-content.tsx:164:25)
+    at renderWithHooks (chunk-WERSD76P.js?v=f5467819:11548:26)
+    at mountIndeterminateComponent (chunk-WERSD76P.js?v=f5467819:14926:21)
+    at beginWork (chunk-WERSD76P.js?v=f5467819:15914:22)
+    at HTMLUnknownElement.callCallback2 (chunk-WERSD76P.js?v=f5467819:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-WERSD76P.js?v=f5467819:3699:24)
+    at invokeGuardedCallback (chunk-WERSD76P.js?v=f5467819:3733:39)
+    at beginWork$1 (chunk-WERSD76P.js?v=f5467819:19765:15)
+    at performUnitOfWork (chunk-WERSD76P.js?v=f5467819:19198:20)
+    at workLoopSync (chunk-WERSD76P.js?v=f5467819:19137:13)
+MessageContent @ message-content.tsx:164
+renderWithHooks @ chunk-WERSD76P.js?v=f5467819:11548
+mountIndeterminateComponent @ chunk-WERSD76P.js?v=f5467819:14926
+beginWork @ chunk-WERSD76P.js?v=f5467819:15914
+callCallback2 @ chunk-WERSD76P.js?v=f5467819:3674
+invokeGuardedCallbackDev @ chunk-WERSD76P.js?v=f5467819:3699
+invokeGuardedCallback @ chunk-WERSD76P.js?v=f5467819:3733
+beginWork$1 @ chunk-WERSD76P.js?v=f5467819:19765
+performUnitOfWork @ chunk-WERSD76P.js?v=f5467819:19198
+workLoopSync @ chunk-WERSD76P.js?v=f5467819:19137
+renderRootSync @ chunk-WERSD76P.js?v=f5467819:19116
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=f5467819:18874
+flushSyncCallbacks @ chunk-WERSD76P.js?v=f5467819:9119
+(anonymous) @ chunk-WERSD76P.js?v=f5467819:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=f5467819:555
+flush @ @tanstack_react-query.js?v=f5467819:569
+batch @ @tanstack_react-query.js?v=f5467819:587
+dispatch_fn @ @tanstack_react-query.js?v=f5467819:996
+setData @ @tanstack_react-query.js?v=f5467819:696
+onSuccess @ @tanstack_react-query.js?v=f5467819:897
+resolve @ @tanstack_react-query.js?v=f5467819:456
+Promise.then
+run @ @tanstack_react-query.js?v=f5467819:498
+start @ @tanstack_react-query.js?v=f5467819:536
+fetch @ @tanstack_react-query.js?v=f5467819:926
+executeFetch_fn @ @tanstack_react-query.js?v=f5467819:2211
+setOptions @ @tanstack_react-query.js?v=f5467819:1955
+(anonymous) @ @tanstack_react-query.js?v=f5467819:3032
+commitHookEffectListMount @ chunk-WERSD76P.js?v=f5467819:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=f5467819:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=f5467819:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=f5467819:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=f5467819:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=f5467819:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=f5467819:19447
+commitRootImpl @ chunk-WERSD76P.js?v=f5467819:19416
+commitRoot @ chunk-WERSD76P.js?v=f5467819:19277
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=f5467819:18895
+flushSyncCallbacks @ chunk-WERSD76P.js?v=f5467819:9119
+(anonymous) @ chunk-WERSD76P.js?v=f5467819:18627Understand this error
+chat-interface.tsx:145 Messages Query Status: {chatId: '8711964f-a2ac-4682-bfdc-853f9de5010c', queryKey: Array(1), enabled: true, isLoading: false, hasError: false, …}
+chat-interface.tsx:155 Chat Interface Debug: {chatId: '8711964f-a2ac-4682-bfdc-853f9de5010c', messagesCount: 1, isLoading: false, hasMessages: true}
+chat-interface.tsx:166 🔍 DETAILED MESSAGE DEBUG: {rawMessages: Array(1), messagesType: 'object', isArray: true, messagesLength: 1, safeMessagesLength: 1, …}
+message-content.tsx:164 Uncaught TypeError: Cannot read properties of undefined (reading 'split')
+    at MessageContent (message-content.tsx:164:25)
+    at renderWithHooks (chunk-WERSD76P.js?v=f5467819:11548:26)
+    at mountIndeterminateComponent (chunk-WERSD76P.js?v=f5467819:14926:21)
+    at beginWork (chunk-WERSD76P.js?v=f5467819:15914:22)
+    at HTMLUnknownElement.callCallback2 (chunk-WERSD76P.js?v=f5467819:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-WERSD76P.js?v=f5467819:3699:24)
+    at invokeGuardedCallback (chunk-WERSD76P.js?v=f5467819:3733:39)
+    at beginWork$1 (chunk-WERSD76P.js?v=f5467819:19765:15)
+    at performUnitOfWork (chunk-WERSD76P.js?v=f5467819:19198:20)
+    at workLoopSync (chunk-WERSD76P.js?v=f5467819:19137:13)
+MessageContent @ message-content.tsx:164
+renderWithHooks @ chunk-WERSD76P.js?v=f5467819:11548
+mountIndeterminateComponent @ chunk-WERSD76P.js?v=f5467819:14926
+beginWork @ chunk-WERSD76P.js?v=f5467819:15914
+callCallback2 @ chunk-WERSD76P.js?v=f5467819:3674
+invokeGuardedCallbackDev @ chunk-WERSD76P.js?v=f5467819:3699
+invokeGuardedCallback @ chunk-WERSD76P.js?v=f5467819:3733
+beginWork$1 @ chunk-WERSD76P.js?v=f5467819:19765
+performUnitOfWork @ chunk-WERSD76P.js?v=f5467819:19198
+workLoopSync @ chunk-WERSD76P.js?v=f5467819:19137
+renderRootSync @ chunk-WERSD76P.js?v=f5467819:19116
+recoverFromConcurrentError @ chunk-WERSD76P.js?v=f5467819:18736
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=f5467819:18879
+flushSyncCallbacks @ chunk-WERSD76P.js?v=f5467819:9119
+(anonymous) @ chunk-WERSD76P.js?v=f5467819:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=f5467819:555
+flush @ @tanstack_react-query.js?v=f5467819:569
+batch @ @tanstack_react-query.js?v=f5467819:587
+dispatch_fn @ @tanstack_react-query.js?v=f5467819:996
+setData @ @tanstack_react-query.js?v=f5467819:696
+onSuccess @ @tanstack_react-query.js?v=f5467819:897
+resolve @ @tanstack_react-query.js?v=f5467819:456
+Promise.then
+run @ @tanstack_react-query.js?v=f5467819:498
+start @ @tanstack_react-query.js?v=f5467819:536
+fetch @ @tanstack_react-query.js?v=f5467819:926
+executeFetch_fn @ @tanstack_react-query.js?v=f5467819:2211
+setOptions @ @tanstack_react-query.js?v=f5467819:1955
+(anonymous) @ @tanstack_react-query.js?v=f5467819:3032
+commitHookEffectListMount @ chunk-WERSD76P.js?v=f5467819:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=f5467819:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=f5467819:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=f5467819:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=f5467819:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=f5467819:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=f5467819:19447
+commitRootImpl @ chunk-WERSD76P.js?v=f5467819:19416
+commitRoot @ chunk-WERSD76P.js?v=f5467819:19277
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=f5467819:18895
+flushSyncCallbacks @ chunk-WERSD76P.js?v=f5467819:9119
+(anonymous) @ chunk-WERSD76P.js?v=f5467819:18627Understand this error
+chat-interface.tsx:145 Messages Query Status: {chatId: '8711964f-a2ac-4682-bfdc-853f9de5010c', queryKey: Array(1), enabled: true, isLoading: false, hasError: false, …}
+chat-interface.tsx:155 Chat Interface Debug: {chatId: '8711964f-a2ac-4682-bfdc-853f9de5010c', messagesCount: 1, isLoading: false, hasMessages: true}
+chat-interface.tsx:166 🔍 DETAILED MESSAGE DEBUG: {rawMessages: Array(1), messagesType: 'object', isArray: true, messagesLength: 1, safeMessagesLength: 1, …}
+message-content.tsx:164 Uncaught TypeError: Cannot read properties of undefined (reading 'split')
+    at MessageContent (message-content.tsx:164:25)
+    at renderWithHooks (chunk-WERSD76P.js?v=f5467819:11548:26)
+    at mountIndeterminateComponent (chunk-WERSD76P.js?v=f5467819:14926:21)
+    at beginWork (chunk-WERSD76P.js?v=f5467819:15914:22)
+    at HTMLUnknownElement.callCallback2 (chunk-WERSD76P.js?v=f5467819:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-WERSD76P.js?v=f5467819:3699:24)
+    at invokeGuardedCallback (chunk-WERSD76P.js?v=f5467819:3733:39)
+    at beginWork$1 (chunk-WERSD76P.js?v=f5467819:19765:15)
+    at performUnitOfWork (chunk-WERSD76P.js?v=f5467819:19198:20)
+    at workLoopSync (chunk-WERSD76P.js?v=f5467819:19137:13)
+MessageContent @ message-content.tsx:164
+renderWithHooks @ chunk-WERSD76P.js?v=f5467819:11548
+mountIndeterminateComponent @ chunk-WERSD76P.js?v=f5467819:14926
+beginWork @ chunk-WERSD76P.js?v=f5467819:15914
+callCallback2 @ chunk-WERSD76P.js?v=f5467819:3674
+invokeGuardedCallbackDev @ chunk-WERSD76P.js?v=f5467819:3699
+invokeGuardedCallback @ chunk-WERSD76P.js?v=f5467819:3733
+beginWork$1 @ chunk-WERSD76P.js?v=f5467819:19765
+performUnitOfWork @ chunk-WERSD76P.js?v=f5467819:19198
+workLoopSync @ chunk-WERSD76P.js?v=f5467819:19137
+renderRootSync @ chunk-WERSD76P.js?v=f5467819:19116
+recoverFromConcurrentError @ chunk-WERSD76P.js?v=f5467819:18736
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=f5467819:18879
+flushSyncCallbacks @ chunk-WERSD76P.js?v=f5467819:9119
+(anonymous) @ chunk-WERSD76P.js?v=f5467819:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=f5467819:555
+flush @ @tanstack_react-query.js?v=f5467819:569
+batch @ @tanstack_react-query.js?v=f5467819:587
+dispatch_fn @ @tanstack_react-query.js?v=f5467819:996
+setData @ @tanstack_react-query.js?v=f5467819:696
+onSuccess @ @tanstack_react-query.js?v=f5467819:897
+resolve @ @tanstack_react-query.js?v=f5467819:456
+Promise.then
+run @ @tanstack_react-query.js?v=f5467819:498
+start @ @tanstack_react-query.js?v=f5467819:536
+fetch @ @tanstack_react-query.js?v=f5467819:926
+executeFetch_fn @ @tanstack_react-query.js?v=f5467819:2211
+setOptions @ @tanstack_react-query.js?v=f5467819:1955
+(anonymous) @ @tanstack_react-query.js?v=f5467819:3032
+commitHookEffectListMount @ chunk-WERSD76P.js?v=f5467819:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=f5467819:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=f5467819:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=f5467819:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=f5467819:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=f5467819:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=f5467819:19447
+commitRootImpl @ chunk-WERSD76P.js?v=f5467819:19416
+commitRoot @ chunk-WERSD76P.js?v=f5467819:19277
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=f5467819:18895
+flushSyncCallbacks @ chunk-WERSD76P.js?v=f5467819:9119
+(anonymous) @ chunk-WERSD76P.js?v=f5467819:18627Understand this error
+chunk-WERSD76P.js?v=f5467819:14032 The above error occurred in the <MessageContent> component:
+
+    at MessageContent (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/components/message-content.tsx:18:34)
+    at div
+    at _c (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/components/ui/card.tsx:20:11)
+    at div
+    at div
+    at div
+    at ChatInterface (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/components/chat-interface.tsx:54:33)
+    at div
+    at div
+    at HomeStable (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/pages/home-stable.tsx:33:20)
+    at Route (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=f5467819:323:16)
+    at Switch (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=f5467819:379:17)
+    at Router (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/App.tsx?v=O445oA3p4ZaQlAyoX45Ve:66:31)
+    at div
+    at DragDropProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/components/drag-drop-provider.tsx:20:36)
+    at GamificationProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/hooks/useGamification.tsx:22:40)
+    at AppContent (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/App.tsx?v=O445oA3p4ZaQlAyoX45Ve:330:20)
+    at Provider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-PLT6GTVM.js?v=f5467819:38:15)
+    at TooltipProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=f5467819:64:5)
+    at QueryClientProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=f5467819:2805:3)
+    at App (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/App.tsx?v=O445oA3p4ZaQlAyoX45Ve:391:9)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+logCapturedError @ chunk-WERSD76P.js?v=f5467819:14032
+update.callback @ chunk-WERSD76P.js?v=f5467819:14052
+callCallback @ chunk-WERSD76P.js?v=f5467819:11248
+commitUpdateQueue @ chunk-WERSD76P.js?v=f5467819:11265
+commitLayoutEffectOnFiber @ chunk-WERSD76P.js?v=f5467819:17093
+commitLayoutMountEffects_complete @ chunk-WERSD76P.js?v=f5467819:17980
+commitLayoutEffects_begin @ chunk-WERSD76P.js?v=f5467819:17969
+commitLayoutEffects @ chunk-WERSD76P.js?v=f5467819:17920
+commitRootImpl @ chunk-WERSD76P.js?v=f5467819:19353
+commitRoot @ chunk-WERSD76P.js?v=f5467819:19277
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=f5467819:18895
+flushSyncCallbacks @ chunk-WERSD76P.js?v=f5467819:9119
+(anonymous) @ chunk-WERSD76P.js?v=f5467819:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=f5467819:555
+flush @ @tanstack_react-query.js?v=f5467819:569
+batch @ @tanstack_react-query.js?v=f5467819:587
+dispatch_fn @ @tanstack_react-query.js?v=f5467819:996
+setData @ @tanstack_react-query.js?v=f5467819:696
+onSuccess @ @tanstack_react-query.js?v=f5467819:897
+resolve @ @tanstack_react-query.js?v=f5467819:456
+Promise.then
+run @ @tanstack_react-query.js?v=f5467819:498
+start @ @tanstack_react-query.js?v=f5467819:536
+fetch @ @tanstack_react-query.js?v=f5467819:926
+executeFetch_fn @ @tanstack_react-query.js?v=f5467819:2211
+setOptions @ @tanstack_react-query.js?v=f5467819:1955
+(anonymous) @ @tanstack_react-query.js?v=f5467819:3032
+commitHookEffectListMount @ chunk-WERSD76P.js?v=f5467819:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=f5467819:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=f5467819:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=f5467819:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=f5467819:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=f5467819:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=f5467819:19447
+commitRootImpl @ chunk-WERSD76P.js?v=f5467819:19416
+commitRoot @ chunk-WERSD76P.js?v=f5467819:19277
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=f5467819:18895
+flushSyncCallbacks @ chunk-WERSD76P.js?v=f5467819:9119
+(anonymous) @ chunk-WERSD76P.js?v=f5467819:18627Understand this error
+chunk-WERSD76P.js?v=f5467819:14032 The above error occurred in the <MessageContent> component:
+
+    at MessageContent (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/components/message-content.tsx:18:34)
+    at div
+    at _c (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/components/ui/card.tsx:20:11)
+    at div
+    at div
+    at div
+    at ChatInterface (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/components/chat-interface.tsx:54:33)
+    at div
+    at div
+    at div
+    at div
+    at HomeStable (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/pages/home-stable.tsx:33:20)
+    at Route (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=f5467819:323:16)
+    at Switch (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=f5467819:379:17)
+    at Router (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/App.tsx?v=O445oA3p4ZaQlAyoX45Ve:66:31)
+    at div
+    at DragDropProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/components/drag-drop-provider.tsx:20:36)
+    at GamificationProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/hooks/useGamification.tsx:22:40)
+    at AppContent (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/App.tsx?v=O445oA3p4ZaQlAyoX45Ve:330:20)
+    at Provider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-PLT6GTVM.js?v=f5467819:38:15)
+    at TooltipProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=f5467819:64:5)
+    at QueryClientProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=f5467819:2805:3)
+    at App (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/App.tsx?v=O445oA3p4ZaQlAyoX45Ve:391:9)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+logCapturedError @ chunk-WERSD76P.js?v=f5467819:14032
+update.callback @ chunk-WERSD76P.js?v=f5467819:14052
+callCallback @ chunk-WERSD76P.js?v=f5467819:11248
+commitUpdateQueue @ chunk-WERSD76P.js?v=f5467819:11265
+commitLayoutEffectOnFiber @ chunk-WERSD76P.js?v=f5467819:17093
+commitLayoutMountEffects_complete @ chunk-WERSD76P.js?v=f5467819:17980
+commitLayoutEffects_begin @ chunk-WERSD76P.js?v=f5467819:17969
+commitLayoutEffects @ chunk-WERSD76P.js?v=f5467819:17920
+commitRootImpl @ chunk-WERSD76P.js?v=f5467819:19353
+commitRoot @ chunk-WERSD76P.js?v=f5467819:19277
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=f5467819:18895
+flushSyncCallbacks @ chunk-WERSD76P.js?v=f5467819:9119
+(anonymous) @ chunk-WERSD76P.js?v=f5467819:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=f5467819:555
+flush @ @tanstack_react-query.js?v=f5467819:569
+batch @ @tanstack_react-query.js?v=f5467819:587
+dispatch_fn @ @tanstack_react-query.js?v=f5467819:996
+setData @ @tanstack_react-query.js?v=f5467819:696
+onSuccess @ @tanstack_react-query.js?v=f5467819:897
+resolve @ @tanstack_react-query.js?v=f5467819:456
+Promise.then
+run @ @tanstack_react-query.js?v=f5467819:498
+start @ @tanstack_react-query.js?v=f5467819:536
+fetch @ @tanstack_react-query.js?v=f5467819:926
+executeFetch_fn @ @tanstack_react-query.js?v=f5467819:2211
+setOptions @ @tanstack_react-query.js?v=f5467819:1955
+(anonymous) @ @tanstack_react-query.js?v=f5467819:3032
+commitHookEffectListMount @ chunk-WERSD76P.js?v=f5467819:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=f5467819:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=f5467819:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=f5467819:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=f5467819:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=f5467819:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=f5467819:19447
+commitRootImpl @ chunk-WERSD76P.js?v=f5467819:19416
+commitRoot @ chunk-WERSD76P.js?v=f5467819:19277
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=f5467819:18895
+flushSyncCallbacks @ chunk-WERSD76P.js?v=f5467819:9119
+(anonymous) @ chunk-WERSD76P.js?v=f5467819:18627Understand this error
+chunk-WERSD76P.js?v=f5467819:9129 Uncaught TypeError: Cannot read properties of undefined (reading 'split')
+    at MessageContent (message-content.tsx:164:25)
+    at renderWithHooks (chunk-WERSD76P.js?v=f5467819:11548:26)
+    at mountIndeterminateComponent (chunk-WERSD76P.js?v=f5467819:14926:21)
+    at beginWork (chunk-WERSD76P.js?v=f5467819:15914:22)
+    at beginWork$1 (chunk-WERSD76P.js?v=f5467819:19753:22)
+    at performUnitOfWork (chunk-WERSD76P.js?v=f5467819:19198:20)
+    at workLoopSync (chunk-WERSD76P.js?v=f5467819:19137:13)
+    at renderRootSync (chunk-WERSD76P.js?v=f5467819:19116:15)
+    at recoverFromConcurrentError (chunk-WERSD76P.js?v=f5467819:18736:28)
+    at performSyncWorkOnRoot (chunk-WERSD76P.js?v=f5467819:18879:28)
+MessageContent @ message-content.tsx:164
+renderWithHooks @ chunk-WERSD76P.js?v=f5467819:11548
+mountIndeterminateComponent @ chunk-WERSD76P.js?v=f5467819:14926
+beginWork @ chunk-WERSD76P.js?v=f5467819:15914
+beginWork$1 @ chunk-WERSD76P.js?v=f5467819:19753
+performUnitOfWork @ chunk-WERSD76P.js?v=f5467819:19198
+workLoopSync @ chunk-WERSD76P.js?v=f5467819:19137
+renderRootSync @ chunk-WERSD76P.js?v=f5467819:19116
+recoverFromConcurrentError @ chunk-WERSD76P.js?v=f5467819:18736
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=f5467819:18879
+flushSyncCallbacks @ chunk-WERSD76P.js?v=f5467819:9119
+(anonymous) @ chunk-WERSD76P.js?v=f5467819:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=f5467819:555
+flush @ @tanstack_react-query.js?v=f5467819:569
+batch @ @tanstack_react-query.js?v=f5467819:587
+dispatch_fn @ @tanstack_react-query.js?v=f5467819:996
+setData @ @tanstack_react-query.js?v=f5467819:696
+onSuccess @ @tanstack_react-query.js?v=f5467819:897
+resolve @ @tanstack_react-query.js?v=f5467819:456
+Promise.then
+run @ @tanstack_react-query.js?v=f5467819:498
+start @ @tanstack_react-query.js?v=f5467819:536
+fetch @ @tanstack_react-query.js?v=f5467819:926
+executeFetch_fn @ @tanstack_react-query.js?v=f5467819:2211
+setOptions @ @tanstack_react-query.js?v=f5467819:1955
+(anonymous) @ @tanstack_react-query.js?v=f5467819:3032
+commitHookEffectListMount @ chunk-WERSD76P.js?v=f5467819:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=f5467819:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=f5467819:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=f5467819:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=f5467819:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=f5467819:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=f5467819:19447
+commitRootImpl @ chunk-WERSD76P.js?v=f5467819:19416
+commitRoot @ chunk-WERSD76P.js?v=f5467819:19277
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=f5467819:18895
+flushSyncCallbacks @ chunk-WERSD76P.js?v=f5467819:9119
+(anonymous) @ chunk-WERSD76P.js?v=f5467819:18627Understand this error
+home-stable.tsx:104 Message sent successfully
