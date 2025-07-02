@@ -29,12 +29,21 @@ interface MessageBubbleProps {
 }
 
 export default function MessageBubble({ message, actions }: MessageBubbleProps) {
+  console.log("🎨 MESSAGEBUBBLE RENDER:", {
+    messageId: message.id,
+    role: message.role,
+    contentLength: message.content?.length || 0,
+    hasContent: !!message.content,
+    contentPreview: message.content?.substring(0, 50) + "..."
+  });
+
   const [feedback, setFeedback] = useState<'liked' | 'disliked' | null>(null);
   const isUser = message.role === 'user';
   const isAssistant = message.role === 'assistant';
 
   // Don't render empty messages
   if (!message.content || message.content.trim() === '') {
+    console.log("🎨 MESSAGEBUBBLE: Skipping empty message");
     return null;
   }
 
