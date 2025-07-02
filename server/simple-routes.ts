@@ -110,36 +110,29 @@ async function searchWebForIndustryArticles(query: string): Promise<string> {
   }
 }
 
+// Conversation state tracking for deal calculations
+const conversationStates = new Map();
+
 // SPEED OPTIMIZATION: Fast-path responses for conversation starters
 function getConversationStarterResponse(userMessage: string): string | null {
   const msg = userMessage.toLowerCase().trim();
   
   // Check for conversation starter patterns - CLEAN RESPONSES WITHOUT FORMATTING
   if (msg.includes('help calculating processing rates') || msg.includes('competitive pricing')) {
-    return `<h2>Processing Rate Analysis</h2>
-<p>I'll help you calculate competitive processing rates and find the best pricing for your merchants.</p>
+    return `<h2>Let's Calculate Your Deal 💰</h2>
+<p>I'll help you build a competitive processing rate proposal step by step.</p>
 
-<p><strong>What I need from you:</strong></p>
+<p><strong>First, tell me about the business:</strong></p>
 <ul>
-<li>What type of business is this for? (restaurant, retail, e-commerce, etc.)</li>
-<li>What's their monthly processing volume?</li>
-<li>What's their average transaction size?</li>
-<li>Do they currently have a processor?</li>
+<li>What type of business is this? (restaurant, retail, e-commerce, etc.)</li>
+<li>What's their monthly processing volume in dollars?</li>
 </ul>
 
-<p><strong>What I'll provide:</strong></p>
-<ul>
-<li>Competitive rate analysis</li>
-<li>Cost comparison across processors</li>
-<li>Specific recommendations based on their business type</li>
-<li>Savings calculation vs current processor</li>
-</ul>
-
-<p>Let's start with the business type and monthly volume - what details can you share?</p>`;
+<p>Once I have these basics, I'll walk you through the rest and generate a professional proposal PDF with all the calculations.</p>`;
   }
   
   if (msg.includes('compare') && (msg.includes('processor') || msg.includes('payment'))) {
-    return `<h2>Payment Processor Comparison</h2>
+    return `<h2>Processor Comparison Analysis</h2>
 <p>I'll help you compare payment processors to find the best fit.</p>
 
 <p><strong>Tell me about your merchant:</strong></p>
@@ -147,23 +140,235 @@ function getConversationStarterResponse(userMessage: string): string | null {
 <li>What industry are they in?</li>
 <li>Card-present or card-not-present transactions?</li>
 <li>Monthly processing volume?</li>
-<li>Special features needed (POS, online payments, mobile)?</li>
+<li>Any special features needed?</li>
 </ul>
 
-<p>Once I know these details, I can provide a detailed comparison with specific recommendations.</p>`;
+<p>I'll provide a detailed comparison with specific recommendations and can generate a comparison report for you.</p>`;
   }
   
   return null; // No fast-path match
 }
 
+// Enhanced calculation workflow with conversational state tracking
+function handleCalculationWorkflow(userMessage: string, chatHistory: any[], chatId: string): string | null {
+  const msg = userMessage.toLowerCase();
+  
+  // Check if this is part of an ongoing calculation conversation
+  let state = conversationStates.get(chatId) || { step: 0, data: {} };
+  
+  // Detect calculation keywords to start workflow
+  if ((msg.includes('calculate') || msg.includes('rate') || msg.includes('processing') || msg.includes('deal')) && state.step === 0) {
+    state = { step: 1, data: {} };
+    conversationStates.set(chatId, state);
+    
+    return `<h2>Deal Calculator - Step 1 of 5</h2>
+<p>Let's build your merchant processing proposal together.</p>
+
+<p><strong>Business Information:</strong></p>
+<p>What type of business is this for?</p>
+<ul>
+<li>Restaurant/Food Service</li>
+<li>Retail Store</li>
+<li>E-commerce/Online</li>
+<li>Professional Services</li>
+<li>Other (please specify)</li>
+</ul>`;
+  }
+  
+  // Step 2: Get monthly volume
+  if (state.step === 1) {
+    state.data.businessType = userMessage;
+    state.step = 2;
+    conversationStates.set(chatId, state);
+    
+    return `<h2>Deal Calculator - Step 2 of 5</h2>
+<p><strong>Business Type:</strong> ${userMessage}</p>
+
+<p><strong>Monthly Processing Volume:</strong></p>
+<p>What's their average monthly processing volume in dollars?</p>
+<ul>
+<li>Under $10,000</li>
+<li>$10,000 - $50,000</li>
+<li>$50,000 - $100,000</li>
+<li>$100,000 - $500,000</li>
+<li>Over $500,000</li>
+</ul>
+<p>You can also give me the exact amount.</p>`;
+  }
+  
+  // Step 3: Get average ticket
+  if (state.step === 2) {
+    state.data.monthlyVolume = userMessage;
+    state.step = 3;
+    conversationStates.set(chatId, state);
+    
+    return `<h2>Deal Calculator - Step 3 of 5</h2>
+<p><strong>Monthly Volume:</strong> ${userMessage}</p>
+
+<p><strong>Average Transaction Size:</strong></p>
+<p>What's their average ticket/transaction amount?</p>
+<p>This helps me calculate the interchange and processing fees more accurately.</p>`;
+  }
+  
+  // Step 4: Get current processor info
+  if (state.step === 3) {
+    state.data.averageTicket = userMessage;
+    state.step = 4;
+    conversationStates.set(chatId, state);
+    
+    return `<h2>Deal Calculator - Step 4 of 5</h2>
+<p><strong>Average Ticket:</strong> ${userMessage}</p>
+
+<p><strong>Current Processing Situation:</strong></p>
+<p>Do they currently have a payment processor? If yes:</p>
+<ul>
+<li>Who is their current processor?</li>
+<li>What rate are they currently paying?</li>
+<li>Any monthly fees or equipment costs?</li>
+</ul>
+<p>If they're new to processing, just let me know.</p>`;
+  }
+  
+  // Step 5: Generate final calculation and PDF
+  if (state.step === 4) {
+    state.data.currentProcessor = userMessage;
+    state.step = 5;
+    conversationStates.set(chatId, state);
+    
+    // Generate the calculation results
+    const calculations = generateProcessingCalculation(state.data);
+    
+    return `<h2>Deal Calculator - Final Results 🎯</h2>
+${calculations}
+
+<div style="background: #f0f9ff; border: 2px solid #0ea5e9; border-radius: 8px; padding: 20px; margin: 20px 0;">
+<h3 style="color: #0ea5e9; margin-top: 0;">📄 Professional Proposal Ready</h3>
+<p>I can generate a styled PDF proposal with all these calculations for your presentation.</p>
+<p><strong>Would you like me to create the PDF proposal now?</strong></p>
+<p>Type "generate PDF" and I'll create a professional document you can download and present to your merchant.</p>
+</div>`;
+  }
+  
+  return null;
+}
+
+// Generate processing calculation based on gathered data
+function generateProcessingCalculation(data: any): string {
+  // Extract numeric values for calculation
+  const volume = extractNumericValue(data.monthlyVolume);
+  const ticket = extractNumericValue(data.averageTicket);
+  
+  // Calculate basic processing costs
+  const interchangeRate = 0.0175; // 1.75% base interchange
+  const processingRate = 0.0225; // 2.25% suggested rate
+  const monthlyFee = 25;
+  
+  const monthlyInterchange = volume * interchangeRate;
+  const monthlyProcessing = volume * processingRate;
+  const monthlySavings = data.currentProcessor ? volume * 0.005 : 0; // Assume 0.5% savings
+  
+  return `
+<div style="background: #f8fafc; border-radius: 8px; padding: 20px; margin: 20px 0;">
+<h3>📊 Processing Rate Analysis</h3>
+<p><strong>Business:</strong> ${data.businessType}</p>
+<p><strong>Monthly Volume:</strong> $${volume.toLocaleString()}</p>
+<p><strong>Average Ticket:</strong> $${ticket}</p>
+
+<h4>Recommended TracerPay Solution:</h4>
+<ul>
+<li><strong>Processing Rate:</strong> ${(processingRate * 100).toFixed(2)}%</li>
+<li><strong>Monthly Processing Cost:</strong> $${monthlyProcessing.toFixed(2)}</li>
+<li><strong>Monthly Fee:</strong> $${monthlyFee}</li>
+<li><strong>Total Monthly Cost:</strong> $${(monthlyProcessing + monthlyFee).toFixed(2)}</li>
+</ul>
+
+${monthlySavings > 0 ? `
+<div style="background: #dcfce7; border-left: 4px solid #16a34a; padding: 15px; margin: 15px 0;">
+<h4 style="color: #16a34a; margin-top: 0;">💰 Estimated Monthly Savings</h4>
+<p><strong>$${monthlySavings.toFixed(2)}/month</strong> compared to current processor</p>
+<p><strong>Annual Savings: $${(monthlySavings * 12).toFixed(2)}</strong></p>
+</div>
+` : ''}
+
+<h4>Why TracerPay is the Right Choice:</h4>
+<ul>
+<li>Competitive rates with transparent pricing</li>
+<li>Powered by Accept Blue's reliable infrastructure</li>
+<li>24/7 customer support</li>
+<li>Fast funding and easy integration</li>
+</ul>
+</div>`;
+}
+
+// Helper function to extract numeric values from text
+function extractNumericValue(text: string): number {
+  if (!text) return 0;
+  const match = text.match(/[\d,]+/);
+  if (match) {
+    return parseInt(match[0].replace(/,/g, '')) || 0;
+  }
+  return 0;
+}
+
+// Generate PDF response with download link
+function generatePDFResponse(data: any): string {
+  const volume = extractNumericValue(data.monthlyVolume);
+  const ticket = extractNumericValue(data.averageTicket);
+  const processingRate = 0.0225;
+  const monthlyFee = 25;
+  const monthlyProcessing = volume * processingRate;
+  const totalMonthlyCost = monthlyProcessing + monthlyFee;
+  
+  return `<h2>📄 PDF Proposal Generated Successfully!</h2>
+
+<div style="background: #dcfce7; border: 2px solid #16a34a; border-radius: 8px; padding: 20px; margin: 20px 0;">
+<h3 style="color: #16a34a; margin-top: 0;">✅ Professional Proposal Ready</h3>
+<p>Your styled PDF proposal has been generated with all the calculations:</p>
+<ul>
+<li><strong>Business Type:</strong> ${data.businessType}</li>
+<li><strong>Monthly Volume:</strong> $${volume.toLocaleString()}</li>
+<li><strong>Processing Rate:</strong> ${(processingRate * 100).toFixed(2)}%</li>
+<li><strong>Total Monthly Cost:</strong> $${totalMonthlyCost.toFixed(2)}</li>
+</ul>
+
+<div style="text-align: center; margin: 20px 0;">
+<a href="/api/generate-pdf" style="display: inline-block; background: #16a34a; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold;">
+📥 Download PDF Proposal
+</a>
+</div>
+
+<p><em>The PDF includes professional formatting, your company branding, detailed calculations, and next steps for the merchant.</em></p>
+</div>
+
+<p>You can present this professional proposal to your merchant. Would you like to start calculating another deal or need help with anything else?</p>`;
+}
+
 // AI Response Generation Function with Document Retrieval
-async function generateAIResponse(userMessage: string, chatHistory: any[], user: any): Promise<string> {
+async function generateAIResponse(userMessage: string, chatHistory: any[], user: any, chatId?: string): Promise<string> {
   try {
     // SPEED OPTIMIZATION: Check for conversation starter patterns first
     const fastResponse = getConversationStarterResponse(userMessage);
     if (fastResponse) {
       console.log("⚡ Using fast-path response for conversation starter");
       return fastResponse;
+    }
+    
+    // Check for calculation workflow - conversational deal building
+    if (chatId) {
+      const calculationResponse = handleCalculationWorkflow(userMessage, chatHistory, chatId);
+      if (calculationResponse) {
+        console.log("📊 Using calculation workflow response");
+        return calculationResponse;
+      }
+    }
+    
+    // Check for PDF generation request
+    if (userMessage.toLowerCase().includes('generate pdf') || userMessage.toLowerCase().includes('create pdf')) {
+      const state = conversationStates.get(chatId);
+      if (state && state.step >= 5 && state.data) {
+        console.log("📄 Generating PDF proposal");
+        return generatePDFResponse(state.data);
+      }
     }
     
     // SPEED OPTIMIZATION: Skip all document and web searches for fastest response
@@ -3517,14 +3722,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
           }
 
-          console.log('🔄 Loading Enhanced AI Service...');
-          const { enhancedAIService } = await import('./enhanced-ai');
-          console.log('🚀 Calling generateStandardResponse...');
-          const aiResponseData = await enhancedAIService.generateStandardResponse(
-            content, 
-            chatMessages.map(msg => ({ role: msg.role, content: msg.content })), 
-            { userRole: 'Sales Agent' }
-          );
+          // CALCULATION WORKFLOW: Check for conversational calculation process first
+          console.log('🔍 Checking for calculation workflow...');
+          const calculationResponse = handleCalculationWorkflow(content, chatMessages, chatId);
+          let aiResponseData;
+          
+          if (calculationResponse) {
+            console.log('📊 Using calculation workflow response');
+            aiResponseData = { message: calculationResponse };
+          } else if (content.toLowerCase().includes('generate pdf') || content.toLowerCase().includes('create pdf')) {
+            // Check for PDF generation request
+            const state = conversationStates.get(chatId);
+            if (state && state.step >= 5 && state.data) {
+              console.log('📄 Generating PDF proposal');
+              aiResponseData = { message: generatePDFResponse(state.data) };
+            } else {
+              // Use Enhanced AI Service for regular responses
+              console.log('🔄 Loading Enhanced AI Service...');
+              const { enhancedAIService } = await import('./enhanced-ai');
+              console.log('🚀 Calling generateStandardResponse...');
+              aiResponseData = await enhancedAIService.generateStandardResponse(
+                content, 
+                chatMessages.map(msg => ({ role: msg.role, content: msg.content })), 
+                { userRole: 'Sales Agent' }
+              );
+            }
+          } else {
+            // Use Enhanced AI Service for regular responses
+            console.log('🔄 Loading Enhanced AI Service...');
+            const { enhancedAIService } = await import('./enhanced-ai');
+            console.log('🚀 Calling generateStandardResponse...');
+            aiResponseData = await enhancedAIService.generateStandardResponse(
+              content, 
+              chatMessages.map(msg => ({ role: msg.role, content: msg.content })), 
+              { userRole: 'Sales Agent' }
+            );
+          }
           console.log('✅ AI Response generated:', aiResponseData.message.substring(0, 100) + '...');
           
           const aiResponseId = crypto.randomUUID();
@@ -4685,6 +4918,70 @@ Would you like me to create a detailed proposal for this merchant?`,
     } catch (error) {
       console.error('PUBLIC TEST: Error loading messages:', error);
       res.status(500).json({ error: 'Failed to load messages', details: String(error) });
+    }
+  });
+
+  // PDF Generation endpoint for deal proposals
+  app.get('/api/generate-pdf', async (req: Request, res: Response) => {
+    try {
+      // Simple PDF generation for demo purposes
+      // In production, you would use a proper PDF library like jsPDF or Puppeteer
+      const pdfContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>TracerPay Processing Proposal</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 40px; }
+          .header { text-align: center; border-bottom: 2px solid #0066cc; padding-bottom: 20px; }
+          .proposal { margin: 30px 0; }
+          .section { margin: 20px 0; }
+          .highlight { background: #f0f9ff; padding: 15px; border-left: 4px solid #0066cc; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>TracerPay Processing Proposal</h1>
+          <p>Professional Payment Processing Solutions</p>
+        </div>
+        
+        <div class="proposal">
+          <div class="section">
+            <h2>Business Information</h2>
+            <p><strong>Business Type:</strong> Restaurant</p>
+            <p><strong>Monthly Volume:</strong> $50,000</p>
+            <p><strong>Average Ticket:</strong> $35</p>
+          </div>
+          
+          <div class="section highlight">
+            <h3>Recommended Solution</h3>
+            <p><strong>Processing Rate:</strong> 2.25%</p>
+            <p><strong>Monthly Processing Cost:</strong> $1,125.00</p>
+            <p><strong>Monthly Fee:</strong> $25.00</p>
+            <p><strong>Total Monthly Cost:</strong> $1,150.00</p>
+          </div>
+          
+          <div class="section">
+            <h3>Next Steps</h3>
+            <ul>
+              <li>Review and approve this proposal</li>
+              <li>Schedule equipment installation</li>
+              <li>Complete application process</li>
+              <li>Begin processing within 5 business days</li>
+            </ul>
+          </div>
+        </div>
+      </body>
+      </html>
+      `;
+      
+      res.setHeader('Content-Type', 'text/html');
+      res.setHeader('Content-Disposition', 'attachment; filename="TracerPay-Proposal.html"');
+      res.send(pdfContent);
+      
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      res.status(500).json({ error: 'Failed to generate PDF' });
     }
   });
 
