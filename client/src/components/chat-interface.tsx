@@ -317,6 +317,9 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
   };
 
   const handleQuickAction = (action: string) => {
+    console.log("🚀 CONVERSATION STARTER: handleQuickAction called with:", action);
+    console.log("🚀 CONVERSATION STARTER: onNewChatWithMessage available:", !!onNewChatWithMessage);
+    
     // Create engaging conversation starters with follow-up questions
     const engagingStarters = {
       "Calculate processing rates for a restaurant": `I need to calculate processing rates for a restaurant client. Can you help me get competitive rates and processor recommendations?`,
@@ -356,9 +359,13 @@ With these details, I'll create a customized proposal highlighting value proposi
 
     const engagingMessage = engagingStarters[action as keyof typeof engagingStarters] || action;
     
+    console.log("🚀 CONVERSATION STARTER: Final message:", engagingMessage);
+    
     if (onNewChatWithMessage) {
+      console.log("🚀 CONVERSATION STARTER: Calling onNewChatWithMessage");
       onNewChatWithMessage(engagingMessage);
     } else {
+      console.log("🚀 CONVERSATION STARTER: Setting input instead");
       setInput(engagingMessage);
     }
   };
