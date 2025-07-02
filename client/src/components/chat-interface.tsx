@@ -240,28 +240,53 @@ export function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessage }: Ch
   // Handle conversation starter clicks
   const handleConversationStarter = async (starter: typeof conversationStarters[0]) => {
     try {
+      console.log("🚀 Starting conversation with starter:", starter.text);
+      
       if (onNewChatWithMessage) {
-        // Use the proper new chat with message function
+        // Use the proper new chat with message function from home page
+        console.log("📨 Using onNewChatWithMessage function");
         await onNewChatWithMessage(starter.text);
       } else {
-        // Fallback: create chat and send message manually
-        const response = await apiRequest("POST", "/api/chats", {
-          title: "New Chat",
-          isActive: true
+        console.log("🔧 Using fallback manual chat creation");
+        // Fallback: create chat and send message manually using fetch
+        const response = await fetch("/api/chats", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            title: "New Chat",
+            isActive: true
+          }),
         });
+        
+        if (!response.ok) {
+          throw new Error(`Failed to create chat: ${response.statusText}`);
+        }
+        
         const newChat = await response.json();
+        console.log("✅ Created new chat:", newChat.id);
         
         // Send the message immediately
-        await apiRequest("POST", `/api/chats/${newChat.id}/messages`, {
-          content: starter.text,
-          role: "user"
+        const messageResponse = await fetch(`/api/chats/${newChat.id}/messages`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            content: starter.text,
+            role: "user"
+          }),
         });
         
+        if (!messageResponse.ok) {
+          throw new Error(`Failed to send message: ${messageResponse.statusText}`);
+        }
+        
+        console.log("✅ Sent initial message, navigating to chat");
         // Navigate to the new chat after message is sent
         window.location.href = `/chat/${newChat.id}`;
       }
     } catch (error) {
-      console.error("Failed to start conversation:", error);
+      console.error("❌ Failed to start conversation:", error);
       toast({
         title: "Error",
         description: "Failed to start conversation. Please try again.",
