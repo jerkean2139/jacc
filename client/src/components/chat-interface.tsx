@@ -237,10 +237,38 @@ export function ChatInterface({ chatId, onChatUpdate }: ChatInterfaceProps) {
     setInput("");
     
     try {
-      await sendMessageMutation.mutateAsync(message);
+      if (!chatId) {
+        // No active chat, create a new one with the message
+        if (onNewChatWithMessage) {
+          await onNewChatWithMessage(message);
+        } else {
+          // Fallback: create chat manually if onNewChatWithMessage is not available
+          const response = await apiRequest("POST", "/api/chats", {
+            title: "New Chat",
+            isActive: true
+          });
+          const newChat = await response.json();
+          window.location.href = `/chat/${newChat.id}`;
+          
+          // Send the message after navigation
+          setTimeout(async () => {
+            await apiRequest("POST", `/api/chats/${newChat.id}/messages`, {
+              content: message,
+              role: "user"
+            });
+          }, 200);
+        }
+      } else {
+        // Active chat exists, send message normally
+        await sendMessageMutation.mutateAsync(message);
+      }
     } catch (error) {
-      // Error handling is done in the mutation's onError
       console.error("Send message error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -257,33 +285,65 @@ export function ChatInterface({ chatId, onChatUpdate }: ChatInterfaceProps) {
     }
   }, [input]);
 
-  // Don't show interface without chat
+  // Welcome screen when no chat is selected
   if (!chatId) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-        <h2 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-gray-200">
-          Welcome to JACC
-        </h2>
-        <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-md">
-          Your AI-powered merchant services assistant. Start a conversation to get help with pricing, processors, and proposals.
-        </p>
-        
-        {/* Conversation Starters */}
-        <div className="grid gap-4 w-full max-w-md">
-          {conversationStarters.map((starter) => {
-            const Icon = starter.icon;
-            return (
-              <Button
-                key={starter.id}
-                variant="outline"
-                className={`${starter.color} text-white border-0 h-auto p-4 text-left flex items-start gap-3 transition-all duration-200 hover:scale-105`}
-                onClick={() => handleConversationStarter(starter)}
-              >
-                <Icon className="h-5 w-5 mt-0.5 flex-shrink-0" />
-                <span className="text-sm leading-relaxed">{starter.text}</span>
-              </Button>
-            );
-          })}
+      <div className="flex-1 flex flex-col">
+        {/* Welcome Content */}
+        <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+          <h2 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-gray-200">
+            Welcome to JACC
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-md">
+            Your AI-powered merchant services assistant. Start a conversation to get help with pricing, processors, and proposals.
+          </p>
+          
+          {/* Conversation Starters */}
+          <div className="grid gap-4 w-full max-w-md">
+            {conversationStarters.map((starter) => {
+              const Icon = starter.icon;
+              return (
+                <Button
+                  key={starter.id}
+                  variant="outline"
+                  className={`${starter.color} text-white border-0 h-auto p-4 text-left flex items-start gap-3 transition-all duration-200 hover:scale-105`}
+                  onClick={() => handleConversationStarter(starter)}
+                >
+                  <Icon className="h-5 w-5 mt-0.5 flex-shrink-0" />
+                  <span className="text-sm leading-relaxed">{starter.text}</span>
+                </Button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Chat Input for Welcome Screen */}
+        <div className="border-t p-4 bg-white dark:bg-gray-800">
+          <form onSubmit={handleSubmit} className="flex gap-3">
+            <div className="flex-1 relative">
+              <Textarea
+                ref={textareaRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Ask about processing rates, compare processors, or request market insights..."
+                className="min-h-[44px] max-h-32 resize-none pr-12"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSubmit(e);
+                  }
+                }}
+              />
+            </div>
+            
+            <Button
+              type="submit"
+              disabled={!input.trim() || sendMessageMutation.isPending}
+              className="bg-blue-700 hover:bg-blue-800 text-white px-4 py-2 h-11"
+            >
+              <Send className="w-4 h-4" />
+            </Button>
+          </form>
         </div>
       </div>
     );
