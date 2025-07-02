@@ -92,6 +92,7 @@ function Router() {
           <Route path="/pricing-comparison" component={PricingComparison} />
 
           <Route path="/guide" component={UserGuide} />
+          <Route path="/test-messages/:id" component={TestMessages} />
           <Route path="/documents" component={DocumentsPage} />
           <Route path="/documents/:documentId" component={DocumentViewer} />
           <Route path="/documents/view/:documentId" component={DocumentViewer} />
