@@ -4666,19 +4666,15 @@ Would you like me to create a detailed proposal for this merchant?`,
       const { chatId } = req.params;
       console.log('🚨 PUBLIC TEST ENDPOINT HIT: Loading messages for chat', chatId);
       
-      // Get messages directly from database using same logic as authenticated endpoint
-      const messagesResult = await db
-        .select({
-          id: messages.id,
-          chatId: messages.chatId,
-          content: messages.content,
-          role: messages.role,
-          metadata: messages.metadata,
-          createdAt: messages.createdAt
-        })
-        .from(messages)
-        .where(eq(messages.chatId, chatId))
-        .orderBy(messages.createdAt);
+      // Get messages directly from database using raw SQL to avoid Drizzle issues
+      const { neon } = await import('@neondatabase/serverless');
+      const sql = neon(process.env.DATABASE_URL!);
+      const messagesResult = await sql`
+        SELECT id, chat_id, content, role, metadata, created_at 
+        FROM messages 
+        WHERE chat_id = ${chatId}
+        ORDER BY created_at ASC
+      `;
 
       console.log(`🔍 PUBLIC TEST: Found ${messagesResult.length} messages in database for chat ${chatId}`);
       if (messagesResult.length > 0) {
