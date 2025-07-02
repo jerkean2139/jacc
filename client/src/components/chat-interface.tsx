@@ -86,6 +86,7 @@ export function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessage }: Ch
     cacheTime: 0,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
+    refetchInterval: 2000, // Poll every 2 seconds to catch AI responses
   });
 
   // Auto-scroll to bottom when messages change
