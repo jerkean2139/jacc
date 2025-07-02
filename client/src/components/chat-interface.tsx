@@ -68,38 +68,22 @@ export function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessage }: Ch
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Add a refresh trigger to force cache busting
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
-  
   // Voice recording state
   const [isRecording, setIsRecording] = useState(false);
   const [recognition, setRecognition] = useState<any>(null);
   
-  // Fetch messages for the active chat - with error handling
+  // Fetch messages for the active chat - RESTORED WORKING VERSION
   const { data: messages = [], isLoading, error, refetch } = useQuery<MessageWithActions[]>({
-    queryKey: [`/api/chats/${chatId}/messages`, refreshTrigger],
+    queryKey: [`/api/chats/${chatId}/messages`],
     enabled: !!chatId,
-    refetchOnMount: true,
-    staleTime: 0, // Always refetch
-    gcTime: 0, // Don't cache (gcTime replaces cacheTime in v5)
-    refetchOnWindowFocus: false,
-    retry: 1,
-    networkMode: 'always', // Always attempt network request
   });
 
-  // Force refresh messages when chatId changes
+  // Auto-scroll to bottom when messages change
   useEffect(() => {
-    if (chatId) {
-      console.log('💫 Force refreshing messages for chat:', chatId);
-      const nextRefreshTrigger = refreshTrigger + 1;
-      setRefreshTrigger(nextRefreshTrigger);
-      
-      // Use the EXACT same query key format as the main query
-      queryClient.invalidateQueries({ queryKey: [`/api/chats/${chatId}/messages`, refreshTrigger] });
-      queryClient.invalidateQueries({ queryKey: [`/api/chats/${chatId}/messages`, nextRefreshTrigger] });
-      refetch();
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [chatId, refetch, queryClient, refreshTrigger]);
+  }, [messages]);
 
   // Fetch saved prompts for the dropdown (only when authenticated)
   const { data: savedPrompts = [] } = useQuery({

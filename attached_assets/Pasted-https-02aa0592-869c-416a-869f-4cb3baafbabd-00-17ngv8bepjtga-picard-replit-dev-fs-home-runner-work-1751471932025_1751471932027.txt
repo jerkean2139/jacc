@@ -1,0 +1,46 @@
+https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=f5467819:379:17)
+    at Router (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/App.tsx?v=-w4iaG_aPTF98o2z1bD9L:66:31)
+    at div
+    at DragDropProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/components/drag-drop-provider.tsx:20:36)
+    at GamificationProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/hooks/useGamification.tsx:22:40)
+    at AppContent (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/App.tsx?v=-w4iaG_aPTF98o2z1bD9L:330:20)
+    at Provider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-PLT6GTVM.js?v=f5467819:38:15)
+    at TooltipProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=f5467819:64:5)
+    at QueryClientProvider (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=f5467819:2805:3)
+    at App (https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/src/App.tsx?v=-w4iaG_aPTF98o2z1bD9L:391:9)
+printWarning @ chunk-WERSD76P.js?v=f5467819:521
+error @ chunk-WERSD76P.js?v=f5467819:505
+checkForNestedUpdates @ chunk-WERSD76P.js?v=f5467819:19665
+scheduleUpdateOnFiber @ chunk-WERSD76P.js?v=f5467819:18533
+dispatchSetState @ chunk-WERSD76P.js?v=f5467819:12403
+(anonymous) @ chat-interface.tsx:95
+commitHookEffectListMount @ chunk-WERSD76P.js?v=f5467819:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=f5467819:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=f5467819:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=f5467819:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=f5467819:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=f5467819:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=f5467819:19447
+(anonymous) @ chunk-WERSD76P.js?v=f5467819:19328
+workLoop @ chunk-WERSD76P.js?v=f5467819:197
+flushWork @ chunk-WERSD76P.js?v=f5467819:176
+performWorkUntilDeadline @ chunk-WERSD76P.js?v=f5467819:384Understand this error
+chat-interface.tsx:93 💫 Force refreshing messages for chat: 5f9072a6-9539-4754-a1ca-d9efe4565d2f
+chat-interface.tsx:155 Messages Query Status: {chatId: '5f9072a6-9539-4754-a1ca-d9efe4565d2f', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:165 Chat Interface Debug: {chatId: '5f9072a6-9539-4754-a1ca-d9efe4565d2f', messagesCount: 0, isLoading: true, hasMessages: false}
+chat-interface.tsx:155 Messages Query Status: {chatId: '5f9072a6-9539-4754-a1ca-d9efe4565d2f', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:165 Chat Interface Debug: {chatId: '5f9072a6-9539-4754-a1ca-d9efe4565d2f', messagesCount: 0, isLoading: true, hasMessages: false}
+2chat-interface.tsx:93 💫 Force refreshing messages for chat: 5f9072a6-9539-4754-a1ca-d9efe4565d2f
+chat-interface.tsx:155 Messages Query Status: {chatId: '5f9072a6-9539-4754-a1ca-d9efe4565d2f', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:165 Chat Interface Debug: {chatId: '5f9072a6-9539-4754-a1ca-d9efe4565d2f', messagesCount: 0, isLoading: true, hasMessages: false}
+chat-interface.tsx:155 Messages Query Status: {chatId: '5f9072a6-9539-4754-a1ca-d9efe4565d2f', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:165 Chat Interface Debug: {chatId: '5f9072a6-9539-4754-a1ca-d9efe4565d2f', messagesCount: 0, isLoading: true, hasMessages: false}
+2chat-interface.tsx:93 💫 Force refreshing messages for chat: 5f9072a6-9539-4754-a1ca-d9efe4565d2f
+chat-interface.tsx:155 Messages Query Status: {chatId: '5f9072a6-9539-4754-a1ca-d9efe4565d2f', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:165 Chat Interface Debug: {chatId: '5f9072a6-9539-4754-a1ca-d9efe4565d2f', messagesCount: 0, isLoading: true, hasMessages: false}
+chat-interface.tsx:155 Messages Query Status: {chatId: '5f9072a6-9539-4754-a1ca-d9efe4565d2f', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:165 Chat Interface Debug: {chatId: '5f9072a6-9539-4754-a1ca-d9efe4565d2f', messagesCount: 0, isLoading: true, hasMessages: false}
+2chat-interface.tsx:93 💫 Force refreshing messages for chat: 5f9072a6-9539-4754-a1ca-d9efe4565d2f
+chat-interface.tsx:155 Messages Query Status: {chatId: '5f9072a6-9539-4754-a1ca-d9efe4565d2f', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:165 Chat Interface Debug: {chatId: '5f9072a6-9539-4754-a1ca-d9efe4565d2f', messagesCount: 0, isLoading: true, hasMessages: false}
+chat-interface.tsx:155 Messages Query Status: {chatId: '5f9072a6-9539-4754-a1ca-d9efe4565d2f', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
