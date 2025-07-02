@@ -29,6 +29,7 @@ interface MessageWithActions {
 interface ChatInterfaceProps {
   chatId: string | null;
   onChatUpdate: () => void;
+  onNewChatWithMessage?: (message: string) => Promise<void>;
 }
 
 // Define conversation starters
@@ -53,7 +54,7 @@ const conversationStarters = [
   }
 ];
 
-export function ChatInterface({ chatId, onChatUpdate }: ChatInterfaceProps) {
+export function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessage }: ChatInterfaceProps) {
   const [input, setInput] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);

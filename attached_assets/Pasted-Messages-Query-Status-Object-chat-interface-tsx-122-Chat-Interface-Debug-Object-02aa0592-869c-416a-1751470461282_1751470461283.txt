@@ -1,0 +1,33 @@
+Messages Query Status: Object
+chat-interface.tsx:122 Chat Interface Debug: Object
+02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/:1 Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner.
+home-stable.tsx:32 URL Debug: Object
+chat-interface.tsx:112 Messages Query Status: Object
+chat-interface.tsx:122 Chat Interface Debug: Object
+sidebar.tsx:171 Sidebar Debug: Object
+chat-interface.tsx:112 Messages Query Status: Object
+chat-interface.tsx:122 Chat Interface Debug: Object
+chat-interface.tsx:221 Failed to start conversation: ReferenceError: onNewChatWithMessage is not defined
+    at handleConversationStarter (chat-interface.tsx:200:7)
+    at onClick (chat-interface.tsx:309:34)
+    at HTMLUnknownElement.callCallback2 (chunk-WERSD76P.js?v=f5467819:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-WERSD76P.js?v=f5467819:3699:24)
+    at invokeGuardedCallback (chunk-WERSD76P.js?v=f5467819:3733:39)
+    at invokeGuardedCallbackAndCatchFirstError (chunk-WERSD76P.js?v=f5467819:3736:33)
+    at executeDispatch (chunk-WERSD76P.js?v=f5467819:7014:11)
+    at processDispatchQueueItemsInOrder (chunk-WERSD76P.js?v=f5467819:7034:15)
+    at processDispatchQueue (chunk-WERSD76P.js?v=f5467819:7043:13)
+    at dispatchEventsForPlugins (chunk-WERSD76P.js?v=f5467819:7051:11)
+handleConversationStarter @ chat-interface.tsx:221Understand this error
+home-stable.tsx:32 URL Debug: Object
+chat-interface.tsx:112 Messages Query Status: Object
+chat-interface.tsx:122 Chat Interface Debug: Object
+sidebar.tsx:171 Sidebar Debug: Object
+chat-interface.tsx:112 Messages Query Status: Object
+chat-interface.tsx:122 Chat Interface Debug: Object
+home-stable.tsx:32 URL Debug: Object
+chat-interface.tsx:112 Messages Query Status: Object
+chat-interface.tsx:122 Chat Interface Debug: Object
+sidebar.tsx:171 Sidebar Debug: Object
+chat-interface.tsx:112 Messages Query Status: Object
+chat-interface.tsx:122 Chat Interface Debug: Object
