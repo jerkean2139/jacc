@@ -217,6 +217,7 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
       
       // Force immediate refresh of messages with correct query key format
       await queryClient.invalidateQueries({ queryKey: ['/api/chats', chatId, 'messages'] });
+      await queryClient.refetchQueries({ queryKey: ['/api/chats', chatId, 'messages'] });
       queryClient.invalidateQueries({ queryKey: ["/api/chats"] });
       onChatUpdate();
       
