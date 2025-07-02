@@ -194,10 +194,8 @@ export default function AdminControlCenter() {
   const createFAQMutation = useMutation({
     mutationFn: async (newFAQ: Omit<FAQ, 'id'>) => {
       console.log('Creating FAQ with data:', newFAQ);
-      return await apiRequest('/api/admin/faq', {
-        method: 'POST',
-        body: JSON.stringify(newFAQ),
-      });
+      const response = await apiRequest('POST', '/api/admin/faq', newFAQ);
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/faq'] });
@@ -224,10 +222,8 @@ export default function AdminControlCenter() {
   const editFAQMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: Partial<FAQ> }) => {
       console.log('Updating FAQ:', id, data);
-      return await apiRequest(`/api/admin/faq/${id}`, {
-        method: 'PATCH',
-        body: JSON.stringify(data),
-      });
+      const response = await apiRequest('PATCH', `/api/admin/faq/${id}`, data);
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/faq'] });
@@ -250,9 +246,8 @@ export default function AdminControlCenter() {
   // Delete FAQ mutation
   const deleteFAQMutation = useMutation({
     mutationFn: async (id: number) => {
-      return await apiRequest(`/api/admin/faq/${id}`, {
-        method: 'DELETE',
-      });
+      const response = await apiRequest('DELETE', `/api/admin/faq/${id}`);
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/faq'] });
@@ -274,15 +269,13 @@ export default function AdminControlCenter() {
   // Create folder mutation
   const createFolderMutation = useMutation({
     mutationFn: async (folderData: { name: string; color: string }) => {
-      return apiRequest('/api/folders', {
-        method: 'POST',
-        body: JSON.stringify({
-          name: folderData.name,
-          color: folderData.color,
-          folderType: 'custom',
-          vectorNamespace: `folder_${folderData.name.toLowerCase().replace(/\s+/g, '_')}`
-        })
+      const response = await apiRequest('POST', '/api/folders', {
+        name: folderData.name,
+        color: folderData.color,
+        folderType: 'custom',
+        vectorNamespace: `folder_${folderData.name.toLowerCase().replace(/\s+/g, '_')}`
       });
+      return response.json();
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['/api/folders'] });
