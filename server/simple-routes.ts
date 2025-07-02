@@ -166,49 +166,10 @@ async function generateAIResponse(userMessage: string, chatHistory: any[], user:
       return fastResponse;
     }
     
-    // Search uploaded documents for relevant information
+    // SPEED OPTIMIZATION: Skip all document and web searches for fastest response
     let documentContext = "";
-    try {
-      console.log("🔍 Searching knowledge base for:", userMessage);
-      
-      // Call the document search API
-      const searchResponse = await axios.post('http://localhost:5000/api/documents/search', {
-        query: userMessage,
-        limit: 5
-      });
-      
-      if (searchResponse.data && searchResponse.data.length > 0) {
-        const relevantDocs = searchResponse.data.slice(0, 3); // Top 3 most relevant
-        documentContext = `\n\nKNOWLEDGE BASE INFORMATION:\n${relevantDocs.map((doc: any, idx: number) => 
-          `${idx + 1}. From "${doc.metadata?.documentName || 'Document'}": ${doc.content}`
-        ).join('\n\n')}\n\n`;
-        console.log(`📚 Found ${relevantDocs.length} relevant document sections`);
-      } else {
-        console.log("📝 No specific document matches found, using general knowledge");
-      }
-    } catch (docError) {
-      console.log("⚠️ Document search unavailable, using general knowledge");
-    }
-
-    // Check if we need external web search for current information
-    const needsWebSearch = /\b(square|stripe|paypal|shopify|current|latest|rates|fees|pricing|2024|2025)\b/i.test(userMessage.toLowerCase()) || 
-                          documentContext.length === 0; // Use web search if no internal documents found
-    
     let webContent = "";
-    if (needsWebSearch) {
-      try {
-        console.log("🌐 Using web search for current information...");
-        const { perplexitySearchService } = await import('./perplexity-search');
-        const webResult = await perplexitySearchService.searchWeb(userMessage);
-        webContent = `\n\nCURRENT WEB INFORMATION:\n${webResult.content}\n`;
-        if (webResult.citations && webResult.citations.length > 0) {
-          webContent += `\nSources: ${webResult.citations.join(', ')}\n`;
-        }
-        console.log(`✅ Web search completed successfully`);
-      } catch (webError) {
-        console.log("⚠️ Web search unavailable:", webError instanceof Error ? webError.message : 'Unknown error');
-      }
-    }
+    console.log("⚡ Using fast mode - no document or web search");
 
     // Tracer Co Card Knowledge Base - Agent Q&A Reference
     const tracerPayKnowledge = `
@@ -252,35 +213,16 @@ SPECIAL SERVICES:
 - Surcharging: SwipeSimple ($20 monthly)
 `;
 
-    // Enhanced system prompt for Tracer Co Card sales agent assistant
-    const systemPrompt = `You are JACC (Just Another Credit Card Assistant), an AI-powered assistant specifically designed for Tracer Co Card sales agents. You help independent sales agents succeed in the merchant services industry.
+    // SPEED OPTIMIZATION: Simple system prompt for fast responses
+    const systemPrompt = `You are JACC, an AI assistant for Tracer Co Card sales agents. Help with merchant services questions.
 
-CRITICAL INSTRUCTIONS:
-- ALWAYS use the Tracer Co Card knowledge base below for specific recommendations
-- NEVER make up product names or services not in the knowledge base
-- ONLY recommend the exact POS systems, partners, and services listed below
-- When asked about specific industries, refer ONLY to the options in the knowledge base
+Key info:
+- Tracer Co Card: Parent company
+- TracerPay: White-label processing powered by Accept Blue
+- Restaurant POS: Skytab, Clover, Tabit, HubWallet
+- Retail POS: Quantic, Clover, HubWallet
 
-${tracerPayKnowledge}
-
-MANDATORY RESPONSE RULES:
-1. For restaurant POS questions: ONLY recommend Skytab, Clover, Tabit, or HubWallet
-2. For retail POS questions: ONLY recommend Quantic, Clover, or HubWallet  
-3. For equipment questions: Reference specific partners (TRX, Clearent, MiCamp, Quantic, Shift4)
-4. For support issues: Provide the exact phone numbers and emails listed above
-5. For specialized industries: Use the exact recommendations from the knowledge base
-6. NEVER mention "TracerPay Restaurant Pro", "TracerPay Tablet POS" or other made-up products
-7. When mentioning processing: Always explain that TracerPay is Tracer Co Card's white-label program powered by Accept Blue processor
-8. When asked about TracerPay directly: Explain it's our white-label processing solution built on Accept Blue's platform
-
-COMMUNICATION STYLE:
-- Be helpful and knowledgeable like an experienced sales agent
-- Reference specific partners and solutions from our network
-- Provide contact information when relevant
-- Explain why certain solutions work best for specific industries
-- Always clarify that Tracer Co Card is the parent company with TracerPay as our white-label processing program
-
-${documentContext}${webContent ? `\n\nCURRENT INDUSTRY INTELLIGENCE:\n${webContent}\n\n` : ''}`;
+Be helpful and concise. Provide practical advice for sales agents.`;
 
     const messages = [
       {
@@ -289,7 +231,7 @@ ${documentContext}${webContent ? `\n\nCURRENT INDUSTRY INTELLIGENCE:\n${webConte
       },
       ...chatHistory
         .filter(msg => msg.role && msg.content)
-        .slice(-8) // Keep last 8 messages for context
+        .slice(-2) // Keep only last 2 messages for speed
         .map(msg => ({
           role: msg.role,
           content: msg.content
