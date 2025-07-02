@@ -93,6 +93,7 @@ function Router() {
           <Route path="/guide" component={UserGuide} />
           <Route path="/documents" component={DocumentsPage} />
           <Route path="/documents/:documentId" component={DocumentViewer} />
+          <Route path="/documents/view/:documentId" component={DocumentViewer} />
           {/* Admin only routes */}
           {user?.role === 'admin' && (
             <>
