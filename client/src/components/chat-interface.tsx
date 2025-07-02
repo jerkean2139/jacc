@@ -78,10 +78,14 @@ export function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessage }: Ch
     queryClient.clear();
   }, []);
   
-  // Fetch messages for the active chat - FIXED QUERY KEY FORMAT
+  // Fetch messages for the active chat - DIRECT ENDPOINT APPROACH
   const { data: messages = [], isLoading, error, refetch } = useQuery<MessageWithActions[]>({
-    queryKey: ['/api/chats', chatId, 'messages'],
+    queryKey: [`/api/chats/${chatId}/messages`],
     enabled: !!chatId,
+    staleTime: 0,
+    cacheTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 
   // Auto-scroll to bottom when messages change
@@ -204,13 +208,16 @@ export function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessage }: Ch
       
       // Input will be cleared by form reset
       
-      // Invalidate cache using EXACT same query key format as main query
-      await queryClient.invalidateQueries({ queryKey: ['/api/chats', chatId, 'messages'] });
-      await queryClient.refetchQueries({ queryKey: ['/api/chats', chatId, 'messages'] });
+      // Force refresh using exact same query key format
+      await queryClient.invalidateQueries({ queryKey: [`/api/chats/${chatId}/messages`] });
+      await queryClient.refetchQueries({ queryKey: [`/api/chats/${chatId}/messages`] });
       queryClient.invalidateQueries({ queryKey: ["/api/chats"] });
       onChatUpdate();
       
-      console.log('✅ Message sent successfully. Cache invalidated for immediate refresh.');
+      // Also force a direct refetch
+      refetch();
+      
+      console.log('✅ Message sent successfully. Cache invalidated and refetched.');
     },
     onError: (error) => {
       console.error("Failed to send message:", error);
