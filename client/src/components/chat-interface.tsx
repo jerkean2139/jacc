@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { Send, Paperclip, Download, FileText, Smile, User, Bot, Brain, Calculator, TrendingUp, BarChart3 } from "lucide-react";
+import { Send, Paperclip, Download, FileText, Smile, User, Bot, Brain, Calculator, TrendingUp, BarChart3, Mic, MicOff } from "lucide-react";
 import { MessageContent } from "./message-content";
 // Remove these imports temporarily as they may not exist
 // import { useCoaching } from "@/hooks/use-coaching"; // Temporarily removed
@@ -51,6 +51,13 @@ const conversationStarters = [
     icon: BarChart3,
     text: "I need help creating a merchant proposal with competitive rates and terms",
     color: "bg-purple-500 hover:bg-purple-600"
+  },
+  {
+    id: "marketing",
+    icon: Brain,
+    text: "Let's Talk Marketing",
+    color: "bg-purple-600 hover:bg-purple-700",
+    comingSoon: true
   }
 ];
 
@@ -63,6 +70,10 @@ export function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessage }: Ch
 
   // Add a refresh trigger to force cache busting
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  
+  // Voice recording state
+  const [isRecording, setIsRecording] = useState(false);
+  const [recognition, setRecognition] = useState<any>(null);
   
   // Fetch messages for the active chat - with error handling
   const { data: messages = [], isLoading, error, refetch } = useQuery<MessageWithActions[]>({
@@ -103,6 +114,37 @@ export function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessage }: Ch
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
     retry: false, // Don't retry on auth errors
   });
+
+  // Initialize speech recognition
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'webkitSpeechRecognition' in window) {
+      const recognition = new (window as any).webkitSpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = 'en-US';
+      
+      recognition.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        setInput(prev => prev + transcript);
+        setIsRecording(false);
+      };
+      
+      recognition.onerror = () => {
+        setIsRecording(false);
+        toast({
+          title: "Voice recognition error",
+          description: "Please try again or type your message.",
+          variant: "destructive",
+        });
+      };
+      
+      recognition.onend = () => {
+        setIsRecording(false);
+      };
+      
+      setRecognition(recognition);
+    }
+  }, [toast]);
 
   // Log any errors with message loading
   if (error) {
@@ -228,6 +270,36 @@ export function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessage }: Ch
     }
   };
 
+  // Handle voice recording toggle
+  const toggleVoiceRecording = () => {
+    if (!recognition) {
+      toast({
+        title: "Voice not supported",
+        description: "Speech recognition is not available in your browser.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (isRecording) {
+      recognition.stop();
+      setIsRecording(false);
+    } else {
+      try {
+        recognition.start();
+        setIsRecording(true);
+      } catch (error) {
+        console.error('Voice recognition error:', error);
+        setIsRecording(false);
+        toast({
+          title: "Voice recognition error",
+          description: "Please try again or type your message.",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -302,16 +374,31 @@ export function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessage }: Ch
           <div className="grid gap-4 w-full max-w-md">
             {conversationStarters.map((starter) => {
               const Icon = starter.icon;
+              const isComingSoon = starter.comingSoon;
               return (
-                <Button
-                  key={starter.id}
-                  variant="outline"
-                  className={`${starter.color} text-white border-0 h-auto p-4 text-left flex items-start gap-3 transition-all duration-200 hover:scale-105`}
-                  onClick={() => handleConversationStarter(starter)}
-                >
-                  <Icon className="h-5 w-5 mt-0.5 flex-shrink-0" />
-                  <span className="text-sm leading-relaxed">{starter.text}</span>
-                </Button>
+                <div key={starter.id} className="relative">
+                  <Button
+                    variant="outline"
+                    className={`${
+                      isComingSoon 
+                        ? 'bg-gray-400 hover:bg-gray-500 cursor-not-allowed opacity-70' 
+                        : starter.color
+                    } text-white border-0 h-auto p-4 text-left flex items-start gap-3 transition-all duration-200 ${
+                      !isComingSoon ? 'hover:scale-105' : ''
+                    } w-full`}
+                    onClick={() => !isComingSoon && handleConversationStarter(starter)}
+                    disabled={isComingSoon}
+                    title={isComingSoon ? "Coming Soon" : undefined}
+                  >
+                    <Icon className="h-5 w-5 mt-0.5 flex-shrink-0" />
+                    <span className="text-sm leading-relaxed">{starter.text}</span>
+                  </Button>
+                  {isComingSoon && (
+                    <div className="absolute -top-2 -right-2 bg-yellow-500 text-white text-xs px-2 py-1 rounded-full font-semibold shadow-lg">
+                      Soon
+                    </div>
+                  )}
+                </div>
               );
             })}
           </div>

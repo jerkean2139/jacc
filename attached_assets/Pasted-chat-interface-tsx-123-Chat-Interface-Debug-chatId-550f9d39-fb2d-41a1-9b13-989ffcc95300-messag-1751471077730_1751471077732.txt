@@ -1,0 +1,92 @@
+chat-interface.tsx:123 Chat Interface Debug: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', messagesCount: 0, isLoading: true, hasMessages: false}
+2chat-interface.tsx:82 💫 Force refreshing messages for chat: 550f9d39-fb2d-41a1-9b13-989ffcc95300
+chat-interface.tsx:113 Messages Query Status: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:123 Chat Interface Debug: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', messagesCount: 0, isLoading: true, hasMessages: false}
+chat-interface.tsx:113 Messages Query Status: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:123 Chat Interface Debug: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', messagesCount: 0, isLoading: true, hasMessages: false}
+2chat-interface.tsx:82 💫 Force refreshing messages for chat: 550f9d39-fb2d-41a1-9b13-989ffcc95300
+chat-interface.tsx:113 Messages Query Status: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:123 Chat Interface Debug: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', messagesCount: 0, isLoading: true, hasMessages: false}
+chat-interface.tsx:113 Messages Query Status: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:123 Chat Interface Debug: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', messagesCount: 0, isLoading: true, hasMessages: false}
+2chat-interface.tsx:82 💫 Force refreshing messages for chat: 550f9d39-fb2d-41a1-9b13-989ffcc95300
+chat-interface.tsx:113 Messages Query Status: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:123 Chat Interface Debug: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', messagesCount: 0, isLoading: true, hasMessages: false}
+chat-interface.tsx:113 Messages Query Status: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:123 Chat Interface Debug: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', messagesCount: 0, isLoading: true, hasMessages: false}
+2chat-interface.tsx:82 💫 Force refreshing messages for chat: 550f9d39-fb2d-41a1-9b13-989ffcc95300
+chat-interface.tsx:113 Messages Query Status: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:123 Chat Interface Debug: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', messagesCount: 0, isLoading: true, hasMessages: false}
+chat-interface.tsx:113 Messages Query Status: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:123 Chat Interface Debug: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', messagesCount: 0, isLoading: true, hasMessages: false}
+2chat-interface.tsx:82 💫 Force refreshing messages for chat: 550f9d39-fb2d-41a1-9b13-989ffcc95300
+chat-interface.tsx:113 Messages Query Status: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:123 Chat Interface Debug: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', messagesCount: 0, isLoading: true, hasMessages: false}
+chat-interface.tsx:113 Messages Query Status: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:123 Chat Interface Debug: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', messagesCount: 0, isLoading: true, hasMessages: false}
+2chat-interface.tsx:82 💫 Force refreshing messages for chat: 550f9d39-fb2d-41a1-9b13-989ffcc95300
+chat-interface.tsx:113 Messages Query Status: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:123 Chat Interface Debug: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', messagesCount: 0, isLoading: true, hasMessages: false}
+chat-interface.tsx:113 Messages Query Status: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:123 Chat Interface Debug: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', messagesCount: 0, isLoading: true, hasMessages: false}
+2chat-interface.tsx:82 💫 Force refreshing messages for chat: 550f9d39-fb2d-41a1-9b13-989ffcc95300
+chat-interface.tsx:113 Messages Query Status: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:123 Chat Interface Debug: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', messagesCount: 0, isLoading: true, hasMessages: false}
+chat-interface.tsx:113 Messages Query Status: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:123 Chat Interface Debug: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', messagesCount: 0, isLoading: true, hasMessages: false}
+2chat-interface.tsx:82 💫 Force refreshing messages for chat: 550f9d39-fb2d-41a1-9b13-989ffcc95300
+chat-interface.tsx:113 Messages Query Status: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:123 Chat Interface Debug: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', messagesCount: 0, isLoading: true, hasMessages: false}
+chat-interface.tsx:113 Messages Query Status: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:123 Chat Interface Debug: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', messagesCount: 0, isLoading: true, hasMessages: false}
+2chat-interface.tsx:82 💫 Force refreshing messages for chat: 550f9d39-fb2d-41a1-9b13-989ffcc95300
+chat-interface.tsx:113 Messages Query Status: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:123 Chat Interface Debug: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', messagesCount: 0, isLoading: true, hasMessages: false}
+chat-interface.tsx:113 Messages Query Status: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:123 Chat Interface Debug: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', messagesCount: 0, isLoading: true, hasMessages: false}
+2chat-interface.tsx:82 💫 Force refreshing messages for chat: 550f9d39-fb2d-41a1-9b13-989ffcc95300
+chat-interface.tsx:113 Messages Query Status: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:123 Chat Interface Debug: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', messagesCount: 0, isLoading: true, hasMessages: false}
+chat-interface.tsx:113 Messages Query Status: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:123 Chat Interface Debug: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', messagesCount: 0, isLoading: true, hasMessages: false}
+2chat-interface.tsx:82 💫 Force refreshing messages for chat: 550f9d39-fb2d-41a1-9b13-989ffcc95300
+chat-interface.tsx:113 Messages Query Status: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:123 Chat Interface Debug: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', messagesCount: 0, isLoading: true, hasMessages: false}
+chat-interface.tsx:113 Messages Query Status: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:123 Chat Interface Debug: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', messagesCount: 0, isLoading: true, hasMessages: false}
+2chat-interface.tsx:82 💫 Force refreshing messages for chat: 550f9d39-fb2d-41a1-9b13-989ffcc95300
+chat-interface.tsx:113 Messages Query Status: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:123 Chat Interface Debug: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', messagesCount: 0, isLoading: true, hasMessages: false}
+chat-interface.tsx:113 Messages Query Status: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:123 Chat Interface Debug: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', messagesCount: 0, isLoading: true, hasMessages: false}
+2chat-interface.tsx:82 💫 Force refreshing messages for chat: 550f9d39-fb2d-41a1-9b13-989ffcc95300
+chat-interface.tsx:113 Messages Query Status: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:123 Chat Interface Debug: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', messagesCount: 0, isLoading: true, hasMessages: false}
+chat-interface.tsx:113 Messages Query Status: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:123 Chat Interface Debug: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', messagesCount: 0, isLoading: true, hasMessages: false}
+2chat-interface.tsx:82 💫 Force refreshing messages for chat: 550f9d39-fb2d-41a1-9b13-989ffcc95300
+chat-interface.tsx:113 Messages Query Status: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:123 Chat Interface Debug: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', messagesCount: 0, isLoading: true, hasMessages: false}
+chat-interface.tsx:113 Messages Query Status: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:123 Chat Interface Debug: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', messagesCount: 0, isLoading: true, hasMessages: false}
+2chat-interface.tsx:82 💫 Force refreshing messages for chat: 550f9d39-fb2d-41a1-9b13-989ffcc95300
+chat-interface.tsx:113 Messages Query Status: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:123 Chat Interface Debug: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', messagesCount: 0, isLoading: true, hasMessages: false}
+chat-interface.tsx:113 Messages Query Status: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:123 Chat Interface Debug: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', messagesCount: 0, isLoading: true, hasMessages: false}
+2chat-interface.tsx:82 💫 Force refreshing messages for chat: 550f9d39-fb2d-41a1-9b13-989ffcc95300
+chat-interface.tsx:113 Messages Query Status: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:123 Chat Interface Debug: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', messagesCount: 0, isLoading: true, hasMessages: false}
+chat-interface.tsx:113 Messages Query Status: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:123 Chat Interface Debug: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', messagesCount: 0, isLoading: true, hasMessages: false}
+2chat-interface.tsx:82 💫 Force refreshing messages for chat: 550f9d39-fb2d-41a1-9b13-989ffcc95300
+chat-interface.tsx:113 Messages Query Status: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:123 Chat Interface Debug: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', messagesCount: 0, isLoading: true, hasMessages: false}
+chat-interface.tsx:113 Messages Query Status: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:123 Chat Interface Debug: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', messagesCount: 0, isLoading: true, hasMessages: false}
+2chat-interface.tsx:82 💫 Force refreshing messages for chat: 550f9d39-fb2d-41a1-9b13-989ffcc95300
+chat-interface.tsx:113 Messages Query Status: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:123 Chat Interface Debug: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', messagesCount: 0, isLoading: true, hasMessages: false}
+chat-interface.tsx:113 Messages Query Status: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:123 Chat Interface Debug: {chatId: '550f9d39-fb2d-41a1-9b13-989ffcc95300', messagesCount: 0, isLoading: true, hasMessages: false}
+2chat-
