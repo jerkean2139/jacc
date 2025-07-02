@@ -217,14 +217,56 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
       
       // Input will be cleared by form reset
       
-      // Add a small delay to ensure AI response is processed before refreshing
-      setTimeout(async () => {
-        console.log('🔄 Refreshing messages after AI response delay...');
-        await queryClient.invalidateQueries({ queryKey: [`/api/chats/${chatId}/messages`] });
-        await queryClient.refetchQueries({ queryKey: [`/api/chats/${chatId}/messages`] });
-        queryClient.invalidateQueries({ queryKey: ["/api/chats"] });
-        onChatUpdate();
-      }, 2000); // 2 second delay to allow AI response to be generated and saved
+      // Immediate refresh for user message
+      await queryClient.invalidateQueries({ queryKey: [`/api/chats/${chatId}/messages`] });
+      await queryClient.refetchQueries({ queryKey: [`/api/chats/${chatId}/messages`] });
+      queryClient.invalidateQueries({ queryKey: ["/api/chats"] });
+      onChatUpdate();
+      
+      // Set up polling to check for AI response
+      const pollForAIResponse = async () => {
+        let attempts = 0;
+        const maxAttempts = 20; // 20 attempts over 20 seconds
+        
+        const checkForResponse = async () => {
+          attempts++;
+          console.log(`🔄 Polling for AI response (attempt ${attempts}/${maxAttempts})...`);
+          
+          try {
+            const response = await fetch(`/api/chats/${chatId}/messages`, {
+              credentials: "include",
+            });
+            
+            if (response.ok) {
+              const messages = await response.json();
+              const hasAIResponse = messages.some((msg: any) => 
+                msg.role === 'assistant' && 
+                msg.createdAt > new Date(Date.now() - 30000) // Within last 30 seconds
+              );
+              
+              if (hasAIResponse) {
+                console.log('✅ AI response detected! Refreshing messages...');
+                await queryClient.invalidateQueries({ queryKey: [`/api/chats/${chatId}/messages`] });
+                await queryClient.refetchQueries({ queryKey: [`/api/chats/${chatId}/messages`] });
+                return true; // Stop polling
+              }
+            }
+          } catch (error) {
+            console.error('Error polling for AI response:', error);
+          }
+          
+          if (attempts < maxAttempts) {
+            setTimeout(checkForResponse, 1000); // Check again in 1 second
+          } else {
+            console.log('❌ Stopped polling - AI response not detected within 20 seconds');
+          }
+        };
+        
+        // Start polling after 2 seconds
+        setTimeout(checkForResponse, 2000);
+      };
+      
+      pollForAIResponse();
       
       // Track message sent action for gamification
       try {
