@@ -104,25 +104,22 @@ export class EnhancedAIService {
     conversationHistory: ChatMessage[],
     userId?: string
   ): Promise<EnhancedAIResponse> {
-    // Step 1: Get user's custom prompt if available
-    let customPrompt = null;
-    if (userId) {
-      const { storage } = await import('./storage');
-      customPrompt = await storage.getUserDefaultPrompt(userId);
-    }
-
-    // Step 2: Memory-optimized document search with limited results
-    const searchResults = await this.searchDocuments(message, 5); // Limit to 5 results for memory optimization
+    // SPEED OPTIMIZATION: Skip custom prompt loading for faster responses
+    // const customPrompt = null; // Remove async database call
+    
+    // SPEED OPTIMIZATION: Reduce document search results from 5 to 3 for faster processing
+    const searchResults = await this.searchDocuments(message, 3);
     
     if (searchResults.length > 0) {
       console.log(`📋 Found ${searchResults.length} documents for: "${message.substring(0, 50)}..."`);
-      const messages = [...conversationHistory.slice(-3), { role: 'user' as const, content: message }]; // Keep only last 3 messages
-      return await this.generateResponseWithDocuments(messages, { searchResults, customPrompt });
+      // SPEED OPTIMIZATION: Keep only last 2 messages instead of 3
+      const messages = [...conversationHistory.slice(-2), { role: 'user' as const, content: message }];
+      return await this.generateResponseWithDocuments(messages, { searchResults });
     }
     
-    // Step 3: If no internal documents found, still use custom prompt for general response
-    const messages = [...conversationHistory, { role: 'user' as const, content: message }];
-    return await this.generateResponseWithDocuments(messages, { customPrompt });
+    // SPEED OPTIMIZATION: Minimal conversation history for faster processing
+    const messages = [{ role: 'user' as const, content: message }];
+    return await this.generateResponseWithDocuments(messages, {});
   }
 
   async generateResponseWithDocuments(
