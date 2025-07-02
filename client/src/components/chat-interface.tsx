@@ -196,18 +196,25 @@ export function ChatInterface({ chatId, onChatUpdate }: ChatInterfaceProps) {
 
   // Handle conversation starter clicks
   const handleConversationStarter = async (starter: typeof conversationStarters[0]) => {
-    if (!chatId) {
+    try {
+      // Create a new chat with the starter message
+      const response = await apiRequest("/api/chat/new", {
+        method: "POST",
+        body: { message: starter.text }
+      });
+      
+      if (response?.chatId) {
+        // Navigate to the new chat
+        window.location.href = `/chat/${response.chatId}`;
+      }
+    } catch (error) {
+      console.error("Failed to start conversation:", error);
       toast({
-        title: "No active chat",
-        description: "Please start a new chat first.",
+        title: "Error",
+        description: "Failed to start conversation. Please try again.",
         variant: "destructive",
       });
-      return;
     }
-
-    setInput(starter.text);
-    await sendMessageMutation.mutateAsync(starter.text);
-    setInput("");
   };
 
   // Handle form submission
@@ -260,7 +267,6 @@ export function ChatInterface({ chatId, onChatUpdate }: ChatInterfaceProps) {
                 variant="outline"
                 className={`${starter.color} text-white border-0 h-auto p-4 text-left flex items-start gap-3 transition-all duration-200 hover:scale-105`}
                 onClick={() => handleConversationStarter(starter)}
-                disabled={!chatId}
               >
                 <Icon className="h-5 w-5 mt-0.5 flex-shrink-0" />
                 <span className="text-sm leading-relaxed">{starter.text}</span>
