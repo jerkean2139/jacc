@@ -75,27 +75,39 @@ export default function HomeStable() {
 
   const handleNewChatWithMessage = async (message: string) => {
     try {
+      console.log("Creating new chat with message:", message);
+      
       const response = await apiRequest("POST", "/api/chats", {
         title: "New Chat",
       });
       const newChat = await response.json();
+      console.log("New chat created:", newChat);
+      
+      // Navigate to the new chat first
+      navigate(`/chat/${newChat.id}`);
       
       // Refresh chats immediately
       queryClient.invalidateQueries({ queryKey: ["/api/chats"] });
       
-      // Navigate to the new chat
-      navigate(`/chat/${newChat.id}`);
-      
-      // Send the message using apiRequest to ensure proper conversation starter detection
-      setTimeout(async () => {
+      // Send the message immediately without timeout
+      try {
+        console.log("Sending message to new chat:", newChat.id);
         await apiRequest("POST", `/api/chats/${newChat.id}/messages`, {
           content: message,
           role: "user"
         });
+        console.log("Message sent successfully");
         
         // Refresh messages for the new chat
         queryClient.invalidateQueries({ queryKey: [`/api/chats/${newChat.id}/messages`] });
-      }, 200);
+      } catch (messageError) {
+        console.error("Failed to send message:", messageError);
+        toast({
+          title: "Warning",
+          description: "Chat created but message failed to send. Please try typing your message again.",
+          variant: "destructive",
+        });
+      }
     } catch (error) {
       toast({
         title: "Error",
