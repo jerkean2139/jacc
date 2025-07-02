@@ -52,7 +52,8 @@ export default function MyDocumentsPage() {
   // Create folder mutation
   const createFolderMutation = useMutation({
     mutationFn: async (folderData: { name: string; description?: string; color: string }) => {
-      return apiRequest('/api/personal-folders', 'POST', folderData);
+      const response = await apiRequest('POST', '/api/personal-folders', folderData);
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/personal-folders'] });
@@ -77,7 +78,8 @@ export default function MyDocumentsPage() {
   // Update document mutation
   const updateDocumentMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<PersonalDocument> }) => {
-      return apiRequest(`/api/personal-documents/${id}`, 'PUT', data);
+      const response = await apiRequest('PUT', `/api/personal-documents/${id}`, data);
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/personal-documents'] });
@@ -100,7 +102,8 @@ export default function MyDocumentsPage() {
   // Delete document mutation
   const deleteDocumentMutation = useMutation({
     mutationFn: async (id: string) => {
-      return apiRequest(`/api/personal-documents/${id}`, 'DELETE');
+      const response = await apiRequest('DELETE', `/api/personal-documents/${id}`);
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/personal-documents'] });
