@@ -78,9 +78,9 @@ export function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessage }: Ch
     queryClient.clear();
   }, []);
   
-  // Fetch messages for the active chat - RESTORED WORKING VERSION
+  // Fetch messages for the active chat - FIXED QUERY KEY FORMAT
   const { data: messages = [], isLoading, error, refetch } = useQuery<MessageWithActions[]>({
-    queryKey: [`/api/chats/${chatId}/messages`],
+    queryKey: ['/api/chats', chatId, 'messages'],
     enabled: !!chatId,
   });
 
@@ -201,32 +201,13 @@ export function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessage }: Ch
       
       // Input will be cleared by form reset
       
-      // Immediate refresh for user message with proper query key format
-      const currentRefreshTrigger = refreshTrigger;
-      const nextRefreshTrigger = currentRefreshTrigger + 1;
-      setRefreshTrigger(nextRefreshTrigger);
-      
-      // Use the EXACT same query key format as the main query
-      await queryClient.invalidateQueries({ queryKey: [`/api/chats/${chatId}/messages`, currentRefreshTrigger] });
-      await queryClient.invalidateQueries({ queryKey: [`/api/chats/${chatId}/messages`, nextRefreshTrigger] });
-      await queryClient.refetchQueries({ queryKey: [`/api/chats/${chatId}/messages`, nextRefreshTrigger] });
+      // Invalidate cache using EXACT same query key format as main query
+      await queryClient.invalidateQueries({ queryKey: ['/api/chats', chatId, 'messages'] });
+      await queryClient.refetchQueries({ queryKey: ['/api/chats', chatId, 'messages'] });
       queryClient.invalidateQueries({ queryKey: ["/api/chats"] });
       onChatUpdate();
       
-      // Simple timeout to allow backend to process the AI response
-      console.log('✅ Message sent successfully. Waiting for AI response...');
-      
-      setTimeout(async () => {
-        // Refresh to show both user message and AI response
-        const laterRefreshTrigger = nextRefreshTrigger + 1;
-        setRefreshTrigger(laterRefreshTrigger);
-        
-        await queryClient.invalidateQueries({ queryKey: [`/api/chats/${chatId}/messages`, nextRefreshTrigger] });
-        await queryClient.invalidateQueries({ queryKey: [`/api/chats/${chatId}/messages`, laterRefreshTrigger] });
-        await queryClient.refetchQueries({ queryKey: [`/api/chats/${chatId}/messages`, laterRefreshTrigger] });
-        
-        console.log('🔄 Chat refreshed after AI response delay');
-      }, 3000); // Wait 3 seconds for AI to respond
+      console.log('✅ Message sent successfully. Cache invalidated for immediate refresh.');
     },
     onError: (error) => {
       console.error("Failed to send message:", error);

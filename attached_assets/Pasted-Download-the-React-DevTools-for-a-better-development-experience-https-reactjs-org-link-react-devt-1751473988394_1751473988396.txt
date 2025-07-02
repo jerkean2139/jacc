@@ -1,0 +1,72 @@
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+clear-popup-flags.ts:26 Cleared 0 popup flags from localStorage
+home-stable.tsx:32 URL Debug: Object
+chat-interface.tsx:145 Messages Query Status: Object
+chat-interface.tsx:155 Chat Interface Debug: Object
+chat-interface.tsx:166 🔍 DETAILED MESSAGE DEBUG: Object
+sidebar.tsx:171 Sidebar Debug: Object
+chat-interface.tsx:145 Messages Query Status: Object
+chat-interface.tsx:155 Chat Interface Debug: Object
+chat-interface.tsx:166 🔍 DETAILED MESSAGE DEBUG: Object
+2chat-interface.tsx:77 🔄 ChatInterface mounted - clearing stale cached queries
+home-stable.tsx:32 URL Debug: Object
+chat-interface.tsx:145 Messages Query Status: Object
+chat-interface.tsx:155 Chat Interface Debug: Object
+chat-interface.tsx:166 🔍 DETAILED MESSAGE DEBUG: Object
+sidebar.tsx:171 Sidebar Debug: Object
+chat-interface.tsx:145 Messages Query Status: Object
+chat-interface.tsx:155 Chat Interface Debug: Object
+chat-interface.tsx:166 🔍 DETAILED MESSAGE DEBUG: Object
+chat-interface.tsx:145 Messages Query Status: Object
+chat-interface.tsx:155 Chat Interface Debug: Object
+chat-interface.tsx:166 🔍 DETAILED MESSAGE DEBUG: Object
+chat-interface.tsx:145 Messages Query Status: Object
+chat-interface.tsx:155 Chat Interface Debug: Object
+chat-interface.tsx:166 🔍 DETAILED MESSAGE DEBUG: Object
+home-stable.tsx:32 URL Debug: Object
+chat-interface.tsx:145 Messages Query Status: Object
+chat-interface.tsx:155 Chat Interface Debug: Object
+chat-interface.tsx:166 🔍 DETAILED MESSAGE DEBUG: Object
+sidebar.tsx:171 Sidebar Debug: Object
+chat-interface.tsx:145 Messages Query Status: Object
+chat-interface.tsx:155 Chat Interface Debug: Object
+chat-interface.tsx:166 🔍 DETAILED MESSAGE DEBUG: Object
+home-stable.tsx:32 URL Debug: Object
+chat-interface.tsx:145 Messages Query Status: Object
+chat-interface.tsx:155 Chat Interface Debug: Object
+chat-interface.tsx:166 🔍 DETAILED MESSAGE DEBUG: Object
+sidebar.tsx:171 Sidebar Debug: Object
+chat-interface.tsx:145 Messages Query Status: Object
+chat-interface.tsx:155 Chat Interface Debug: Object
+chat-interface.tsx:166 🔍 DETAILED MESSAGE DEBUG: Object
+02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/:1 Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner.
+chat-interface.tsx:244 🚀 Starting conversation with starter: I need help calculating processing rates and finding competitive pricing
+chat-interface.tsx:248 📨 Using onNewChatWithMessage function
+home-stable.tsx:81 Creating new chat with message: I need help calculating processing rates and finding competitive pricing
+home-stable.tsx:87 New chat created: Object
+home-stable.tsx:90 Attempting to navigate to: /chat/8734a081-97bc-423b-a9a6-6f0216440a8b
+home-stable.tsx:92 Navigation called, new location should be: /chat/8734a081-97bc-423b-a9a6-6f0216440a8b
+home-stable.tsx:99 Sending message to new chat: 8734a081-97bc-423b-a9a6-6f0216440a8b
+home-stable.tsx:32 URL Debug: Object
+chat-interface.tsx:145 Messages Query Status: Object
+chat-interface.tsx:155 Chat Interface Debug: Object
+chat-interface.tsx:166 🔍 DETAILED MESSAGE DEBUG: Object
+sidebar.tsx:171 Sidebar Debug: Object
+chat-interface.tsx:145 Messages Query Status: Object
+chat-interface.tsx:155 Chat Interface Debug: Object
+chat-interface.tsx:166 🔍 DETAILED MESSAGE DEBUG: Object
+home-stable.tsx:32 URL Debug: Object
+chat-interface.tsx:145 Messages Query Status: Object
+chat-interface.tsx:155 Chat Interface Debug: Object
+chat-interface.tsx:166 🔍 DETAILED MESSAGE DEBUG: Object
+sidebar.tsx:171 Sidebar Debug: Object
+chat-interface.tsx:145 Messages Query Status: Object
+chat-interface.tsx:155 Chat Interface Debug: Object
+chat-interface.tsx:166 🔍 DETAILED MESSAGE DEBUG: Object
+chat-interface.tsx:145 Messages Query Status: Object
+chat-interface.tsx:155 Chat Interface Debug: Object
+chat-interface.tsx:166 🔍 DETAILED MESSAGE DEBUG: Object
+chat-interface.tsx:145 Messages Query Status: Object
+chat-interface.tsx:155 Chat Interface Debug: Object
+chat-interface.tsx:166 🔍 DETAILED MESSAGE DEBUG: Object
+home-stable.tsx:104 Message sent successfully
