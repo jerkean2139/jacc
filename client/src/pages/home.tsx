@@ -204,6 +204,7 @@ export default function Home() {
           <ChatInterface
             chatId={activeChatId}
             onChatUpdate={refetchChats}
+            onNewChatWithMessage={handleNewChatWithMessage}
           />
         </div>
       </div>
