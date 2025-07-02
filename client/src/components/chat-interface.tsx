@@ -141,14 +141,23 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
   const coaching = useCoaching();
 
   // Fetch messages for the active chat - with error handling
-  const { data: messages = [], isLoading, error } = useQuery<MessageWithActions[]>({
+  const { data: messages = [], isLoading, error, refetch } = useQuery<MessageWithActions[]>({
     queryKey: [`/api/chats/${chatId}/messages`],
     enabled: !!chatId,
     refetchOnMount: true,
     staleTime: 0, // Always refetch
+    cacheTime: 0, // Don't cache
     refetchOnWindowFocus: false,
     retry: 1,
   });
+
+  // Force refresh messages when chatId changes
+  useEffect(() => {
+    if (chatId) {
+      console.log('💫 Force refreshing messages for chat:', chatId);
+      refetch();
+    }
+  }, [chatId, refetch]);
 
   // Fetch saved prompts for the dropdown (only when authenticated)
   const { data: savedPrompts = [] } = useQuery({
@@ -241,7 +250,7 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
               const messages = await response.json();
               const hasAIResponse = messages.some((msg: any) => 
                 msg.role === 'assistant' && 
-                msg.createdAt > new Date(Date.now() - 30000) // Within last 30 seconds
+                msg.createdAt > new Date(Date.now() - 60000) // Within last 60 seconds
               );
               
               if (hasAIResponse) {
@@ -259,6 +268,10 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
             setTimeout(checkForResponse, 1000); // Check again in 1 second
           } else {
             console.log('❌ Stopped polling - AI response not detected within 20 seconds');
+            // Force refresh messages even if no recent AI response detected
+            console.log('🔄 Force refreshing messages cache...');
+            await queryClient.invalidateQueries({ queryKey: [`/api/chats/${chatId}/messages`] });
+            await queryClient.refetchQueries({ queryKey: [`/api/chats/${chatId}/messages`] });
           }
         };
         
