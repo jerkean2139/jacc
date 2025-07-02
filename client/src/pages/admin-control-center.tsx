@@ -112,13 +112,6 @@ export default function AdminControlCenter() {
   const { data: faqData = [], isLoading: faqLoading, error: faqError } = useQuery({
     queryKey: ['/api/admin/faq'],
     retry: false,
-    onSuccess: (data) => {
-      console.log('FAQ Data loaded:', data?.length || 0, 'entries');
-      console.log('FAQ Categories found:', Array.from(new Set(data?.map((f: FAQ) => f.category) || [])));
-    },
-    onError: (error) => {
-      console.error('FAQ loading error:', error);
-    }
   });
 
   const { data: documentsData = [] } = useQuery({
@@ -200,6 +193,7 @@ export default function AdminControlCenter() {
   // Mutations
   const createFAQMutation = useMutation({
     mutationFn: async (newFAQ: Omit<FAQ, 'id'>) => {
+      console.log('Creating FAQ with data:', newFAQ);
       return await apiRequest('/api/admin/faq', {
         method: 'POST',
         body: JSON.stringify(newFAQ),
@@ -214,6 +208,65 @@ export default function AdminControlCenter() {
       toast({
         title: "FAQ Created",
         description: "New FAQ entry has been added successfully.",
+      });
+    },
+    onError: (error) => {
+      console.error('FAQ creation error:', error);
+      toast({
+        title: "Creation Failed",
+        description: "Failed to create FAQ entry. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Edit FAQ mutation
+  const editFAQMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: Partial<FAQ> }) => {
+      console.log('Updating FAQ:', id, data);
+      return await apiRequest(`/api/admin/faq/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/faq'] });
+      setEditingFAQ(null);
+      toast({
+        title: "FAQ Updated",
+        description: "FAQ entry has been updated successfully.",
+      });
+    },
+    onError: (error) => {
+      console.error('FAQ update error:', error);
+      toast({
+        title: "Update Failed",
+        description: "Failed to update FAQ entry. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Delete FAQ mutation
+  const deleteFAQMutation = useMutation({
+    mutationFn: async (id: number) => {
+      return await apiRequest(`/api/admin/faq/${id}`, {
+        method: 'DELETE',
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/faq'] });
+      toast({
+        title: "FAQ Deleted",
+        description: "FAQ entry has been deleted successfully.",
+      });
+    },
+    onError: (error) => {
+      console.error('FAQ deletion error:', error);
+      toast({
+        title: "Deletion Failed",
+        description: "Failed to delete FAQ entry. Please try again.",
+        variant: "destructive",
       });
     },
   });
@@ -292,16 +345,6 @@ export default function AdminControlCenter() {
       setIsSubmittingCorrection(false);
     }
   };
-
-  const deleteFAQMutation = useMutation({
-    mutationFn: (faqId: number) => apiRequest(`/api/admin/faq/${faqId}`, {
-      method: 'DELETE',
-    }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/faq'] });
-      toast({ title: 'FAQ deleted successfully' });
-    },
-  });
 
   // Archive chat mutation
   const archiveChatMutation = useMutation({
