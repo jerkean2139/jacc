@@ -140,24 +140,30 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
   // Initialize coaching hook
   const coaching = useCoaching();
 
+  // Add a refresh trigger to force cache busting
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  
   // Fetch messages for the active chat - with error handling
   const { data: messages = [], isLoading, error, refetch } = useQuery<MessageWithActions[]>({
-    queryKey: [`/api/chats/${chatId}/messages`],
+    queryKey: [`/api/chats/${chatId}/messages`, refreshTrigger],
     enabled: !!chatId,
     refetchOnMount: true,
     staleTime: 0, // Always refetch
-    cacheTime: 0, // Don't cache
+    gcTime: 0, // Don't cache (gcTime replaces cacheTime in v5)
     refetchOnWindowFocus: false,
     retry: 1,
+    networkMode: 'always', // Always attempt network request
   });
 
   // Force refresh messages when chatId changes
   useEffect(() => {
     if (chatId) {
       console.log('💫 Force refreshing messages for chat:', chatId);
+      const messageQueryKey = [`/api/chats/${chatId}/messages`];
+      queryClient.invalidateQueries({ queryKey: messageQueryKey });
       refetch();
     }
-  }, [chatId, refetch]);
+  }, [chatId, refetch, queryClient]);
 
   // Fetch saved prompts for the dropdown (only when authenticated)
   const { data: savedPrompts = [] } = useQuery({
@@ -226,9 +232,10 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
       
       // Input will be cleared by form reset
       
-      // Immediate refresh for user message
-      await queryClient.invalidateQueries({ queryKey: [`/api/chats/${chatId}/messages`] });
-      await queryClient.refetchQueries({ queryKey: [`/api/chats/${chatId}/messages`] });
+      // Immediate refresh for user message with proper query key format
+      const messageQueryKey = [`/api/chats/${chatId}/messages`];
+      await queryClient.invalidateQueries({ queryKey: messageQueryKey });
+      await queryClient.refetchQueries({ queryKey: messageQueryKey });
       queryClient.invalidateQueries({ queryKey: ["/api/chats"] });
       onChatUpdate();
       
@@ -255,8 +262,9 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
               
               if (hasAIResponse) {
                 console.log('✅ AI response detected! Refreshing messages...');
-                await queryClient.invalidateQueries({ queryKey: [`/api/chats/${chatId}/messages`] });
-                await queryClient.refetchQueries({ queryKey: [`/api/chats/${chatId}/messages`] });
+                const messageQueryKey = [`/api/chats/${chatId}/messages`];
+                await queryClient.invalidateQueries({ queryKey: messageQueryKey });
+                await queryClient.refetchQueries({ queryKey: messageQueryKey });
                 return true; // Stop polling
               }
             }
@@ -270,8 +278,9 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
             console.log('❌ Stopped polling - AI response not detected within 20 seconds');
             // Force refresh messages even if no recent AI response detected
             console.log('🔄 Force refreshing messages cache...');
-            await queryClient.invalidateQueries({ queryKey: [`/api/chats/${chatId}/messages`] });
-            await queryClient.refetchQueries({ queryKey: [`/api/chats/${chatId}/messages`] });
+            const messageQueryKey = [`/api/chats/${chatId}/messages`];
+            await queryClient.invalidateQueries({ queryKey: messageQueryKey });
+            await queryClient.refetchQueries({ queryKey: messageQueryKey });
           }
         };
         
