@@ -479,7 +479,7 @@ export function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessage }: Ch
   return (
     <div className="flex-1 flex flex-col h-full">
       {/* Messages Container */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4" key={`messages-${safeMessages.length}-${chatId}`}>
         {isLoading && safeMessages.length === 0 ? (
           <div className="flex justify-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
