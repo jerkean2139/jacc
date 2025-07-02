@@ -159,6 +159,7 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
   useEffect(() => {
     if (chatId) {
       console.log('💫 Force refreshing messages for chat:', chatId);
+      setRefreshTrigger(prev => prev + 1); // Force cache bust
       const messageQueryKey = [`/api/chats/${chatId}/messages`];
       queryClient.invalidateQueries({ queryKey: messageQueryKey });
       refetch();
@@ -233,6 +234,7 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
       // Input will be cleared by form reset
       
       // Immediate refresh for user message with proper query key format
+      setRefreshTrigger(prev => prev + 1); // Force cache bust
       const messageQueryKey = [`/api/chats/${chatId}/messages`];
       await queryClient.invalidateQueries({ queryKey: messageQueryKey });
       await queryClient.refetchQueries({ queryKey: messageQueryKey });
@@ -262,6 +264,7 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
               
               if (hasAIResponse) {
                 console.log('✅ AI response detected! Refreshing messages...');
+                setRefreshTrigger(prev => prev + 1); // Force cache bust
                 const messageQueryKey = [`/api/chats/${chatId}/messages`];
                 await queryClient.invalidateQueries({ queryKey: messageQueryKey });
                 await queryClient.refetchQueries({ queryKey: messageQueryKey });
@@ -278,6 +281,7 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
             console.log('❌ Stopped polling - AI response not detected within 20 seconds');
             // Force refresh messages even if no recent AI response detected
             console.log('🔄 Force refreshing messages cache...');
+            setRefreshTrigger(prev => prev + 1); // Force cache bust
             const messageQueryKey = [`/api/chats/${chatId}/messages`];
             await queryClient.invalidateQueries({ queryKey: messageQueryKey });
             await queryClient.refetchQueries({ queryKey: messageQueryKey });
