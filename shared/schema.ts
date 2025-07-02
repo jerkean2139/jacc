@@ -91,14 +91,19 @@ export const userSessions = pgTable("user_sessions", {
 // User prompts management
 export const userPrompts = pgTable("user_prompts", {
   id: varchar("id").primaryKey().notNull().$defaultFn(() => crypto.randomUUID()),
-  name: varchar("name").notNull(),
-  description: text("description"),
-  category: varchar("category").notNull(),
-  content: text("content").notNull(),
-  isActive: boolean("is_active").default(true),
   userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  name: varchar("name").notNull(),
+  content: text("content").notNull(),
+  temperature: decimal("temperature"),
+  maxTokens: integer("max_tokens"),
+  isDefault: boolean("is_default").default(false),
+  description: text("description"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+  writingStyle: text("writing_style"),
+  systemRules: text("system_rules"),
+  promptTemplate: text("prompt_template"),
+  category: varchar("category"),
 });
 
 // Prompt usage analytics
