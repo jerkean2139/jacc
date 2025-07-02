@@ -1,0 +1,36 @@
+🔍 DETAILED MESSAGE DEBUG: {rawMessages: Array(0), messagesType: 'object', isArray: true, messagesLength: 0, safeMessagesLength: 0, …}
+sidebar.tsx:171 Sidebar Debug: {chatsCount: 2, hasOnChatDelete: false, onChatDeleteType: 'undefined'}
+chat-interface.tsx:145 Messages Query Status: {chatId: null, queryKey: Array(1), enabled: false, isLoading: false, hasError: false, …}
+chat-interface.tsx:155 Chat Interface Debug: {chatId: null, messagesCount: 0, isLoading: false, hasMessages: false}
+chat-interface.tsx:166 🔍 DETAILED MESSAGE DEBUG: {rawMessages: Array(0), messagesType: 'object', isArray: true, messagesLength: 0, safeMessagesLength: 0, …}
+02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/:1 Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner.
+chat-interface.tsx:225 🚀 Starting conversation with starter: I need help calculating processing rates and finding competitive pricing
+chat-interface.tsx:229 📨 Using onNewChatWithMessage function
+home-stable.tsx:81 Creating new chat with message: I need help calculating processing rates and finding competitive pricing
+home-stable.tsx:87 New chat created: {id: '11cfd294-169a-4542-ac3a-bd4ee6a8ac10', title: 'New Chat', userId: 'demo-user-id', createdAt: '2025-07-02T16:48:48.831Z', updatedAt: '2025-07-02T16:48:48.831Z'}
+home-stable.tsx:90 Attempting to navigate to: /chat/11cfd294-169a-4542-ac3a-bd4ee6a8ac10
+home-stable.tsx:92 Navigation called, new location should be: /chat/11cfd294-169a-4542-ac3a-bd4ee6a8ac10
+home-stable.tsx:99 Sending message to new chat: 11cfd294-169a-4542-ac3a-bd4ee6a8ac10
+home-stable.tsx:32 URL Debug: {location: '/chat/11cfd294-169a-4542-ac3a-bd4ee6a8ac10', activeChatId: '11cfd294-169a-4542-ac3a-bd4ee6a8ac10', hasChat: true}
+chat-interface.tsx:145 Messages Query Status: {chatId: '11cfd294-169a-4542-ac3a-bd4ee6a8ac10', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:155 Chat Interface Debug: {chatId: '11cfd294-169a-4542-ac3a-bd4ee6a8ac10', messagesCount: 0, isLoading: true, hasMessages: false}
+chat-interface.tsx:166 🔍 DETAILED MESSAGE DEBUG: {rawMessages: Array(0), messagesType: 'object', isArray: true, messagesLength: 0, safeMessagesLength: 0, …}
+sidebar.tsx:171 Sidebar Debug: {chatsCount: 2, hasOnChatDelete: false, onChatDeleteType: 'undefined'}
+chat-interface.tsx:145 Messages Query Status: {chatId: '11cfd294-169a-4542-ac3a-bd4ee6a8ac10', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:155 Chat Interface Debug: {chatId: '11cfd294-169a-4542-ac3a-bd4ee6a8ac10', messagesCount: 0, isLoading: true, hasMessages: false}
+chat-interface.tsx:166 🔍 DETAILED MESSAGE DEBUG: {rawMessages: Array(0), messagesType: 'object', isArray: true, messagesLength: 0, safeMessagesLength: 0, …}
+home-stable.tsx:32 URL Debug: {location: '/chat/11cfd294-169a-4542-ac3a-bd4ee6a8ac10', activeChatId: '11cfd294-169a-4542-ac3a-bd4ee6a8ac10', hasChat: true}
+chat-interface.tsx:145 Messages Query Status: {chatId: '11cfd294-169a-4542-ac3a-bd4ee6a8ac10', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:155 Chat Interface Debug: {chatId: '11cfd294-169a-4542-ac3a-bd4ee6a8ac10', messagesCount: 0, isLoading: true, hasMessages: false}
+chat-interface.tsx:166 🔍 DETAILED MESSAGE DEBUG: {rawMessages: Array(0), messagesType: 'object', isArray: true, messagesLength: 0, safeMessagesLength: 0, …}
+sidebar.tsx:171 Sidebar Debug: {chatsCount: 3, hasOnChatDelete: false, onChatDeleteType: 'undefined'}
+chat-interface.tsx:145 Messages Query Status: {chatId: '11cfd294-169a-4542-ac3a-bd4ee6a8ac10', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:155 Chat Interface Debug: {chatId: '11cfd294-169a-4542-ac3a-bd4ee6a8ac10', messagesCount: 0, isLoading: true, hasMessages: false}
+chat-interface.tsx:166 🔍 DETAILED MESSAGE DEBUG: {rawMessages: Array(0), messagesType: 'object', isArray: true, messagesLength: 0, safeMessagesLength: 0, …}
+chat-interface.tsx:145 Messages Query Status: {chatId: '11cfd294-169a-4542-ac3a-bd4ee6a8ac10', queryKey: Array(1), enabled: true, isLoading: false, hasError: false, …}
+chat-interface.tsx:155 Chat Interface Debug: {chatId: '11cfd294-169a-4542-ac3a-bd4ee6a8ac10', messagesCount: 3, isLoading: false, hasMessages: true}
+chat-interface.tsx:166 🔍 DETAILED MESSAGE DEBUG: {rawMessages: Array(3), messagesType: 'object', isArray: true, messagesLength: 3, safeMessagesLength: 3, …}
+chat-interface.tsx:145 Messages Query Status: {chatId: '11cfd294-169a-4542-ac3a-bd4ee6a8ac10', queryKey: Array(1), enabled: true, isLoading: false, hasError: false, …}
+chat-interface.tsx:155 Chat Interface Debug: {chatId: '11cfd294-169a-4542-ac3a-bd4ee6a8ac10', messagesCount: 3, isLoading: false, hasMessages: true}
+chat-interface.tsx:166 🔍 DETAILED MESSAGE DEBUG: {rawMessages: Array(3), messagesType: 'object', isArray: true, messagesLength: 3, safeMessagesLength: 3, …}
+home-stable.tsx:104 Message sent successfully
