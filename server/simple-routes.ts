@@ -17,7 +17,7 @@ import {
   users,
   userStats,
   chats,
-  chatMessages,
+  messages,
   userPrompts,
   streakTracking,
   trainingInteractions,
@@ -4669,16 +4669,16 @@ Would you like me to create a detailed proposal for this merchant?`,
       // Get messages directly from database using same logic as authenticated endpoint
       const messagesResult = await db
         .select({
-          id: chatMessages.id,
-          chatId: chatMessages.chatId,
-          content: chatMessages.content,
-          role: chatMessages.role,
-          metadata: chatMessages.metadata,
-          createdAt: chatMessages.createdAt
+          id: messages.id,
+          chatId: messages.chatId,
+          content: messages.content,
+          role: messages.role,
+          metadata: messages.metadata,
+          createdAt: messages.createdAt
         })
-        .from(chatMessages)
-        .where(eq(chatMessages.chatId, chatId))
-        .orderBy(chatMessages.createdAt);
+        .from(messages)
+        .where(eq(messages.chatId, chatId))
+        .orderBy(messages.createdAt);
 
       console.log(`🔍 PUBLIC TEST: Found ${messagesResult.length} messages in database for chat ${chatId}`);
       if (messagesResult.length > 0) {
