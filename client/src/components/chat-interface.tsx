@@ -197,16 +197,27 @@ export function ChatInterface({ chatId, onChatUpdate }: ChatInterfaceProps) {
   // Handle conversation starter clicks
   const handleConversationStarter = async (starter: typeof conversationStarters[0]) => {
     try {
-      // Create a new chat with the starter message
-      const response = await apiRequest("/api/chat/new", {
-        method: "POST",
-        body: { message: starter.text }
+      // Create a new chat first
+      const response = await apiRequest("POST", "/api/chats", {
+        title: "New Chat",
+        isActive: true
       });
+      const newChat = await response.json();
       
-      if (response?.chatId) {
-        // Navigate to the new chat
-        window.location.href = `/chat/${response.chatId}`;
-      }
+      // Navigate to the new chat
+      window.location.href = `/chat/${newChat.id}`;
+      
+      // Send the initial message after a brief delay
+      setTimeout(async () => {
+        try {
+          await apiRequest("POST", `/api/chats/${newChat.id}/messages`, {
+            content: starter.text,
+            role: "user"
+          });
+        } catch (messageError) {
+          console.error("Failed to send initial message:", messageError);
+        }
+      }, 200);
     } catch (error) {
       console.error("Failed to start conversation:", error);
       toast({
