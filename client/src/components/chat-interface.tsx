@@ -251,16 +251,35 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
           console.log(`🔄 Polling for AI response (attempt ${attempts}/${maxAttempts})...`);
           
           try {
-            const response = await fetch(`/api/chats/${chatId}/messages`, {
+            const response = await fetch(`/api/chats/${chatId}/messages?t=${Date.now()}`, {
               credentials: "include",
+              cache: "no-store",
+              headers: {
+                "Cache-Control": "no-cache, no-store, must-revalidate",
+                "Pragma": "no-cache",
+                "Expires": "0"
+              }
             });
             
             if (response.ok) {
               const messages = await response.json();
-              const hasAIResponse = messages.some((msg: any) => 
-                msg.role === 'assistant' && 
-                msg.createdAt > new Date(Date.now() - 60000) // Within last 60 seconds
-              );
+              console.log(`📊 Polling check: Found ${messages.length} messages`);
+              
+              // Log each message for debugging
+              messages.forEach((msg: any, index: number) => {
+                console.log(`Message ${index + 1}: ${msg.role} - ${msg.content?.substring(0, 50)}... (created: ${msg.createdAt})`);
+              });
+              
+              const recentThreshold = new Date(Date.now() - 60000);
+              console.log(`🕐 Looking for assistant messages after: ${recentThreshold.toISOString()}`);
+              
+              const hasAIResponse = messages.some((msg: any) => {
+                const msgDate = new Date(msg.createdAt);
+                const isAssistant = msg.role === 'assistant';
+                const isRecent = msgDate > recentThreshold;
+                console.log(`Checking message: ${msg.role}, created: ${msgDate.toISOString()}, recent: ${isRecent}`);
+                return isAssistant && isRecent;
+              });
               
               if (hasAIResponse) {
                 console.log('✅ AI response detected! Refreshing messages...');
@@ -269,6 +288,8 @@ export default function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessa
                 await queryClient.invalidateQueries({ queryKey: messageQueryKey });
                 await queryClient.refetchQueries({ queryKey: messageQueryKey });
                 return true; // Stop polling
+              } else {
+                console.log('❌ No recent AI response found yet');
               }
             }
           } catch (error) {
