@@ -48,6 +48,7 @@ import LearningPathPage from "@/pages/learning-path";
 import ChatTesting from "@/pages/chat-testing";
 import DemoAdmin from "@/pages/demo-admin";
 import UnifiedAdminPanel from "@/pages/unified-admin-panel";
+import TestMessages from "@/pages/test-messages";
 import FAQManager from "@/pages/faq-manager";
 import ConsolidatedAdmin from "@/pages/consolidated-admin";
 import DragDropDocsPage from "@/pages/drag-drop-docs";

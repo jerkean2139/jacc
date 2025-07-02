@@ -1,0 +1,69 @@
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+clear-popup-flags.ts:26 Cleared 0 popup flags from localStorage
+home-stable.tsx:32 URL Debug: {location: '/', activeChatId: null, hasChat: false}
+chat-interface.tsx:149 Messages Query Status: {chatId: null, queryKey: Array(1), enabled: false, isLoading: false, hasError: false, …}
+chat-interface.tsx:159 Chat Interface Debug: {chatId: null, messagesCount: 0, isLoading: false, hasMessages: false}
+chat-interface.tsx:170 🔍 DETAILED MESSAGE DEBUG: {rawMessages: Array(0), messagesType: 'object', isArray: true, messagesLength: 0, safeMessagesLength: 0, …}
+sidebar.tsx:171 Sidebar Debug: {chatsCount: 0, hasOnChatDelete: false, onChatDeleteType: 'undefined'}
+chat-interface.tsx:149 Messages Query Status: {chatId: null, queryKey: Array(1), enabled: false, isLoading: false, hasError: false, …}
+chat-interface.tsx:159 Chat Interface Debug: {chatId: null, messagesCount: 0, isLoading: false, hasMessages: false}
+chat-interface.tsx:170 🔍 DETAILED MESSAGE DEBUG: {rawMessages: Array(0), messagesType: 'object', isArray: true, messagesLength: 0, safeMessagesLength: 0, …}
+2chat-interface.tsx:77 🔄 ChatInterface mounted - clearing stale cached queries
+home-stable.tsx:32 URL Debug: {location: '/', activeChatId: null, hasChat: false}
+chat-interface.tsx:149 Messages Query Status: {chatId: null, queryKey: Array(1), enabled: false, isLoading: false, hasError: false, …}
+chat-interface.tsx:159 Chat Interface Debug: {chatId: null, messagesCount: 0, isLoading: false, hasMessages: false}
+chat-interface.tsx:170 🔍 DETAILED MESSAGE DEBUG: {rawMessages: Array(0), messagesType: 'object', isArray: true, messagesLength: 0, safeMessagesLength: 0, …}
+sidebar.tsx:171 Sidebar Debug: {chatsCount: 0, hasOnChatDelete: false, onChatDeleteType: 'undefined'}
+chat-interface.tsx:149 Messages Query Status: {chatId: null, queryKey: Array(1), enabled: false, isLoading: false, hasError: false, …}
+chat-interface.tsx:159 Chat Interface Debug: {chatId: null, messagesCount: 0, isLoading: false, hasMessages: false}
+chat-interface.tsx:170 🔍 DETAILED MESSAGE DEBUG: {rawMessages: Array(0), messagesType: 'object', isArray: true, messagesLength: 0, safeMessagesLength: 0, …}
+chat-interface.tsx:149 Messages Query Status: {chatId: null, queryKey: Array(1), enabled: false, isLoading: false, hasError: false, …}
+chat-interface.tsx:159 Chat Interface Debug: {chatId: null, messagesCount: 0, isLoading: false, hasMessages: false}
+chat-interface.tsx:170 🔍 DETAILED MESSAGE DEBUG: {rawMessages: Array(0), messagesType: 'object', isArray: true, messagesLength: 0, safeMessagesLength: 0, …}
+chat-interface.tsx:149 Messages Query Status: {chatId: null, queryKey: Array(1), enabled: false, isLoading: false, hasError: false, …}
+chat-interface.tsx:159 Chat Interface Debug: {chatId: null, messagesCount: 0, isLoading: false, hasMessages: false}
+chat-interface.tsx:170 🔍 DETAILED MESSAGE DEBUG: {rawMessages: Array(0), messagesType: 'object', isArray: true, messagesLength: 0, safeMessagesLength: 0, …}
+chat-interface.tsx:149 Messages Query Status: {chatId: null, queryKey: Array(1), enabled: false, isLoading: false, hasError: false, …}
+chat-interface.tsx:159 Chat Interface Debug: {chatId: null, messagesCount: 0, isLoading: false, hasMessages: false}
+chat-interface.tsx:170 🔍 DETAILED MESSAGE DEBUG: {rawMessages: Array(0), messagesType: 'object', isArray: true, messagesLength: 0, safeMessagesLength: 0, …}
+chat-interface.tsx:149 Messages Query Status: {chatId: null, queryKey: Array(1), enabled: false, isLoading: false, hasError: false, …}
+chat-interface.tsx:159 Chat Interface Debug: {chatId: null, messagesCount: 0, isLoading: false, hasMessages: false}
+chat-interface.tsx:170 🔍 DETAILED MESSAGE DEBUG: {rawMessages: Array(0), messagesType: 'object', isArray: true, messagesLength: 0, safeMessagesLength: 0, …}
+home-stable.tsx:32 URL Debug: {location: '/', activeChatId: null, hasChat: false}
+chat-interface.tsx:149 Messages Query Status: {chatId: null, queryKey: Array(1), enabled: false, isLoading: false, hasError: false, …}
+chat-interface.tsx:159 Chat Interface Debug: {chatId: null, messagesCount: 0, isLoading: false, hasMessages: false}
+chat-interface.tsx:170 🔍 DETAILED MESSAGE DEBUG: {rawMessages: Array(0), messagesType: 'object', isArray: true, messagesLength: 0, safeMessagesLength: 0, …}
+sidebar.tsx:171 Sidebar Debug: {chatsCount: 1, hasOnChatDelete: false, onChatDeleteType: 'undefined'}
+chat-interface.tsx:149 Messages Query Status: {chatId: null, queryKey: Array(1), enabled: false, isLoading: false, hasError: false, …}
+chat-interface.tsx:159 Chat Interface Debug: {chatId: null, messagesCount: 0, isLoading: false, hasMessages: false}
+chat-interface.tsx:170 🔍 DETAILED MESSAGE DEBUG: {rawMessages: Array(0), messagesType: 'object', isArray: true, messagesLength: 0, safeMessagesLength: 0, …}
+02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/:1 Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner.
+chat-interface.tsx:235 🚀 Starting conversation with starter: I need help calculating processing rates and finding competitive pricing
+chat-interface.tsx:239 📨 Using onNewChatWithMessage function
+home-stable.tsx:81 Creating new chat with message: I need help calculating processing rates and finding competitive pricing
+home-stable.tsx:87 New chat created: {id: '9f0904ed-de01-4f33-9265-476067288160', title: 'New Chat', userId: 'demo-user-id', createdAt: '2025-07-02T17:01:49.062Z', updatedAt: '2025-07-02T17:01:49.062Z'}
+home-stable.tsx:90 Attempting to navigate to: /chat/9f0904ed-de01-4f33-9265-476067288160
+home-stable.tsx:92 Navigation called, new location should be: /chat/9f0904ed-de01-4f33-9265-476067288160
+home-stable.tsx:99 Sending message to new chat: 9f0904ed-de01-4f33-9265-476067288160
+home-stable.tsx:32 URL Debug: {location: '/chat/9f0904ed-de01-4f33-9265-476067288160', activeChatId: '9f0904ed-de01-4f33-9265-476067288160', hasChat: true}
+chat-interface.tsx:149 Messages Query Status: {chatId: '9f0904ed-de01-4f33-9265-476067288160', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:159 Chat Interface Debug: {chatId: '9f0904ed-de01-4f33-9265-476067288160', messagesCount: 0, isLoading: true, hasMessages: false}
+chat-interface.tsx:170 🔍 DETAILED MESSAGE DEBUG: {rawMessages: Array(0), messagesType: 'object', isArray: true, messagesLength: 0, safeMessagesLength: 0, …}
+sidebar.tsx:171 Sidebar Debug: {chatsCount: 1, hasOnChatDelete: false, onChatDeleteType: 'undefined'}
+chat-interface.tsx:149 Messages Query Status: {chatId: '9f0904ed-de01-4f33-9265-476067288160', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:159 Chat Interface Debug: {chatId: '9f0904ed-de01-4f33-9265-476067288160', messagesCount: 0, isLoading: true, hasMessages: false}
+chat-interface.tsx:170 🔍 DETAILED MESSAGE DEBUG: {rawMessages: Array(0), messagesType: 'object', isArray: true, messagesLength: 0, safeMessagesLength: 0, …}
+home-stable.tsx:32 URL Debug: {location: '/chat/9f0904ed-de01-4f33-9265-476067288160', activeChatId: '9f0904ed-de01-4f33-9265-476067288160', hasChat: true}
+chat-interface.tsx:149 Messages Query Status: {chatId: '9f0904ed-de01-4f33-9265-476067288160', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:159 Chat Interface Debug: {chatId: '9f0904ed-de01-4f33-9265-476067288160', messagesCount: 0, isLoading: true, hasMessages: false}
+chat-interface.tsx:170 🔍 DETAILED MESSAGE DEBUG: {rawMessages: Array(0), messagesType: 'object', isArray: true, messagesLength: 0, safeMessagesLength: 0, …}
+sidebar.tsx:171 Sidebar Debug: {chatsCount: 2, hasOnChatDelete: false, onChatDeleteType: 'undefined'}
+chat-interface.tsx:149 Messages Query Status: {chatId: '9f0904ed-de01-4f33-9265-476067288160', queryKey: Array(1), enabled: true, isLoading: true, hasError: false, …}
+chat-interface.tsx:159 Chat Interface Debug: {chatId: '9f0904ed-de01-4f33-9265-476067288160', messagesCount: 0, isLoading: true, hasMessages: false}
+chat-interface.tsx:170 🔍 DETAILED MESSAGE DEBUG: {rawMessages: Array(0), messagesType: 'object', isArray: true, messagesLength: 0, safeMessagesLength: 0, …}
+chat-interface.tsx:149 Messages Query Status: {chatId: '9f0904ed-de01-4f33-9265-476067288160', queryKey: Array(1), enabled: true, isLoading: false, hasError: false, …}
+chat-interface.tsx:159 Chat Interface Debug: {chatId: '9f0904ed-de01-4f33-9265-476067288160', messagesCount: 1, isLoading: false, hasMessages: true}
+chat-interface.tsx:170 🔍 DETAILED MESSAGE DEBUG: {rawMessages: Array(1), messagesType: 'object', isArray: true, messagesLength: 1, safeMessagesLength: 1, …}
+chat-interface.tsx:149 Messages Query Status: {chatId: '9f0904ed-de01-4f33-9265-476067288160', queryKey: Array(1), enabled: true, isLoading: false, hasError: false, …}
+chat-interface.tsx:159 Chat Interface Debug: {chatId: '9f0904ed-de01-4f33-9265-476067288160', messagesCount: 1, isLoading: false, hasMessages: true}
+chat-interface.tsx:170 🔍 DETAILED MESSAGE DEBUG: {rawMessages: Array(1), messagesType: 'object', isArray: true, messagesLength: 1, safeMessagesLength: 1, …}

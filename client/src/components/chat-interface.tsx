@@ -480,8 +480,16 @@ export function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessage }: Ch
             No messages yet. Start the conversation!
           </div>
         ) : (
-          safeMessages.map((message) => (
-            <div
+          safeMessages.map((message) => {
+            console.log('🔥 RENDERING MESSAGE:', {
+              messageId: message.id,
+              messageRole: message.role,
+              messageContent: message.content?.substring(0, 100),
+              messageKeys: Object.keys(message),
+              hasContent: !!message.content
+            });
+            return (
+              <div
               key={message.id}
               className={`flex gap-3 ${
                 message.role === "user" ? "justify-end" : "justify-start"
@@ -515,8 +523,9 @@ export function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessage }: Ch
                   </div>
                 </div>
               )}
-            </div>
-          ))
+              </div>
+            );
+          })
         )}
         
         {sendMessageMutation.isPending && (
