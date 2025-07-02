@@ -27,6 +27,9 @@ export default function HomeStable() {
 
   // Extract chatId from URL
   const activeChatId = location.includes('/chat/') ? location.split('/chat/')[1] : null;
+  
+  // Debug logging
+  console.log('URL Debug:', { location, activeChatId, hasChat: location.includes('/chat/') });
 
   // Fetch chats and folders
   const { data: chats = [], refetch: refetchChats } = useQuery({
@@ -98,8 +101,8 @@ export default function HomeStable() {
         });
         console.log("Message sent successfully");
         
-        // Refresh messages for the new chat
-        queryClient.invalidateQueries({ queryKey: [`/api/chats/${newChat.id}/messages`] });
+        // Refresh messages for the new chat using correct array format
+        queryClient.invalidateQueries({ queryKey: ['/api/chats', newChat.id, 'messages'] });
       } catch (messageError) {
         console.error("Failed to send message:", messageError);
         toast({
