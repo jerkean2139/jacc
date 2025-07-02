@@ -3547,7 +3547,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
             chatId,
             content: `I'm currently experiencing technical difficulties. Please try again in a moment, or contact support if the issue persists.`,
             role: 'assistant',
-            userId: 'system',
             createdAt: new Date()
           });
           
