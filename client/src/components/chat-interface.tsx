@@ -4,10 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { Send, Paperclip, Download, FileText, Smile, User, Bot, Brain, Calculator, TrendingUp, PresentationChart } from "lucide-react";
+import { Send, Paperclip, Download, FileText, Smile, User, Bot, Brain, Calculator, TrendingUp, BarChart3 } from "lucide-react";
 import { MessageContent } from "./message-content";
 // Remove these imports temporarily as they may not exist
-import { useCoaching } from "@/hooks/use-coaching";
+// import { useCoaching } from "@/hooks/use-coaching"; // Temporarily removed
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -47,7 +47,7 @@ const conversationStarters = [
   },
   {
     id: "proposal",
-    icon: PresentationChart,
+    icon: BarChart3,
     text: "I need help creating a merchant proposal with competitive rates and terms",
     color: "bg-purple-500 hover:bg-purple-600"
   }
@@ -151,9 +151,9 @@ export function ChatInterface({ chatId, onChatUpdate }: ChatInterfaceProps) {
       return response.json();
     },
     onSuccess: async (data, variables) => {
-      // Process message for coaching analysis
-      const coaching = useCoaching();
-      coaching.processMessage(variables, true); // true = agent message
+      // Process message for coaching analysis - temporarily disabled
+      // const coaching = useCoaching();
+      // coaching.processMessage(variables, true); // true = agent message
       
       // Input will be cleared by form reset
       
@@ -332,7 +332,7 @@ export function ChatInterface({ chatId, onChatUpdate }: ChatInterfaceProps) {
               </div>
             </div>
             <Card className="max-w-[80%] p-4 bg-white dark:bg-gray-800">
-              <LoadingSpinner />
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
             </Card>
           </div>
         )}
@@ -371,3 +371,5 @@ export function ChatInterface({ chatId, onChatUpdate }: ChatInterfaceProps) {
     </div>
   );
 }
+
+export default ChatInterface;
