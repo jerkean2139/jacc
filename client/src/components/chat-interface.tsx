@@ -71,6 +71,12 @@ export function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessage }: Ch
   // Voice recording state
   const [isRecording, setIsRecording] = useState(false);
   const [recognition, setRecognition] = useState<any>(null);
+
+  // Clear all cached queries on mount to prevent infinite loops
+  useEffect(() => {
+    console.log('🔄 ChatInterface mounted - clearing stale cached queries');
+    queryClient.clear();
+  }, []);
   
   // Fetch messages for the active chat - RESTORED WORKING VERSION
   const { data: messages = [], isLoading, error, refetch } = useQuery<MessageWithActions[]>({
