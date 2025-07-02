@@ -3357,7 +3357,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         };
       }
 
-      const chatId = Math.random().toString(36).substring(2, 15);
+      const chatId = crypto.randomUUID();
       const newChat = {
         id: chatId,
         title: req.body.title || "New Chat",
@@ -3442,7 +3442,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { chatId } = req.params;
       const { content, role } = req.body;
 
-      const messageId = Math.random().toString(36).substring(2, 15);
+      const messageId = crypto.randomUUID();
       const newMessage = {
         id: messageId,
         chatId,
@@ -3495,7 +3495,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             chatMessages.map(msg => ({ role: msg.role, content: msg.content })), 
             { userRole: 'Sales Agent' }
           );
-          const aiResponseId = Math.random().toString(36).substring(2, 15);
+          const aiResponseId = crypto.randomUUID();
           const aiMessage = {
             id: aiResponseId,
             chatId,
@@ -3509,7 +3509,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         } catch (aiError) {
           console.error('AI response error:', aiError);
           // Fallback response if AI fails
-          const aiResponseId = Math.random().toString(36).substring(2, 15);
+          const aiResponseId = crypto.randomUUID();
           const aiMessage = {
             id: aiResponseId,
             chatId,
