@@ -78,9 +78,9 @@ export function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessage }: Ch
     queryClient.clear();
   }, []);
   
-  // Fetch messages for the active chat - DIRECT ENDPOINT APPROACH
+  // Fetch messages for the active chat - USING WORKING PUBLIC ENDPOINT TEMPORARILY
   const { data: messages = [], isLoading, error, refetch } = useQuery<MessageWithActions[]>({
-    queryKey: [`/api/chats/${chatId}/messages`],
+    queryKey: [`/api/public/chats/${chatId}/messages`],
     enabled: !!chatId,
     staleTime: 0,
     cacheTime: 0,

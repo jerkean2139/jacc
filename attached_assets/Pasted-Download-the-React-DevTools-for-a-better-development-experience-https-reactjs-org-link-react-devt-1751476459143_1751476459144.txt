@@ -1,0 +1,39 @@
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+clear-popup-flags.ts:26 Cleared 0 popup flags from localStorage
+useAuth.ts:11   GET https://02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/api/user 401 (Unauthorized)
+queryFn @ useAuth.ts:11
+fetchFn @ query.ts:429
+run @ retryer.ts:153
+start @ retryer.ts:218
+fetch @ query.ts:540
+executeFetch_fn @ queryObserver.ts:346
+onSubscribe @ queryObserver.ts:108
+subscribe @ subscribable.ts:11
+(anonymous) @ useBaseQuery.ts:92
+subscribeToStore @ react-dom.development.js:16139
+commitHookEffectListMount @ react-dom.development.js:23189
+commitPassiveMountOnFiber @ react-dom.development.js:24965
+commitPassiveMountEffects_complete @ react-dom.development.js:24930
+commitPassiveMountEffects_begin @ react-dom.development.js:24917
+commitPassiveMountEffects @ react-dom.development.js:24905
+flushPassiveEffectsImpl @ react-dom.development.js:27078
+flushPassiveEffects @ react-dom.development.js:27023
+performSyncWorkOnRoot @ react-dom.development.js:26115
+flushSyncCallbacks @ react-dom.development.js:12042
+commitRootImpl @ react-dom.development.js:26998
+commitRoot @ react-dom.development.js:26721
+finishConcurrentRender @ react-dom.development.js:26020
+performConcurrentWorkOnRoot @ react-dom.development.js:25848
+workLoop @ scheduler.development.js:266
+flushWork @ scheduler.development.js:239
+performWorkUntilDeadline @ scheduler.development.js:533
+test-messages.tsx:8 TEST PAGE - Chat ID: 9f0904ed-de01-4f33-9265-476067288160
+test-messages.tsx:16 TEST PAGE - Messages: {messages: undefined, isLoading: true, error: null}
+[NEW] Explain Console errors by using Copilot in Edge: click
+         
+         to explain an error. 
+        Learn more
+        Don't show again
+9f0904ed-de01-4f33-9265-476067288160:1 Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner.
+test-messages.tsx:8 TEST PAGE - Chat ID: 9f0904ed-de01-4f33-9265-476067288160
+test-messages.tsx:16 TEST PAGE - Messages: {messages: Array(2), isLoading: false, error: null}
