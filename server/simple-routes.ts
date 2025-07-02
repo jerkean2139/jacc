@@ -1237,6 +1237,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Move document to folder endpoint
+  app.put('/api/personal-documents/:id/move', async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const { folderId } = req.body;
+      
+      const { db } = await import('./db.ts');
+      const { personalDocuments } = await import('../shared/schema.ts');
+      const { eq } = await import('drizzle-orm');
+      
+      await db.update(personalDocuments)
+        .set({ 
+          folderId: folderId || null,
+          updatedAt: new Date().toISOString()
+        })
+        .where(eq(personalDocuments.id, id));
+      
+      console.log(`Document ${id} moved to folder: ${folderId || 'unassigned'}`);
+      res.json({ success: true, documentId: id, folderId });
+    } catch (error) {
+      console.error("Error moving document:", error);
+      res.status(500).json({ error: 'Failed to move document' });
+    }
+  });
+
   // Delete document endpoint
   app.delete('/api/admin/documents/:id', async (req: Request, res: Response) => {
     try {
