@@ -845,13 +845,22 @@ With these details, I'll create a customized proposal highlighting value proposi
               <p className="text-slate-600 dark:text-slate-400 mb-6">Ask me anything about Tracer Merchant Services; documents, marketing, sales, or client questions.</p>
             </div>
           ) : (
-            safeMessages.map((message) => (
-              <MessageBubble
-                key={message.id}
-                message={message}
-                actions={message.actions}
-              />
-            ))
+            safeMessages.map((message, index) => {
+              console.log(`🔍 RENDERING MESSAGE ${index}:`, {
+                id: message.id,
+                role: message.role,
+                contentLength: message.content?.length || 0,
+                hasActions: !!message.actions,
+                messageObject: message
+              });
+              return (
+                <MessageBubble
+                  key={message.id}
+                  message={message}
+                  actions={message.actions}
+                />
+              );
+            })
           )}
           
           {sendMessageMutation.isPending && (
