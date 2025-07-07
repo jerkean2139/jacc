@@ -509,8 +509,12 @@ export function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessage }: Ch
             >
               {message.role === "assistant" && (
                 <div className="flex-shrink-0">
-                  <div className="w-8 h-8 rounded-full bg-blue-500 dark:bg-blue-600 flex items-center justify-center">
-                    <Bot className="w-4 h-4 text-white" />
+                  <div className="w-8 h-8 rounded-full overflow-hidden">
+                    <img 
+                      src="/attached_assets/FS6idYAvlqMOrtmKZEBd5.jpg" 
+                      alt="JACC Assistant" 
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                 </div>
               )}
@@ -543,8 +547,12 @@ export function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessage }: Ch
         {sendMessageMutation.isPending && (
           <div className="flex gap-3 justify-start">
             <div className="flex-shrink-0">
-              <div className="w-8 h-8 rounded-full bg-blue-500 dark:bg-blue-600 flex items-center justify-center">
-                <Bot className="w-4 h-4 text-white" />
+              <div className="w-8 h-8 rounded-full overflow-hidden">
+                <img 
+                  src="/attached_assets/FS6idYAvlqMOrtmKZEBd5.jpg" 
+                  alt="JACC Assistant" 
+                  className="w-full h-full object-cover"
+                />
               </div>
             </div>
             <Card className="max-w-[80%] p-4 bg-white dark:bg-gray-800">
