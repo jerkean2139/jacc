@@ -381,10 +381,14 @@ export function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessage }: Ch
       <div className="flex-1 flex flex-col">
         {/* Welcome Content */}
         <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-          {/* JACC Logo */}
+          {/* JACC Logo - Guy with Glasses */}
           <div className="mb-6">
-            <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-              <span className="text-2xl font-bold text-white">JACC</span>
+            <div className="w-20 h-20 rounded-xl overflow-hidden shadow-lg">
+              <img 
+                src="/attached_assets/FS6idYAvlqMOrtmKZEBd5.jpg" 
+                alt="JACC Assistant" 
+                className="w-full h-full object-cover"
+              />
             </div>
           </div>
           
