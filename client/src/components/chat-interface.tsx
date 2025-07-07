@@ -381,6 +381,13 @@ export function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessage }: Ch
       <div className="flex-1 flex flex-col">
         {/* Welcome Content */}
         <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+          {/* JACC Logo */}
+          <div className="mb-6">
+            <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+              <span className="text-2xl font-bold text-white">JACC</span>
+            </div>
+          </div>
+          
           <h2 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-gray-200">
             Welcome to JACC
           </h2>
@@ -431,7 +438,7 @@ export function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessage }: Ch
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Ask about processing rates, compare processors, or request market insights..."
-                className="min-h-[44px] max-h-32 resize-none pr-12"
+                className="min-h-[40px] max-h-20 resize-none pr-12"
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
@@ -554,7 +561,7 @@ export function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessage }: Ch
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask about processing rates, compare processors, or request market insights..."
-              className="min-h-[44px] max-h-32 resize-none pr-12"
+              className="min-h-[40px] max-h-20 resize-none pr-12"
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();

@@ -3521,21 +3521,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get all chats
-  app.get('/api/chats', (req: Request, res: Response) => {
-    const sessionId = req.cookies?.sessionId;
-    let userId;
+  // Get all chats - FIXED: Now uses database
+  app.get('/api/chats', async (req: Request, res: Response) => {
+    try {
+      const sessionId = req.cookies?.sessionId;
+      let userId;
 
-    // Check for demo user or session-based auth
-    if (sessionId && sessions.has(sessionId)) {
-      userId = sessions.get(sessionId).id;
-    } else {
-      // Use demo user for testing when no session exists
-      userId = 'demo-user-id';
+      // Check for demo user or session-based auth
+      if (sessionId && sessions.has(sessionId)) {
+        userId = sessions.get(sessionId).id;
+      } else {
+        // Use demo user for testing when no session exists
+        userId = 'demo-user-id';
+      }
+      
+      console.log(`🔍 LOADING CHATS for user: ${userId}`);
+      
+      // CRITICAL FIX: Use database instead of in-memory Map
+      const { db } = await import('./db');
+      const { chats: chatsTable } = await import('@shared/schema');
+      const { eq, desc } = await import('drizzle-orm');
+      
+      const userChats = await db.select().from(chatsTable).where(eq(chatsTable.userId, userId)).orderBy(desc(chatsTable.createdAt));
+      
+      console.log(`✅ Found ${userChats.length} chats in database for user ${userId}`);
+      
+      res.json(userChats);
+    } catch (error) {
+      console.error('Get chats error:', error);
+      res.status(500).json({ error: 'Failed to get chats' });
     }
-    
-    const userChats = Array.from(chats.values()).filter(chat => chat.userId === userId);
-    res.json(userChats);
   });
 
   // Create new chat
