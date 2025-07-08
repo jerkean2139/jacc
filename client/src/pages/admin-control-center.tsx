@@ -2165,7 +2165,7 @@ export default function AdminControlCenter() {
                 </SelectTrigger>
                 <SelectContent>
                   {faqCategories.map(category => (
-                    <SelectItem key={category} value={category}>{category}</SelectItem>
+                    <SelectItem key={category.name || category} value={category.name || category}>{category.name || category}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
