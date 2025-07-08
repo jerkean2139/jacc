@@ -1932,8 +1932,8 @@ export default function AdminControlCenter() {
                       <div className="flex items-center gap-3 mb-6">
                         <Users className="w-6 h-6 text-purple-400" />
                         <div>
-                          <h3 className="text-xl font-semibold glass-text">User Management</h3>
-                          <p className="glass-text-muted">Configure user access and permissions</p>
+                          <h3 className="text-xl font-semibold settings-label">User Management</h3>
+                          <p className="settings-description">Configure user access and permissions</p>
                         </div>
                       </div>
                       
@@ -1941,10 +1941,10 @@ export default function AdminControlCenter() {
                       
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="glass-card p-4">
-                          <h4 className="font-semibold glass-text mb-3">Access Control</h4>
+                          <h4 className="font-semibold settings-label mb-3">Access Control</h4>
                           <div className="space-y-3">
                             <div>
-                              <label className="glass-text-muted text-sm">Default Role</label>
+                              <label className="settings-description text-sm">Default Role</label>
                               <select className="glass-input w-full mt-1 p-2">
                                 <option value="sales-agent">Sales Agent</option>
                                 <option value="client-admin">Client Admin</option>
@@ -1952,7 +1952,7 @@ export default function AdminControlCenter() {
                               </select>
                             </div>
                             <div>
-                              <label className="glass-text-muted text-sm">Session Timeout</label>
+                              <label className="settings-description text-sm">Session Timeout</label>
                               <select className="glass-input w-full mt-1 p-2">
                                 <option value="15min">15 minutes</option>
                                 <option value="1hour">1 hour</option>
@@ -1964,10 +1964,10 @@ export default function AdminControlCenter() {
                         </div>
                         
                         <div className="glass-card p-4">
-                          <h4 className="font-semibold glass-text mb-3">Security Settings</h4>
+                          <h4 className="font-semibold settings-label mb-3">Security Settings</h4>
                           <div className="space-y-3">
                             <div className="flex items-center justify-between">
-                              <span className="glass-text text-sm">Require MFA</span>
+                              <span className="settings-description text-sm">Require MFA</span>
                               <input type="checkbox" className="glass-input" defaultChecked />
                             </div>
                             <div className="flex items-center justify-between">
@@ -1989,8 +1989,8 @@ export default function AdminControlCenter() {
                       <div className="flex items-center gap-3 mb-6">
                         <FileText className="w-6 h-6 text-green-400" />
                         <div>
-                          <h3 className="text-xl font-semibold glass-text">Content & Documents</h3>
-                          <p className="glass-text-muted">Configure document processing and content management</p>
+                          <h3 className="text-xl font-semibold settings-label">Content & Documents</h3>
+                          <p className="settings-description">Configure document processing and content management</p>
                         </div>
                       </div>
                       
@@ -1998,10 +1998,10 @@ export default function AdminControlCenter() {
                       
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="glass-card p-4">
-                          <h4 className="font-semibold glass-text mb-3">Document Processing</h4>
+                          <h4 className="font-semibold settings-label mb-3">Document Processing</h4>
                           <div className="space-y-3">
                             <div>
-                              <label className="glass-text-muted text-sm">OCR Quality</label>
+                              <label className="settings-description text-sm">OCR Quality</label>
                               <select className="glass-input w-full mt-1 p-2">
                                 <option value="high">High Quality</option>
                                 <option value="medium">Medium Quality</option>
@@ -2016,10 +2016,10 @@ export default function AdminControlCenter() {
                         </div>
                         
                         <div className="glass-card p-4">
-                          <h4 className="font-semibold glass-text mb-3">Content Management</h4>
+                          <h4 className="font-semibold settings-label mb-3">Content Management</h4>
                           <div className="space-y-3">
                             <div className="flex items-center justify-between">
-                              <span className="glass-text text-sm">Auto-categorize</span>
+                              <span className="settings-description text-sm">Auto-categorize</span>
                               <input type="checkbox" className="glass-input" defaultChecked />
                             </div>
                             <div className="flex items-center justify-between">
@@ -2041,8 +2041,8 @@ export default function AdminControlCenter() {
                       <div className="flex items-center gap-3 mb-6">
                         <Activity className="w-6 h-6 text-orange-400" />
                         <div>
-                          <h3 className="text-xl font-semibold glass-text">System Performance</h3>
-                          <p className="glass-text-muted">Monitor and optimize system performance</p>
+                          <h3 className="text-xl font-semibold settings-label">System Performance</h3>
+                          <p className="settings-description">Monitor and optimize system performance</p>
                         </div>
                       </div>
                       
@@ -2050,9 +2050,9 @@ export default function AdminControlCenter() {
                       
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div className="glass-card p-4">
-                          <h4 className="font-semibold glass-text mb-3">Memory Usage</h4>
+                          <h4 className="font-semibold settings-label mb-3">Memory Usage</h4>
                           <div className="space-y-2">
-                            <div className="flex justify-between glass-text-muted text-sm">
+                            <div className="flex justify-between settings-description text-sm">
                               <span>Used</span>
                               <span>72%</span>
                             </div>
@@ -2063,9 +2063,9 @@ export default function AdminControlCenter() {
                         </div>
                         
                         <div className="glass-card p-4">
-                          <h4 className="font-semibold glass-text mb-3">Response Time</h4>
+                          <h4 className="font-semibold settings-label mb-3">Response Time</h4>
                           <div className="space-y-2">
-                            <div className="flex justify-between glass-text-muted text-sm">
+                            <div className="flex justify-between settings-description text-sm">
                               <span>Average</span>
                               <span>1.2s</span>
                             </div>
@@ -2076,9 +2076,9 @@ export default function AdminControlCenter() {
                         </div>
                         
                         <div className="glass-card p-4">
-                          <h4 className="font-semibold glass-text mb-3">Database Load</h4>
+                          <h4 className="font-semibold settings-label mb-3">Database Load</h4>
                           <div className="space-y-2">
-                            <div className="flex justify-between glass-text-muted text-sm">
+                            <div className="flex justify-between settings-description text-sm">
                               <span>Load</span>
                               <span>45%</span>
                             </div>
