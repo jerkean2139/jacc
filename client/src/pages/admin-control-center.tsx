@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 import DocumentDragDrop from '@/components/ui/document-drag-drop';
 import DocumentPreviewModal from '@/components/ui/document-preview-modal';
-import DocumentUpload from '@/components/document-upload';
+import DocumentUpload from '@/components/document-upload-new';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';

@@ -36,19 +36,34 @@ interface DocumentUploadProps {
 
 export default function DocumentUpload({ folderId, onUploadComplete }: DocumentUploadProps) {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [currentStep, setCurrentStep] = useState<'files' | 'folder' | 'permissions'>('files');
+  const [selectedFolderId, setSelectedFolderId] = useState<string>(folderId || "");
+  const [permissions, setPermissions] = useState({
+    viewAll: true,
+    adminOnly: false,
+    managerAccess: true,
+    agentAccess: true,
+    trainingData: true,
+    autoVectorize: true,
+  });
   const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
-  const [uploadedFiles, setUploadedFiles] = useState<Array<{ id: string; filename: string; size: number; mimeType: string }>>([]);
-  const [showPlacementDialog, setShowPlacementDialog] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [fileNames, setFileNames] = useState<Record<string, string>>({});
   const [duplicateWarnings, setDuplicateWarnings] = useState<string[]>([]);
+  const [isDragOver, setIsDragOver] = useState(false);
   const isAuthenticated = true; // Admin-only component, no auth check needed
 
-  // Fetch existing documents
+  // Fetch existing documents and folders
   const { data: documentsData } = useQuery({
     queryKey: ["/api/documents"],
+    enabled: isAuthenticated,
+  });
+
+  const { data: folders = [] } = useQuery({
+    queryKey: ["/api/folders"],
+    enabled: isAuthenticated,
   });
 
   // Extract documents from the integrated structure
@@ -56,6 +71,14 @@ export default function DocumentUpload({ folderId, onUploadComplete }: DocumentU
     ...((documentsData as any)?.folders?.flatMap((folder: any) => folder.documents || []) || []),
     ...((documentsData as any)?.unassignedDocuments || [])
   ] : [];
+
+  // Reset to step 1 when files are cleared
+  const resetToStep1 = () => {
+    setCurrentStep('files');
+    setSelectedFiles([]);
+    setFileNames({});
+    setDuplicateWarnings([]);
+  };
 
   // Check for duplicate files using the API
   const checkForDuplicates = async (files: File[]) => {
@@ -151,8 +174,6 @@ export default function DocumentUpload({ folderId, onUploadComplete }: DocumentU
       });
     },
   });
-
-  const [isDragOver, setIsDragOver] = useState(false);
 
   const validateAndAddFiles = (files: File[]) => {
     // Enhanced file type validation including ZIP files
