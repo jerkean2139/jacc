@@ -128,6 +128,23 @@ export default function AdminControlCenter() {
   const [editingUrl, setEditingUrl] = useState<any>(null);
   const [isForcingUpdate, setIsForcingUpdate] = useState<string | null>(null);
 
+  // AI Configuration state
+  const [aiConfig, setAiConfig] = useState({
+    primaryModel: 'claude-sonnet-4',
+    fallbackModel: 'gpt-4o',
+    temperature: 0.7,
+    maxTokens: 4096,
+    responseStyle: 'professional'
+  });
+
+  // Search parameters state
+  const [searchParams, setSearchParams] = useState({
+    sensitivity: 0.8,
+    searchOrder: ['faq', 'documents', 'web'],
+    fuzzyMatching: true,
+    maxResults: 10
+  });
+
   // Data queries
   const { data: faqData = [], isLoading: faqLoading, error: faqError } = useQuery({
     queryKey: ['/api/admin/faq'],
@@ -146,6 +163,22 @@ export default function AdminControlCenter() {
 
   const { data: userChats, isLoading: chatsLoading } = useQuery({
     queryKey: ['/api/admin/chat-reviews'],
+  });
+
+  // AI Configuration queries
+  const { data: aiModelsData } = useQuery({
+    queryKey: ['/api/admin/ai-models'],
+    retry: false,
+  });
+
+  const { data: searchParamsData } = useQuery({
+    queryKey: ['/api/admin/search-params'],
+    retry: false,
+  });
+
+  const { data: aiConfigData } = useQuery({
+    queryKey: ['/api/admin/ai-config'],
+    retry: false,
   });
 
   const { data: chatMessages, isLoading: messagesLoading } = useQuery({
@@ -221,6 +254,20 @@ export default function AdminControlCenter() {
       }
     }
   }, [chatMessages, selectedChatId]);
+
+  // Sync AI configuration data with local state
+  useEffect(() => {
+    if (aiConfigData) {
+      setAiConfig(aiConfigData);
+    }
+  }, [aiConfigData]);
+
+  // Sync search parameters data with local state
+  useEffect(() => {
+    if (searchParamsData) {
+      setSearchParams(searchParamsData);
+    }
+  }, [searchParamsData]);
 
   // Create category mutation
   const createCategoryMutation = useMutation({
@@ -306,6 +353,71 @@ export default function AdminControlCenter() {
         variant: "destructive",
       });
     }
+  });
+
+  // AI Configuration mutations
+  const updateAiConfigMutation = useMutation({
+    mutationFn: (config: any) => apiRequest('/api/admin/ai-config', {
+      method: 'PUT',
+      body: JSON.stringify(config),
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/ai-config'] });
+      toast({
+        title: "Success",
+        description: "AI configuration updated successfully",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to update AI configuration",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Update search parameters mutation
+  const updateSearchParamsMutation = useMutation({
+    mutationFn: (params: any) => apiRequest('/api/admin/search-params', {
+      method: 'PUT',
+      body: JSON.stringify(params),
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/search-params'] });
+      toast({
+        title: "Success",
+        description: "Search parameters updated successfully",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to update search parameters",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Set default model mutation
+  const setDefaultModelMutation = useMutation({
+    mutationFn: (modelId: string) => apiRequest(`/api/admin/ai-models/${modelId}/set-default`, {
+      method: 'POST',
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/ai-models'] });
+      toast({
+        title: "Success",
+        description: "Default model updated successfully",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to set default model",
+        variant: "destructive",
+      });
+    },
   });
 
   // Mutations
@@ -1889,19 +2001,41 @@ export default function AdminControlCenter() {
                           <div className="space-y-3">
                             <div>
                               <label className="settings-text text-sm">Primary Model</label>
-                              <select className="glass-input w-full mt-1 p-2">
-                                <option value="claude-sonnet">Claude Sonnet</option>
-                                <option value="gpt-4">GPT-4</option>
-                                <option value="gpt-3.5">GPT-3.5 Turbo</option>
+                              <select 
+                                className="glass-input w-full mt-1 p-2"
+                                value={aiConfig.primaryModel}
+                                onChange={(e) => setAiConfig({...aiConfig, primaryModel: e.target.value})}
+                              >
+                                <option value="claude-sonnet-4">Claude 4.0 Sonnet</option>
+                                <option value="gpt-4o">GPT-4o</option>
+                                <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
                               </select>
                             </div>
                             <div>
                               <label className="settings-text text-sm">Response Temperature</label>
-                              <input type="range" min="0" max="1" step="0.1" defaultValue="0.7" className="w-full mt-1" />
+                              <input 
+                                type="range" 
+                                min="0" 
+                                max="1" 
+                                step="0.1" 
+                                value={aiConfig.temperature}
+                                onChange={(e) => setAiConfig({...aiConfig, temperature: parseFloat(e.target.value)})}
+                                className="w-full mt-1" 
+                              />
                               <div className="flex justify-between text-xs settings-description">
-                                <span>Conservative</span>
-                                <span>Creative</span>
+                                <span>Conservative (0.0)</span>
+                                <span>Creative (1.0)</span>
                               </div>
+                              <div className="text-center text-sm mt-1">Current: {aiConfig.temperature}</div>
+                            </div>
+                            <div className="pt-3 border-t">
+                              <Button 
+                                onClick={() => updateAiConfigMutation.mutate(aiConfig)}
+                                disabled={updateAiConfigMutation.isPending}
+                                className="w-full glass-button"
+                              >
+                                {updateAiConfigMutation.isPending ? 'Saving...' : 'Save AI Configuration'}
+                              </Button>
                             </div>
                           </div>
                         </div>
@@ -1911,15 +2045,50 @@ export default function AdminControlCenter() {
                           <div className="space-y-3">
                             <div>
                               <label className="settings-text text-sm">Search Sensitivity</label>
-                              <input type="range" min="0.1" max="1" step="0.1" defaultValue="0.8" className="w-full mt-1" />
+                              <input 
+                                type="range" 
+                                min="0.1" 
+                                max="1" 
+                                step="0.1" 
+                                value={searchParams.sensitivity}
+                                onChange={(e) => setSearchParams({...searchParams, sensitivity: parseFloat(e.target.value)})}
+                                className="w-full mt-1" 
+                              />
                               <div className="flex justify-between text-xs settings-description">
-                                <span>Strict</span>
-                                <span>Fuzzy</span>
+                                <span>Strict (0.1)</span>
+                                <span>Flexible (1.0)</span>
                               </div>
+                              <div className="text-center text-sm mt-1">Current: {searchParams.sensitivity}</div>
                             </div>
                             <div>
                               <label className="settings-text text-sm">Max Results</label>
-                              <input type="number" min="1" max="50" defaultValue="10" className="glass-input w-full mt-1 p-2" />
+                              <input 
+                                type="number" 
+                                min="1" 
+                                max="50" 
+                                value={searchParams.maxResults}
+                                onChange={(e) => setSearchParams({...searchParams, maxResults: parseInt(e.target.value)})}
+                                className="glass-input w-full mt-1 p-2" 
+                              />
+                            </div>
+                            <div>
+                              <label className="settings-text text-sm">Fuzzy Matching</label>
+                              <div className="flex items-center space-x-2 mt-1">
+                                <Switch
+                                  checked={searchParams.fuzzyMatching}
+                                  onCheckedChange={(checked) => setSearchParams({...searchParams, fuzzyMatching: checked})}
+                                />
+                                <span className="text-sm">{searchParams.fuzzyMatching ? 'Enabled' : 'Disabled'}</span>
+                              </div>
+                            </div>
+                            <div className="pt-3 border-t">
+                              <Button 
+                                onClick={() => updateSearchParamsMutation.mutate(searchParams)}
+                                disabled={updateSearchParamsMutation.isPending}
+                                className="w-full glass-button"
+                              >
+                                {updateSearchParamsMutation.isPending ? 'Saving...' : 'Save Search Parameters'}
+                              </Button>
                             </div>
                           </div>
                         </div>
