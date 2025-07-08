@@ -2195,8 +2195,8 @@ export default function AdminControlCenter() {
               <Label htmlFor="editCategoryName">Category Name</Label>
               <Input
                 id="editCategoryName"
-                value={editingCategory}
-                onChange={(e) => setEditingCategory(e.target.value)}
+                value={newCategoryName}
+                onChange={(e) => setNewCategoryName(e.target.value)}
                 placeholder="Enter category name"
               />
             </div>
