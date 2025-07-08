@@ -38,25 +38,25 @@ const conversationStarters = [
     id: "rates",
     icon: Calculator,
     text: "I need help calculating processing rates and finding competitive pricing",
-    color: "bg-blue-500 hover:bg-blue-600"
+    color: "bg-blue-500 hover:bg-blue-600 hover:text-white"
   },
   {
     id: "processors", 
     icon: TrendingUp,
     text: "I need to compare payment processors - can you help me analyze different options?",
-    color: "bg-green-500 hover:bg-green-600"
+    color: "bg-green-500 hover:bg-green-600 hover:text-white"
   },
   {
     id: "proposal",
     icon: BarChart3,
     text: "I need help creating a merchant proposal with competitive rates and terms",
-    color: "bg-purple-500 hover:bg-purple-600"
+    color: "bg-purple-500 hover:bg-purple-600 hover:text-white"
   },
   {
     id: "marketing",
     icon: Brain,
     text: "Let's Talk Marketing",
-    color: "bg-purple-600 hover:bg-purple-700",
+    color: "bg-purple-600 hover:bg-purple-700 hover:text-white",
     comingSoon: true
   }
 ];
@@ -410,10 +410,10 @@ export function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessage }: Ch
                     variant="outline"
                     className={`${
                       isComingSoon 
-                        ? 'bg-gray-400 hover:bg-gray-500 cursor-not-allowed opacity-70' 
+                        ? 'bg-gray-400 hover:bg-gray-500 cursor-not-allowed opacity-70 text-white hover:text-white' 
                         : starter.color
-                    } text-white border-0 h-auto p-3 text-left flex items-center gap-2 transition-all duration-200 ${
-                      !isComingSoon ? 'hover:scale-[1.02]' : ''
+                    } text-white hover:text-white border-0 h-auto p-3 text-left flex items-center gap-2 transition-all duration-200 ${
+                      !isComingSoon ? 'hover:scale-[1.02] hover:shadow-lg' : ''
                     } w-full text-sm`}
                     onClick={() => !isComingSoon && handleConversationStarter(starter)}
                     disabled={isComingSoon}
@@ -442,7 +442,7 @@ export function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessage }: Ch
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Ask about processing rates, compare processors, or request market insights..."
-                className="min-h-[36px] max-h-16 resize-none pr-10 text-sm py-2"
+                className="min-h-[36px] max-h-16 resize-none pr-12 text-sm py-2"
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
@@ -455,14 +455,15 @@ export function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessage }: Ch
                 variant="ghost"
                 size="sm"
                 onClick={toggleVoiceRecording}
-                className={`absolute right-2 top-2 p-1 h-6 w-6 ${
+                className={`absolute right-1 top-1 p-2 h-8 w-8 rounded-full ${
                   isRecording 
-                    ? 'text-red-500 hover:text-red-600' 
-                    : 'text-gray-400 hover:text-gray-600'
+                    ? 'text-red-500 hover:text-red-600 bg-red-50 hover:bg-red-100' 
+                    : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
                 }`}
                 disabled={!recognition}
+                title={isRecording ? "Stop recording" : "Start voice recording"}
               >
-                {isRecording ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                {isRecording ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
               </Button>
             </div>
             
@@ -586,14 +587,15 @@ export function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessage }: Ch
               variant="ghost"
               size="sm"
               onClick={toggleVoiceRecording}
-              className={`absolute right-2 top-2 p-1 h-6 w-6 ${
+              className={`absolute right-1 top-2 p-2 h-8 w-8 rounded-full ${
                 isRecording 
-                  ? 'text-red-500 hover:text-red-600' 
-                  : 'text-gray-400 hover:text-gray-600'
+                  ? 'text-red-500 hover:text-red-600 bg-red-50 hover:bg-red-100' 
+                  : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
               }`}
               disabled={!recognition}
+              title={isRecording ? "Stop recording" : "Start voice recording"}
             >
-              {isRecording ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+              {isRecording ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
             </Button>
           </div>
           
