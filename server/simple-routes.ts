@@ -117,9 +117,9 @@ const conversationStates = new Map();
 function getConversationStarterResponse(userMessage: string): string | null {
   const msg = userMessage.toLowerCase().trim();
   
-  // Check for conversation starter patterns - CLEAN RESPONSES WITHOUT FORMATTING
+  // ULTRA-FAST responses for conversation starters - immediate return
   if (msg.includes('help calculating processing rates') || msg.includes('competitive pricing')) {
-    return `<h2>Let's Calculate Your Deal 💰</h2>
+    return `<h2>Let's Calculate Your Deal</h2>
 <p>I'll help you build a competitive processing rate proposal step by step.</p>
 
 <p><strong>First, tell me about the business:</strong></p>
@@ -144,6 +144,36 @@ function getConversationStarterResponse(userMessage: string): string | null {
 </ul>
 
 <p>I'll provide a detailed comparison with specific recommendations and can generate a comparison report for you.</p>`;
+  }
+
+  if (msg.includes('talk marketing') || msg.includes('marketing')) {
+    return `<h2>Marketing Strategy Session</h2>
+<p>Great! I'll help you develop effective marketing strategies for your merchant services business.</p>
+
+<p><strong>What's your focus area?</strong></p>
+<ul>
+<li>Lead generation strategies</li>
+<li>Cold outreach templates</li>
+<li>Referral program development</li>
+<li>Social media marketing</li>
+</ul>
+
+<p>Tell me which area you'd like to explore first, and I'll provide specific tactics and templates.</p>`;
+  }
+
+  if (msg.includes('create proposal') || msg.includes('proposal')) {
+    return `<h2>Proposal Creation Assistant</h2>
+<p>Perfect! I'll help you create a compelling proposal that wins the deal.</p>
+
+<p><strong>Tell me about your prospect:</strong></p>
+<ul>
+<li>What type of business are they?</li>
+<li>What's their current payment processing pain point?</li>
+<li>Estimated monthly transaction volume?</li>
+<li>Any specific requirements they mentioned?</li>
+</ul>
+
+<p>With these details, I'll create a customized proposal highlighting value propositions, competitive rates, and implementation benefits.</p>`;
   }
   
   return null; // No fast-path match
@@ -970,6 +1000,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/documents/:id', async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
+      
+      // Handle FAQ entries (non-UUID format)
+      if (id.startsWith('faq-')) {
+        const { db } = await import('./db.ts');
+        const { faqEntries } = await import('../shared/schema.ts');
+        const { eq } = await import('drizzle-orm');
+        
+        const faqId = parseInt(id.replace('faq-', ''), 10);
+        const [faqEntry] = await db.select().from(faqEntries).where(eq(faqEntries.id, faqId));
+        
+        if (!faqEntry) {
+          return res.status(404).json({ message: "FAQ entry not found" });
+        }
+        
+        // Convert FAQ to document format
+        return res.json({
+          id: `faq-${faqEntry.id}`,
+          title: faqEntry.question,
+          content: faqEntry.answer,
+          type: 'faq',
+          createdAt: faqEntry.createdAt
+        });
+      }
+      
+      // Handle regular documents (UUID format)
       const { db } = await import('./db.ts');
       const { documents } = await import('../shared/schema.ts');
       const { eq } = await import('drizzle-orm');

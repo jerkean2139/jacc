@@ -380,10 +380,10 @@ export function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessage }: Ch
     return (
       <div className="flex-1 flex flex-col">
         {/* Welcome Content */}
-        <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+        <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
           {/* JACC Logo - Guy with Glasses */}
-          <div className="mb-6">
-            <div className="w-20 h-20 rounded-xl overflow-hidden shadow-lg">
+          <div className="mb-4">
+            <div className="w-16 h-16 rounded-xl overflow-hidden shadow-lg">
               <img 
                 src="/jacc-logo.jpg" 
                 alt="JACC Assistant" 
@@ -392,15 +392,15 @@ export function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessage }: Ch
             </div>
           </div>
           
-          <h2 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-gray-200">
+          <h2 className="text-xl font-semibold mb-3 text-gray-800 dark:text-gray-200">
             Welcome to JACC
           </h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-md">
+          <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md text-sm">
             Your AI-powered merchant services assistant. Start a conversation to get help with pricing, processors, and proposals.
           </p>
           
           {/* Conversation Starters */}
-          <div className="grid gap-4 w-full max-w-md">
+          <div className="grid gap-3 w-full max-w-lg">
             {conversationStarters.map((starter) => {
               const Icon = starter.icon;
               const isComingSoon = starter.comingSoon;
@@ -412,18 +412,18 @@ export function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessage }: Ch
                       isComingSoon 
                         ? 'bg-gray-400 hover:bg-gray-500 cursor-not-allowed opacity-70' 
                         : starter.color
-                    } text-white border-0 h-auto p-4 text-left flex items-start gap-3 transition-all duration-200 ${
-                      !isComingSoon ? 'hover:scale-105' : ''
-                    } w-full`}
+                    } text-white border-0 h-auto p-3 text-left flex items-center gap-2 transition-all duration-200 ${
+                      !isComingSoon ? 'hover:scale-[1.02]' : ''
+                    } w-full text-sm`}
                     onClick={() => !isComingSoon && handleConversationStarter(starter)}
                     disabled={isComingSoon}
                     title={isComingSoon ? "Coming Soon" : undefined}
                   >
-                    <Icon className="h-5 w-5 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm leading-relaxed">{starter.text}</span>
+                    <Icon className="h-4 w-4 flex-shrink-0" />
+                    <span className="leading-tight">{starter.text}</span>
                   </Button>
                   {isComingSoon && (
-                    <div className="absolute -top-2 -right-2 bg-yellow-500 text-white text-xs px-2 py-1 rounded-full font-semibold shadow-lg">
+                    <div className="absolute -top-1 -right-1 bg-yellow-500 text-white text-xs px-1.5 py-0.5 rounded-full font-semibold shadow-lg">
                       Soon
                     </div>
                   )}
@@ -434,15 +434,15 @@ export function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessage }: Ch
         </div>
 
         {/* Chat Input for Welcome Screen */}
-        <div className="border-t p-4 bg-white dark:bg-gray-800">
-          <form onSubmit={handleSubmit} className="flex gap-3">
+        <div className="border-t p-3 bg-white dark:bg-gray-800">
+          <form onSubmit={handleSubmit} className="flex gap-2 max-w-lg mx-auto">
             <div className="flex-1 relative">
               <Textarea
                 ref={textareaRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Ask about processing rates, compare processors, or request market insights..."
-                className="min-h-[40px] max-h-20 resize-none pr-12"
+                className="min-h-[36px] max-h-16 resize-none pr-10 text-sm py-2"
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
@@ -469,7 +469,7 @@ export function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessage }: Ch
             <Button
               type="submit"
               disabled={!input.trim() || sendMessageMutation.isPending}
-              className="bg-blue-700 hover:bg-blue-800 text-white px-4 py-2 h-11"
+              className="bg-blue-700 hover:bg-blue-800 text-white h-9 w-9 p-0 flex-shrink-0"
             >
               <Send className="w-4 h-4" />
             </Button>
