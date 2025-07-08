@@ -1813,8 +1813,8 @@ export default function AdminControlCenter() {
                     <Settings className="w-6 h-6 text-blue-400" />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold glass-text">System Settings</h2>
-                    <p className="glass-text-muted">Configure your JACC admin environment</p>
+                    <h2 className="text-2xl font-bold settings-label">System Settings</h2>
+                    <p className="settings-description">Configure your JACC admin environment</p>
                   </div>
                 </div>
                 <div className="flex gap-2">
@@ -1834,7 +1834,7 @@ export default function AdminControlCenter() {
               {/* Main Categories */}
               <div className="lg:col-span-1">
                 <div className="glass-card p-6">
-                  <h3 className="text-lg font-semibold glass-text mb-4">Settings Categories</h3>
+                  <h3 className="text-lg font-semibold settings-label mb-4">Settings Categories</h3>
                   <div className="space-y-2">
                     <button 
                       className={`glass-button w-full justify-start text-sm p-3 ${settingsTab === "ai-search" ? "bg-blue-500/20 border-blue-400/50" : ""}`}
@@ -1876,8 +1876,8 @@ export default function AdminControlCenter() {
                       <div className="flex items-center gap-3 mb-6">
                         <Brain className="w-6 h-6 text-blue-400" />
                         <div>
-                          <h3 className="text-xl font-semibold glass-text">AI & Search Configuration</h3>
-                          <p className="glass-text-muted">Manage AI models and search parameters</p>
+                          <h3 className="text-xl font-semibold settings-label">AI & Search Configuration</h3>
+                          <p className="settings-description">Manage AI models and search parameters</p>
                         </div>
                       </div>
                       
@@ -1885,10 +1885,10 @@ export default function AdminControlCenter() {
                       
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="glass-card p-4">
-                          <h4 className="font-semibold glass-text mb-3">AI Model Configuration</h4>
+                          <h4 className="font-semibold settings-label mb-3">AI Model Configuration</h4>
                           <div className="space-y-3">
                             <div>
-                              <label className="glass-text-muted text-sm">Primary Model</label>
+                              <label className="settings-text text-sm">Primary Model</label>
                               <select className="glass-input w-full mt-1 p-2">
                                 <option value="claude-sonnet">Claude Sonnet</option>
                                 <option value="gpt-4">GPT-4</option>
@@ -1896,9 +1896,9 @@ export default function AdminControlCenter() {
                               </select>
                             </div>
                             <div>
-                              <label className="glass-text-muted text-sm">Response Temperature</label>
+                              <label className="settings-text text-sm">Response Temperature</label>
                               <input type="range" min="0" max="1" step="0.1" defaultValue="0.7" className="w-full mt-1" />
-                              <div className="flex justify-between text-xs glass-text-muted">
+                              <div className="flex justify-between text-xs settings-description">
                                 <span>Conservative</span>
                                 <span>Creative</span>
                               </div>
@@ -1907,18 +1907,18 @@ export default function AdminControlCenter() {
                         </div>
                         
                         <div className="glass-card p-4">
-                          <h4 className="font-semibold glass-text mb-3">Search Parameters</h4>
+                          <h4 className="font-semibold settings-label mb-3">Search Parameters</h4>
                           <div className="space-y-3">
                             <div>
-                              <label className="glass-text-muted text-sm">Search Sensitivity</label>
+                              <label className="settings-text text-sm">Search Sensitivity</label>
                               <input type="range" min="0.1" max="1" step="0.1" defaultValue="0.8" className="w-full mt-1" />
-                              <div className="flex justify-between text-xs glass-text-muted">
+                              <div className="flex justify-between text-xs settings-description">
                                 <span>Strict</span>
                                 <span>Fuzzy</span>
                               </div>
                             </div>
                             <div>
-                              <label className="glass-text-muted text-sm">Max Results</label>
+                              <label className="settings-text text-sm">Max Results</label>
                               <input type="number" min="1" max="50" defaultValue="10" className="glass-input w-full mt-1 p-2" />
                             </div>
                           </div>

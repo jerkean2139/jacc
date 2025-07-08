@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { db } from './db';
 import { chats, users, messages, chatReviews, messageCorrections } from '@shared/schema';
 import { eq, desc, isNull, sql } from 'drizzle-orm';
+import { randomUUID } from 'crypto';
 
 export function registerChatReviewRoutes(app: any) {
   // Get review stats (must be before parameterized routes)
@@ -258,6 +259,7 @@ export function registerChatReviewRoutes(app: any) {
           .where(eq(chatReviews.chatId, chatId));
       } else {
         await db.insert(chatReviews).values({
+          id: randomUUID(),
           chatId,
           reviewStatus,
           reviewNotes,
@@ -265,6 +267,7 @@ export function registerChatReviewRoutes(app: any) {
           correctionsMade: correctionsCount,
           totalMessages: messageCount,
           lastReviewedAt: new Date(),
+          createdAt: new Date(),
         });
       }
 

@@ -3647,7 +3647,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const chatId = crypto.randomUUID();
       const newChat = {
         id: chatId,
-        title: req.body.title || (req.body.message ? req.body.message.substring(0, 50) + "..." : "New Chat"),
+        title: req.body.title || (req.body.message ? req.body.message.substring(0, 50).trim() + (req.body.message.length > 50 ? "..." : "") : "New Chat"),
         userId: user.id,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
@@ -3659,7 +3659,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       await db.insert(chatsTable).values({
         id: chatId,
-        title: req.body.title || (req.body.message ? req.body.message.substring(0, 50) + "..." : "New Chat"),
+        title: req.body.title || (req.body.message ? req.body.message.substring(0, 50).trim() + (req.body.message.length > 50 ? "..." : "") : "New Chat"),
         userId: user.id,
         createdAt: new Date(),
         updatedAt: new Date()
