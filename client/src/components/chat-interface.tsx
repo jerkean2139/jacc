@@ -442,7 +442,7 @@ export function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessage }: Ch
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Ask about processing rates, compare processors, or request market insights..."
-                className="min-h-[36px] max-h-16 resize-none pr-12 text-sm py-2"
+                className="min-h-[36px] max-h-16 resize-none pr-14 text-sm py-2"
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
@@ -455,7 +455,7 @@ export function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessage }: Ch
                 variant="ghost"
                 size="sm"
                 onClick={toggleVoiceRecording}
-                className={`absolute right-1 top-1 p-2 h-8 w-8 rounded-full ${
+                className={`absolute right-3 top-1 p-2 h-8 w-8 rounded-full ${
                   isRecording 
                     ? 'text-red-500 hover:text-red-600 bg-red-50 hover:bg-red-100' 
                     : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
@@ -574,7 +574,7 @@ export function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessage }: Ch
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask about processing rates, compare processors, or request market insights..."
-              className="min-h-[40px] max-h-20 resize-none pr-12"
+              className="min-h-[40px] max-h-20 resize-none pr-14"
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
@@ -587,7 +587,7 @@ export function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessage }: Ch
               variant="ghost"
               size="sm"
               onClick={toggleVoiceRecording}
-              className={`absolute right-1 top-2 p-2 h-8 w-8 rounded-full ${
+              className={`absolute right-3 top-2 p-2 h-8 w-8 rounded-full ${
                 isRecording 
                   ? 'text-red-500 hover:text-red-600 bg-red-50 hover:bg-red-100' 
                   : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'

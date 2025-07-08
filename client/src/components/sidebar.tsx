@@ -450,7 +450,9 @@ export default function Sidebar({
                       ? "text-slate-900 dark:text-white font-medium" 
                       : "text-slate-700 dark:text-slate-300"
                   )}>
-                    {chat.title}
+                    {chat.title && chat.title !== "New Chat" && chat.title !== "Untitled Chat" 
+                      ? chat.title 
+                      : "New Chat"}
                   </span>
                   {activeChatId === chat.id && (
                     <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0" />
