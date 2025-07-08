@@ -385,7 +385,7 @@ export function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessage }: Ch
           <div className="mb-6">
             <div className="w-20 h-20 rounded-xl overflow-hidden shadow-lg">
               <img 
-                src="/attached_assets/FS6idYAvlqMOrtmKZEBd5.jpg" 
+                src="/jacc-logo.jpg" 
                 alt="JACC Assistant" 
                 className="w-full h-full object-cover"
               />
@@ -511,7 +511,7 @@ export function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessage }: Ch
                 <div className="flex-shrink-0">
                   <div className="w-8 h-8 rounded-full overflow-hidden">
                     <img 
-                      src="/attached_assets/FS6idYAvlqMOrtmKZEBd5.jpg" 
+                      src="/jacc-logo.jpg" 
                       alt="JACC Assistant" 
                       className="w-full h-full object-cover"
                     />
@@ -549,7 +549,7 @@ export function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessage }: Ch
             <div className="flex-shrink-0">
               <div className="w-8 h-8 rounded-full overflow-hidden">
                 <img 
-                  src="/attached_assets/FS6idYAvlqMOrtmKZEBd5.jpg" 
+                  src="/jacc-logo.jpg" 
                   alt="JACC Assistant" 
                   className="w-full h-full object-cover"
                 />
