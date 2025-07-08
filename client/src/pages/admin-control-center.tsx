@@ -17,7 +17,7 @@ import {
   Settings, Database, MessageSquare, Brain, PlayCircle, CheckCircle, XCircle, 
   AlertTriangle, Clock, TrendingUp, Zap, Globe, Search, FileText, Eye, Download,
   Edit, Trash2, Save, Plus, Folder, FolderOpen, Upload, Users, Activity,
-  BarChart3, Timer, ChevronDown, ChevronRight, Target, BookOpen, ThumbsUp,
+  BarChart3, Timer, ChevronDown, ChevronRight, Target, BookOpen, ThumbsUp, Trash,
   ThumbsDown, Star, Copy, AlertCircle, ArrowRight, User, Bot, RefreshCw, Calendar,
   Archive, Scan
 } from 'lucide-react';
