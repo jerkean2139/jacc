@@ -321,7 +321,7 @@ export function registerChatReviewRoutes(app: any) {
           .update(chatReviews)
           .set({
             reviewStatus: 'archived',
-            reviewedBy: userId,
+            reviewedBy: userId === 'admin' ? 'admin-user-id' : userId,
             lastReviewedAt: new Date(),
             updatedAt: new Date(),
           })
@@ -330,7 +330,7 @@ export function registerChatReviewRoutes(app: any) {
         await db.insert(chatReviews).values({
           chatId,
           reviewStatus: 'archived',
-          reviewedBy: userId,
+          reviewedBy: userId === 'admin' ? 'admin-user-id' : userId,
           lastReviewedAt: new Date(),
         });
       }
@@ -360,7 +360,7 @@ export function registerChatReviewRoutes(app: any) {
           .update(chatReviews)
           .set({
             reviewStatus: 'approved',
-            reviewedBy: userId,
+            reviewedBy: userId === 'admin' ? 'admin-user-id' : userId,
             lastReviewedAt: new Date(),
             updatedAt: new Date(),
           })
@@ -369,7 +369,7 @@ export function registerChatReviewRoutes(app: any) {
         await db.insert(chatReviews).values({
           chatId,
           reviewStatus: 'approved',
-          reviewedBy: userId,
+          reviewedBy: userId === 'admin' ? 'admin-user-id' : userId,
           lastReviewedAt: new Date(),
         });
       }
