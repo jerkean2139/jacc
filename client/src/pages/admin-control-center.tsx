@@ -12,6 +12,7 @@ import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Switch } from '@/components/ui/switch';
 import { 
   Settings, Database, MessageSquare, Brain, PlayCircle, CheckCircle, XCircle, 
   AlertTriangle, Clock, TrendingUp, Zap, Globe, Search, FileText, Eye, Download,
@@ -99,6 +100,10 @@ export default function AdminControlCenter() {
   const [chatReviewTab, setChatReviewTab] = useState<string>("active");
   const [chatDisplayLimit, setChatDisplayLimit] = useState(5); // Show 5 chats initially
   
+
+  // URL tracking state  
+  const [showEditUrl, setShowEditUrl] = useState(false);
+  
   // State for category management
   const [showCreateCategory, setShowCreateCategory] = useState(false);
   const [showEditCategory, setShowEditCategory] = useState(false);
@@ -114,6 +119,10 @@ export default function AdminControlCenter() {
   const [scheduledUrls, setScheduledUrls] = useState<string[]>([]);
   const [correctionText, setCorrectionText] = useState("");
   const [isSubmittingCorrection, setIsSubmittingCorrection] = useState(false);
+
+  // State for URL tracking management
+  const [editingUrl, setEditingUrl] = useState<any>(null);
+  const [isForcingUpdate, setIsForcingUpdate] = useState<string | null>(null);
 
   // Data queries
   const { data: faqData = [], isLoading: faqLoading, error: faqError } = useQuery({
@@ -141,7 +150,7 @@ export default function AdminControlCenter() {
   });
 
   // Fetch vendor URLs for tracking
-  const { data: vendorUrls = [] } = useQuery({
+  const { data: vendorUrls = [], refetch: refetchVendorUrls } = useQuery({
     queryKey: ['/api/admin/vendor-urls'],
     retry: false,
   });
@@ -480,6 +489,82 @@ export default function AdminControlCenter() {
     },
   });
 
+  // URL tracking mutations
+  const updateUrlMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: any }) => {
+      const response = await apiRequest(`/api/admin/vendor-urls/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+        headers: { 'Content-Type': 'application/json' },
+      });
+      return response;
+    },
+    onSuccess: () => {
+      toast({
+        title: "URL Updated",
+        description: "Vendor URL has been updated successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/vendor-urls'] });
+      setShowEditUrl(false);
+      setEditingUrl(null);
+    },
+    onError: (error) => {
+      toast({
+        title: "Error", 
+        description: "Failed to update URL",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const forceUpdateMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await apiRequest(`/api/admin/scrape-vendor-url/${id}`, {
+        method: 'POST',
+      });
+      return response;
+    },
+    onSuccess: () => {
+      toast({
+        title: "Update Forced",
+        description: "URL content is being scraped and updated",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/vendor-urls'] });
+      setIsForcingUpdate(null);
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to force update",
+        variant: "destructive",
+      });
+      setIsForcingUpdate(null);
+    },
+  });
+
+  const deleteUrlMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await apiRequest(`/api/admin/vendor-urls/${id}`, {
+        method: 'DELETE',
+      });
+      return response;
+    },
+    onSuccess: () => {
+      toast({
+        title: "URL Deleted",
+        description: "Vendor URL has been removed from tracking",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/vendor-urls'] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to delete URL",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Delete chat mutation
   const deleteChatMutation = useMutation({
     mutationFn: async (chatId: string) => {
@@ -645,6 +730,30 @@ export default function AdminControlCenter() {
   const handleDeleteCategory = (id: number) => {
     if (confirm('Are you sure you want to delete this category? This will affect all FAQs in this category.')) {
       deleteCategoryMutation.mutate(id);
+    }
+  };
+
+  // URL tracking handlers
+  const handleEditUrl = (urlData: any) => {
+    setEditingUrl(urlData);
+    setShowEditUrl(true);
+  };
+
+  const handleToggleUrlTracking = async (urlData: any) => {
+    updateUrlMutation.mutate({
+      id: urlData.id,
+      data: { ...urlData, isActive: !urlData.isActive }
+    });
+  };
+
+  const handleForceUpdate = async (urlId: string) => {
+    setIsForcingUpdate(urlId);
+    forceUpdateMutation.mutate(urlId);
+  };
+
+  const handleDeleteUrl = (urlId: string) => {
+    if (confirm('Are you sure you want to remove this URL from tracking?')) {
+      deleteUrlMutation.mutate(urlId);
     }
   };
 
@@ -1305,129 +1414,172 @@ export default function AdminControlCenter() {
               </CardContent>
             </Card>
 
-            {/* URL Tracking & Status Section */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Globe className="h-5 w-5" />
-                  URL Tracking & Status
-                </CardTitle>
-                <CardDescription>
-                  View all tracked URLs with their weekly check status and last update
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {Array.isArray(vendorUrls) && vendorUrls.length > 0 ? (
-                    vendorUrls.map((urlData: any) => (
-                      <div key={urlData.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <div className="flex-1">
-                          <div className="font-medium text-sm truncate max-w-xs">
-                            {urlData.url}
-                          </div>
-                          <div className="text-xs text-gray-500 mt-1">
-                            Last checked: {urlData.lastChecked ? new Date(urlData.lastChecked).toLocaleDateString() : 'Never'}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Badge variant={urlData.weeklyCheck ? "default" : "secondary"}>
-                            {urlData.weeklyCheck ? "Weekly Enabled" : "Manual Only"}
-                          </Badge>
-                          <Badge variant={urlData.status === 'active' ? "default" : "destructive"}>
-                            {urlData.status || 'Unknown'}
-                          </Badge>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="text-center py-6 text-gray-500">
-                      <Globe className="w-8 h-8 mx-auto mb-2 text-gray-300" />
-                      <p className="text-sm">No tracked URLs yet</p>
-                      <p className="text-xs">Add a URL above with weekly updates to see tracking status</p>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
+            {/* Knowledge Base Management - Combined URL Tracking & Categories */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
-                  📚 Knowledge Base Categories
-                  <Button size="sm" onClick={() => setShowCreateCategory(true)}>
-                    <Plus className="w-4 h-4 mr-1" />
-                    New Category
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Globe className="h-5 w-5" />
+                    Knowledge Base Management
+                  </div>
+                  <div className="flex gap-2">
+                    <Button size="sm" onClick={() => setShowCreateCategory(true)}>
+                      <Plus className="w-4 h-4 mr-1" />
+                      New Category
+                    </Button>
+                  </div>
                 </CardTitle>
-                <CardDescription>Browse and manage FAQ categories with CRUD operations</CardDescription>
+                <CardDescription>
+                  Manage FAQ categories and track automated URL updates for knowledge base content
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <ScrollArea className="h-[300px]">
-                  <div className="space-y-3">
-                    {faqLoading ? (
-                      <div className="flex items-center justify-center py-8">
-                        <RefreshCw className="h-6 w-6 animate-spin" />
-                        <span className="ml-2">Loading categories...</span>
-                      </div>
-                    ) : computedFaqCategories.length === 0 ? (
-                      <div className="text-center py-8 text-gray-500">
-                        <BookOpen className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                        <p className="font-medium">No FAQ categories found</p>
-                        <p className="text-sm">Add your first FAQ entry to create categories</p>
-                        {faqError && (
-                          <p className="text-red-500 text-sm mt-2">Error loading FAQ data</p>
+                <Tabs defaultValue="categories" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="categories">FAQ Categories</TabsTrigger>
+                    <TabsTrigger value="url-tracking">URL Tracking</TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="categories" className="mt-4">
+                    <ScrollArea className="h-[350px]">
+                      <div className="space-y-3">
+                        {faqLoading ? (
+                          <div className="flex items-center justify-center py-8">
+                            <RefreshCw className="h-6 w-6 animate-spin" />
+                            <span className="ml-2">Loading categories...</span>
+                          </div>
+                        ) : computedFaqCategories.length === 0 ? (
+                          <div className="text-center py-8 text-gray-500">
+                            <BookOpen className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                            <p className="font-medium">No FAQ categories found</p>
+                            <p className="text-sm">Add your first FAQ entry to create categories</p>
+                            {faqError && (
+                              <p className="text-red-500 text-sm mt-2">Error loading FAQ data</p>
+                            )}
+                          </div>
+                        ) : (
+                          computedFaqCategories.map((category) => {
+                            const count = Array.isArray(faqData) ? faqData.filter((f: FAQ) => f.category === category).length : 0;
+                            const categoryFAQs = Array.isArray(faqData) ? faqData.filter((f: FAQ) => f.category === category) : [];
+                            const isOpen = openKnowledgeCategories.includes(category);
+                            
+                            return (
+                              <Collapsible key={category} open={isOpen} onOpenChange={() => toggleKnowledgeCategory(category)}>
+                                <CollapsibleTrigger asChild>
+                                  <div className="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                                    <div className="flex items-center gap-3">
+                                      {isOpen ? <ChevronDown className="w-4 h-4 text-blue-500" /> : <ChevronRight className="w-4 h-4 text-blue-500" />}
+                                      <BookOpen className="w-4 h-4 text-blue-500" />
+                                      <span className="font-medium capitalize">{category}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <Badge variant="secondary">{count}</Badge>
+                                      <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); handleEditCategory({ name: category }); }}>
+                                        <Edit className="w-3 h-3" />
+                                      </Button>
+                                    </div>
+                                  </div>
+                                </CollapsibleTrigger>
+                                <CollapsibleContent className="mt-2 ml-6 space-y-2">
+                                  {categoryFAQs.map((faq: FAQ) => (
+                                    <div key={faq.id} className="flex items-center justify-between p-2 bg-white border rounded text-sm">
+                                      <div className="flex-1">
+                                        <div className="font-medium truncate max-w-xs">{faq.question}</div>
+                                        <div className="text-xs text-gray-500 mt-1">Priority: {faq.priority} | Active: {faq.isActive ? 'Yes' : 'No'}</div>
+                                      </div>
+                                      <div className="flex items-center gap-1">
+                                        <Button size="sm" variant="ghost" onClick={() => handleEditFAQ(faq)}>
+                                          <Edit className="w-3 h-3" />
+                                        </Button>
+                                        <Button size="sm" variant="ghost" onClick={() => handleDeleteFAQ(faq.id)}>
+                                          <Trash className="w-3 h-3 text-red-500" />
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </CollapsibleContent>
+                              </Collapsible>
+                            );
+                          })
                         )}
                       </div>
-                    ) : (
-                      computedFaqCategories.map((category) => {
-                        const count = Array.isArray(faqData) ? faqData.filter((f: FAQ) => f.category === category).length : 0;
-                        const categoryFAQs = Array.isArray(faqData) ? faqData.filter((f: FAQ) => f.category === category) : [];
-                        const isOpen = openKnowledgeCategories.includes(category);
-                        
-                        return (
-                          <Collapsible key={category} open={isOpen} onOpenChange={() => toggleKnowledgeCategory(category)}>
-                            <CollapsibleTrigger asChild>
-                              <div className="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
-                                <div className="flex items-center gap-3">
-                                  {isOpen ? <ChevronDown className="w-4 h-4 text-blue-500" /> : <ChevronRight className="w-4 h-4 text-blue-500" />}
-                                  <BookOpen className="w-4 h-4 text-blue-500" />
-                                  <span className="font-medium capitalize">{category}</span>
+                    </ScrollArea>
+                  </TabsContent>
+                  
+                  <TabsContent value="url-tracking" className="mt-4">
+                    <ScrollArea className="h-[350px]">
+                      <div className="space-y-3">
+                        {Array.isArray(vendorUrls) && vendorUrls.length > 0 ? (
+                          vendorUrls.map((urlData: any) => (
+                            <div key={urlData.id} className="p-4 border rounded-lg bg-gray-50">
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="flex-1">
+                                  <div className="font-medium text-sm truncate max-w-sm">
+                                    {urlData.urlTitle || urlData.url}
+                                  </div>
+                                  <div className="text-xs text-gray-500 mt-1">
+                                    {urlData.vendorName} • Last checked: {urlData.lastScraped ? new Date(urlData.lastScraped).toLocaleDateString() : 'Never'}
+                                  </div>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  <Badge variant="secondary">{count}</Badge>
-                                  <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); handleEditCategory({ name: category }); }}>
+                                  <Switch 
+                                    checked={urlData.isActive} 
+                                    onCheckedChange={() => handleToggleUrlTracking(urlData)}
+                                    size="sm"
+                                  />
+                                  <Badge variant={urlData.isActive ? "default" : "secondary"}>
+                                    {urlData.isActive ? "Active" : "Disabled"}
+                                  </Badge>
+                                </div>
+                              </div>
+                              
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  <Badge variant={urlData.autoUpdate ? "default" : "secondary"} className="text-xs">
+                                    {urlData.autoUpdate ? `Auto: ${urlData.updateFrequency}` : "Manual Only"}
+                                  </Badge>
+                                  <Badge variant={urlData.scrapingStatus === 'success' ? "default" : "destructive"} className="text-xs">
+                                    {urlData.scrapingStatus || 'Pending'}
+                                  </Badge>
+                                </div>
+                                
+                                <div className="flex items-center gap-1">
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline"
+                                    onClick={() => handleForceUpdate(urlData.id)}
+                                    disabled={isForcingUpdate === urlData.id}
+                                  >
+                                    {isForcingUpdate === urlData.id ? (
+                                      <RefreshCw className="w-3 h-3 animate-spin" />
+                                    ) : (
+                                      <RefreshCw className="w-3 h-3" />
+                                    )}
+                                    Force Update
+                                  </Button>
+                                  <Button size="sm" variant="ghost" onClick={() => handleEditUrl(urlData)}>
                                     <Edit className="w-3 h-3" />
+                                  </Button>
+                                  <Button size="sm" variant="ghost" onClick={() => handleDeleteUrl(urlData.id)}>
+                                    <Trash className="w-3 h-3 text-red-500" />
                                   </Button>
                                 </div>
                               </div>
-                            </CollapsibleTrigger>
-                            <CollapsibleContent className="mt-2 ml-6 space-y-2">
-                              {categoryFAQs.map((faq: FAQ) => (
-                                <div key={faq.id} className="p-2 bg-gray-50 rounded text-sm">
-                                  <div className="font-medium text-gray-800">{faq.question}</div>
-                                  <div className="text-gray-600 mt-1">{faq.answer.length > 100 ? faq.answer.substring(0, 100) + '...' : faq.answer}</div>
-                                  <div className="flex items-center gap-2 mt-2">
-                                    <Button size="sm" variant="ghost" onClick={() => handleEditFAQ(faq)}>
-                                      <Edit className="w-3 h-3 mr-1" />
-                                      Edit
-                                    </Button>
-                                    <Button size="sm" variant="ghost" onClick={() => handleDeleteFAQ(faq.id)}>
-                                      <Trash2 className="w-3 h-3 mr-1 text-red-500" />
-                                      Delete
-                                    </Button>
-                                  </div>
-                                </div>
-                              ))}
-                            </CollapsibleContent>
-                          </Collapsible>
-                        );
-                      })
-                    )}
-                  </div>
-                </ScrollArea>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="text-center py-8 text-gray-500">
+                            <Globe className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                            <p className="text-sm">No tracked URLs yet</p>
+                            <p className="text-xs">Add a URL above with weekly updates to see tracking status</p>
+                          </div>
+                        )}
+                      </div>
+                    </ScrollArea>
+                  </TabsContent>
+                </Tabs>
               </CardContent>
             </Card>
-          </div>
 
           <Card>
             <CardHeader>
@@ -1474,6 +1626,7 @@ export default function AdminControlCenter() {
               </ScrollArea>
             </CardContent>
           </Card>
+          </div>
         </TabsContent>
 
         <TabsContent value="documents" className="space-y-6">
@@ -2475,6 +2628,90 @@ export default function AdminControlCenter() {
               )}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* URL Edit Modal */}
+      <Dialog open={showEditUrl} onOpenChange={setShowEditUrl}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit Vendor URL</DialogTitle>
+            <DialogDescription>
+              Update URL settings and tracking configuration
+            </DialogDescription>
+          </DialogHeader>
+          
+          {editingUrl && (
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="urlAddress">URL Address</Label>
+                <Input
+                  id="urlAddress"
+                  value={editingUrl.url || ''}
+                  onChange={(e) => setEditingUrl({...editingUrl, url: e.target.value})}
+                  placeholder="https://vendor.com/support"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="vendorName">Vendor Name</Label>
+                <Input
+                  id="vendorName"
+                  value={editingUrl.vendorName || ''}
+                  onChange={(e) => setEditingUrl({...editingUrl, vendorName: e.target.value})}
+                  placeholder="Vendor Name"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="urlTitle">Page Title</Label>
+                <Input
+                  id="urlTitle"
+                  value={editingUrl.urlTitle || ''}
+                  onChange={(e) => setEditingUrl({...editingUrl, urlTitle: e.target.value})}
+                  placeholder="Page Title"
+                />
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <Label htmlFor="autoUpdate">Automatic Updates</Label>
+                <Switch
+                  id="autoUpdate"
+                  checked={editingUrl.autoUpdate || false}
+                  onCheckedChange={(checked) => setEditingUrl({...editingUrl, autoUpdate: checked})}
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="updateFrequency">Update Frequency</Label>
+                <Select 
+                  value={editingUrl.updateFrequency || 'weekly'} 
+                  onValueChange={(value) => setEditingUrl({...editingUrl, updateFrequency: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select frequency" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="daily">Daily</SelectItem>
+                    <SelectItem value="weekly">Weekly</SelectItem>
+                    <SelectItem value="monthly">Monthly</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowEditUrl(false)}>
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={() => updateUrlMutation.mutate({ id: editingUrl.id, data: editingUrl })}
+                  disabled={updateUrlMutation.isPending}
+                >
+                  {updateUrlMutation.isPending ? "Saving..." : "Save Changes"}
+                </Button>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
