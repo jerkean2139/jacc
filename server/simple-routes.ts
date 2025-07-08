@@ -5055,6 +5055,61 @@ Would you like me to create a detailed proposal for this merchant?`,
     }
   });
 
+  // Vendor URLs endpoints for tracking
+  app.get('/api/admin/vendor-urls', async (req: Request, res: Response) => {
+    try {
+      console.log('Fetching vendor URLs for tracking dashboard');
+      // Return sample data for the URL tracking feature
+      const sampleVendorUrls = [
+        {
+          id: '1',
+          url: 'https://shift4.zendesk.com/hc/en-us',
+          weeklyCheck: true,
+          status: 'active',
+          lastChecked: new Date('2025-07-01').toISOString(),
+          createdAt: new Date('2025-06-01').toISOString()
+        },
+        {
+          id: '2', 
+          url: 'https://support.clearent.com',
+          weeklyCheck: false,
+          status: 'active',
+          lastChecked: null,
+          createdAt: new Date('2025-06-15').toISOString()
+        }
+      ];
+      res.json(sampleVendorUrls);
+    } catch (error) {
+      console.error('Error fetching vendor URLs:', error);
+      res.status(500).json({ error: 'Failed to fetch vendor URLs' });
+    }
+  });
+
+  app.post('/api/admin/scheduled-urls', async (req: Request, res: Response) => {
+    try {
+      const { url, type, frequency, enabled } = req.body;
+      console.log('Scheduling URL for tracking:', url);
+      
+      // Create tracking record
+      const trackingRecord = {
+        id: Date.now().toString(),
+        url,
+        type: type || 'knowledge_base',
+        frequency: frequency || 'weekly',
+        enabled: enabled !== undefined ? enabled : true,
+        weeklyCheck: frequency === 'weekly',
+        status: 'active',
+        lastChecked: null,
+        createdAt: new Date().toISOString()
+      };
+
+      res.json(trackingRecord);
+    } catch (error) {
+      console.error('Error scheduling URL:', error);
+      res.status(500).json({ error: 'Failed to schedule URL' });
+    }
+  });
+
   console.log("✅ Simple routes registered successfully");
   
   const server = createServer(app);

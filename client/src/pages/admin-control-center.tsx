@@ -99,6 +99,13 @@ export default function AdminControlCenter() {
   const [chatReviewTab, setChatReviewTab] = useState<string>("active");
   const [chatDisplayLimit, setChatDisplayLimit] = useState(5); // Show 5 chats initially
   
+  // State for category management
+  const [showCreateCategory, setShowCreateCategory] = useState(false);
+  const [showEditCategory, setShowEditCategory] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<any>(null);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [newCategoryDescription, setNewCategoryDescription] = useState('');
+  
   // URL Scraping for Knowledge Base
   const [scrapeUrl, setScrapeUrl] = useState('');
   const [isScrapingForKnowledge, setIsScrapingForKnowledge] = useState(false);
@@ -131,6 +138,18 @@ export default function AdminControlCenter() {
   const { data: chatMessages, isLoading: messagesLoading } = useQuery({
     queryKey: [`/api/chats/${selectedChatId}/messages`],
     enabled: !!selectedChatId,
+  });
+
+  // Fetch vendor URLs for tracking
+  const { data: vendorUrls = [] } = useQuery({
+    queryKey: ['/api/admin/vendor-urls'],
+    retry: false,
+  });
+
+  // Fetch FAQ categories
+  const { data: faqCategories = [] } = useQuery({
+    queryKey: ['/api/admin/faq-categories'],
+    retry: false,
   });
 
   // Monitor chat selection state
@@ -190,6 +209,92 @@ export default function AdminControlCenter() {
     }
   }, [chatMessages, selectedChatId]);
 
+  // Create category mutation
+  const createCategoryMutation = useMutation({
+    mutationFn: async (categoryData: any) => {
+      const response = await fetch('/api/admin/faq-categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(categoryData)
+      });
+      if (!response.ok) throw new Error('Failed to create category');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/faq'] });
+      setShowCreateCategory(false);
+      setNewCategoryName('');
+      setNewCategoryDescription('');
+      toast({
+        title: "Category Created",
+        description: "New FAQ category has been created successfully",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Creation Failed",
+        description: "Failed to create category. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Update category mutation
+  const updateCategoryMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: any }) => {
+      const response = await fetch(`/api/admin/faq-categories/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      if (!response.ok) throw new Error('Failed to update category');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/faq'] });
+      setShowEditCategory(false);
+      setEditingCategory(null);
+      setNewCategoryName('');
+      setNewCategoryDescription('');
+      toast({
+        title: "Category Updated",
+        description: "FAQ category has been updated successfully",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Update Failed",
+        description: "Failed to update category. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Delete category mutation
+  const deleteCategoryMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await fetch(`/api/admin/faq-categories/${id}`, {
+        method: 'DELETE'
+      });
+      if (!response.ok) throw new Error('Failed to delete category');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/faq'] });
+      toast({
+        title: "Category Deleted",
+        description: "FAQ category has been deleted successfully",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Delete Failed", 
+        description: "Failed to delete category. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
   // Mutations
   const createFAQMutation = useMutation({
     mutationFn: async (newFAQ: Omit<FAQ, 'id'>) => {
@@ -218,11 +323,17 @@ export default function AdminControlCenter() {
     },
   });
 
-  // Edit FAQ mutation
+  // Edit FAQ mutation - Fixed API call
   const editFAQMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: Partial<FAQ> }) => {
       console.log('Updating FAQ:', id, data);
-      const response = await apiRequest('PATCH', `/api/admin/faq/${id}`, data);
+      const response = await fetch(`/api/admin/faq/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(data)
+      });
+      if (!response.ok) throw new Error('Failed to update FAQ');
       return response.json();
     },
     onSuccess: () => {
@@ -243,10 +354,15 @@ export default function AdminControlCenter() {
     },
   });
 
-  // Delete FAQ mutation
+  // Delete FAQ mutation - Fixed API call
   const deleteFAQMutation = useMutation({
     mutationFn: async (id: number) => {
-      const response = await apiRequest('DELETE', `/api/admin/faq/${id}`);
+      const response = await fetch(`/api/admin/faq/${id}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to delete FAQ');
       return response.json();
     },
     onSuccess: () => {
@@ -265,6 +381,10 @@ export default function AdminControlCenter() {
       });
     },
   });
+
+  // Category CRUD mutations - already defined above
+
+  // Update and delete category mutations already defined above
 
   // Create folder mutation
   const createFolderMutation = useMutation({
@@ -488,12 +608,52 @@ export default function AdminControlCenter() {
     }
   };
 
+  // Category management handlers
+  const handleCreateCategory = () => {
+    if (!newCategoryName.trim()) {
+      toast({
+        title: "Category Name Required",
+        description: "Please enter a category name",
+        variant: "destructive",
+      });
+      return;
+    }
+    createCategoryMutation.mutate({
+      name: newCategoryName,
+      description: newCategoryDescription
+    });
+  };
+
+  const handleEditCategory = (category: any) => {
+    setEditingCategory(category);
+    setNewCategoryName(category.name);
+    setNewCategoryDescription(category.description || '');
+    setShowEditCategory(true);
+  };
+
+  const handleUpdateCategory = () => {
+    if (!editingCategory) return;
+    updateCategoryMutation.mutate({
+      id: editingCategory.id,
+      data: {
+        name: newCategoryName,
+        description: newCategoryDescription
+      }
+    });
+  };
+
+  const handleDeleteCategory = (id: number) => {
+    if (confirm('Are you sure you want to delete this category? This will affect all FAQs in this category.')) {
+      deleteCategoryMutation.mutate(id);
+    }
+  };
+
   // Filtered data for FAQ management
   const filteredFAQs = Array.isArray(faqData) ? faqData.filter((faq: FAQ) => {
     return faq.question && faq.answer;
   }) : [];
 
-  const faqCategories = Array.isArray(faqData) ? 
+  const computedFaqCategories = Array.isArray(faqData) ? 
     Array.from(new Set(faqData.map((faq: FAQ) => faq.category))) : [];
 
   // URL Scraping for Knowledge Base
@@ -1145,10 +1305,61 @@ export default function AdminControlCenter() {
               </CardContent>
             </Card>
 
+            {/* URL Tracking & Status Section */}
             <Card>
               <CardHeader>
-                <CardTitle>📚 Knowledge Base Categories</CardTitle>
-                <CardDescription>Browse and manage FAQ categories</CardDescription>
+                <CardTitle className="flex items-center gap-2">
+                  <Globe className="h-5 w-5" />
+                  URL Tracking & Status
+                </CardTitle>
+                <CardDescription>
+                  View all tracked URLs with their weekly check status and last update
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {Array.isArray(vendorUrls) && vendorUrls.length > 0 ? (
+                    vendorUrls.map((urlData: any) => (
+                      <div key={urlData.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div className="flex-1">
+                          <div className="font-medium text-sm truncate max-w-xs">
+                            {urlData.url}
+                          </div>
+                          <div className="text-xs text-gray-500 mt-1">
+                            Last checked: {urlData.lastChecked ? new Date(urlData.lastChecked).toLocaleDateString() : 'Never'}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant={urlData.weeklyCheck ? "default" : "secondary"}>
+                            {urlData.weeklyCheck ? "Weekly Enabled" : "Manual Only"}
+                          </Badge>
+                          <Badge variant={urlData.status === 'active' ? "default" : "destructive"}>
+                            {urlData.status || 'Unknown'}
+                          </Badge>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-6 text-gray-500">
+                      <Globe className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                      <p className="text-sm">No tracked URLs yet</p>
+                      <p className="text-xs">Add a URL above with weekly updates to see tracking status</p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  📚 Knowledge Base Categories
+                  <Button size="sm" onClick={() => setShowCreateCategory(true)}>
+                    <Plus className="w-4 h-4 mr-1" />
+                    New Category
+                  </Button>
+                </CardTitle>
+                <CardDescription>Browse and manage FAQ categories with CRUD operations</CardDescription>
               </CardHeader>
               <CardContent>
                 <ScrollArea className="h-[300px]">
@@ -1158,7 +1369,7 @@ export default function AdminControlCenter() {
                         <RefreshCw className="h-6 w-6 animate-spin" />
                         <span className="ml-2">Loading categories...</span>
                       </div>
-                    ) : faqCategories.length === 0 ? (
+                    ) : computedFaqCategories.length === 0 ? (
                       <div className="text-center py-8 text-gray-500">
                         <BookOpen className="w-12 h-12 mx-auto mb-3 text-gray-300" />
                         <p className="font-medium">No FAQ categories found</p>
@@ -1168,7 +1379,7 @@ export default function AdminControlCenter() {
                         )}
                       </div>
                     ) : (
-                      faqCategories.map((category) => {
+                      computedFaqCategories.map((category) => {
                         const count = Array.isArray(faqData) ? faqData.filter((f: FAQ) => f.category === category).length : 0;
                         const categoryFAQs = Array.isArray(faqData) ? faqData.filter((f: FAQ) => f.category === category) : [];
                         const isOpen = openKnowledgeCategories.includes(category);
@@ -1182,7 +1393,12 @@ export default function AdminControlCenter() {
                                   <BookOpen className="w-4 h-4 text-blue-500" />
                                   <span className="font-medium capitalize">{category}</span>
                                 </div>
-                                <Badge variant="secondary">{count}</Badge>
+                                <div className="flex items-center gap-2">
+                                  <Badge variant="secondary">{count}</Badge>
+                                  <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); handleEditCategory({ name: category }); }}>
+                                    <Edit className="w-3 h-3" />
+                                  </Button>
+                                </div>
                               </div>
                             </CollapsibleTrigger>
                             <CollapsibleContent className="mt-2 ml-6 space-y-2">
@@ -2154,6 +2370,108 @@ export default function AdminControlCenter() {
                   <Plus className="w-4 h-4 mr-2" />
                   Create Folder
                 </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Category Modal */}
+      <Dialog open={showCreateCategory} onOpenChange={setShowCreateCategory}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Create New Category</DialogTitle>
+            <DialogDescription>
+              Add a new FAQ category to organize your knowledge base
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="categoryName">Category Name</Label>
+              <Input
+                id="categoryName"
+                value={newCategoryName}
+                onChange={(e) => setNewCategoryName(e.target.value)}
+                placeholder="Enter category name"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="categoryDescription">Description (Optional)</Label>
+              <Textarea
+                id="categoryDescription"
+                value={newCategoryDescription}
+                onChange={(e) => setNewCategoryDescription(e.target.value)}
+                placeholder="Enter category description"
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreateCategory(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleCreateCategory}
+              disabled={createCategoryMutation.isPending || !newCategoryName.trim()}
+            >
+              {createCategoryMutation.isPending ? (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                'Create Category'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Category Modal */}
+      <Dialog open={showEditCategory} onOpenChange={setShowEditCategory}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit Category</DialogTitle>
+            <DialogDescription>
+              Update the category name and description
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="editCategoryName">Category Name</Label>
+              <Input
+                id="editCategoryName"
+                value={newCategoryName}
+                onChange={(e) => setNewCategoryName(e.target.value)}
+                placeholder="Enter category name"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="editCategoryDescription">Description (Optional)</Label>
+              <Textarea
+                id="editCategoryDescription"
+                value={newCategoryDescription}
+                onChange={(e) => setNewCategoryDescription(e.target.value)}
+                placeholder="Enter category description"
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditCategory(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleUpdateCategory}
+              disabled={updateCategoryMutation.isPending || !newCategoryName.trim()}
+            >
+              {updateCategoryMutation.isPending ? (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  Updating...
+                </>
+              ) : (
+                'Update Category'
               )}
             </Button>
           </DialogFooter>
