@@ -3794,17 +3794,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 currentChat.title = generatedTitle;
                 chats.set(chatId, currentChat);
                 console.log('✅ Updated chat title:', generatedTitle);
+                
+                // CRITICAL: Update database with the new title
+                const { eq } = await import('drizzle-orm');
+                await db.update(chatsTable)
+                  .set({ title: generatedTitle, updatedAt: new Date() })
+                  .where(eq(chatsTable.id, chatId));
+                console.log('✅ Updated database with new title:', generatedTitle);
               }
             } catch (titleError) {
               console.error('❌ Title generation failed:', titleError);
-              // Fallback to meaningful title based on content
-              const fallbackTitle = content.length > 50 ? 
-                content.substring(0, 47).trim() + '...' : 
-                content.trim();
+              // Fallback to meaningful title based on content - use first sentence
+              const sentences = content.split(/[.!?]+/);
+              const firstSentence = sentences[0]?.trim();
+              const fallbackTitle = firstSentence && firstSentence.length > 0 && firstSentence.length <= 60 ? 
+                firstSentence : 
+                (content.length > 50 ? content.substring(0, 47).trim() + '...' : content.trim());
+              
+              console.log('🏷️ Using fallback title:', fallbackTitle);
               const currentChat = chats.get(chatId);
               if (currentChat) {
                 currentChat.title = fallbackTitle;
                 chats.set(chatId, currentChat);
+                
+                // CRITICAL: Update database with fallback title too
+                const { eq } = await import('drizzle-orm');
+                await db.update(chatsTable)
+                  .set({ title: fallbackTitle, updatedAt: new Date() })
+                  .where(eq(chatsTable.id, chatId));
+                console.log('✅ Updated database with fallback title:', fallbackTitle);
               }
             }
           }
