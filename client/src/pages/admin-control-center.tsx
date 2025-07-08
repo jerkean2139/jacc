@@ -1052,7 +1052,7 @@ export default function AdminControlCenter() {
                               `}
                             >
                               <div className="flex items-center justify-between mb-2">
-                                <h4 className="font-medium truncate text-sm">{chat.title || 'Untitled Chat'}</h4>
+                                <h4 className="font-medium truncate text-sm">{chat.chatTitle || chat.title || 'Untitled Chat'}</h4>
                                 <Badge variant={chat.reviewStatus === 'approved' ? 'default' : 'secondary'} className="text-xs">
                                   {chat.reviewStatus === 'approved' ? (
                                     <ThumbsUp className="h-3 w-3 mr-1" />
