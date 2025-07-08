@@ -1770,943 +1770,462 @@ export default function AdminControlCenter() {
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            {/* Main Categories */}
-            <div className="lg:col-span-1">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Settings Categories</CardTitle>
-                </CardHeader>
-                <CardContent className="p-2">
-                  <div className="space-y-1">
-                    <Button 
-                      variant={settingsTab === "ai-search" ? "default" : "ghost"} 
-                      className="w-full justify-start text-sm"
+          {/* Glassomorphic Settings Panel */}
+          <div className="relative min-h-screen">
+            {/* Background gradient */}
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 via-purple-900/20 to-pink-900/20 rounded-lg"></div>
+            
+            {/* Glass panel header */}
+            <div className="relative glass-panel p-6 mb-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="glass-card p-3 rounded-full">
+                    <Settings className="w-6 h-6 text-blue-400" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold glass-text">System Settings</h2>
+                    <p className="glass-text-muted">Configure your JACC admin environment</p>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <button className="glass-button px-4 py-2 flex items-center gap-2">
+                    <Download className="w-4 h-4" />
+                    Export
+                  </button>
+                  <button className="glass-button px-4 py-2 flex items-center gap-2">
+                    <Upload className="w-4 h-4" />
+                    Import
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="relative grid grid-cols-1 lg:grid-cols-4 gap-6">
+              {/* Main Categories */}
+              <div className="lg:col-span-1">
+                <div className="glass-card p-6">
+                  <h3 className="text-lg font-semibold glass-text mb-4">Settings Categories</h3>
+                  <div className="space-y-2">
+                    <button 
+                      className={`glass-button w-full justify-start text-sm p-3 ${settingsTab === "ai-search" ? "bg-blue-500/20 border-blue-400/50" : ""}`}
                       onClick={() => setSettingsTab("ai-search")}
                     >
                       <Brain className="w-4 h-4 mr-2" />
                       AI & Search
-                    </Button>
-                    <Button 
-                      variant={settingsTab === "user-mgmt" ? "default" : "ghost"} 
-                      className="w-full justify-start text-sm"
+                    </button>
+                    <button 
+                      className={`glass-button w-full justify-start text-sm p-3 ${settingsTab === "user-mgmt" ? "bg-purple-500/20 border-purple-400/50" : ""}`}
                       onClick={() => setSettingsTab("user-mgmt")}
                     >
                       <Users className="w-4 h-4 mr-2" />
                       User Management
-                    </Button>
-                    <Button 
-                      variant={settingsTab === "content-docs" ? "default" : "ghost"} 
-                      className="w-full justify-start text-sm"
+                    </button>
+                    <button 
+                      className={`glass-button w-full justify-start text-sm p-3 ${settingsTab === "content-docs" ? "bg-green-500/20 border-green-400/50" : ""}`}
                       onClick={() => setSettingsTab("content-docs")}
                     >
                       <FileText className="w-4 h-4 mr-2" />
                       Content & Documents
-                    </Button>
-                    <Button 
-                      variant={settingsTab === "system-perf" ? "default" : "ghost"} 
-                      className="w-full justify-start text-sm"
+                    </button>
+                    <button 
+                      className={`glass-button w-full justify-start text-sm p-3 ${settingsTab === "system-perf" ? "bg-orange-500/20 border-orange-400/50" : ""}`}
                       onClick={() => setSettingsTab("system-perf")}
                     >
                       <Activity className="w-4 h-4 mr-2" />
                       System Performance
-                    </Button>
+                    </button>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
+                </div>
+              </div>
 
-            {/* Settings Content */}
-            <div className="lg:col-span-3">
-              {settingsTab === "ai-search" && (
-                <div className="space-y-6">
-                  {/* AI Prompts Management */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Brain className="w-5 h-5 text-purple-500" />
-                        AI Prompts Management
-                      </CardTitle>
-                      <CardDescription>Configure AI behavior and prompt templates</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                      {/* System Prompts */}
-                      <div>
-                        <h4 className="font-semibold mb-3 flex items-center gap-2">
-                          <Settings className="w-4 h-4" />
-                          System Prompts
-                        </h4>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          <Card className="border-blue-200">
-                            <CardContent className="p-4">
-                              <div className="flex items-center justify-between mb-2">
-                                <span className="font-medium text-sm">Document Search</span>
-                                <Button size="sm" variant="outline">
-                                  <Edit className="w-3 h-3" />
-                                </Button>
-                              </div>
-                              <p className="text-xs text-gray-600">Controls how AI searches documents</p>
-                            </CardContent>
-                          </Card>
-                          <Card className="border-green-200">
-                            <CardContent className="p-4">
-                              <div className="flex items-center justify-between mb-2">
-                                <span className="font-medium text-sm">Response Formatting</span>
-                                <Button size="sm" variant="outline">
-                                  <Edit className="w-3 h-3" />
-                                </Button>
-                              </div>
-                              <p className="text-xs text-gray-600">Manages response structure and style</p>
-                            </CardContent>
-                          </Card>
-                          <Card className="border-red-200">
-                            <CardContent className="p-4">
-                              <div className="flex items-center justify-between mb-2">
-                                <span className="font-medium text-sm">Error Handling</span>
-                                <Button size="sm" variant="outline">
-                                  <Edit className="w-3 h-3" />
-                                </Button>
-                              </div>
-                              <p className="text-xs text-gray-600">Defines error response behavior</p>
-                            </CardContent>
-                          </Card>
-                        </div>
-                      </div>
-
-                      <Separator />
-
-                      {/* Personality & Behavior */}
-                      <div>
-                        <h4 className="font-semibold mb-3 flex items-center gap-2">
-                          <User className="w-4 h-4" />
-                          Personality & Behavior
-                        </h4>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          <div className="space-y-4">
-                            <div>
-                              <Label className="text-sm font-medium">AI Response Style</Label>
-                              <Select>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Professional & Helpful" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="professional">Professional & Helpful</SelectItem>
-                                  <SelectItem value="technical">Technical & Detailed</SelectItem>
-                                  <SelectItem value="conversational">Conversational & Friendly</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            <div>
-                              <Label className="text-sm font-medium">Response Tone</Label>
-                              <Select>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Balanced" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="formal">Formal</SelectItem>
-                                  <SelectItem value="balanced">Balanced</SelectItem>
-                                  <SelectItem value="casual">Casual</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          </div>
-                          <div className="space-y-4">
-                            <div>
-                              <Label className="text-sm font-medium mb-2 block">Expertise Level</Label>
-                              <div className="px-3 py-2 border rounded">Advanced</div>
-                            </div>
-                            <div className="space-y-2">
-                              <Label className="text-sm font-medium">Behavioral Options</Label>
-                              <div className="space-y-2">
-                                <div className="flex items-center space-x-2">
-                                  <input type="checkbox" id="proactive" defaultChecked />
-                                  <Label htmlFor="proactive" className="text-sm">Proactive suggestions</Label>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                  <input type="checkbox" id="detailed" defaultChecked />
-                                  <Label htmlFor="detailed" className="text-sm">Detailed explanations</Label>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <Separator />
-
-                      {/* Custom Prompt Templates */}
-                      <div>
-                        <h4 className="font-semibold mb-3 flex items-center gap-2">
-                          <FileText className="w-4 h-4" />
-                          Custom Prompt Templates
-                        </h4>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          <Card className="border-purple-200">
-                            <CardContent className="p-4">
-                              <div className="flex items-center justify-between mb-2">
-                                <span className="font-medium text-sm">Pricing Analysis</span>
-                                <div className="flex gap-1">
-                                  <Button size="sm" variant="outline">
-                                    <Edit className="w-3 h-3" />
-                                  </Button>
-                                  <Button size="sm" variant="outline">
-                                    <Download className="w-3 h-3" />
-                                  </Button>
-                                </div>
-                              </div>
-                              <p className="text-xs text-gray-600 mb-2">Merchant rate comparison template</p>
-                              <Badge variant="outline" className="text-xs">Active</Badge>
-                            </CardContent>
-                          </Card>
-                          <Card className="border-orange-200">
-                            <CardContent className="p-4">
-                              <div className="flex items-center justify-between mb-2">
-                                <span className="font-medium text-sm">Objection Handling</span>
-                                <div className="flex gap-1">
-                                  <Button size="sm" variant="outline">
-                                    <Edit className="w-3 h-3" />
-                                  </Button>
-                                  <Button size="sm" variant="outline">
-                                    <Download className="w-3 h-3" />
-                                  </Button>
-                                </div>
-                              </div>
-                              <p className="text-xs text-gray-600 mb-2">Sales objection responses</p>
-                              <Badge variant="outline" className="text-xs">Active</Badge>
-                            </CardContent>
-                          </Card>
-                          <Card className="border-teal-200">
-                            <CardContent className="p-4">
-                              <div className="flex items-center justify-between mb-2">
-                                <span className="font-medium text-sm">Compliance Guidance</span>
-                                <div className="flex gap-1">
-                                  <Button size="sm" variant="outline">
-                                    <Edit className="w-3 h-3" />
-                                  </Button>
-                                  <Button size="sm" variant="outline">
-                                    <Download className="w-3 h-3" />
-                                  </Button>
-                                </div>
-                              </div>
-                              <p className="text-xs text-gray-600 mb-2">Regulatory compliance help</p>
-                              <Badge variant="outline" className="text-xs">Active</Badge>
-                            </CardContent>
-                          </Card>
-                        </div>
-                        <div className="mt-4 flex gap-2">
-                          <Button variant="outline" size="sm">
-                            <Plus className="w-4 h-4 mr-2" />
-                            Create Template
-                          </Button>
-                          <Button variant="outline" size="sm">
-                            <Upload className="w-4 h-4 mr-2" />
-                            Import Template
-                          </Button>
-                        </div>
-                      </div>
-
-                      <Separator />
-
-                      {/* User-Specific Overrides */}
-                      <div>
-                        <h4 className="font-semibold mb-3 flex items-center gap-2">
-                          <Users className="w-4 h-4" />
-                          User-Specific Prompt Overrides
-                        </h4>
-                        <div className="space-y-3">
-                          <Card className="border-indigo-200">
-                            <CardContent className="p-4">
-                              <div className="flex items-center justify-between">
-                                <div>
-                                  <span className="font-medium text-sm">Dev Admin Role</span>
-                                  <p className="text-xs text-gray-600">Technical responses with system details</p>
-                                </div>
-                                <Button size="sm" variant="outline">
-                                  <Edit className="w-3 h-3" />
-                                </Button>
-                              </div>
-                            </CardContent>
-                          </Card>
-                          <Card className="border-emerald-200">
-                            <CardContent className="p-4">
-                              <div className="flex items-center justify-between">
-                                <div>
-                                  <span className="font-medium text-sm">Sales Agent Role</span>
-                                  <p className="text-xs text-gray-600">Sales-focused responses with market insights</p>
-                                </div>
-                                <Button size="sm" variant="outline">
-                                  <Edit className="w-3 h-3" />
-                                </Button>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Model Configuration */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Model Configuration</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Content Area */}
+              <div className="lg:col-span-3">
+                <div className="glass-card p-6">
+                  {settingsTab === "ai-search" && (
+                    <div className="space-y-6">
+                      <div className="flex items-center gap-3 mb-6">
+                        <Brain className="w-6 h-6 text-blue-400" />
                         <div>
-                          <Label className="text-sm font-medium">Primary Model</Label>
-                          <Select>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Claude 4.0 Sonnet" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="claude-4-sonnet">Claude 4.0 Sonnet</SelectItem>
-                              <SelectItem value="gpt-4o">GPT-4o</SelectItem>
-                            </SelectContent>
-                          </Select>
+                          <h3 className="text-xl font-semibold glass-text">AI & Search Configuration</h3>
+                          <p className="glass-text-muted">Manage AI models and search parameters</p>
                         </div>
+                      </div>
+                      
+                      <div className="glass-divider mb-6"></div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="glass-card p-4">
+                          <h4 className="font-semibold glass-text mb-3">AI Model Configuration</h4>
+                          <div className="space-y-3">
+                            <div>
+                              <label className="glass-text-muted text-sm">Primary Model</label>
+                              <select className="glass-input w-full mt-1 p-2">
+                                <option value="claude-sonnet">Claude Sonnet</option>
+                                <option value="gpt-4">GPT-4</option>
+                                <option value="gpt-3.5">GPT-3.5 Turbo</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label className="glass-text-muted text-sm">Response Temperature</label>
+                              <input type="range" min="0" max="1" step="0.1" defaultValue="0.7" className="w-full mt-1" />
+                              <div className="flex justify-between text-xs glass-text-muted">
+                                <span>Conservative</span>
+                                <span>Creative</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="glass-card p-4">
+                          <h4 className="font-semibold glass-text mb-3">Search Parameters</h4>
+                          <div className="space-y-3">
+                            <div>
+                              <label className="glass-text-muted text-sm">Search Sensitivity</label>
+                              <input type="range" min="0.1" max="1" step="0.1" defaultValue="0.8" className="w-full mt-1" />
+                              <div className="flex justify-between text-xs glass-text-muted">
+                                <span>Strict</span>
+                                <span>Fuzzy</span>
+                              </div>
+                            </div>
+                            <div>
+                              <label className="glass-text-muted text-sm">Max Results</label>
+                              <input type="number" min="1" max="50" defaultValue="10" className="glass-input w-full mt-1 p-2" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {settingsTab === "user-mgmt" && (
+                    <div className="space-y-6">
+                      <div className="flex items-center gap-3 mb-6">
+                        <Users className="w-6 h-6 text-purple-400" />
                         <div>
-                          <Label className="text-sm font-medium">Search Sensitivity</Label>
-                          <Select>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Balanced" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="high">High Precision</SelectItem>
-                              <SelectItem value="balanced">Balanced</SelectItem>
-                              <SelectItem value="broad">Broad Search</SelectItem>
-                            </SelectContent>
-                          </Select>
+                          <h3 className="text-xl font-semibold glass-text">User Management</h3>
+                          <p className="glass-text-muted">Configure user access and permissions</p>
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
+                      
+                      <div className="glass-divider mb-6"></div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="glass-card p-4">
+                          <h4 className="font-semibold glass-text mb-3">Access Control</h4>
+                          <div className="space-y-3">
+                            <div>
+                              <label className="glass-text-muted text-sm">Default Role</label>
+                              <select className="glass-input w-full mt-1 p-2">
+                                <option value="sales-agent">Sales Agent</option>
+                                <option value="client-admin">Client Admin</option>
+                                <option value="dev-admin">Dev Admin</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label className="glass-text-muted text-sm">Session Timeout</label>
+                              <select className="glass-input w-full mt-1 p-2">
+                                <option value="15min">15 minutes</option>
+                                <option value="1hour">1 hour</option>
+                                <option value="2hours">2 hours</option>
+                                <option value="8hours">8 hours</option>
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="glass-card p-4">
+                          <h4 className="font-semibold glass-text mb-3">Security Settings</h4>
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <span className="glass-text text-sm">Require MFA</span>
+                              <input type="checkbox" className="glass-input" defaultChecked />
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="glass-text text-sm">Allow Guest Access</span>
+                              <input type="checkbox" className="glass-input" />
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="glass-text text-sm">Auto-logout</span>
+                              <input type="checkbox" className="glass-input" defaultChecked />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {settingsTab === "content-docs" && (
+                    <div className="space-y-6">
+                      <div className="flex items-center gap-3 mb-6">
+                        <FileText className="w-6 h-6 text-green-400" />
+                        <div>
+                          <h3 className="text-xl font-semibold glass-text">Content & Documents</h3>
+                          <p className="glass-text-muted">Configure document processing and content management</p>
+                        </div>
+                      </div>
+                      
+                      <div className="glass-divider mb-6"></div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="glass-card p-4">
+                          <h4 className="font-semibold glass-text mb-3">Document Processing</h4>
+                          <div className="space-y-3">
+                            <div>
+                              <label className="glass-text-muted text-sm">OCR Quality</label>
+                              <select className="glass-input w-full mt-1 p-2">
+                                <option value="high">High Quality</option>
+                                <option value="medium">Medium Quality</option>
+                                <option value="fast">Fast Processing</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label className="glass-text-muted text-sm">Max File Size (MB)</label>
+                              <input type="number" min="1" max="100" defaultValue="25" className="glass-input w-full mt-1 p-2" />
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="glass-card p-4">
+                          <h4 className="font-semibold glass-text mb-3">Content Management</h4>
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <span className="glass-text text-sm">Auto-categorize</span>
+                              <input type="checkbox" className="glass-input" defaultChecked />
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="glass-text text-sm">Version Control</span>
+                              <input type="checkbox" className="glass-input" defaultChecked />
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="glass-text text-sm">Backup Daily</span>
+                              <input type="checkbox" className="glass-input" defaultChecked />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {settingsTab === "system-perf" && (
+                    <div className="space-y-6">
+                      <div className="flex items-center gap-3 mb-6">
+                        <Activity className="w-6 h-6 text-orange-400" />
+                        <div>
+                          <h3 className="text-xl font-semibold glass-text">System Performance</h3>
+                          <p className="glass-text-muted">Monitor and optimize system performance</p>
+                        </div>
+                      </div>
+                      
+                      <div className="glass-divider mb-6"></div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="glass-card p-4">
+                          <h4 className="font-semibold glass-text mb-3">Memory Usage</h4>
+                          <div className="space-y-2">
+                            <div className="flex justify-between glass-text-muted text-sm">
+                              <span>Used</span>
+                              <span>72%</span>
+                            </div>
+                            <div className="w-full bg-gray-700 rounded-full h-2">
+                              <div className="bg-gradient-to-r from-green-400 to-blue-400 h-2 rounded-full" style={{width: '72%'}}></div>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="glass-card p-4">
+                          <h4 className="font-semibold glass-text mb-3">Response Time</h4>
+                          <div className="space-y-2">
+                            <div className="flex justify-between glass-text-muted text-sm">
+                              <span>Average</span>
+                              <span>1.2s</span>
+                            </div>
+                            <div className="w-full bg-gray-700 rounded-full h-2">
+                              <div className="bg-gradient-to-r from-yellow-400 to-orange-400 h-2 rounded-full" style={{width: '40%'}}></div>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="glass-card p-4">
+                          <h4 className="font-semibold glass-text mb-3">Database Load</h4>
+                          <div className="space-y-2">
+                            <div className="flex justify-between glass-text-muted text-sm">
+                              <span>Load</span>
+                              <span>45%</span>
+                            </div>
+                            <div className="w-full bg-gray-700 rounded-full h-2">
+                              <div className="bg-gradient-to-r from-blue-400 to-purple-400 h-2 rounded-full" style={{width: '45%'}}></div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
-
-              {settingsTab === "system-perf" && (
-                <div className="space-y-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Activity className="w-5 h-5 text-orange-500" />
-                        System Performance Monitoring
-                      </CardTitle>
-                      <CardDescription>Real-time system metrics and configuration</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                      {/* Real-time Metrics */}
-                      <div>
-                        <h4 className="font-semibold mb-3 flex items-center gap-2">
-                          <BarChart3 className="w-4 h-4" />
-                          Real-time Metrics
-                        </h4>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          <Card className="border-green-200">
-                            <CardContent className="p-4">
-                              <div className="flex items-center justify-between mb-2">
-                                <div className="flex items-center gap-2">
-                                  <Activity className="h-4 w-4 text-green-500" />
-                                  <span className="font-medium text-sm">System Status</span>
-                                </div>
-                                <Badge variant="outline" className="text-green-600">Online</Badge>
-                              </div>
-                              <p className="text-xs text-gray-600">All Services Operational</p>
-                              <div className="mt-2">
-                                <Progress value={98} className="h-2" />
-                                <p className="text-xs text-gray-500 mt-1">98% Uptime</p>
-                              </div>
-                            </CardContent>
-                          </Card>
-                          <Card className="border-blue-200">
-                            <CardContent className="p-4">
-                              <div className="flex items-center justify-between mb-2">
-                                <div className="flex items-center gap-2">
-                                  <Database className="h-4 w-4 text-blue-500" />
-                                  <span className="font-medium text-sm">Database</span>
-                                </div>
-                                <Badge variant="outline" className="text-blue-600">Connected</Badge>
-                              </div>
-                              <p className="text-xs text-gray-600">Response: 2.3s avg</p>
-                              <div className="mt-2">
-                                <Progress value={85} className="h-2" />
-                                <p className="text-xs text-gray-500 mt-1">85% Efficiency</p>
-                              </div>
-                            </CardContent>
-                          </Card>
-                          <Card className="border-orange-200">
-                            <CardContent className="p-4">
-                              <div className="flex items-center justify-between mb-2">
-                                <div className="flex items-center gap-2">
-                                  <Zap className="h-4 w-4 text-orange-500" />
-                                  <span className="font-medium text-sm">Memory Usage</span>
-                                </div>
-                                <Badge variant="outline" className="text-orange-600">97%</Badge>
-                              </div>
-                              <p className="text-xs text-gray-600">1.2GB / 1.25GB Used</p>
-                              <div className="mt-2">
-                                <Progress value={97} className="h-2" />
-                                <p className="text-xs text-gray-500 mt-1">High Usage</p>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        </div>
-                      </div>
-
-                      <Separator />
-
-                      {/* Timeout & Cache Settings */}
-                      <div>
-                        <h4 className="font-semibold mb-3 flex items-center gap-2">
-                          <Timer className="w-4 h-4" />
-                          Timeouts & Cache
-                        </h4>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          <div className="space-y-4">
-                            <div>
-                              <Label className="text-sm font-medium">API Timeout</Label>
-                              <Select>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="30 seconds" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="15s">15 seconds</SelectItem>
-                                  <SelectItem value="30s">30 seconds</SelectItem>
-                                  <SelectItem value="60s">60 seconds</SelectItem>
-                                  <SelectItem value="120s">2 minutes</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            <div>
-                              <Label className="text-sm font-medium">Database Timeout</Label>
-                              <Select>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="10 seconds" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="5s">5 seconds</SelectItem>
-                                  <SelectItem value="10s">10 seconds</SelectItem>
-                                  <SelectItem value="20s">20 seconds</SelectItem>
-                                  <SelectItem value="30s">30 seconds</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          </div>
-                          <div className="space-y-4">
-                            <div>
-                              <Label className="text-sm font-medium">Cache Duration</Label>
-                              <Select>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="5 minutes" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="1min">1 minute</SelectItem>
-                                  <SelectItem value="5min">5 minutes</SelectItem>
-                                  <SelectItem value="15min">15 minutes</SelectItem>
-                                  <SelectItem value="1hour">1 hour</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            <div className="space-y-2">
-                              <Label className="text-sm font-medium">Memory Optimization</Label>
-                              <div className="space-y-2">
-                                <div className="flex items-center space-x-2">
-                                  <input type="checkbox" id="auto-gc" defaultChecked />
-                                  <Label htmlFor="auto-gc" className="text-sm">Auto garbage collection</Label>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                  <input type="checkbox" id="cache-compression" defaultChecked />
-                                  <Label htmlFor="cache-compression" className="text-sm">Cache compression</Label>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <Separator />
-
-                      {/* Health Monitoring */}
-                      <div>
-                        <h4 className="font-semibold mb-3 flex items-center gap-2">
-                          <TrendingUp className="w-4 h-4" />
-                          Health Monitoring
-                        </h4>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <Card className="border-purple-200">
-                            <CardContent className="p-4">
-                              <div className="flex items-center justify-between mb-2">
-                                <span className="font-medium text-sm">AI Services</span>
-                                <Badge variant="outline" className="text-green-600">Healthy</Badge>
-                              </div>
-                              <div className="space-y-1 text-xs text-gray-600">
-                                <div className="flex justify-between">
-                                  <span>Claude API:</span>
-                                  <span className="text-green-600">Active</span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span>OpenAI API:</span>
-                                  <span className="text-green-600">Active</span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span>Pinecone:</span>
-                                  <span className="text-green-600">Connected</span>
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                          <Card className="border-teal-200">
-                            <CardContent className="p-4">
-                              <div className="flex items-center justify-between mb-2">
-                                <span className="font-medium text-sm">Search Accuracy</span>
-                                <Badge variant="outline" className="text-teal-600">96%</Badge>
-                              </div>
-                              <div className="space-y-1 text-xs text-gray-600">
-                                <div className="flex justify-between">
-                                  <span>Document Retrieval:</span>
-                                  <span className="text-green-600">Excellent</span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span>FAQ Matching:</span>
-                                  <span className="text-green-600">High</span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span>Vector Search:</span>
-                                  <span className="text-green-600">Optimal</span>
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              )}
-
-              {settingsTab === "user-mgmt" && (
-                <div className="space-y-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Users className="w-5 h-5 text-blue-500" />
-                        User Management
-                      </CardTitle>
-                      <CardDescription>Configure user access and session settings</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                      {/* Sessions & Notifications */}
-                      <div>
-                        <h4 className="font-semibold mb-3 flex items-center gap-2">
-                          <Clock className="w-4 h-4" />
-                          Sessions & Notifications
-                        </h4>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          <div className="space-y-4">
-                            <div>
-                              <Label className="text-sm font-medium">Default User Role</Label>
-                              <Select>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Sales Agent" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="sales-agent">Sales Agent</SelectItem>
-                                  <SelectItem value="client-admin">Client Admin</SelectItem>
-                                  <SelectItem value="dev-admin">Dev Admin</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            <div>
-                              <Label className="text-sm font-medium">Session Timeout</Label>
-                              <Select>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="2 hours" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="15min">15 minutes</SelectItem>
-                                  <SelectItem value="1hour">1 hour</SelectItem>
-                                  <SelectItem value="2hours">2 hours</SelectItem>
-                                  <SelectItem value="8hours">8 hours</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          </div>
-                          <div className="space-y-4">
-                            <div className="space-y-2">
-                              <Label className="text-sm font-medium">MFA Settings</Label>
-                              <div className="space-y-2">
-                                <div className="flex items-center space-x-2">
-                                  <input type="checkbox" id="mfa-required" defaultChecked />
-                                  <Label htmlFor="mfa-required" className="text-sm">Require MFA for admin roles</Label>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                  <input type="checkbox" id="guest-access" />
-                                  <Label htmlFor="guest-access" className="text-sm">Allow guest access</Label>
-                                </div>
-                              </div>
-                            </div>
-                            <div>
-                              <Label className="text-sm font-medium">Notification Preferences</Label>
-                              <Select>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Daily digest" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="immediate">Immediate</SelectItem>
-                                  <SelectItem value="daily">Daily digest</SelectItem>
-                                  <SelectItem value="weekly">Weekly summary</SelectItem>
-                                  <SelectItem value="disabled">Disabled</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              )}
-
-              {settingsTab === "content-docs" && (
-                <div className="space-y-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <FileText className="w-5 h-5 text-green-500" />
-                        Content & Document Processing
-                      </CardTitle>
-                      <CardDescription>Configure OCR, categorization, and retention policies</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                      {/* OCR & Categorization */}
-                      <div>
-                        <h4 className="font-semibold mb-3 flex items-center gap-2">
-                          <Scan className="w-4 h-4" />
-                          OCR & Categorization
-                        </h4>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          <div className="space-y-4">
-                            <div>
-                              <Label className="text-sm font-medium">OCR Quality Level</Label>
-                              <Select>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="High Quality" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="basic">Basic (Fast)</SelectItem>
-                                  <SelectItem value="standard">Standard</SelectItem>
-                                  <SelectItem value="high">High Quality</SelectItem>
-                                  <SelectItem value="premium">Premium (Slow)</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            <div className="space-y-2">
-                              <Label className="text-sm font-medium">Auto-Categorization</Label>
-                              <div className="space-y-2">
-                                <div className="flex items-center space-x-2">
-                                  <input type="checkbox" id="auto-categorize" defaultChecked />
-                                  <Label htmlFor="auto-categorize" className="text-sm">Enable auto-categorization</Label>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                  <input type="checkbox" id="auto-tagging" defaultChecked />
-                                  <Label htmlFor="auto-tagging" className="text-sm">Automatic tagging</Label>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="space-y-4">
-                            <div>
-                              <Label className="text-sm font-medium">Text Chunking Size</Label>
-                              <Select>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="800 characters" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="500">500 characters</SelectItem>
-                                  <SelectItem value="800">800 characters</SelectItem>
-                                  <SelectItem value="1000">1000 characters</SelectItem>
-                                  <SelectItem value="1500">1500 characters</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            <div>
-                              <Label className="text-sm font-medium">Document Retention</Label>
-                              <Select>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="2 years" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="1year">1 year</SelectItem>
-                                  <SelectItem value="2years">2 years</SelectItem>
-                                  <SelectItem value="5years">5 years</SelectItem>
-                                  <SelectItem value="permanent">Permanent</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              )}
+              </div>
             </div>
           </div>
         </TabsContent>
       </Tabs>
 
       {/* Create Folder Dialog */}
-      <Dialog open={isCreateFolderDialogOpen} onOpenChange={setIsCreateFolderDialogOpen}>
-        <DialogContent>
+      <Dialog open={showCreateFolder} onOpenChange={setShowCreateFolder}>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Create New Folder</DialogTitle>
             <DialogDescription>
-              Create a new folder to organize your documents
+              Enter a name for the new folder
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label htmlFor="folder-name">Folder Name</Label>
+              <Label htmlFor="folderName">Folder Name</Label>
               <Input
-                id="folder-name"
+                id="folderName"
                 value={newFolderName}
                 onChange={(e) => setNewFolderName(e.target.value)}
                 placeholder="Enter folder name"
-                className="mt-1"
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowCreateFolder(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleCreateFolder} disabled={!newFolderName.trim()}>
+                Create Folder
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit FAQ Dialog */}
+      <Dialog open={showEditFAQ} onOpenChange={setShowEditFAQ}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Edit FAQ</DialogTitle>
+            <DialogDescription>
+              Update the FAQ question and answer
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="editQuestion">Question</Label>
+              <Input
+                id="editQuestion"
+                value={editingFAQ?.question || ''}
+                onChange={(e) => setEditingFAQ(prev => prev ? {...prev, question: e.target.value} : null)}
+                placeholder="Enter question"
               />
             </div>
             <div>
-              <Label htmlFor="folder-color">Folder Color</Label>
-              <Select value={newFolderColor} onValueChange={setNewFolderColor}>
-                <SelectTrigger className="mt-1">
-                  <SelectValue placeholder="Choose folder color" />
+              <Label htmlFor="editAnswer">Answer</Label>
+              <Textarea
+                id="editAnswer"
+                value={editingFAQ?.answer || ''}
+                onChange={(e) => setEditingFAQ(prev => prev ? {...prev, answer: e.target.value} : null)}
+                placeholder="Enter answer"
+                rows={4}
+              />
+            </div>
+            <div>
+              <Label htmlFor="editCategory">Category</Label>
+              <Select value={editingFAQ?.category || ''} onValueChange={(value) => setEditingFAQ(prev => prev ? {...prev, category: value} : null)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="blue">🔵 Blue</SelectItem>
-                  <SelectItem value="green">🟢 Green</SelectItem>
-                  <SelectItem value="yellow">🟡 Yellow</SelectItem>
-                  <SelectItem value="red">🔴 Red</SelectItem>
-                  <SelectItem value="purple">🟣 Purple</SelectItem>
-                  <SelectItem value="orange">🟠 Orange</SelectItem>
+                  {faqCategories.map(category => (
+                    <SelectItem key={category} value={category}>{category}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowEditFAQ(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleUpdateFAQ}>
+                Save Changes
+              </Button>
+            </div>
           </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setIsCreateFolderDialogOpen(false);
-                setNewFolderName('');
-                setNewFolderColor('blue');
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={() => {
-                if (newFolderName.trim()) {
-                  createFolderMutation.mutate({
-                    name: newFolderName.trim(),
-                    color: newFolderColor
-                  });
-                }
-              }}
-              disabled={!newFolderName.trim() || createFolderMutation.isPending}
-            >
-              {createFolderMutation.isPending ? (
-                <>
-                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                  Creating...
-                </>
-              ) : (
-                <>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Create Folder
-                </>
-              )}
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Create Category Modal */}
-      <Dialog open={showCreateCategory} onOpenChange={setShowCreateCategory}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Create New Category</DialogTitle>
-            <DialogDescription>
-              Add a new FAQ category to organize your knowledge base
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="categoryName">Category Name</Label>
-              <Input
-                id="categoryName"
-                value={newCategoryName}
-                onChange={(e) => setNewCategoryName(e.target.value)}
-                placeholder="Enter category name"
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="categoryDescription">Description (Optional)</Label>
-              <Textarea
-                id="categoryDescription"
-                value={newCategoryDescription}
-                onChange={(e) => setNewCategoryDescription(e.target.value)}
-                placeholder="Enter category description"
-                rows={3}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowCreateCategory(false)}>
-              Cancel
-            </Button>
-            <Button 
-              onClick={handleCreateCategory}
-              disabled={createCategoryMutation.isPending || !newCategoryName.trim()}
-            >
-              {createCategoryMutation.isPending ? (
-                <>
-                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                  Creating...
-                </>
-              ) : (
-                'Create Category'
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit Category Modal */}
+      {/* Edit Category Dialog */}
       <Dialog open={showEditCategory} onOpenChange={setShowEditCategory}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Edit Category</DialogTitle>
             <DialogDescription>
-              Update the category name and description
+              Update the category name
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
+          <div className="space-y-4">
+            <div>
               <Label htmlFor="editCategoryName">Category Name</Label>
               <Input
                 id="editCategoryName"
-                value={newCategoryName}
-                onChange={(e) => setNewCategoryName(e.target.value)}
+                value={editingCategory}
+                onChange={(e) => setEditingCategory(e.target.value)}
                 placeholder="Enter category name"
               />
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="editCategoryDescription">Description (Optional)</Label>
-              <Textarea
-                id="editCategoryDescription"
-                value={newCategoryDescription}
-                onChange={(e) => setNewCategoryDescription(e.target.value)}
-                placeholder="Enter category description"
-                rows={3}
-              />
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowEditCategory(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleUpdateCategory}>
+                Save Changes
+              </Button>
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowEditCategory(false)}>
-              Cancel
-            </Button>
-            <Button 
-              onClick={handleUpdateCategory}
-              disabled={updateCategoryMutation.isPending || !newCategoryName.trim()}
-            >
-              {updateCategoryMutation.isPending ? (
-                <>
-                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                  Updating...
-                </>
-              ) : (
-                'Update Category'
-              )}
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
-      
-      {/* URL Edit Modal */}
+
+      {/* Edit URL Dialog */}
       <Dialog open={showEditUrl} onOpenChange={setShowEditUrl}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Edit Vendor URL</DialogTitle>
             <DialogDescription>
-              Update URL settings and tracking configuration
+              Update the vendor URL settings
             </DialogDescription>
           </DialogHeader>
-          
           {editingUrl && (
             <div className="space-y-4">
               <div>
-                <Label htmlFor="urlAddress">URL Address</Label>
+                <Label htmlFor="editUrlAddress">URL</Label>
                 <Input
-                  id="urlAddress"
-                  value={editingUrl.url || ''}
-                  onChange={(e) => setEditingUrl({...editingUrl, url: e.target.value})}
-                  placeholder="https://vendor.com/support"
+                  id="editUrlAddress"
+                  value={editingUrl.url}
+                  onChange={(e) => setEditingUrl(prev => prev ? {...prev, url: e.target.value} : null)}
+                  placeholder="Enter URL"
                 />
               </div>
-              
               <div>
-                <Label htmlFor="vendorName">Vendor Name</Label>
+                <Label htmlFor="editUrlDescription">Description</Label>
                 <Input
-                  id="vendorName"
-                  value={editingUrl.vendorName || ''}
-                  onChange={(e) => setEditingUrl({...editingUrl, vendorName: e.target.value})}
-                  placeholder="Vendor Name"
+                  id="editUrlDescription"
+                  value={editingUrl.description}
+                  onChange={(e) => setEditingUrl(prev => prev ? {...prev, description: e.target.value} : null)}
+                  placeholder="Enter description"
                 />
               </div>
-              
-              <div>
-                <Label htmlFor="urlTitle">Page Title</Label>
-                <Input
-                  id="urlTitle"
-                  value={editingUrl.urlTitle || ''}
-                  onChange={(e) => setEditingUrl({...editingUrl, urlTitle: e.target.value})}
-                  placeholder="Page Title"
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="editUrlWeekly"
+                  checked={editingUrl.weekly_updates}
+                  onChange={(e) => setEditingUrl(prev => prev ? {...prev, weekly_updates: e.target.checked} : null)}
                 />
+                <Label htmlFor="editUrlWeekly">Weekly Updates</Label>
               </div>
-              
-              <div className="flex items-center justify-between">
-                <Label htmlFor="autoUpdate">Automatic Updates</Label>
-                <Switch
-                  id="autoUpdate"
-                  checked={editingUrl.autoUpdate || false}
-                  onCheckedChange={(checked) => setEditingUrl({...editingUrl, autoUpdate: checked})}
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="updateFrequency">Update Frequency</Label>
-                <Select 
-                  value={editingUrl.updateFrequency || 'weekly'} 
-                  onValueChange={(value) => setEditingUrl({...editingUrl, updateFrequency: value})}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select frequency" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="daily">Daily</SelectItem>
-                    <SelectItem value="weekly">Weekly</SelectItem>
-                    <SelectItem value="monthly">Monthly</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setShowEditUrl(false)}>
                   Cancel
                 </Button>
-                <Button 
-                  onClick={() => updateUrlMutation.mutate({ id: editingUrl.id, data: editingUrl })}
-                  disabled={updateUrlMutation.isPending}
-                >
+                <Button onClick={handleUpdateUrl}>
                   {updateUrlMutation.isPending ? "Saving..." : "Save Changes"}
                 </Button>
               </div>
