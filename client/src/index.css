@@ -137,6 +137,38 @@
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
 
+/* Fix dropdown options visibility */
+.glass-input option {
+  background: #1e293b !important;
+  color: white !important;
+  padding: 8px 12px;
+}
+
+.glass-input select {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: white !important;
+}
+
+/* Ensure dropdown text is visible */
+select.glass-input {
+  color: white !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+select.glass-input option {
+  background: #1e293b !important;
+  color: white !important;
+  text-shadow: none;
+}
+
+/* Alternative approach for better browser compatibility */
+.glass-input[type="text"],
+.glass-input[type="number"],
+.glass-input[type="email"],
+.glass-input[type="password"] {
+  color: white !important;
+}
+
 .glass-gradient {
   background: linear-gradient(135deg, 
     rgba(255, 255, 255, 0.1) 0%,
