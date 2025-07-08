@@ -791,8 +791,9 @@ export default function AdminControlCenter() {
     return faq.question && faq.answer;
   }) : [];
 
-  const computedFaqCategories = Array.isArray(faqData) ? 
-    Array.from(new Set(faqData.map((faq: FAQ) => faq.category))) : [];
+  const computedFaqCategories = Array.isArray(faqCategories) && faqCategories.length > 0 ? 
+    faqCategories.map((cat: any) => cat.name) : 
+    (Array.isArray(faqData) ? Array.from(new Set(faqData.map((faq: FAQ) => faq.category))) : []);
 
   // URL Scraping for Knowledge Base
   const handleScrapeForKnowledge = async () => {
