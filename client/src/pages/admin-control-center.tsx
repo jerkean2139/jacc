@@ -116,6 +116,10 @@ export default function AdminControlCenter() {
   const [isScrapingForKnowledge, setIsScrapingForKnowledge] = useState(false);
   const [enableWeeklyUpdates, setEnableWeeklyUpdates] = useState(false);
   const [settingsTab, setSettingsTab] = useState("ai-search");
+  
+  // Dialog states for glassomorphic settings
+  const [showCreateFolder, setShowCreateFolder] = useState(false);
+  const [showEditFAQ, setShowEditFAQ] = useState(false);
   const [scheduledUrls, setScheduledUrls] = useState<string[]>([]);
   const [correctionText, setCorrectionText] = useState("");
   const [isSubmittingCorrection, setIsSubmittingCorrection] = useState(false);
@@ -685,6 +689,31 @@ export default function AdminControlCenter() {
     setNewAnswer(faq.answer);
     setNewCategory(faq.category);
     setNewPriority(faq.priority);
+    setShowEditFAQ(true);
+  };
+
+  // Handler functions for glassomorphic settings dialogs
+  const handleCreateFolder = () => {
+    // Implementation for creating folder
+    console.log("Creating folder:", newFolderName);
+    setShowCreateFolder(false);
+    setNewFolderName("");
+  };
+
+  const handleUpdateFAQ = () => {
+    // Implementation for updating FAQ
+    console.log("Updating FAQ:", editingFAQ);
+    setShowEditFAQ(false);
+    setEditingFAQ(null);
+  };
+
+
+
+  const handleUpdateUrl = () => {
+    // Implementation for updating URL
+    console.log("Updating URL:", editingUrl);
+    setShowEditUrl(false);
+    setEditingUrl(null);
   };
 
   const handleDeleteFAQ = (faqId: number) => {
@@ -2226,7 +2255,7 @@ export default function AdminControlCenter() {
                   Cancel
                 </Button>
                 <Button onClick={handleUpdateUrl}>
-                  {updateUrlMutation.isPending ? "Saving..." : "Save Changes"}
+                  Save Changes
                 </Button>
               </div>
             </div>
