@@ -317,20 +317,43 @@ function generateProcessingCalculation(data: any): string {
   // Calculate transaction count
   const transactionCount = Math.round(volume / ticket);
   
+  // Extract current rate from user input (look for percentage in current processor info)
+  const currentRateMatch = data.currentProcessor?.match(/(\d+\.?\d*)%/);
+  const userCurrentRate = currentRateMatch ? parseFloat(currentRateMatch[1]) / 100 : null;
+  
   // Calculate processing costs based on realistic merchant services model
   const interchangeRate = 0.0175; // 1.75% base interchange
   const processingMarkup = 0.005; // 0.50% markup over interchange
-  const totalProcessingRate = interchangeRate + processingMarkup; // 2.25% total
+  const totalProcessingRate = interchangeRate + processingMarkup; // 2.25% total recommended rate
   const authFee = 0.10; // $0.10 per transaction authorization fee
   const monthlyFee = 25;
   
-  // Calculate detailed costs
+  // Calculate detailed costs for RECOMMENDED solution
   const monthlyProcessingCost = volume * totalProcessingRate;
   const monthlyAuthFees = transactionCount * authFee;
   const totalMonthlyCost = monthlyProcessingCost + monthlyAuthFees + monthlyFee;
   const effectiveRate = (totalMonthlyCost / volume) * 100;
   
-  const monthlySavings = data.currentProcessor ? volume * 0.005 : 0; // Assume 0.5% savings
+  // Calculate current costs if rate provided
+  let currentCosts = null;
+  let monthlySavings = 0;
+  if (userCurrentRate) {
+    const currentProcessingCost = volume * userCurrentRate;
+    const currentAuthFees = transactionCount * 0.15; // Assume higher auth fees with current processor
+    const currentMonthlyFee = 35; // Assume higher monthly fees
+    const currentTotalCost = currentProcessingCost + currentAuthFees + currentMonthlyFee;
+    
+    currentCosts = {
+      rate: userCurrentRate,
+      processingCost: currentProcessingCost,
+      authFees: currentAuthFees,
+      monthlyFee: currentMonthlyFee,
+      totalCost: currentTotalCost,
+      effectiveRate: (currentTotalCost / volume) * 100
+    };
+    
+    monthlySavings = currentTotalCost - totalMonthlyCost;
+  }
   
   return `
 <div style="background: #f8fafc; border-radius: 8px; padding: 20px; margin: 20px 0;">
@@ -340,7 +363,19 @@ function generateProcessingCalculation(data: any): string {
 <p><strong>Average Ticket:</strong> $${ticket.toFixed(2)}</p>
 <p><strong>Transaction Count:</strong> ${transactionCount.toLocaleString()}</p>
 
-<h4>Recommended TracerPay Solution:</h4>
+${currentCosts ? `
+<h4 style="color: #dc2626;">Current Processor Costs:</h4>
+<ul>
+<li><strong>Processing Rate:</strong> ${(currentCosts.rate * 100).toFixed(2)}%</li>
+<li><strong>Monthly Processing Cost:</strong> $${currentCosts.processingCost.toFixed(2)}</li>
+<li><strong>Authorization Fees:</strong> $${currentCosts.authFees.toFixed(2)}</li>
+<li><strong>Monthly Fee:</strong> $${currentCosts.monthlyFee.toFixed(2)}</li>
+<li><strong>Total Monthly Cost:</strong> $${currentCosts.totalCost.toFixed(2)}</li>
+<li><strong>Effective Rate:</strong> ${currentCosts.effectiveRate.toFixed(3)}%</li>
+</ul>
+` : ''}
+
+<h4 style="color: #16a34a;">Recommended TracerPay Solution:</h4>
 <ul>
 <li><strong>Processing Rate:</strong> ${(totalProcessingRate * 100).toFixed(2)}%</li>
 <li><strong>Monthly Processing Cost:</strong> $${monthlyProcessingCost.toFixed(2)}</li>
@@ -352,9 +387,10 @@ function generateProcessingCalculation(data: any): string {
 
 ${monthlySavings > 0 ? `
 <div style="background: #dcfce7; border-left: 4px solid #16a34a; padding: 15px; margin: 15px 0;">
-<h4 style="color: #16a34a; margin-top: 0;">💰 Estimated Monthly Savings</h4>
-<p><strong>$${monthlySavings.toFixed(2)}/month</strong> compared to current processor</p>
+<h4 style="color: #16a34a; margin-top: 0;">💰 Monthly Savings with TracerPay</h4>
+<p><strong>$${monthlySavings.toFixed(2)}/month</strong> savings compared to current ${(currentCosts.rate * 100).toFixed(2)}% rate</p>
 <p><strong>Annual Savings: $${(monthlySavings * 12).toFixed(2)}</strong></p>
+<p><strong>Rate Reduction: ${((currentCosts.rate - totalProcessingRate) * 100).toFixed(2)} percentage points</strong></p>
 </div>
 ` : ''}
 
