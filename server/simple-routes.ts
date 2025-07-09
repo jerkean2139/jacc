@@ -5055,25 +5055,92 @@ Would you like me to create a detailed proposal for this merchant?`,
   // PDF Generation endpoint for deal proposals
   app.get('/api/generate-pdf', async (req: Request, res: Response) => {
     try {
-      // Simple PDF generation for demo purposes
-      // In production, you would use a proper PDF library like jsPDF or Puppeteer
-      const pdfContent = `
+      console.log('📄 Generating PDF proposal...');
+      
+      // Import Puppeteer for PDF generation
+      const puppeteer = await import('puppeteer');
+      
+      const htmlContent = `
       <!DOCTYPE html>
       <html>
       <head>
         <title>TracerPay Processing Proposal</title>
         <style>
-          body { font-family: Arial, sans-serif; margin: 40px; }
-          .header { text-align: center; border-bottom: 2px solid #0066cc; padding-bottom: 20px; }
+          body { 
+            font-family: 'Arial', sans-serif; 
+            margin: 0; 
+            padding: 40px; 
+            background: #ffffff; 
+            color: #333; 
+            line-height: 1.6;
+          }
+          .header { 
+            text-align: center; 
+            border-bottom: 3px solid #0066cc; 
+            padding-bottom: 30px; 
+            margin-bottom: 40px;
+          }
+          .header h1 {
+            color: #0066cc;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+          }
+          .header p {
+            color: #666;
+            font-size: 1.2em;
+          }
           .proposal { margin: 30px 0; }
-          .section { margin: 20px 0; }
-          .highlight { background: #f0f9ff; padding: 15px; border-left: 4px solid #0066cc; }
+          .section { 
+            margin: 30px 0; 
+            page-break-inside: avoid;
+          }
+          .section h2 {
+            color: #0066cc;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+          }
+          .section h3 {
+            color: #0066cc;
+            margin-top: 25px;
+          }
+          .highlight { 
+            background: #f0f9ff; 
+            padding: 20px; 
+            border-left: 5px solid #0066cc; 
+            margin: 20px 0;
+            border-radius: 5px;
+          }
+          .cost-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+          }
+          .cost-table th, .cost-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+          }
+          .cost-table th {
+            background: #0066cc;
+            color: white;
+          }
+          .total-row {
+            font-weight: bold;
+            background: #f9f9f9;
+          }
+          .footer {
+            margin-top: 50px;
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+          }
         </style>
       </head>
       <body>
         <div class="header">
           <h1>TracerPay Processing Proposal</h1>
           <p>Professional Payment Processing Solutions</p>
+          <p><strong>Date:</strong> ${new Date().toLocaleDateString()}</p>
         </div>
         
         <div class="proposal">
@@ -5082,36 +5149,105 @@ Would you like me to create a detailed proposal for this merchant?`,
             <p><strong>Business Type:</strong> Restaurant</p>
             <p><strong>Monthly Volume:</strong> $50,000</p>
             <p><strong>Average Ticket:</strong> $35</p>
+            <p><strong>Transaction Count:</strong> ~1,429 monthly</p>
           </div>
           
           <div class="section highlight">
-            <h3>Recommended Solution</h3>
-            <p><strong>Processing Rate:</strong> 2.25%</p>
-            <p><strong>Monthly Processing Cost:</strong> $1,125.00</p>
-            <p><strong>Monthly Fee:</strong> $25.00</p>
-            <p><strong>Total Monthly Cost:</strong> $1,150.00</p>
+            <h3>Recommended Processing Solution</h3>
+            <table class="cost-table">
+              <thead>
+                <tr>
+                  <th>Component</th>
+                  <th>Rate/Fee</th>
+                  <th>Monthly Cost</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Processing Rate</td>
+                  <td>2.25%</td>
+                  <td>$1,125.00</td>
+                </tr>
+                <tr>
+                  <td>Monthly Gateway Fee</td>
+                  <td>$25.00</td>
+                  <td>$25.00</td>
+                </tr>
+                <tr class="total-row">
+                  <td><strong>Total Monthly Cost</strong></td>
+                  <td></td>
+                  <td><strong>$1,150.00</strong></td>
+                </tr>
+              </tbody>
+            </table>
           </div>
           
           <div class="section">
-            <h3>Next Steps</h3>
+            <h2>Equipment & Features</h2>
             <ul>
-              <li>Review and approve this proposal</li>
-              <li>Schedule equipment installation</li>
-              <li>Complete application process</li>
-              <li>Begin processing within 5 business days</li>
+              <li>Clover Station POS System</li>
+              <li>Mobile payment acceptance</li>
+              <li>Online ordering integration</li>
+              <li>Inventory management</li>
+              <li>24/7 customer support</li>
             </ul>
           </div>
+          
+          <div class="section">
+            <h2>Next Steps</h2>
+            <ol>
+              <li>Review and approve this proposal</li>
+              <li>Complete merchant application</li>
+              <li>Schedule equipment installation</li>
+              <li>Begin processing within 5 business days</li>
+            </ol>
+          </div>
+          
+          <div class="section">
+            <h2>Contact Information</h2>
+            <p><strong>Sales Agent:</strong> JACC Assistant</p>
+            <p><strong>Email:</strong> support@tracerpay.com</p>
+            <p><strong>Phone:</strong> (555) 123-4567</p>
+          </div>
+        </div>
+        
+        <div class="footer">
+          <p>Generated by JACC AI Assistant • TracerPay Processing Solutions</p>
         </div>
       </body>
       </html>
       `;
       
-      res.setHeader('Content-Type', 'text/html');
-      res.setHeader('Content-Disposition', 'attachment; filename="TracerPay-Proposal.html"');
-      res.send(pdfContent);
+      // Generate PDF using Puppeteer
+      const browser = await puppeteer.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+      });
       
+      const page = await browser.newPage();
+      await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+      
+      const pdfBuffer = await page.pdf({
+        format: 'A4',
+        printBackground: true,
+        margin: {
+          top: '20mm',
+          right: '15mm',
+          bottom: '20mm',
+          left: '15mm'
+        }
+      });
+      
+      await browser.close();
+      
+      // Send PDF as download
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', 'attachment; filename="TracerPay-Proposal.pdf"');
+      res.send(pdfBuffer);
+      
+      console.log('✅ PDF generated and sent successfully');
     } catch (error) {
-      console.error('Error generating PDF:', error);
+      console.error('PDF generation error:', error);
       res.status(500).json({ error: 'Failed to generate PDF' });
     }
   });

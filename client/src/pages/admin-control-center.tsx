@@ -1889,19 +1889,28 @@ export default function AdminControlCenter() {
               {/* Step 3: Document Upload Area */}
               <div className="border-t pt-4">
                 <Label className="text-sm font-medium text-green-700 mb-2 block">Step 3: Upload Documents</Label>
-                <DocumentUpload 
-                  preSelectedFolder={uploadSelectedFolder}
-                  preSelectedPermissions={selectedPermissions}
-                  onUploadComplete={() => {
-                    queryClient.invalidateQueries({ queryKey: ['/api/documents'] });
-                    setUploadSelectedFolder('');
-                    setSelectedPermissions('');
-                    toast({
-                      title: "Upload Complete",
-                      description: "Documents have been uploaded successfully",
-                    });
-                  }} 
-                />
+                
+                {/* Pre-configured upload requirements check */}
+                {!uploadSelectedFolder || !selectedPermissions ? (
+                  <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <p className="text-sm text-yellow-700">
+                      Please complete Steps 1 and 2 before uploading documents.
+                    </p>
+                  </div>
+                ) : (
+                  <DocumentUpload 
+                    folderId={uploadSelectedFolder}
+                    onUploadComplete={() => {
+                      queryClient.invalidateQueries({ queryKey: ['/api/documents'] });
+                      setUploadSelectedFolder('');
+                      setSelectedPermissions('admin');
+                      toast({
+                        title: "Upload Complete",
+                        description: "Documents have been uploaded successfully",
+                      });
+                    }} 
+                  />
+                )}
               </div>
             </CardContent>
           </Card>

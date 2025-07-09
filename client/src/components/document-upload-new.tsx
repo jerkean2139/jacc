@@ -32,8 +32,10 @@ interface DocumentUploadProps {
 }
 
 export default function DocumentUpload({ folderId, onUploadComplete }: DocumentUploadProps) {
-  // State management
-  const [currentStep, setCurrentStep] = useState<'files' | 'folder' | 'permissions'>('files');
+  // State management - Skip to permissions step if folder is pre-selected
+  const [currentStep, setCurrentStep] = useState<'files' | 'folder' | 'permissions'>(
+    folderId ? 'files' : 'files'
+  );
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [selectedFolderId, setSelectedFolderId] = useState<string>(folderId || "");
   const [permissions, setPermissions] = useState({
@@ -256,6 +258,12 @@ export default function DocumentUpload({ folderId, onUploadComplete }: DocumentU
 
   // Navigation functions
   const goToStep = (step: 'files' | 'folder' | 'permissions') => {
+    // Skip folder selection if folder is pre-selected
+    if (step === 'folder' && folderId) {
+      setCurrentStep('permissions');
+      return;
+    }
+    
     if (step === 'folder' && selectedFiles.length === 0) {
       toast({
         title: "No files selected",
@@ -307,32 +315,52 @@ export default function DocumentUpload({ folderId, onUploadComplete }: DocumentU
 
   return (
     <div className="space-y-6">
-      {/* Step Indicator */}
-      <div className="flex items-center justify-center space-x-4 mb-6">
-        <div className={cn(
-          "flex items-center space-x-2 px-3 py-1 rounded-lg",
-          currentStep === 'files' ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-500"
-        )}>
-          <Upload className="h-4 w-4" />
-          <span className="text-sm font-medium">1. Select Files</span>
+      {/* Step Indicator - Show simplified version when folder is pre-selected */}
+      {folderId ? (
+        <div className="flex items-center justify-center space-x-4 mb-6">
+          <div className={cn(
+            "flex items-center space-x-2 px-3 py-1 rounded-lg",
+            currentStep === 'files' ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-500"
+          )}>
+            <Upload className="h-4 w-4" />
+            <span className="text-sm font-medium">1. Select Files</span>
+          </div>
+          <ArrowRight className="h-4 w-4 text-gray-400" />
+          <div className={cn(
+            "flex items-center space-x-2 px-3 py-1 rounded-lg",
+            currentStep === 'permissions' ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-500"
+          )}>
+            <Shield className="h-4 w-4" />
+            <span className="text-sm font-medium">2. Set Permissions</span>
+          </div>
         </div>
-        <ArrowRight className="h-4 w-4 text-gray-400" />
-        <div className={cn(
-          "flex items-center space-x-2 px-3 py-1 rounded-lg",
-          currentStep === 'folder' ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-500"
-        )}>
-          <Folder className="h-4 w-4" />
-          <span className="text-sm font-medium">2. Choose Folder</span>
+      ) : (
+        <div className="flex items-center justify-center space-x-4 mb-6">
+          <div className={cn(
+            "flex items-center space-x-2 px-3 py-1 rounded-lg",
+            currentStep === 'files' ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-500"
+          )}>
+            <Upload className="h-4 w-4" />
+            <span className="text-sm font-medium">1. Select Files</span>
+          </div>
+          <ArrowRight className="h-4 w-4 text-gray-400" />
+          <div className={cn(
+            "flex items-center space-x-2 px-3 py-1 rounded-lg",
+            currentStep === 'folder' ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-500"
+          )}>
+            <Folder className="h-4 w-4" />
+            <span className="text-sm font-medium">2. Choose Folder</span>
+          </div>
+          <ArrowRight className="h-4 w-4 text-gray-400" />
+          <div className={cn(
+            "flex items-center space-x-2 px-3 py-1 rounded-lg",
+            currentStep === 'permissions' ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-500"
+          )}>
+            <Shield className="h-4 w-4" />
+            <span className="text-sm font-medium">3. Set Permissions</span>
+          </div>
         </div>
-        <ArrowRight className="h-4 w-4 text-gray-400" />
-        <div className={cn(
-          "flex items-center space-x-2 px-3 py-1 rounded-lg",
-          currentStep === 'permissions' ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-500"
-        )}>
-          <Shield className="h-4 w-4" />
-          <span className="text-sm font-medium">3. Set Permissions</span>
-        </div>
-      </div>
+      )}
 
       {/* Step 1: File Selection */}
       {currentStep === 'files' && (
@@ -434,11 +462,11 @@ export default function DocumentUpload({ folderId, onUploadComplete }: DocumentU
             {/* Navigation */}
             <div className="flex justify-end pt-4">
               <Button
-                onClick={() => goToStep('folder')}
+                onClick={() => folderId ? goToStep('permissions') : goToStep('folder')}
                 disabled={selectedFiles.length === 0}
                 className="flex items-center gap-2"
               >
-                Next: Choose Folder
+                {folderId ? 'Next: Set Permissions' : 'Next: Choose Folder'}
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </div>
