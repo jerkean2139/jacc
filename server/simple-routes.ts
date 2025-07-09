@@ -3787,7 +3787,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Save user message to database
       const { db } = await import('./db');
-      const { messages: messagesTable } = await import('@shared/schema');
+      const { messages: messagesTable, chats: chatsTable } = await import('@shared/schema');
       
       await db.insert(messagesTable).values({
         id: messageId,
