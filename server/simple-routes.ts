@@ -314,13 +314,22 @@ function generateProcessingCalculation(data: any): string {
   const volume = extractNumericValue(data.monthlyVolume);
   const ticket = extractNumericValue(data.averageTicket);
   
-  // Calculate basic processing costs
+  // Calculate transaction count
+  const transactionCount = Math.round(volume / ticket);
+  
+  // Calculate processing costs based on realistic merchant services model
   const interchangeRate = 0.0175; // 1.75% base interchange
-  const processingRate = 0.0225; // 2.25% suggested rate
+  const processingMarkup = 0.005; // 0.50% markup over interchange
+  const totalProcessingRate = interchangeRate + processingMarkup; // 2.25% total
+  const authFee = 0.10; // $0.10 per transaction authorization fee
   const monthlyFee = 25;
   
-  const monthlyInterchange = volume * interchangeRate;
-  const monthlyProcessing = volume * processingRate;
+  // Calculate detailed costs
+  const monthlyProcessingCost = volume * totalProcessingRate;
+  const monthlyAuthFees = transactionCount * authFee;
+  const totalMonthlyCost = monthlyProcessingCost + monthlyAuthFees + monthlyFee;
+  const effectiveRate = (totalMonthlyCost / volume) * 100;
+  
   const monthlySavings = data.currentProcessor ? volume * 0.005 : 0; // Assume 0.5% savings
   
   return `
@@ -328,14 +337,17 @@ function generateProcessingCalculation(data: any): string {
 <h3>📊 Processing Rate Analysis</h3>
 <p><strong>Business:</strong> ${data.businessType}</p>
 <p><strong>Monthly Volume:</strong> $${volume.toLocaleString()}</p>
-<p><strong>Average Ticket:</strong> $${ticket}</p>
+<p><strong>Average Ticket:</strong> $${ticket.toFixed(2)}</p>
+<p><strong>Transaction Count:</strong> ${transactionCount.toLocaleString()}</p>
 
 <h4>Recommended TracerPay Solution:</h4>
 <ul>
-<li><strong>Processing Rate:</strong> ${(processingRate * 100).toFixed(2)}%</li>
-<li><strong>Monthly Processing Cost:</strong> $${monthlyProcessing.toFixed(2)}</li>
-<li><strong>Monthly Fee:</strong> $${monthlyFee}</li>
-<li><strong>Total Monthly Cost:</strong> $${(monthlyProcessing + monthlyFee).toFixed(2)}</li>
+<li><strong>Processing Rate:</strong> ${(totalProcessingRate * 100).toFixed(2)}%</li>
+<li><strong>Monthly Processing Cost:</strong> $${monthlyProcessingCost.toFixed(2)}</li>
+<li><strong>Authorization Fees:</strong> $${monthlyAuthFees.toFixed(2)} (${transactionCount} transactions × $${authFee.toFixed(2)})</li>
+<li><strong>Monthly Fee:</strong> $${monthlyFee.toFixed(2)}</li>
+<li><strong>Total Monthly Cost:</strong> $${totalMonthlyCost.toFixed(2)}</li>
+<li><strong>Effective Rate:</strong> ${effectiveRate.toFixed(3)}%</li>
 </ul>
 
 ${monthlySavings > 0 ? `
@@ -370,10 +382,13 @@ function extractNumericValue(text: string): number {
 function generatePDFResponse(data: any): string {
   const volume = extractNumericValue(data.monthlyVolume);
   const ticket = extractNumericValue(data.averageTicket);
+  const transactionCount = Math.round(volume / ticket);
   const processingRate = 0.0225;
+  const authFee = 0.10;
   const monthlyFee = 25;
   const monthlyProcessing = volume * processingRate;
-  const totalMonthlyCost = monthlyProcessing + monthlyFee;
+  const monthlyAuthFees = transactionCount * authFee;
+  const totalMonthlyCost = monthlyProcessing + monthlyAuthFees + monthlyFee;
   
   return `<h2>📄 PDF Proposal Generated Successfully!</h2>
 
