@@ -1,0 +1,334 @@
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+clear-popup-flags.ts:26 Cleared 0 popup flags from localStorage
+contentScript.bundle.js:69 Loaded contentScript
+home-stable.tsx:32 URL Debug: Object
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+sidebar.tsx:171 Sidebar Debug: Object
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+2chat-interface.tsx:77 🔄 ChatInterface mounted - clearing stale cached queries
+home-stable.tsx:32 URL Debug: Object
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+sidebar.tsx:171 Sidebar Debug: Object
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+home-stable.tsx:32 URL Debug: Object
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+sidebar.tsx:171 Sidebar Debug: Object
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/:1 Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner.
+02aa0592-869c-416a-869f-4cb3baafbabd-00-17ngv8bepjtga.picard.replit.dev/:1 Unchecked runtime.lastError: The message port closed before a response was received.Understand this error
+home-stable.tsx:32 URL Debug: Object
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+sidebar.tsx:171 Sidebar Debug: Object
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+home-stable.tsx:32 URL Debug: Object
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+sidebar.tsx:171 Sidebar Debug: Object
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 updating page active status
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 updating page active status
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 updating page active status
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+contentScript.bundle.js:28 received intentional event
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+home-stable.tsx:81 Creating new chat with message: what are the top 3 processors i should use and why?
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+home-stable.tsx:87 New chat created: Object
+home-stable.tsx:90 Attempting to navigate to: /chat/ced80489-6c12-4811-86b7-a7405472338a
+home-stable.tsx:92 Navigation called, new location should be: /chat/ced80489-6c12-4811-86b7-a7405472338a
+home-stable.tsx:99 Sending message to new chat: ced80489-6c12-4811-86b7-a7405472338a
+home-stable.tsx:32 URL Debug: Object
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+sidebar.tsx:171 Sidebar Debug: Object
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+home-stable.tsx:32 URL Debug: Object
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+sidebar.tsx:171 Sidebar Debug: Object
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+chat-interface.tsx:497 🔥 RENDERING MESSAGE: Object
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+chat-interface.tsx:497 🔥 RENDERING MESSAGE: Object
+contentScript.bundle.js:28 updating page active status
+home-stable.tsx:104 Message sent successfully
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+chat-interface.tsx:497 🔥 RENDERING MESSAGE: Object
+chat-interface.tsx:497 🔥 RENDERING MESSAGE: Object
+chat-interface.tsx:150 Messages Query Status: Object
+chat-interface.tsx:160 Chat Interface Debug: Object
+chat-interface.tsx:171 🔍 DETAILED MESSAGE DEBUG: Object
+chat-interface.tsx:497 🔥 RENDERING MESSAGE: Object
+chat-interface.tsx:497 🔥 RENDERING MESSAGE: Object
+contentScript.bundle.js:28 received intentional event
+contentScript.bundle.js:28 updating page active status
+inject.bundle.js:71 WebSocket connection to 'ws://localhost:8098/' failed: 
+e @ inject.bundle.js:71Understand this error
