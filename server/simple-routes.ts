@@ -209,18 +209,17 @@ function getConversationStarterResponse(userMessage: string): string | null {
 function handleCalculationWorkflow(userMessage: string, chatHistory: any[], chatId: string): string | null {
   const msg = userMessage.toLowerCase();
   
-  // PRIORITY CHECK: Personalized PDF generation requests override calculation workflow
+  // PRIORITY CHECK: All PDF generation requests override calculation workflow
   const personalizedPDFMatch = userMessage.match(/Generate personalized PDF: Company: ([^,]+), Contact: ([^,]+)/);
-  if (personalizedPDFMatch) {
-    console.log('🔍 CALCULATION WORKFLOW: Detected personalized PDF request - bypassing calculation flow');
-    return null; // Let the main endpoint handle this
-  }
+  const isPDFRequest = userMessage.toLowerCase().includes('generate pdf') || 
+                      userMessage.toLowerCase().includes('create pdf') ||
+                      userMessage.toLowerCase().includes('personalize pdf') ||
+                      userMessage.toLowerCase().includes("i'd like to personalize") ||
+                      userMessage.toLowerCase().includes("pdf") && 
+                      (userMessage.toLowerCase().includes('generate') || userMessage.toLowerCase().includes('create'));
   
-  // Check for personalization request
-  if (userMessage.toLowerCase().includes("i'd like to personalize the pdf") ||
-      userMessage.toLowerCase().includes("personalize the pdf") ||
-      userMessage.toLowerCase().includes("add client details")) {
-    console.log('🔍 CALCULATION WORKFLOW: Detected PDF personalization request - bypassing calculation flow');
+  if (personalizedPDFMatch || isPDFRequest) {
+    console.log('🔍 CALCULATION WORKFLOW: Detected PDF request - bypassing calculation flow');
     return null; // Let the main endpoint handle this
   }
   
@@ -355,7 +354,12 @@ function generateProcessingCalculation(data: any): string {
   if (userCurrentRate) {
     const currentProcessingCost = volume * userCurrentRate;
     const currentAuthFees = transactionCount * 0.15; // Assume higher auth fees with current processor
-    const currentMonthlyFee = 35; // Assume higher monthly fees
+    
+    // Extract monthly fee from user input, fallback to 35 if not found
+    const monthlyFeeMatch = data.currentProcessor?.match(/\$(\d+)\/mo|\$(\d+)\s*monthly|\$(\d+)\s*per\s*month/i);
+    const currentMonthlyFee = monthlyFeeMatch ? 
+      (parseFloat(monthlyFeeMatch[1]) || parseFloat(monthlyFeeMatch[2]) || parseFloat(monthlyFeeMatch[3]) || 35) : 35;
+    
     const currentTotalCost = currentProcessingCost + currentAuthFees + currentMonthlyFee;
     
     currentCosts = {
@@ -422,9 +426,10 @@ ${monthlySavings > 0 ? `
 // Helper function to extract numeric values from text
 function extractNumericValue(text: string): number {
   if (!text) return 0;
-  const match = text.match(/[\d,]+/);
+  // Match numbers with decimals and commas, handle currency symbols
+  const match = text.match(/[\d,]+\.?\d*/);
   if (match) {
-    return parseInt(match[0].replace(/,/g, '')) || 0;
+    return parseFloat(match[0].replace(/,/g, '')) || 0;
   }
   return 0;
 }
@@ -4075,11 +4080,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
           }
 
-          // PERSONALIZED PDF: Check for personalized PDF generation request first
+          // CALCULATION-BASED PDF: Check for PDF generation from calculation data first
           console.log('🔍 POST ENDPOINT DEBUG: Message content:', content);
-          console.log('🔍 POST ENDPOINT DEBUG: Looking for personalized PDF pattern...');
+          console.log('🔍 POST ENDPOINT DEBUG: Looking for PDF generation patterns...');
+          
+          // Check for simple personalized PDF format
           const personalizedPDFMatch = content.match(/Generate personalized PDF: Company: ([^,]+), Contact: ([^,]+)/);
-          console.log('🔍 POST ENDPOINT DEBUG: PDF Match result:', personalizedPDFMatch);
+          
+          // Check for calculation-based PDF generation (looking at chat history for calculation data)
+          const isCalculationPDFRequest = content.toLowerCase().includes('generate pdf') || 
+                                         content.toLowerCase().includes('create pdf') ||
+                                         content.toLowerCase().includes('personalize the pdf') ||
+                                         content.toLowerCase().includes("i'd like to personalize");
+          
+          // Look for calculation data in recent chat history
+          const hasCalculationData = chatMessages.some(msg => 
+            msg.content.includes('Business:') || 
+            msg.content.includes('Monthly Volume:') || 
+            msg.content.includes('Processing Rate Analysis') ||
+            msg.content.includes('Deal Calculator - Final Results') ||
+            msg.content.includes('Current Processor Costs:')
+          );
+          
+          console.log('🔍 POST ENDPOINT DEBUG: PDF Request?', isCalculationPDFRequest);
+          console.log('🔍 POST ENDPOINT DEBUG: Has calculation data?', hasCalculationData);
+          console.log('🔍 POST ENDPOINT DEBUG: Personalized PDF Match?', personalizedPDFMatch);
+          
           if (personalizedPDFMatch) {
             const [, companyName, contactName] = personalizedPDFMatch;
             console.log('🔍 POST ENDPOINT: Generating personalized PDF with details:', { companyName, contactName });
@@ -4106,6 +4132,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
 <li><strong>Savings Calculation:</strong> Monthly & Annual Projections</li>
 <li><strong>Professional Branding:</strong> TracerPay presentation</li>
 </ul>
+</div>`
+            };
+          } else if (isCalculationPDFRequest && hasCalculationData) {
+            console.log('🔍 POST ENDPOINT: Detected PDF request from calculation data - offering personalization');
+            
+            aiResponseData = {
+              message: `<div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border-radius: 12px; padding: 24px; margin: 16px 0; text-align: center;">
+<h2 style="margin: 0 0 16px 0; font-size: 20px; font-weight: 700;">✨ Perfect! I'll Create Your PDF Proposal</h2>
+<p style="margin: 0 0 16px 0; opacity: 0.9;">I can see you have completed calculation data. Would you like to personalize this proposal with your client's information?</p>
+</div>
+
+<div style="background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 12px; padding: 24px; margin: 16px 0;">
+<h3 style="color: #334155; margin: 0 0 20px 0; font-size: 18px; font-weight: 600;">📋 Client Information (Optional)</h3>
+
+<div style="margin-bottom: 16px;">
+<label style="display: block; color: #374151; font-weight: 600; margin-bottom: 6px;">🏢 Company Name:</label>
+<input type="text" id="companyName" placeholder="Enter client's company name" style="width: 100%; padding: 12px; border: 2px solid #d1d5db; border-radius: 8px; font-size: 16px;" />
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+<div>
+<label style="display: block; color: #374151; font-weight: 600; margin-bottom: 6px;">👤 First Name:</label>
+<input type="text" id="firstName" placeholder="Contact's first name" style="width: 100%; padding: 12px; border: 2px solid #d1d5db; border-radius: 8px; font-size: 16px;" />
+</div>
+<div>
+<label style="display: block; color: #374151; font-weight: 600; margin-bottom: 6px;">👤 Last Name:</label>
+<input type="text" id="lastName" placeholder="Contact's last name" style="width: 100%; padding: 12px; border: 2px solid #d1d5db; border-radius: 8px; font-size: 16px;" />
+</div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px;">
+<button onclick="window.generatePersonalizedPDFWithDetails()" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 14px 20px; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+🎯 Generate Personalized PDF
+</button>
+
+<a href="/api/generate-pdf" style="display: inline-block; background: #6b7280; color: white; padding: 14px 20px; border-radius: 8px; text-decoration: none; font-weight: 700; text-align: center; box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);" target="_blank">
+📄 Generate Basic PDF
+</a>
+</div>
+
+<div style="background: #f0f9ff; border: 1px solid #3b82f6; border-radius: 8px; padding: 12px; margin-top: 16px;">
+<p style="color: #1e40af; margin: 0; font-size: 13px; text-align: center;">📌 <strong>Note:</strong> Both options include your calculation data. Personalization adds client branding for a professional touch.</p>
+</div>
 </div>`
             };
           } else if (content.toLowerCase().includes("i'd like to personalize the pdf") ||
@@ -4156,23 +4225,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
             if (calculationResponse) {
               console.log('📊 Using calculation workflow response');
               aiResponseData = { message: calculationResponse };
-            } else if (content.toLowerCase().includes('generate pdf') || content.toLowerCase().includes('create pdf')) {
-              // Check for PDF generation request
-              const state = conversationStates.get(chatId);
-              if (state && state.step >= 5 && state.data) {
-                console.log('📄 Generating PDF proposal');
-                aiResponseData = { message: generatePDFResponse(state.data) };
-              } else {
-                // Use Enhanced AI Service for regular responses
-                console.log('🔄 Loading Enhanced AI Service...');
-                const { enhancedAIService } = await import('./enhanced-ai');
-                console.log('🚀 Calling generateStandardResponse...');
-                aiResponseData = await enhancedAIService.generateStandardResponse(
-                  content, 
-                  chatMessages.map(msg => ({ role: msg.role, content: msg.content })), 
-                  { userRole: 'Sales Agent' }
-                );
-              }
             } else {
               // Use Enhanced AI Service for regular responses
               console.log('🔄 Loading Enhanced AI Service...');
