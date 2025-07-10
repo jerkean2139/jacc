@@ -5429,15 +5429,21 @@ Would you like me to create a detailed proposal for this merchant?`,
       const sessionId = req.cookies?.sessionId || 'demo-user-id';
       const userId = sessions.get(sessionId)?.userId || 'demo-user-id';
       
+      // Extract personalization parameters from query
+      const companyName = req.query.company as string || "Sample Business";
+      const contactName = req.query.contact as string || "Contact Person";
+      
       console.log('🔍 PDF generation requested for user:', userId);
+      console.log('🔍 Personalization details:', { companyName, contactName });
       
       // Get the PDF generator
       const { generatePDFReport } = await import('./pdf-report-generator');
       
-      // Generate PDF with sample calculation data
+      // Generate PDF with personalized calculation data
       const calculationData = {
         businessInfo: {
-          name: "Sample Business",
+          name: companyName,
+          contactName: contactName,
           type: "Restaurant",
           monthlyVolume: 50000,
           averageTicket: 45
@@ -5465,22 +5471,28 @@ Would you like me to create a detailed proposal for this merchant?`,
         }
       };
       
-      const pdfBuffer = await generatePDFReport(calculationData);
+      // Use the compact proposal generator for single-page layout
+      const pdfGenerator = new (await import('./pdf-report-generator')).PDFReportGenerator();
+      const pdfBuffer = await pdfGenerator.generateCompactProposal(calculationData);
       
-      // Create personal document entry
+      // Create personal document entry with personalized name
+      const fileName = companyName !== "Sample Business" ? 
+        `${companyName.replace(/[^a-zA-Z0-9]/g, '_')}_Processing_Proposal_${new Date().toISOString().split('T')[0]}.pdf` :
+        `Processing_Proposal_${new Date().toISOString().split('T')[0]}.pdf`;
+        
       const personalDoc = {
         id: crypto.randomUUID(),
-        name: `Processing_Proposal_${new Date().toISOString().split('T')[0]}.pdf`,
-        originalName: `Processing_Proposal_${new Date().toISOString().split('T')[0]}.pdf`,
+        name: fileName,
+        originalName: fileName,
         mimeType: 'application/pdf',
         size: pdfBuffer.length,
         path: `/uploads/${userId}_proposal_${Date.now()}.pdf`,
-        content: "Payment processing proposal with rate calculations and savings analysis",
+        content: `Payment processing proposal for ${companyName} (${contactName}) with rate calculations and savings analysis`,
         userId: userId,
         personalFolderId: null,
         isFavorite: false,
-        tags: ["proposal", "rates", "calculation"],
-        notes: "Generated PDF proposal with current vs recommended processing costs"
+        tags: ["proposal", "rates", "calculation", companyName.toLowerCase()],
+        notes: `Generated PDF proposal for ${companyName} with current vs recommended processing costs`
       };
       
       // Save to personal documents

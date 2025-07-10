@@ -279,32 +279,170 @@ export class EnhancedAIService {
       const isPDFRequest = /^(pdf|generate pdf|create pdf|make pdf|pdf proposal|pdf report)$/i.test(lastUserMessage.content.trim());
       
       if (isPDFRequest) {
-        console.log('🔍 PDF creation request detected, generating PDF proposal...');
+        console.log('🔍 PDF creation request detected, prompting for personalization...');
         return {
           message: `<div style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white; border-radius: 12px; padding: 24px; margin: 16px 0; text-align: center;">
-<h2 style="margin: 0 0 16px 0; font-size: 20px; font-weight: 700;">📄 Creating Your Professional PDF Proposal</h2>
-<p style="margin: 0 0 16px 0; opacity: 0.9;">Generating a client-ready proposal with your calculation data...</p>
-<div style="background: rgba(255,255,255,0.1); border-radius: 8px; padding: 16px; margin: 16px 0;">
-<p style="margin: 0; font-size: 14px; opacity: 0.8;">✅ Extracting calculation data<br/>
-✅ Formatting professional proposal<br/>
-✅ Generating downloadable PDF</p>
-</div>
-<a href="/api/generate-pdf" style="display: inline-block; background: #ffffff; color: #1d4ed8; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 700; margin-top: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" target="_blank">📥 Download PDF Proposal</a>
+<h2 style="margin: 0 0 16px 0; font-size: 20px; font-weight: 700;">📄 Ready to Create Your Professional PDF Proposal</h2>
+<p style="margin: 0 0 16px 0; opacity: 0.9;">Before I generate your client-ready proposal, would you like to personalize it?</p>
 </div>
 
-<div style="background: #f0f9ff; border: 2px solid #3b82f6; border-radius: 8px; padding: 16px; margin: 16px 0;">
-<h3 style="color: #1e40af; margin: 0 0 8px 0; font-size: 16px; font-weight: 600;">💡 Next Steps:</h3>
-<p style="color: #1e40af; margin: 0; font-size: 14px;">1. Download your PDF proposal above<br/>
-2. Review the calculation details<br/>
-3. Save to your personal documents for future reference<br/>
-4. Share with your client or team</p>
+<div style="background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 12px; padding: 20px; margin: 16px 0;">
+<h3 style="color: #334155; margin: 0 0 16px 0; font-size: 18px; font-weight: 600;">🎯 Personalization Options</h3>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0;">
+<div style="background: #ffffff; border: 2px solid #10b981; border-radius: 8px; padding: 16px; text-align: center; cursor: pointer;" onclick="window.generatePersonalizedPDF()">
+<h4 style="color: #065f46; margin: 0 0 8px 0; font-size: 16px; font-weight: 600;">✨ Personalized PDF</h4>
+<p style="color: #047857; margin: 0; font-size: 14px;">Add client's company name and contact details for a professional touch</p>
+<div style="background: #10b981; color: white; padding: 8px 16px; border-radius: 6px; margin-top: 12px; font-weight: 600;">Choose This Option</div>
+</div>
+
+<div style="background: #ffffff; border: 2px solid #6b7280; border-radius: 8px; padding: 16px; text-align: center; cursor: pointer;">
+<h4 style="color: #374151; margin: 0 0 8px 0; font-size: 16px; font-weight: 600;">⚡ Quick PDF</h4>
+<p style="color: #4b5563; margin: 0; font-size: 14px;">Generate standard proposal with calculation data only</p>
+<a href="/api/generate-pdf" style="display: inline-block; background: #6b7280; color: white; padding: 8px 16px; border-radius: 6px; margin-top: 12px; font-weight: 600; text-decoration: none;" target="_blank">Generate Now</a>
+</div>
+</div>
+
+<div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 12px; margin-top: 16px;">
+<p style="color: #92400e; margin: 0; font-size: 13px; text-align: center;">💡 <strong>Pro Tip:</strong> Personalized PDFs create a more professional impression with prospects</p>
+</div>
+</div>
+
+<script>
+window.generatePersonalizedPDF = function() {
+  const message = "I'd like to personalize the PDF with client details";
+  // Find the chat input and send the message
+  const chatInput = document.querySelector('textarea[placeholder*="message"], input[placeholder*="message"]');
+  if (chatInput) {
+    chatInput.value = message;
+    chatInput.dispatchEvent(new Event('input', { bubbles: true }));
+    // Try to find and click send button
+    const sendButton = document.querySelector('button[type="submit"], button:has(svg[data-testid*="send"])');
+    if (sendButton) {
+      sendButton.click();
+    }
+  }
+};
+</script>`,
+          sources: [],
+          reasoning: "PDF creation request detected - offering personalization options",
+          suggestions: ["Personalize PDF", "Generate quick PDF", "Add client details"],
+          actions: [
+            { type: 'personalize_pdf', label: 'Personalize PDF', data: { step: 'collect_details' } },
+            { type: 'download_pdf', label: 'Quick PDF Download', data: { url: '/api/generate-pdf' } }
+          ]
+        };
+      }
+
+      // Check if this is a personalization request
+      const isPersonalizationRequest = lastUserMessage.content.toLowerCase().includes("i'd like to personalize the pdf") ||
+                                     lastUserMessage.content.toLowerCase().includes("personalize the pdf") ||
+                                     lastUserMessage.content.toLowerCase().includes("add client details");
+      
+      if (isPersonalizationRequest) {
+        console.log('🔍 PDF personalization request detected, collecting client details...');
+        return {
+          message: `<div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border-radius: 12px; padding: 24px; margin: 16px 0; text-align: center;">
+<h2 style="margin: 0 0 16px 0; font-size: 20px; font-weight: 700;">✨ Perfect! Let's Personalize Your PDF</h2>
+<p style="margin: 0 0 16px 0; opacity: 0.9;">I'll collect your client's information to create a professional, personalized proposal.</p>
+</div>
+
+<div style="background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 12px; padding: 24px; margin: 16px 0;">
+<h3 style="color: #334155; margin: 0 0 20px 0; font-size: 18px; font-weight: 600;">📋 Client Information Form</h3>
+
+<div style="margin-bottom: 16px;">
+<label style="display: block; color: #374151; font-weight: 600; margin-bottom: 6px;">🏢 Company Name:</label>
+<input type="text" id="companyName" placeholder="Enter client's company name" style="width: 100%; padding: 12px; border: 2px solid #d1d5db; border-radius: 8px; font-size: 16px;" />
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+<div>
+<label style="display: block; color: #374151; font-weight: 600; margin-bottom: 6px;">👤 First Name:</label>
+<input type="text" id="firstName" placeholder="Contact's first name" style="width: 100%; padding: 12px; border: 2px solid #d1d5db; border-radius: 8px; font-size: 16px;" />
+</div>
+<div>
+<label style="display: block; color: #374151; font-weight: 600; margin-bottom: 6px;">👤 Last Name:</label>
+<input type="text" id="lastName" placeholder="Contact's last name" style="width: 100%; padding: 12px; border: 2px solid #d1d5db; border-radius: 8px; font-size: 16px;" />
+</div>
+</div>
+
+<div style="text-align: center; margin-top: 24px;">
+<button onclick="window.generatePersonalizedPDFWithDetails()" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 14px 28px; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); transition: all 0.2s ease;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+🚀 Generate Personalized PDF
+</button>
+</div>
+
+<div style="background: #f0f9ff; border: 1px solid #3b82f6; border-radius: 8px; padding: 12px; margin-top: 16px;">
+<p style="color: #1e40af; margin: 0; font-size: 13px; text-align: center;">📌 <strong>Note:</strong> All fields are optional, but company name helps create a professional impression</p>
+</div>
+</div>
+
+<script>
+window.generatePersonalizedPDFWithDetails = function() {
+  const companyName = document.getElementById('companyName').value || 'Sample Business';
+  const firstName = document.getElementById('firstName').value || 'Contact';
+  const lastName = document.getElementById('lastName').value || 'Person';
+  
+  const message = \`Generate personalized PDF: Company: \${companyName}, Contact: \${firstName} \${lastName}\`;
+  
+  // Find the chat input and send the message
+  const chatInput = document.querySelector('textarea[placeholder*="message"], input[placeholder*="message"]');
+  if (chatInput) {
+    chatInput.value = message;
+    chatInput.dispatchEvent(new Event('input', { bubbles: true }));
+    // Try to find and click send button
+    const sendButton = document.querySelector('button[type="submit"], button:has(svg[data-testid*="send"])');
+    if (sendButton) {
+      sendButton.click();
+    }
+  }
+};
+</script>`,
+          sources: [],
+          reasoning: "PDF personalization request detected - collecting client details for customized proposal",
+          suggestions: ["Enter company name", "Add contact details", "Generate personalized PDF"],
+          actions: [
+            { type: 'collect_details', label: 'Collect Client Details', data: { form: 'personalization' } }
+          ]
+        };
+      }
+
+      // Check if this is a personalized PDF generation request with details
+      const personalizedPDFMatch = lastUserMessage.content.match(/Generate personalized PDF: Company: ([^,]+), Contact: ([^,]+)/);
+      
+      if (personalizedPDFMatch) {
+        const [, companyName, contactName] = personalizedPDFMatch;
+        console.log('🔍 Generating personalized PDF with details:', { companyName, contactName });
+        
+        return {
+          message: `<div style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white; border-radius: 12px; padding: 24px; margin: 16px 0; text-align: center;">
+<h2 style="margin: 0 0 16px 0; font-size: 20px; font-weight: 700;">🎉 Personalized PDF Ready!</h2>
+<p style="margin: 0 0 16px 0; opacity: 0.9;">Creating professional proposal for <strong>${companyName}</strong> (${contactName})</p>
+<div style="background: rgba(255,255,255,0.1); border-radius: 8px; padding: 16px; margin: 16px 0;">
+<p style="margin: 0; font-size: 14px; opacity: 0.8;">✅ Client details applied<br/>
+✅ Professional formatting<br/>
+✅ Calculation data included<br/>
+✅ Ready for download</p>
+</div>
+<a href="/api/generate-pdf?company=${encodeURIComponent(companyName)}&contact=${encodeURIComponent(contactName)}" style="display: inline-block; background: #ffffff; color: #1d4ed8; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 700; margin-top: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" target="_blank">📥 Download Personalized PDF</a>
+</div>
+
+<div style="background: #f0fdf4; border: 2px solid #10b981; border-radius: 8px; padding: 16px; margin: 16px 0;">
+<h3 style="color: #065f46; margin: 0 0 8px 0; font-size: 16px; font-weight: 600;">🎯 Your Personalized Proposal Includes:</h3>
+<ul style="color: #047857; margin: 8px 0; padding-left: 20px; font-size: 14px;">
+<li><strong>Company Name:</strong> ${companyName}</li>
+<li><strong>Contact:</strong> ${contactName}</li>
+<li><strong>Processing Analysis:</strong> Current vs Recommended Rates</li>
+<li><strong>Savings Calculation:</strong> Monthly & Annual Projections</li>
+<li><strong>Professional Branding:</strong> TracerPay presentation</li>
+</ul>
 </div>`,
           sources: [],
-          reasoning: "PDF creation request detected - generating professional proposal",
-          suggestions: ["Download PDF", "Save to personal documents", "Create another calculation"],
+          reasoning: `Personalized PDF generation request with client details: ${companyName}, ${contactName}`,
+          suggestions: ["Download PDF", "Save to personal documents", "Create another proposal"],
           actions: [
-            { type: 'download_pdf', label: 'Download PDF Proposal', data: { url: '/api/generate-pdf' } },
-            { type: 'save_to_personal', label: 'Save to My Documents', data: { type: 'pdf_proposal' } }
+            { type: 'download_personalized_pdf', label: 'Download Personalized PDF', data: { company: companyName, contact: contactName } },
+            { type: 'save_to_personal', label: 'Save to My Documents', data: { type: 'personalized_pdf_proposal' } }
           ]
         };
       }

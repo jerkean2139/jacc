@@ -45,6 +45,246 @@ export class PDFReportGenerator {
     return await this.generatePDF(html, 'savings');
   }
 
+  async generateCompactProposal(data: any): Promise<Buffer> {
+    const html = this.generateCompactProposalHTML(data);
+    return await this.generatePDF(html, 'compact-proposal');
+  }
+
+  private generateCompactProposalHTML(data: any): string {
+    const businessName = data.businessInfo?.name || 'Sample Business';
+    const contactName = data.businessInfo?.contactName || 'Contact Person';
+    const currentDate = new Date().toLocaleDateString();
+    
+    return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Payment Processing Proposal - ${businessName}</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            
+            @page {
+                size: A4;
+                margin: 15mm;
+            }
+            
+            body {
+                font-family: 'Segoe UI', Arial, sans-serif;
+                font-size: 12px;
+                line-height: 1.4;
+                color: #1f2937;
+                background: white;
+            }
+            
+            .header {
+                background: linear-gradient(135deg, #2563eb, #1e40af);
+                color: white;
+                padding: 20px;
+                border-radius: 8px;
+                text-align: center;
+                margin-bottom: 20px;
+            }
+            
+            .header h1 {
+                font-size: 20px;
+                margin-bottom: 8px;
+            }
+            
+            .header-info {
+                display: flex;
+                justify-content: space-between;
+                font-size: 11px;
+                margin-top: 10px;
+            }
+            
+            .content {
+                display: grid;
+                gap: 15px;
+            }
+            
+            .section {
+                border: 1px solid #e5e7eb;
+                border-radius: 6px;
+                padding: 15px;
+                background: #f9fafb;
+            }
+            
+            .section h2 {
+                color: #2563eb;
+                font-size: 14px;
+                margin-bottom: 10px;
+                border-bottom: 1px solid #e5e7eb;
+                padding-bottom: 5px;
+            }
+            
+            .comparison-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 15px;
+            }
+            
+            .cost-box {
+                background: white;
+                border: 1px solid #d1d5db;
+                border-radius: 6px;
+                padding: 12px;
+            }
+            
+            .cost-box h3 {
+                font-size: 13px;
+                color: #374151;
+                margin-bottom: 8px;
+            }
+            
+            .cost-item {
+                display: flex;
+                justify-content: space-between;
+                margin: 4px 0;
+                font-size: 11px;
+            }
+            
+            .cost-total {
+                font-weight: bold;
+                border-top: 1px solid #e5e7eb;
+                padding-top: 4px;
+                margin-top: 8px;
+            }
+            
+            .savings-highlight {
+                background: linear-gradient(135deg, #10b981, #059669);
+                color: white;
+                padding: 15px;
+                border-radius: 6px;
+                text-align: center;
+            }
+            
+            .savings-highlight h3 {
+                font-size: 16px;
+                margin-bottom: 8px;
+            }
+            
+            .savings-amount {
+                font-size: 20px;
+                font-weight: bold;
+                margin: 5px 0;
+            }
+            
+            .footer {
+                background: #1f2937;
+                color: white;
+                padding: 12px;
+                text-align: center;
+                font-size: 10px;
+                border-radius: 6px;
+                margin-top: 15px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <h1>Payment Processing Proposal</h1>
+            <div class="header-info">
+                <div><strong>Company:</strong> ${businessName}</div>
+                <div><strong>Contact:</strong> ${contactName}</div>
+                <div><strong>Date:</strong> ${currentDate}</div>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <h2>Business Overview</h2>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 11px;">
+                    <div><strong>Business Type:</strong> ${data.businessInfo?.type || 'Restaurant'}</div>
+                    <div><strong>Monthly Volume:</strong> $${(data.businessInfo?.monthlyVolume || 50000).toLocaleString()}</div>
+                    <div><strong>Average Ticket:</strong> $${data.businessInfo?.averageTicket || 45}</div>
+                    <div><strong>Transaction Count:</strong> ~${Math.round((data.businessInfo?.monthlyVolume || 50000) / (data.businessInfo?.averageTicket || 45))}</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Cost Comparison Analysis</h2>
+                <div class="comparison-grid">
+                    <div class="cost-box">
+                        <h3>Current Processing Costs</h3>
+                        <div class="cost-item">
+                            <span>Interchange Rate:</span>
+                            <span>${((data.currentProcessing?.interchangeRate || 0.0185) * 100).toFixed(2)}%</span>
+                        </div>
+                        <div class="cost-item">
+                            <span>Assessment Fee:</span>
+                            <span>${((data.currentProcessing?.assessmentFee || 0.0014) * 100).toFixed(2)}%</span>
+                        </div>
+                        <div class="cost-item">
+                            <span>Processing Fee:</span>
+                            <span>${((data.currentProcessing?.processingFee || 0.0089) * 100).toFixed(2)}%</span>
+                        </div>
+                        <div class="cost-item">
+                            <span>Monthly Fee:</span>
+                            <span>$${(data.currentProcessing?.monthlyFee || 29.95).toFixed(2)}</span>
+                        </div>
+                        <div class="cost-item cost-total">
+                            <span>Total Monthly Cost:</span>
+                            <span>$${(data.currentProcessing?.totalCost || 1247.50).toFixed(2)}</span>
+                        </div>
+                    </div>
+
+                    <div class="cost-box">
+                        <h3>Recommended TracerPay Solution</h3>
+                        <div class="cost-item">
+                            <span>Interchange Rate:</span>
+                            <span>${((data.recommendedProcessing?.interchangeRate || 0.0159) * 100).toFixed(2)}%</span>
+                        </div>
+                        <div class="cost-item">
+                            <span>Assessment Fee:</span>
+                            <span>${((data.recommendedProcessing?.assessmentFee || 0.0014) * 100).toFixed(2)}%</span>
+                        </div>
+                        <div class="cost-item">
+                            <span>Processing Fee:</span>
+                            <span>${((data.recommendedProcessing?.processingFee || 0.0065) * 100).toFixed(2)}%</span>
+                        </div>
+                        <div class="cost-item">
+                            <span>Monthly Fee:</span>
+                            <span>$${(data.recommendedProcessing?.monthlyFee || 19.95).toFixed(2)}</span>
+                        </div>
+                        <div class="cost-item cost-total">
+                            <span>Total Monthly Cost:</span>
+                            <span>$${(data.recommendedProcessing?.totalCost || 1029.50).toFixed(2)}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="savings-highlight">
+                <h3>Your Potential Savings</h3>
+                <div class="savings-amount">$${(data.savings?.monthlySavings || 218).toFixed(2)} per month</div>
+                <div>$${(data.savings?.annualSavings || 2616).toFixed(2)} annually (${(data.savings?.percentSavings || 17.5).toFixed(1)}% reduction)</div>
+            </div>
+
+            <div class="section">
+                <h2>Next Steps</h2>
+                <div style="font-size: 11px; line-height: 1.6;">
+                    <div style="margin: 8px 0;"><strong>1.</strong> Review and approve this proposal</div>
+                    <div style="margin: 8px 0;"><strong>2.</strong> Complete merchant application with required documentation</div>
+                    <div style="margin: 8px 0;"><strong>3.</strong> Schedule equipment installation (1-3 business days)</div>
+                    <div style="margin: 8px 0;"><strong>4.</strong> Begin processing with optimized payment solution</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div><strong>JACC - Merchant Services Intelligence Platform</strong></div>
+            <div>Professional payment processing analysis and optimization</div>
+        </div>
+    </body>
+    </html>
+    `;
+  }
+
   async generateProposalReport(data: ReportData): Promise<Buffer> {
     const html = this.generateProposalHTML(data);
     return await this.generatePDF(html, 'proposal');
@@ -709,11 +949,12 @@ export class PDFReportGenerator {
       const pdf = await page.pdf({
         format: 'A4',
         printBackground: true,
+        preferCSSPageSize: true,
         margin: {
-          top: '20mm',
-          right: '15mm',
-          bottom: '20mm',
-          left: '15mm'
+          top: '10mm',
+          right: '10mm',
+          bottom: '10mm',
+          left: '10mm'
         }
       });
 
