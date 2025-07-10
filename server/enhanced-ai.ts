@@ -278,7 +278,12 @@ export class EnhancedAIService {
       // Check if this is a PDF creation request 
       const isPDFRequest = /^(pdf|generate pdf|create pdf|make pdf|pdf proposal|pdf report)$/i.test(lastUserMessage.content.trim());
       
-      if (isPDFRequest) {
+      // Check if this is a personalized PDF request with client details
+      const isPersonalizedPDFRequest = /generate personalized pdf/i.test(lastUserMessage.content) ||
+                                      /personalized pdf.*company:/i.test(lastUserMessage.content) ||
+                                      /create personalized pdf/i.test(lastUserMessage.content);
+      
+      if (isPDFRequest && !isPersonalizedPDFRequest) {
         console.log('🔍 PDF creation request detected, prompting for personalization...');
         return {
           message: `<div style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white; border-radius: 12px; padding: 24px; margin: 16px 0; text-align: center;">

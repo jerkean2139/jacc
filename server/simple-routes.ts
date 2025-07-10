@@ -209,6 +209,21 @@ function getConversationStarterResponse(userMessage: string): string | null {
 function handleCalculationWorkflow(userMessage: string, chatHistory: any[], chatId: string): string | null {
   const msg = userMessage.toLowerCase();
   
+  // PRIORITY CHECK: Personalized PDF generation requests override calculation workflow
+  const personalizedPDFMatch = userMessage.match(/Generate personalized PDF: Company: ([^,]+), Contact: ([^,]+)/);
+  if (personalizedPDFMatch) {
+    console.log('🔍 CALCULATION WORKFLOW: Detected personalized PDF request - bypassing calculation flow');
+    return null; // Let the main endpoint handle this
+  }
+  
+  // Check for personalization request
+  if (userMessage.toLowerCase().includes("i'd like to personalize the pdf") ||
+      userMessage.toLowerCase().includes("personalize the pdf") ||
+      userMessage.toLowerCase().includes("add client details")) {
+    console.log('🔍 CALCULATION WORKFLOW: Detected PDF personalization request - bypassing calculation flow');
+    return null; // Let the main endpoint handle this
+  }
+  
   // Check if this is part of an ongoing calculation conversation
   let state = conversationStates.get(chatId) || { step: 0, data: {} };
   
@@ -485,6 +500,79 @@ async function generateAIResponse(userMessage: string, chatHistory: any[], user:
       return fastResponse;
     }
     
+    // Check for personalized PDF generation request with client details
+    const personalizedPDFMatch = userMessage.match(/Generate personalized PDF: Company: ([^,]+), Contact: ([^,]+)/);
+    if (personalizedPDFMatch) {
+      const [, companyName, contactName] = personalizedPDFMatch;
+      console.log('🔍 SIMPLE ROUTES: Generating personalized PDF with details:', { companyName, contactName });
+      
+      return `<div style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white; border-radius: 12px; padding: 24px; margin: 16px 0; text-align: center;">
+<h2 style="margin: 0 0 16px 0; font-size: 20px; font-weight: 700;">🎉 Personalized PDF Ready!</h2>
+<p style="margin: 0 0 16px 0; opacity: 0.9;">Creating professional proposal for <strong>${companyName}</strong> (${contactName})</p>
+<div style="background: rgba(255,255,255,0.1); border-radius: 8px; padding: 16px; margin: 16px 0;">
+<p style="margin: 0; font-size: 14px; opacity: 0.8;">✅ Client details applied<br/>
+✅ Professional formatting<br/>
+✅ Calculation data included<br/>
+✅ Ready for download</p>
+</div>
+<a href="/api/generate-pdf?company=${encodeURIComponent(companyName)}&contact=${encodeURIComponent(contactName)}" style="display: inline-block; background: #ffffff; color: #1d4ed8; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 700; margin-top: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" target="_blank">📥 Download Personalized PDF</a>
+</div>
+
+<div style="background: #f0fdf4; border: 2px solid #10b981; border-radius: 8px; padding: 16px; margin: 16px 0;">
+<h3 style="color: #065f46; margin: 0 0 8px 0; font-size: 16px; font-weight: 600;">🎯 Your Personalized Proposal Includes:</h3>
+<ul style="color: #047857; margin: 8px 0; padding-left: 20px; font-size: 14px;">
+<li><strong>Company Name:</strong> ${companyName}</li>
+<li><strong>Contact:</strong> ${contactName}</li>
+<li><strong>Processing Analysis:</strong> Current vs Recommended Rates</li>
+<li><strong>Savings Calculation:</strong> Monthly & Annual Projections</li>
+<li><strong>Professional Branding:</strong> TracerPay presentation</li>
+</ul>
+</div>`;
+    }
+
+    // Check for personalization request
+    const isPersonalizationRequest = userMessage.toLowerCase().includes("i'd like to personalize the pdf") ||
+                                   userMessage.toLowerCase().includes("personalize the pdf") ||
+                                   userMessage.toLowerCase().includes("add client details");
+    
+    if (isPersonalizationRequest) {
+      console.log('🔍 SIMPLE ROUTES: PDF personalization request detected, collecting client details...');
+      return `<div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border-radius: 12px; padding: 24px; margin: 16px 0; text-align: center;">
+<h2 style="margin: 0 0 16px 0; font-size: 20px; font-weight: 700;">✨ Perfect! Let's Personalize Your PDF</h2>
+<p style="margin: 0 0 16px 0; opacity: 0.9;">I'll collect your client's information to create a professional, personalized proposal.</p>
+</div>
+
+<div style="background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 12px; padding: 24px; margin: 16px 0;">
+<h3 style="color: #334155; margin: 0 0 20px 0; font-size: 18px; font-weight: 600;">📋 Client Information Form</h3>
+
+<div style="margin-bottom: 16px;">
+<label style="display: block; color: #374151; font-weight: 600; margin-bottom: 6px;">🏢 Company Name:</label>
+<input type="text" id="companyName" placeholder="Enter client's company name" style="width: 100%; padding: 12px; border: 2px solid #d1d5db; border-radius: 8px; font-size: 16px;" />
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+<div>
+<label style="display: block; color: #374151; font-weight: 600; margin-bottom: 6px;">👤 First Name:</label>
+<input type="text" id="firstName" placeholder="Contact's first name" style="width: 100%; padding: 12px; border: 2px solid #d1d5db; border-radius: 8px; font-size: 16px;" />
+</div>
+<div>
+<label style="display: block; color: #374151; font-weight: 600; margin-bottom: 6px;">👤 Last Name:</label>
+<input type="text" id="lastName" placeholder="Contact's last name" style="width: 100%; padding: 12px; border: 2px solid #d1d5db; border-radius: 8px; font-size: 16px;" />
+</div>
+</div>
+
+<div style="text-align: center; margin-top: 24px;">
+<button onclick="window.generatePersonalizedPDFWithDetails()" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 14px 28px; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); transition: all 0.2s ease;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+🚀 Generate Personalized PDF
+</button>
+</div>
+
+<div style="background: #f0f9ff; border: 1px solid #3b82f6; border-radius: 8px; padding: 12px; margin-top: 16px;">
+<p style="color: #1e40af; margin: 0; font-size: 13px; text-align: center;">📌 <strong>Note:</strong> All fields are optional, but company name helps create a professional impression</p>
+</div>
+</div>`;
+    }
+
     // Check for calculation workflow - conversational deal building
     if (chatId) {
       const calculationResponse = handleCalculationWorkflow(userMessage, chatHistory, chatId);
@@ -3941,6 +4029,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (role === 'user') {
         console.log('🤖 STARTING AI RESPONSE GENERATION for user message:', content.substring(0, 50) + '...');
         try {
+          let aiResponseData;
+          
           // Generate meaningful chat title for first user message
           const isFirstUserMessage = chatMessages.filter(msg => msg.role === 'user').length === 1;
           if (isFirstUserMessage && chats.has(chatId)) {
@@ -3985,20 +4075,104 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
           }
 
-          // CALCULATION WORKFLOW: Check for conversational calculation process first
-          console.log('🔍 Checking for calculation workflow...');
-          const calculationResponse = handleCalculationWorkflow(content, chatMessages, chatId);
-          let aiResponseData;
-          
-          if (calculationResponse) {
-            console.log('📊 Using calculation workflow response');
-            aiResponseData = { message: calculationResponse };
-          } else if (content.toLowerCase().includes('generate pdf') || content.toLowerCase().includes('create pdf')) {
-            // Check for PDF generation request
-            const state = conversationStates.get(chatId);
-            if (state && state.step >= 5 && state.data) {
-              console.log('📄 Generating PDF proposal');
-              aiResponseData = { message: generatePDFResponse(state.data) };
+          // PERSONALIZED PDF: Check for personalized PDF generation request first
+          console.log('🔍 POST ENDPOINT DEBUG: Message content:', content);
+          console.log('🔍 POST ENDPOINT DEBUG: Looking for personalized PDF pattern...');
+          const personalizedPDFMatch = content.match(/Generate personalized PDF: Company: ([^,]+), Contact: ([^,]+)/);
+          console.log('🔍 POST ENDPOINT DEBUG: PDF Match result:', personalizedPDFMatch);
+          if (personalizedPDFMatch) {
+            const [, companyName, contactName] = personalizedPDFMatch;
+            console.log('🔍 POST ENDPOINT: Generating personalized PDF with details:', { companyName, contactName });
+            
+            aiResponseData = {
+              message: `<div style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white; border-radius: 12px; padding: 24px; margin: 16px 0; text-align: center;">
+<h2 style="margin: 0 0 16px 0; font-size: 20px; font-weight: 700;">🎉 Personalized PDF Ready!</h2>
+<p style="margin: 0 0 16px 0; opacity: 0.9;">Creating professional proposal for <strong>${companyName}</strong> (${contactName})</p>
+<div style="background: rgba(255,255,255,0.1); border-radius: 8px; padding: 16px; margin: 16px 0;">
+<p style="margin: 0; font-size: 14px; opacity: 0.8;">✅ Client details applied<br/>
+✅ Professional formatting<br/>
+✅ Calculation data included<br/>
+✅ Ready for download</p>
+</div>
+<a href="/api/generate-pdf?company=${encodeURIComponent(companyName)}&contact=${encodeURIComponent(contactName)}" style="display: inline-block; background: #ffffff; color: #1d4ed8; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 700; margin-top: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" target="_blank">📥 Download Personalized PDF</a>
+</div>
+
+<div style="background: #f0fdf4; border: 2px solid #10b981; border-radius: 8px; padding: 16px; margin: 16px 0;">
+<h3 style="color: #065f46; margin: 0 0 8px 0; font-size: 16px; font-weight: 600;">🎯 Your Personalized Proposal Includes:</h3>
+<ul style="color: #047857; margin: 8px 0; padding-left: 20px; font-size: 14px;">
+<li><strong>Company Name:</strong> ${companyName}</li>
+<li><strong>Contact:</strong> ${contactName}</li>
+<li><strong>Processing Analysis:</strong> Current vs Recommended Rates</li>
+<li><strong>Savings Calculation:</strong> Monthly & Annual Projections</li>
+<li><strong>Professional Branding:</strong> TracerPay presentation</li>
+</ul>
+</div>`
+            };
+          } else if (content.toLowerCase().includes("i'd like to personalize the pdf") ||
+                     content.toLowerCase().includes("personalize the pdf") ||
+                     content.toLowerCase().includes("add client details")) {
+            console.log('🔍 POST ENDPOINT: PDF personalization request detected, collecting client details...');
+            aiResponseData = {
+              message: `<div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border-radius: 12px; padding: 24px; margin: 16px 0; text-align: center;">
+<h2 style="margin: 0 0 16px 0; font-size: 20px; font-weight: 700;">✨ Perfect! Let's Personalize Your PDF</h2>
+<p style="margin: 0 0 16px 0; opacity: 0.9;">I'll collect your client's information to create a professional, personalized proposal.</p>
+</div>
+
+<div style="background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 12px; padding: 24px; margin: 16px 0;">
+<h3 style="color: #334155; margin: 0 0 20px 0; font-size: 18px; font-weight: 600;">📋 Client Information Form</h3>
+
+<div style="margin-bottom: 16px;">
+<label style="display: block; color: #374151; font-weight: 600; margin-bottom: 6px;">🏢 Company Name:</label>
+<input type="text" id="companyName" placeholder="Enter client's company name" style="width: 100%; padding: 12px; border: 2px solid #d1d5db; border-radius: 8px; font-size: 16px;" />
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+<div>
+<label style="display: block; color: #374151; font-weight: 600; margin-bottom: 6px;">👤 First Name:</label>
+<input type="text" id="firstName" placeholder="Contact's first name" style="width: 100%; padding: 12px; border: 2px solid #d1d5db; border-radius: 8px; font-size: 16px;" />
+</div>
+<div>
+<label style="display: block; color: #374151; font-weight: 600; margin-bottom: 6px;">👤 Last Name:</label>
+<input type="text" id="lastName" placeholder="Contact's last name" style="width: 100%; padding: 12px; border: 2px solid #d1d5db; border-radius: 8px; font-size: 16px;" />
+</div>
+</div>
+
+<div style="text-align: center; margin-top: 24px;">
+<button onclick="window.generatePersonalizedPDFWithDetails()" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 14px 28px; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); transition: all 0.2s ease;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+🚀 Generate Personalized PDF
+</button>
+</div>
+
+<div style="background: #f0f9ff; border: 1px solid #3b82f6; border-radius: 8px; padding: 12px; margin-top: 16px;">
+<p style="color: #1e40af; margin: 0; font-size: 13px; text-align: center;">📌 <strong>Note:</strong> All fields are optional, but company name helps create a professional impression</p>
+</div>
+</div>`
+            };
+          } else {
+            // CALCULATION WORKFLOW: Check for conversational calculation process
+            console.log('🔍 Checking for calculation workflow...');
+            const calculationResponse = handleCalculationWorkflow(content, chatMessages, chatId);
+            
+            if (calculationResponse) {
+              console.log('📊 Using calculation workflow response');
+              aiResponseData = { message: calculationResponse };
+            } else if (content.toLowerCase().includes('generate pdf') || content.toLowerCase().includes('create pdf')) {
+              // Check for PDF generation request
+              const state = conversationStates.get(chatId);
+              if (state && state.step >= 5 && state.data) {
+                console.log('📄 Generating PDF proposal');
+                aiResponseData = { message: generatePDFResponse(state.data) };
+              } else {
+                // Use Enhanced AI Service for regular responses
+                console.log('🔄 Loading Enhanced AI Service...');
+                const { enhancedAIService } = await import('./enhanced-ai');
+                console.log('🚀 Calling generateStandardResponse...');
+                aiResponseData = await enhancedAIService.generateStandardResponse(
+                  content, 
+                  chatMessages.map(msg => ({ role: msg.role, content: msg.content })), 
+                  { userRole: 'Sales Agent' }
+                );
+              }
             } else {
               // Use Enhanced AI Service for regular responses
               console.log('🔄 Loading Enhanced AI Service...');
@@ -4010,16 +4184,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 { userRole: 'Sales Agent' }
               );
             }
-          } else {
-            // Use Enhanced AI Service for regular responses
-            console.log('🔄 Loading Enhanced AI Service...');
-            const { enhancedAIService } = await import('./enhanced-ai');
-            console.log('🚀 Calling generateStandardResponse...');
-            aiResponseData = await enhancedAIService.generateStandardResponse(
-              content, 
-              chatMessages.map(msg => ({ role: msg.role, content: msg.content })), 
-              { userRole: 'Sales Agent' }
-            );
           }
           console.log('✅ AI Response generated:', aiResponseData.message.substring(0, 100) + '...');
           
