@@ -5651,12 +5651,13 @@ Would you like me to create a detailed proposal for this merchant?`,
       
       console.log('🔍 PDF generation requested for user:', userId);
       console.log('🔍 Personalization details:', { companyName, contactName });
+      console.log('🔍 Attempting to extract real calculation data from chat history...');
       
       // Get the PDF generator
       const { generatePDFReport } = await import('./pdf-report-generator');
       
-      // Generate PDF with personalized calculation data
-      const calculationData = {
+      // Get user's most recent chat with calculation data
+      let calculationData = {
         businessInfo: {
           name: companyName,
           contactName: contactName,
@@ -5673,7 +5674,7 @@ Would you like me to create a detailed proposal for this merchant?`,
           totalCost: 1247.50
         },
         recommendedProcessing: {
-          processor: "Tracer Co Card",
+          processor: "TracerPay",
           interchangeRate: 0.0159,
           assessmentFee: 0.0014,
           processingFee: 0.0065,
@@ -5686,6 +5687,98 @@ Would you like me to create a detailed proposal for this merchant?`,
           percentSavings: 17.5
         }
       };
+
+      try {
+        // Get user's recent chats to find calculation data
+        const { db } = await import('./db');
+        const { sql } = await import('drizzle-orm');
+        
+        const result = await db.execute(sql`
+          SELECT m.id, m.content, m.role, m."created_at", m."chat_id"
+          FROM messages m
+          INNER JOIN chats c ON m."chat_id" = c.id
+          WHERE c."user_id" = ${userId}
+          ORDER BY m."created_at" DESC
+          LIMIT 20
+        `);
+        
+        const recentMessages = result.rows || [];
+        console.log('🔍 Found', recentMessages.length, 'recent messages for calculation data extraction');
+        
+        // Look for calculation results in recent messages
+        for (const message of recentMessages) {
+          if (message.role === 'assistant' && message.content) {
+            // Extract business data
+            const businessTypeMatch = message.content.match(/Business.*?:\s*(\w+)/i);
+            const monthlyVolumeMatch = message.content.match(/Monthly Volume.*?:\s*\$?([\d,]+)/i);
+            const averageTicketMatch = message.content.match(/Average Ticket.*?:\s*\$?([\d.]+)/i);
+            const transactionCountMatch = message.content.match(/Transaction Count.*?:\s*([\d,]+)/i);
+            
+            // Extract current processor costs
+            const currentRateMatch = message.content.match(/Processing Rate.*?:\s*([\d.]+)%/i);
+            const currentFeeMatch = message.content.match(/Monthly Fee.*?:\s*\$?([\d.]+)/i);
+            const currentTotalMatch = message.content.match(/Total Monthly Cost.*?:\s*\$?([\d,.]+)/i);
+            const effectiveRateMatch = message.content.match(/Effective Rate.*?:\s*([\d.]+)%/i);
+            
+            // Extract TracerPay recommendation
+            const tracerRateMatch = message.content.match(/Processing Rate.*?:\s*([\d.]+)%(?:.*?Recommended|.*?TracerPay)/is);
+            const tracerTotalMatch = message.content.match(/Total Monthly Cost.*?:\s*\$?([\d,.]+)(?:.*?Recommended|.*?TracerPay)/is);
+            const savingsMatch = message.content.match(/\$?([\d,.]+)\/month.*?savings/i);
+            const annualSavingsMatch = message.content.match(/Annual Savings.*?\$?([\d,.]+)/i);
+            
+            if (monthlyVolumeMatch && averageTicketMatch) {
+              console.log('✅ Found calculation data in recent messages');
+              
+              const monthlyVolume = parseFloat(monthlyVolumeMatch[1].replace(/,/g, ''));
+              const averageTicket = parseFloat(averageTicketMatch[1]);
+              const transactionCount = transactionCountMatch ? parseInt(transactionCountMatch[1].replace(/,/g, '')) : Math.round(monthlyVolume / averageTicket);
+              
+              calculationData = {
+                businessInfo: {
+                  name: companyName,
+                  contactName: contactName,
+                  type: businessTypeMatch ? businessTypeMatch[1] : "Restaurant",
+                  monthlyVolume: monthlyVolume,
+                  averageTicket: averageTicket,
+                  transactionCount: transactionCount
+                },
+                currentProcessing: {
+                  processor: "Current Provider",
+                  rate: currentRateMatch ? parseFloat(currentRateMatch[1]) : 2.9,
+                  monthlyFee: currentFeeMatch ? parseFloat(currentFeeMatch[1]) : 25,
+                  totalCost: currentTotalMatch ? parseFloat(currentTotalMatch[1].replace(/,/g, '')) : 1400,
+                  effectiveRate: effectiveRateMatch ? parseFloat(effectiveRateMatch[1]) : 3.1
+                },
+                recommendedProcessing: {
+                  processor: "TracerPay",
+                  rate: tracerRateMatch ? parseFloat(tracerRateMatch[1]) : 2.25,
+                  monthlyFee: 25,
+                  totalCost: tracerTotalMatch ? parseFloat(tracerTotalMatch[1].replace(/,/g, '')) : 1100
+                },
+                savings: {
+                  monthlySavings: savingsMatch ? parseFloat(savingsMatch[1].replace(/,/g, '')) : 300,
+                  annualSavings: annualSavingsMatch ? parseFloat(annualSavingsMatch[1].replace(/,/g, '')) : 3600,
+                  percentSavings: 15
+                }
+              };
+              
+              console.log('🔍 Extracted calculation data:', {
+                business: calculationData.businessInfo.type,
+                volume: calculationData.businessInfo.monthlyVolume,
+                ticket: calculationData.businessInfo.averageTicket,
+                currentRate: calculationData.currentProcessing.rate,
+                currentFee: calculationData.currentProcessing.monthlyFee,
+                savings: calculationData.savings.monthlySavings
+              });
+              
+              break;
+            }
+          }
+        }
+      } catch (error) {
+        console.log('⚠️ Could not extract calculation data, using defaults:', error.message);
+        console.log('⚠️ Full error details:', error);
+      }
       
       // Use the compact proposal generator for single-page layout
       const pdfGenerator = new (await import('./pdf-report-generator')).PDFReportGenerator();
