@@ -5495,7 +5495,7 @@ Would you like me to create a detailed proposal for this merchant?`,
       res.setHeader('Cache-Control', 'no-cache');
       res.setHeader('Access-Control-Allow-Origin', '*');
       
-      res.send(pdfBuffer);
+      res.end(pdfBuffer);
       
     } catch (error) {
       console.error('Error generating PDF:', error);
