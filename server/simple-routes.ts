@@ -419,12 +419,34 @@ function generatePDFResponse(data: any): string {
   const volume = extractNumericValue(data.monthlyVolume);
   const ticket = extractNumericValue(data.averageTicket);
   const transactionCount = Math.round(volume / ticket);
-  const processingRate = 0.0225;
+  
+  // Extract current rate from user input
+  const currentRateMatch = data.currentProcessor?.match(/(\d+\.?\d*)%/);
+  const userCurrentRate = currentRateMatch ? parseFloat(currentRateMatch[1]) / 100 : null;
+  
+  // TracerPay recommended rates
+  const processingRate = 0.0225; // 2.25%
   const authFee = 0.10;
   const monthlyFee = 25;
   const monthlyProcessing = volume * processingRate;
   const monthlyAuthFees = transactionCount * authFee;
   const totalMonthlyCost = monthlyProcessing + monthlyAuthFees + monthlyFee;
+  
+  // Calculate savings if current rate provided
+  let savingsInfo = '';
+  if (userCurrentRate) {
+    const currentProcessingCost = volume * userCurrentRate;
+    const currentAuthFees = transactionCount * 0.15;
+    const currentMonthlyFee = 35;
+    const currentTotalCost = currentProcessingCost + currentAuthFees + currentMonthlyFee;
+    const monthlySavings = currentTotalCost - totalMonthlyCost;
+    const annualSavings = monthlySavings * 12;
+    
+    savingsInfo = `
+<li><strong>Current Rate:</strong> ${(userCurrentRate * 100).toFixed(2)}%</li>
+<li><strong>Monthly Savings:</strong> $${monthlySavings.toFixed(2)}</li>
+<li><strong>Annual Savings:</strong> $${annualSavings.toFixed(2)}</li>`;
+  }
   
   return `<h2>📄 PDF Proposal Generated Successfully!</h2>
 
@@ -434,8 +456,11 @@ function generatePDFResponse(data: any): string {
 <ul>
 <li><strong>Business Type:</strong> ${data.businessType}</li>
 <li><strong>Monthly Volume:</strong> $${volume.toLocaleString()}</li>
-<li><strong>Processing Rate:</strong> ${(processingRate * 100).toFixed(2)}%</li>
+<li><strong>Average Ticket:</strong> $${ticket.toFixed(2)}</li>
+<li><strong>Transactions:</strong> ${transactionCount.toLocaleString()}</li>
+<li><strong>TracerPay Rate:</strong> ${(processingRate * 100).toFixed(2)}%</li>
 <li><strong>Total Monthly Cost:</strong> $${totalMonthlyCost.toFixed(2)}</li>
+${savingsInfo}
 </ul>
 
 <div style="text-align: center; margin: 20px 0;">
@@ -444,7 +469,7 @@ function generatePDFResponse(data: any): string {
 </a>
 </div>
 
-<p><em>The PDF includes professional formatting, your company branding, detailed calculations, and next steps for the merchant.</em></p>
+<p><em>The PDF includes professional formatting, TracerPay branding, detailed calculations, and next steps for the merchant.</em></p>
 </div>
 
 <p>You can present this professional proposal to your merchant. Would you like to start calculating another deal or need help with anything else?</p>`;
@@ -469,8 +494,8 @@ async function generateAIResponse(userMessage: string, chatHistory: any[], user:
       }
     }
     
-    // Check for PDF generation request
-    if (userMessage.toLowerCase().includes('generate pdf') || userMessage.toLowerCase().includes('create pdf')) {
+    // Check for PDF generation request (handle "PDF", "generate pdf", "create pdf")
+    if (userMessage.toLowerCase().includes('pdf') || userMessage.toLowerCase().includes('generate pdf') || userMessage.toLowerCase().includes('create pdf')) {
       const state = conversationStates.get(chatId);
       if (state && state.step >= 5 && state.data) {
         console.log("📄 Generating PDF proposal");
@@ -5119,6 +5144,57 @@ Would you like me to create a detailed proposal for this merchant?`,
     try {
       console.log('📄 Generating PDF proposal...');
       
+      // Get the session to identify user
+      const sessionId = req.cookies['sessionId'] || req.headers['x-session-id'];
+      
+      // Try to get calculation data from active conversation states
+      let calculationData = null;
+      let chatId = null;
+      
+      // Find the most recent calculation conversation for this user
+      for (const [id, state] of conversationStates.entries()) {
+        if (state.step >= 5 && state.data && state.data.businessType) {
+          chatId = id;
+          calculationData = state.data;
+          break;
+        }
+      }
+      
+      if (!calculationData) {
+        // Fallback to sample data if no calculation state found
+        calculationData = {
+          businessType: 'Sample Business',
+          monthlyVolume: '$50,000',
+          averageTicket: '$35',
+          currentProcessor: 'Currently paying 3.99% with Square'
+        };
+      }
+      
+      // Generate calculation details
+      const volume = extractNumericValue(calculationData.monthlyVolume);
+      const ticket = extractNumericValue(calculationData.averageTicket);
+      const transactionCount = Math.round(volume / ticket);
+      
+      // Extract current rate from user input
+      const currentRateMatch = calculationData.currentProcessor?.match(/(\d+\.?\d*)%/);
+      const userCurrentRate = currentRateMatch ? parseFloat(currentRateMatch[1]) / 100 : 0.0399;
+      
+      // Calculate costs
+      const processingRate = 0.0225; // 2.25%
+      const authFee = 0.10;
+      const monthlyFee = 25;
+      const monthlyProcessing = volume * processingRate;
+      const monthlyAuthFees = transactionCount * authFee;
+      const totalMonthlyCost = monthlyProcessing + monthlyAuthFees + monthlyFee;
+      
+      // Current processor costs
+      const currentProcessingCost = volume * userCurrentRate;
+      const currentAuthFees = transactionCount * 0.15;
+      const currentMonthlyFee = 35;
+      const currentTotalCost = currentProcessingCost + currentAuthFees + currentMonthlyFee;
+      const monthlySavings = currentTotalCost - totalMonthlyCost;
+      const annualSavings = monthlySavings * 12;
+      
       // Import Puppeteer for PDF generation
       const puppeteer = await import('puppeteer');
       
@@ -5172,6 +5248,13 @@ Would you like me to create a detailed proposal for this merchant?`,
             margin: 20px 0;
             border-radius: 5px;
           }
+          .savings-highlight {
+            background: #f0fdf4;
+            padding: 20px;
+            border-left: 5px solid #16a34a;
+            margin: 20px 0;
+            border-radius: 5px;
+          }
           .cost-table {
             width: 100%;
             border-collapse: collapse;
@@ -5208,14 +5291,15 @@ Would you like me to create a detailed proposal for this merchant?`,
         <div class="proposal">
           <div class="section">
             <h2>Business Information</h2>
-            <p><strong>Business Type:</strong> Restaurant</p>
-            <p><strong>Monthly Volume:</strong> $50,000</p>
-            <p><strong>Average Ticket:</strong> $35</p>
-            <p><strong>Transaction Count:</strong> ~1,429 monthly</p>
+            <p><strong>Business Type:</strong> ${calculationData.businessType}</p>
+            <p><strong>Monthly Volume:</strong> $${volume.toLocaleString()}</p>
+            <p><strong>Average Ticket:</strong> $${ticket.toFixed(2)}</p>
+            <p><strong>Transaction Count:</strong> ${transactionCount.toLocaleString()} monthly</p>
           </div>
           
-          <div class="section highlight">
-            <h3>Recommended Processing Solution</h3>
+          ${userCurrentRate && userCurrentRate > 0 ? `
+          <div class="section">
+            <h2>Current Processing Costs</h2>
             <table class="cost-table">
               <thead>
                 <tr>
@@ -5227,22 +5311,72 @@ Would you like me to create a detailed proposal for this merchant?`,
               <tbody>
                 <tr>
                   <td>Processing Rate</td>
-                  <td>2.25%</td>
-                  <td>$1,125.00</td>
+                  <td>${(userCurrentRate * 100).toFixed(2)}%</td>
+                  <td>$${currentProcessingCost.toFixed(2)}</td>
+                </tr>
+                <tr>
+                  <td>Authorization Fees</td>
+                  <td>$0.15 per transaction</td>
+                  <td>$${currentAuthFees.toFixed(2)}</td>
                 </tr>
                 <tr>
                   <td>Monthly Gateway Fee</td>
-                  <td>$25.00</td>
-                  <td>$25.00</td>
+                  <td>$${currentMonthlyFee.toFixed(2)}</td>
+                  <td>$${currentMonthlyFee.toFixed(2)}</td>
                 </tr>
                 <tr class="total-row">
                   <td><strong>Total Monthly Cost</strong></td>
                   <td></td>
-                  <td><strong>$1,150.00</strong></td>
+                  <td><strong>$${currentTotalCost.toFixed(2)}</strong></td>
                 </tr>
               </tbody>
             </table>
           </div>
+          ` : ''}
+          
+          <div class="section highlight">
+            <h3>Recommended TracerPay Solution</h3>
+            <table class="cost-table">
+              <thead>
+                <tr>
+                  <th>Component</th>
+                  <th>Rate/Fee</th>
+                  <th>Monthly Cost</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Processing Rate</td>
+                  <td>${(processingRate * 100).toFixed(2)}%</td>
+                  <td>$${monthlyProcessing.toFixed(2)}</td>
+                </tr>
+                <tr>
+                  <td>Authorization Fees</td>
+                  <td>$${authFee.toFixed(2)} per transaction</td>
+                  <td>$${monthlyAuthFees.toFixed(2)}</td>
+                </tr>
+                <tr>
+                  <td>Monthly Gateway Fee</td>
+                  <td>$${monthlyFee.toFixed(2)}</td>
+                  <td>$${monthlyFee.toFixed(2)}</td>
+                </tr>
+                <tr class="total-row">
+                  <td><strong>Total Monthly Cost</strong></td>
+                  <td></td>
+                  <td><strong>$${totalMonthlyCost.toFixed(2)}</strong></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+          ${monthlySavings > 0 ? `
+          <div class="section savings-highlight">
+            <h3>💰 Monthly Savings with TracerPay</h3>
+            <p style="font-size: 1.2em; margin-bottom: 10px;"><strong>Monthly Savings: $${monthlySavings.toFixed(2)}</strong></p>
+            <p style="font-size: 1.1em; margin-bottom: 10px;"><strong>Annual Savings: $${annualSavings.toFixed(2)}</strong></p>
+            <p><strong>Rate Reduction:</strong> ${((userCurrentRate - processingRate) * 100).toFixed(2)} percentage points</p>
+          </div>
+          ` : ''}
           
           <div class="section">
             <h2>Equipment & Features</h2>
