@@ -76,6 +76,49 @@ export function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessage }: Ch
   useEffect(() => {
     console.log('🔄 ChatInterface mounted - clearing stale cached queries');
     queryClient.clear();
+    
+    // Add PDF generation functions to global window object
+    (window as any).generatePersonalizedPDF = function() {
+      console.log('🔍 generatePersonalizedPDF called');
+      const message = "I'd like to personalize the PDF with client details";
+      
+      // Find the chat input and send the message
+      const chatInput = document.querySelector('textarea[placeholder*="processing"], textarea[placeholder*="message"], input[placeholder*="message"]') as HTMLTextAreaElement;
+      console.log('🔍 Found chat input:', chatInput);
+      
+      if (chatInput) {
+        setInput(message);
+        // Trigger form submission
+        setTimeout(() => {
+          const sendButton = document.querySelector('button[type="submit"]') as HTMLButtonElement;
+          if (sendButton) {
+            sendButton.click();
+          }
+        }, 100);
+      } else {
+        console.error('❌ Chat input not found');
+      }
+    };
+
+    (window as any).generatePersonalizedPDFWithDetails = function() {
+      console.log('🔍 generatePersonalizedPDFWithDetails called');
+      const companyName = (document.getElementById('companyName') as HTMLInputElement)?.value || 'Sample Business';
+      const firstName = (document.getElementById('firstName') as HTMLInputElement)?.value || 'Contact';
+      const lastName = (document.getElementById('lastName') as HTMLInputElement)?.value || 'Person';
+      
+      console.log('🔍 Collected details:', { companyName, firstName, lastName });
+      
+      const message = `Generate personalized PDF: Company: ${companyName}, Contact: ${firstName} ${lastName}`;
+      
+      setInput(message);
+      // Trigger form submission
+      setTimeout(() => {
+        const sendButton = document.querySelector('button[type="submit"]') as HTMLButtonElement;
+        if (sendButton) {
+          sendButton.click();
+        }
+      }, 100);
+    };
   }, []);
   
   // Fetch messages for the active chat - USING WORKING PUBLIC ENDPOINT TEMPORARILY

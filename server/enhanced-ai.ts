@@ -308,32 +308,7 @@ export class EnhancedAIService {
 </div>
 </div>
 
-<script>
-window.generatePersonalizedPDF = function() {
-  console.log('🔍 generatePersonalizedPDF called');
-  const message = "I'd like to personalize the PDF with client details";
-  
-  // Find the chat input and send the message
-  const chatInput = document.querySelector('textarea[placeholder*="processing"], textarea[placeholder*="message"], input[placeholder*="message"]');
-  console.log('🔍 Found chat input:', chatInput);
-  
-  if (chatInput) {
-    chatInput.value = message;
-    chatInput.dispatchEvent(new Event('input', { bubbles: true }));
-    chatInput.dispatchEvent(new Event('change', { bubbles: true }));
-    
-    // Try to find and click send button
-    const sendButton = document.querySelector('button[type="submit"]');
-    console.log('🔍 Found send button:', sendButton);
-    
-    if (sendButton) {
-      sendButton.click();
-    }
-  } else {
-    console.error('❌ Chat input not found');
-  }
-};
-</script>`,
+`,
           sources: [],
           reasoning: "PDF creation request detected - offering personalization options",
           suggestions: ["Personalize PDF", "Generate quick PDF", "Add client details"],
@@ -387,38 +362,7 @@ window.generatePersonalizedPDF = function() {
 </div>
 </div>
 
-<script>
-window.generatePersonalizedPDFWithDetails = function() {
-  console.log('🔍 generatePersonalizedPDFWithDetails called');
-  const companyName = document.getElementById('companyName').value || 'Sample Business';
-  const firstName = document.getElementById('firstName').value || 'Contact';
-  const lastName = document.getElementById('lastName').value || 'Person';
-  
-  console.log('🔍 Collected details:', { companyName, firstName, lastName });
-  
-  const message = \`Generate personalized PDF: Company: \${companyName}, Contact: \${firstName} \${lastName}\`;
-  
-  // Find the chat input and send the message
-  const chatInput = document.querySelector('textarea[placeholder*="processing"], textarea[placeholder*="message"], input[placeholder*="message"]');
-  console.log('🔍 Found chat input:', chatInput);
-  
-  if (chatInput) {
-    chatInput.value = message;
-    chatInput.dispatchEvent(new Event('input', { bubbles: true }));
-    chatInput.dispatchEvent(new Event('change', { bubbles: true }));
-    
-    // Try to find and click send button
-    const sendButton = document.querySelector('button[type="submit"]');
-    console.log('🔍 Found send button:', sendButton);
-    
-    if (sendButton) {
-      sendButton.click();
-    }
-  } else {
-    console.error('❌ Chat input not found');
-  }
-};
-</script>`,
+`,
           sources: [],
           reasoning: "PDF personalization request detected - collecting client details for customized proposal",
           suggestions: ["Enter company name", "Add contact details", "Generate personalized PDF"],
