@@ -42,7 +42,9 @@ import {
   type PromptUsageLog,
   type InsertPromptUsageLog,
   type AdminSetting,
-  type InsertAdminSetting
+  type InsertAdminSetting,
+  personalDocuments,
+  personalFolders
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and } from "drizzle-orm";
@@ -87,6 +89,14 @@ export interface IStorage {
   createDocument(document: InsertDocument): Promise<Document>;
   getDocument(id: string): Promise<Document | undefined>;
   deleteDocument(id: string): Promise<void>;
+  
+  // Personal document operations
+  getUserPersonalDocuments(userId: string): Promise<any[]>;
+  createPersonalDocument(document: any): Promise<any>;
+  getPersonalDocument(id: string): Promise<any | undefined>;
+  deletePersonalDocument(id: string): Promise<void>;
+  getUserPersonalFolders(userId: string): Promise<any[]>;
+  createPersonalFolder(folder: any): Promise<any>;
   
   // Favorite operations
   getUserFavorites(userId: string): Promise<Favorite[]>;
@@ -338,6 +348,53 @@ export class DatabaseStorage implements IStorage {
     await db
       .delete(documents)
       .where(eq(documents.id, id));
+  }
+
+  // Personal document operations
+  async getUserPersonalDocuments(userId: string): Promise<any[]> {
+    return await db
+      .select()
+      .from(personalDocuments)
+      .where(eq(personalDocuments.userId, userId))
+      .orderBy(desc(personalDocuments.createdAt));
+  }
+
+  async createPersonalDocument(documentData: any): Promise<any> {
+    const [document] = await db
+      .insert(personalDocuments)
+      .values(documentData)
+      .returning();
+    return document;
+  }
+
+  async getPersonalDocument(id: string): Promise<any | undefined> {
+    const [document] = await db
+      .select()
+      .from(personalDocuments)
+      .where(eq(personalDocuments.id, id));
+    return document || undefined;
+  }
+
+  async deletePersonalDocument(id: string): Promise<void> {
+    await db
+      .delete(personalDocuments)
+      .where(eq(personalDocuments.id, id));
+  }
+
+  async getUserPersonalFolders(userId: string): Promise<any[]> {
+    return await db
+      .select()
+      .from(personalFolders)
+      .where(eq(personalFolders.userId, userId))
+      .orderBy(personalFolders.name);
+  }
+
+  async createPersonalFolder(folderData: any): Promise<any> {
+    const [folder] = await db
+      .insert(personalFolders)
+      .values(folderData)
+      .returning();
+    return folder;
   }
 
   // Favorite operations

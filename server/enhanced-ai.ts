@@ -275,6 +275,40 @@ export class EnhancedAIService {
 </div>`;
       }).join('\n');
       
+      // Check if this is a PDF creation request 
+      const isPDFRequest = /^(pdf|generate pdf|create pdf|make pdf|pdf proposal|pdf report)$/i.test(lastUserMessage.content.trim());
+      
+      if (isPDFRequest) {
+        console.log('🔍 PDF creation request detected, generating PDF proposal...');
+        return {
+          message: `<div style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white; border-radius: 12px; padding: 24px; margin: 16px 0; text-align: center;">
+<h2 style="margin: 0 0 16px 0; font-size: 20px; font-weight: 700;">📄 Creating Your Professional PDF Proposal</h2>
+<p style="margin: 0 0 16px 0; opacity: 0.9;">Generating a client-ready proposal with your calculation data...</p>
+<div style="background: rgba(255,255,255,0.1); border-radius: 8px; padding: 16px; margin: 16px 0;">
+<p style="margin: 0; font-size: 14px; opacity: 0.8;">✅ Extracting calculation data<br/>
+✅ Formatting professional proposal<br/>
+✅ Generating downloadable PDF</p>
+</div>
+<a href="/api/generate-pdf" style="display: inline-block; background: #ffffff; color: #1d4ed8; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 700; margin-top: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" target="_blank">📥 Download PDF Proposal</a>
+</div>
+
+<div style="background: #f0f9ff; border: 2px solid #3b82f6; border-radius: 8px; padding: 16px; margin: 16px 0;">
+<h3 style="color: #1e40af; margin: 0 0 8px 0; font-size: 16px; font-weight: 600;">💡 Next Steps:</h3>
+<p style="color: #1e40af; margin: 0; font-size: 14px;">1. Download your PDF proposal above<br/>
+2. Review the calculation details<br/>
+3. Save to your personal documents for future reference<br/>
+4. Share with your client or team</p>
+</div>`,
+          sources: [],
+          reasoning: "PDF creation request detected - generating professional proposal",
+          suggestions: ["Download PDF", "Save to personal documents", "Create another calculation"],
+          actions: [
+            { type: 'download_pdf', label: 'Download PDF Proposal', data: { url: '/api/generate-pdf' } },
+            { type: 'save_to_personal', label: 'Save to My Documents', data: { type: 'pdf_proposal' } }
+          ]
+        };
+      }
+
       // Check if this is a conversation starter that needs engagement
       const userMessages = messages.filter(msg => msg.role === 'user');
       const isFirstUserMessage = userMessages.length === 1;

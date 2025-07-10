@@ -5688,6 +5688,132 @@ Would you like me to create a detailed proposal for this merchant?`,
     }
   });
 
+  // PDF Generation endpoint - Save to personal documents
+  app.get('/api/generate-pdf', async (req: Request, res: Response) => {
+    try {
+      const sessionId = req.cookies?.sessionId || 'demo-user-id';
+      const userId = sessions.get(sessionId)?.userId || 'demo-user-id';
+      
+      console.log('🔍 PDF generation requested for user:', userId);
+      
+      // Get the PDF generator
+      const { generatePDFReport } = await import('./pdf-report-generator');
+      
+      // Generate PDF with sample calculation data
+      const calculationData = {
+        businessInfo: {
+          name: "Sample Business",
+          type: "Restaurant",
+          monthlyVolume: 50000,
+          averageTicket: 45
+        },
+        currentProcessing: {
+          processor: "Current Provider",
+          interchangeRate: 0.0185,
+          assessmentFee: 0.0014,
+          processingFee: 0.0089,
+          monthlyFee: 29.95,
+          totalCost: 1247.50
+        },
+        recommendedProcessing: {
+          processor: "Tracer Co Card",
+          interchangeRate: 0.0159,
+          assessmentFee: 0.0014,
+          processingFee: 0.0065,
+          monthlyFee: 19.95,
+          totalCost: 1029.50
+        },
+        savings: {
+          monthlySavings: 218.00,
+          annualSavings: 2616.00,
+          percentSavings: 17.5
+        }
+      };
+      
+      const pdfBuffer = await generatePDFReport(calculationData);
+      
+      // Create personal document entry
+      const personalDoc = {
+        id: crypto.randomUUID(),
+        name: `Processing_Proposal_${new Date().toISOString().split('T')[0]}.pdf`,
+        originalName: `Processing_Proposal_${new Date().toISOString().split('T')[0]}.pdf`,
+        mimeType: 'application/pdf',
+        size: pdfBuffer.length,
+        path: `/uploads/${userId}_proposal_${Date.now()}.pdf`,
+        content: "Payment processing proposal with rate calculations and savings analysis",
+        userId: userId,
+        personalFolderId: null,
+        isFavorite: false,
+        tags: ["proposal", "rates", "calculation"],
+        notes: "Generated PDF proposal with current vs recommended processing costs"
+      };
+      
+      // Save to personal documents
+      await storage.createPersonalDocument(personalDoc);
+      
+      console.log('✅ PDF saved to personal documents for user:', userId);
+      
+      // Return PDF for download
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="${personalDoc.name}"`);
+      res.setHeader('Content-Length', pdfBuffer.length);
+      
+      res.send(pdfBuffer);
+      
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      res.status(500).json({ 
+        error: 'Failed to generate PDF', 
+        details: error.message 
+      });
+    }
+  });
+
+  // Personal documents endpoints
+  app.get('/api/personal-documents', async (req: Request, res: Response) => {
+    try {
+      const sessionId = req.cookies?.sessionId || 'demo-user-id';
+      const userId = sessions.get(sessionId)?.userId || 'demo-user-id';
+      
+      const documents = await storage.getUserPersonalDocuments(userId);
+      res.json(documents);
+    } catch (error) {
+      console.error('Error fetching personal documents:', error);
+      res.status(500).json({ error: 'Failed to fetch personal documents' });
+    }
+  });
+
+  app.get('/api/personal-folders', async (req: Request, res: Response) => {
+    try {
+      const sessionId = req.cookies?.sessionId || 'demo-user-id';
+      const userId = sessions.get(sessionId)?.userId || 'demo-user-id';
+      
+      const folders = await storage.getUserPersonalFolders(userId);
+      res.json(folders);
+    } catch (error) {
+      console.error('Error fetching personal folders:', error);
+      res.status(500).json({ error: 'Failed to fetch personal folders' });
+    }
+  });
+
+  app.post('/api/personal-folders', async (req: Request, res: Response) => {
+    try {
+      const sessionId = req.cookies?.sessionId || 'demo-user-id';
+      const userId = sessions.get(sessionId)?.userId || 'demo-user-id';
+      
+      const folderData = {
+        ...req.body,
+        userId: userId
+      };
+      
+      const folder = await storage.createPersonalFolder(folderData);
+      res.json(folder);
+    } catch (error) {
+      console.error('Error creating personal folder:', error);
+      res.status(500).json({ error: 'Failed to create personal folder' });
+    }
+  });
+
   console.log("✅ Simple routes registered successfully");
   
   const server = createServer(app);
