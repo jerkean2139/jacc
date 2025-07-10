@@ -76,49 +76,6 @@ export function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessage }: Ch
   useEffect(() => {
     console.log('🔄 ChatInterface mounted - clearing stale cached queries');
     queryClient.clear();
-    
-    // Add PDF generation functions to global window object
-    (window as any).generatePersonalizedPDF = function() {
-      console.log('🔍 generatePersonalizedPDF called');
-      const message = "I'd like to personalize the PDF with client details";
-      
-      // Find the chat input and send the message
-      const chatInput = document.querySelector('textarea[placeholder*="processing"], textarea[placeholder*="message"], input[placeholder*="message"]') as HTMLTextAreaElement;
-      console.log('🔍 Found chat input:', chatInput);
-      
-      if (chatInput) {
-        setInput(message);
-        // Trigger form submission
-        setTimeout(() => {
-          const sendButton = document.querySelector('button[type="submit"]') as HTMLButtonElement;
-          if (sendButton) {
-            sendButton.click();
-          }
-        }, 100);
-      } else {
-        console.error('❌ Chat input not found');
-      }
-    };
-
-    (window as any).generatePersonalizedPDFWithDetails = function() {
-      console.log('🔍 generatePersonalizedPDFWithDetails called');
-      const companyName = (document.getElementById('companyName') as HTMLInputElement)?.value || 'Sample Business';
-      const firstName = (document.getElementById('firstName') as HTMLInputElement)?.value || 'Contact';
-      const lastName = (document.getElementById('lastName') as HTMLInputElement)?.value || 'Person';
-      
-      console.log('🔍 Collected details:', { companyName, firstName, lastName });
-      
-      const message = `Generate personalized PDF: Company: ${companyName}, Contact: ${firstName} ${lastName}`;
-      
-      setInput(message);
-      // Trigger form submission
-      setTimeout(() => {
-        const sendButton = document.querySelector('button[type="submit"]') as HTMLButtonElement;
-        if (sendButton) {
-          sendButton.click();
-        }
-      }, 100);
-    };
   }, []);
   
   // Fetch messages for the active chat - USING WORKING PUBLIC ENDPOINT TEMPORARILY
@@ -418,6 +375,41 @@ export function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessage }: Ch
     }
   }, [input]);
 
+  // Add PDF generation functions to global window object
+  useEffect(() => {
+    (window as any).generatePersonalizedPDF = function() {
+      console.log('🔍 generatePersonalizedPDF called - auto-sending message');
+      const message = "I'd like to personalize the PDF with client details";
+      
+      setInput(message);
+      // Auto-submit the form after setting the message
+      setTimeout(() => {
+        // Create a synthetic form event
+        const syntheticEvent = { preventDefault: () => {} } as React.FormEvent;
+        handleSubmit(syntheticEvent);
+      }, 100);
+    };
+
+    (window as any).generatePersonalizedPDFWithDetails = function() {
+      console.log('🔍 generatePersonalizedPDFWithDetails called - auto-sending message');
+      const companyName = (document.getElementById('companyName') as HTMLInputElement)?.value || 'Sample Business';
+      const firstName = (document.getElementById('firstName') as HTMLInputElement)?.value || 'Contact';
+      const lastName = (document.getElementById('lastName') as HTMLInputElement)?.value || 'Person';
+      
+      console.log('🔍 Collected details:', { companyName, firstName, lastName });
+      
+      const message = `Generate personalized PDF: Company: ${companyName}, Contact: ${firstName} ${lastName}`;
+      
+      setInput(message);
+      // Auto-submit the form after setting the message
+      setTimeout(() => {
+        // Create a synthetic form event
+        const syntheticEvent = { preventDefault: () => {} } as React.FormEvent;
+        handleSubmit(syntheticEvent);
+      }, 100);
+    };
+  }, [handleSubmit, setInput]);
+
   // Welcome screen when no chat is selected
   if (!chatId) {
     return (
@@ -478,7 +470,7 @@ export function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessage }: Ch
 
         {/* Chat Input for Welcome Screen */}
         <div className="border-t p-3 bg-white dark:bg-gray-800">
-          <form onSubmit={handleSubmit} className="flex gap-2 max-w-lg mx-auto">
+          <form onSubmit={handleSubmit} data-chat-form className="flex gap-2 max-w-lg mx-auto">
             <div className="flex-1 relative">
               <Textarea
                 ref={textareaRef}
@@ -610,7 +602,7 @@ export function ChatInterface({ chatId, onChatUpdate, onNewChatWithMessage }: Ch
 
       {/* Chat Input */}
       <div className="border-t p-4 bg-white dark:bg-gray-800">
-        <form onSubmit={handleSubmit} className="flex gap-3">
+        <form onSubmit={handleSubmit} data-chat-form className="flex gap-3">
           <div className="flex-1 relative">
             <Textarea
               ref={textareaRef}
