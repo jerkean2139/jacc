@@ -3637,14 +3637,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Basic chat endpoint
+  // Enhanced chat endpoint with PDF detection
   app.post('/api/chat', async (req: Request, res: Response) => {
     try {
-      const { message } = req.body;
+      const { message, chatId } = req.body;
+      const sessionId = req.cookies?.sessionId || 'demo-user-id';
+      const userId = sessions.get(sessionId)?.userId || 'demo-user-id';
+      
+      console.log(`🔍 Chat message received: "${message}"`);
+      
+      // Check if user is requesting PDF generation
+      const pdfRequest = /\b(pdf|generate pdf|create pdf|make pdf|build pdf)\b/i.test(message);
+      
+      if (pdfRequest) {
+        console.log('📄 PDF generation request detected');
+        
+        // Return PDF generation interface response
+        const pdfResponse = `
+          <div class="hormozi-card">
+            <h2>📄 PDF Proposal Generator</h2>
+            <p>I'll create a professional payment processing proposal for you with rate calculations and savings analysis.</p>
+            
+            <div class="hormozi-action-box">
+              <h3>What I'll Include:</h3>
+              <ul>
+                <li>Current vs. Recommended Processing Rates</li>
+                <li>Monthly and Annual Savings Calculations</li>
+                <li>Detailed Cost Breakdown</li>
+                <li>Professional Proposal Format</li>
+              </ul>
+            </div>
+            
+            <div class="hormozi-cta-box">
+              <p><strong>Click the button below to generate your PDF proposal:</strong></p>
+              <a href="/api/generate-pdf" target="_blank" class="hormozi-cta-button">
+                📄 Generate PDF Proposal
+              </a>
+            </div>
+            
+            <div class="hormozi-note">
+              <p><em>Note: The PDF will be saved to your personal documents for future reference.</em></p>
+            </div>
+          </div>
+        `;
+        
+        return res.json({
+          response: pdfResponse,
+          timestamp: new Date().toISOString(),
+          isPdfGeneration: true
+        });
+      }
+      
+      // Regular AI response using enhanced service
+      const { enhancedAIService } = await import('./enhanced-ai');
+      const aiResponseData = await enhancedAIService.generateStandardResponse(
+        message, 
+        [], 
+        { userRole: 'Sales Agent' }
+      );
+      
       res.json({
-        response: `Echo: ${message}`,
+        response: aiResponseData.message,
         timestamp: new Date().toISOString()
       });
+      
     } catch (error) {
       console.error('Chat error:', error);
       res.status(500).json({ error: 'Chat failed' });
