@@ -840,3 +840,310 @@ export class PDFReportGenerator {
 }
 
 export const pdfReportGenerator = new PDFReportGenerator();
+
+// Simple PDF generation function for basic calculation reports
+export async function generatePDFReport(calculationData: any): Promise<Buffer> {
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Payment Processing Proposal</title>
+        <style>
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                margin: 0;
+                padding: 40px;
+                background: #ffffff;
+                color: #1f2937;
+                line-height: 1.6;
+            }
+            .header {
+                text-align: center;
+                margin-bottom: 40px;
+                border-bottom: 3px solid #1e40af;
+                padding-bottom: 20px;
+            }
+            .header h1 {
+                color: #1e40af;
+                font-size: 28px;
+                margin: 0;
+                font-weight: 700;
+            }
+            .header p {
+                color: #6b7280;
+                font-size: 16px;
+                margin: 10px 0 0 0;
+            }
+            .business-info {
+                background: #f8fafc;
+                border: 1px solid #e2e8f0;
+                border-radius: 8px;
+                padding: 25px;
+                margin-bottom: 30px;
+            }
+            .business-info h2 {
+                color: #1e40af;
+                margin: 0 0 15px 0;
+                font-size: 20px;
+            }
+            .info-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+            }
+            .info-item {
+                display: flex;
+                justify-content: space-between;
+                padding: 8px 0;
+                border-bottom: 1px solid #e5e7eb;
+            }
+            .info-label {
+                font-weight: 600;
+                color: #374151;
+            }
+            .info-value {
+                color: #1f2937;
+                font-weight: 500;
+            }
+            .comparison-section {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 30px;
+                margin: 30px 0;
+            }
+            .processor-card {
+                border: 2px solid #e5e7eb;
+                border-radius: 12px;
+                padding: 25px;
+                background: #ffffff;
+            }
+            .processor-card.current {
+                border-color: #ef4444;
+                background: #fef2f2;
+            }
+            .processor-card.recommended {
+                border-color: #10b981;
+                background: #f0fdf4;
+            }
+            .processor-card h3 {
+                margin: 0 0 15px 0;
+                font-size: 18px;
+                font-weight: 700;
+            }
+            .processor-card.current h3 {
+                color: #dc2626;
+            }
+            .processor-card.recommended h3 {
+                color: #059669;
+            }
+            .cost-item {
+                display: flex;
+                justify-content: space-between;
+                padding: 8px 0;
+                border-bottom: 1px solid #e5e7eb;
+            }
+            .cost-label {
+                font-weight: 500;
+                color: #374151;
+            }
+            .cost-value {
+                font-weight: 600;
+                color: #1f2937;
+            }
+            .savings-highlight {
+                background: linear-gradient(135deg, #10b981, #059669);
+                color: white;
+                padding: 25px;
+                border-radius: 12px;
+                margin: 30px 0;
+                text-align: center;
+            }
+            .savings-highlight h2 {
+                margin: 0 0 15px 0;
+                font-size: 24px;
+                font-weight: 700;
+            }
+            .savings-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+                margin-top: 20px;
+            }
+            .savings-item {
+                background: rgba(255, 255, 255, 0.1);
+                padding: 15px;
+                border-radius: 8px;
+                text-align: center;
+            }
+            .savings-amount {
+                font-size: 20px;
+                font-weight: 700;
+                margin: 0;
+            }
+            .savings-label {
+                font-size: 14px;
+                opacity: 0.9;
+                margin: 5px 0 0 0;
+            }
+            .footer {
+                margin-top: 40px;
+                text-align: center;
+                padding: 20px;
+                border-top: 1px solid #e5e7eb;
+                color: #6b7280;
+                font-size: 14px;
+            }
+            .footer strong {
+                color: #1e40af;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <h1>Payment Processing Proposal</h1>
+            <p>Comprehensive Rate Analysis & Savings Calculation</p>
+        </div>
+
+        <div class="business-info">
+            <h2>Business Information</h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Business Name:</span>
+                    <span class="info-value">${calculationData.businessInfo.name}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Business Type:</span>
+                    <span class="info-value">${calculationData.businessInfo.type}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Monthly Volume:</span>
+                    <span class="info-value">$${calculationData.businessInfo.monthlyVolume.toLocaleString()}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Average Ticket:</span>
+                    <span class="info-value">$${calculationData.businessInfo.averageTicket}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="comparison-section">
+            <div class="processor-card current">
+                <h3>Current Processing</h3>
+                <div class="cost-item">
+                    <span class="cost-label">Processor:</span>
+                    <span class="cost-value">${calculationData.currentProcessing.processor}</span>
+                </div>
+                <div class="cost-item">
+                    <span class="cost-label">Interchange Rate:</span>
+                    <span class="cost-value">${(calculationData.currentProcessing.interchangeRate * 100).toFixed(2)}%</span>
+                </div>
+                <div class="cost-item">
+                    <span class="cost-label">Assessment Fee:</span>
+                    <span class="cost-value">${(calculationData.currentProcessing.assessmentFee * 100).toFixed(2)}%</span>
+                </div>
+                <div class="cost-item">
+                    <span class="cost-label">Processing Fee:</span>
+                    <span class="cost-value">${(calculationData.currentProcessing.processingFee * 100).toFixed(2)}%</span>
+                </div>
+                <div class="cost-item">
+                    <span class="cost-label">Monthly Fee:</span>
+                    <span class="cost-value">$${calculationData.currentProcessing.monthlyFee}</span>
+                </div>
+                <div class="cost-item" style="border-bottom: 2px solid #ef4444; padding-top: 15px;">
+                    <span class="cost-label"><strong>Total Monthly Cost:</strong></span>
+                    <span class="cost-value"><strong>$${calculationData.currentProcessing.totalCost}</strong></span>
+                </div>
+            </div>
+
+            <div class="processor-card recommended">
+                <h3>Recommended Processing</h3>
+                <div class="cost-item">
+                    <span class="cost-label">Processor:</span>
+                    <span class="cost-value">${calculationData.recommendedProcessing.processor}</span>
+                </div>
+                <div class="cost-item">
+                    <span class="cost-label">Interchange Rate:</span>
+                    <span class="cost-value">${(calculationData.recommendedProcessing.interchangeRate * 100).toFixed(2)}%</span>
+                </div>
+                <div class="cost-item">
+                    <span class="cost-label">Assessment Fee:</span>
+                    <span class="cost-value">${(calculationData.recommendedProcessing.assessmentFee * 100).toFixed(2)}%</span>
+                </div>
+                <div class="cost-item">
+                    <span class="cost-label">Processing Fee:</span>
+                    <span class="cost-value">${(calculationData.recommendedProcessing.processingFee * 100).toFixed(2)}%</span>
+                </div>
+                <div class="cost-item">
+                    <span class="cost-label">Monthly Fee:</span>
+                    <span class="cost-value">$${calculationData.recommendedProcessing.monthlyFee}</span>
+                </div>
+                <div class="cost-item" style="border-bottom: 2px solid #10b981; padding-top: 15px;">
+                    <span class="cost-label"><strong>Total Monthly Cost:</strong></span>
+                    <span class="cost-value"><strong>$${calculationData.recommendedProcessing.totalCost}</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="savings-highlight">
+            <h2>Your Savings Opportunity</h2>
+            <div class="savings-grid">
+                <div class="savings-item">
+                    <p class="savings-amount">$${calculationData.savings.monthlySavings}</p>
+                    <p class="savings-label">Monthly Savings</p>
+                </div>
+                <div class="savings-item">
+                    <p class="savings-amount">$${calculationData.savings.annualSavings}</p>
+                    <p class="savings-label">Annual Savings</p>
+                </div>
+            </div>
+            <p style="margin-top: 20px; font-size: 18px;">
+                <strong>Save ${calculationData.savings.percentSavings}% on processing costs!</strong>
+            </p>
+        </div>
+
+        <div class="footer">
+            <p>Generated by <strong>JACC Merchant Services</strong> | Professional Payment Processing Analysis</p>
+            <p>Date: ${new Date().toLocaleDateString()}</p>
+        </div>
+    </body>
+    </html>
+  `;
+
+  const puppeteer = await import('puppeteer');
+  const browser = await puppeteer.default.launch({
+    headless: true,
+    executablePath: '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium-browser',
+    args: [
+      '--no-sandbox', 
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-extensions',
+      '--disable-plugins',
+      '--disable-gpu',
+      '--no-first-run',
+      '--no-zygote',
+      '--single-process',
+      '--disable-background-timer-throttling',
+      '--disable-backgrounding-occluded-windows',
+      '--disable-renderer-backgrounding'
+    ]
+  });
+  
+  const page = await browser.newPage();
+  await page.setContent(html);
+  
+  const pdfBuffer = await page.pdf({
+    format: 'A4',
+    printBackground: true,
+    margin: {
+      top: '0.5in',
+      right: '0.5in',
+      bottom: '0.5in',
+      left: '0.5in'
+    }
+  });
+  
+  await browser.close();
+  return pdfBuffer;
+}
